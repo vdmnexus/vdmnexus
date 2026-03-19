@@ -2,81 +2,162 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
-import { createEmployee, getSkills, assignSkill, deployEmployee, type Skill } from "../../../lib/api";
+import { ArrowLeft, Check, Loader2, Building2, Headset, DoorOpen, Mail, MessageSquare, Sparkles } from "lucide-react";
+import { createEmployee, assignSkill, deployEmployee, getSkills, type Skill } from "../../../lib/api";
 import { useEffect } from "react";
 
-type Step = "identity" | "personality" | "model" | "skills" | "guardrails" | "review";
-const steps: Step[] = ["identity", "personality", "model", "skills", "guardrails", "review"];
-const stepLabels: Record<Step, string> = {
-  identity: "Identiteit",
-  personality: "Persoonlijkheid",
-  model: "Model & Geheugen",
-  skills: "Skills",
-  guardrails: "Guardrails",
-  review: "Review & Deploy",
-};
+// ─── Role Templates ──────────────────────────────────────
+
+const roleTemplates = [
+  {
+    id: "vastgoedbeheer",
+    icon: Building2,
+    name: "Vastgoedbeheer",
+    beschrijving: "Beheert panden, huurders, facturen, onderhoud en contracten",
+    skills: ["Huurincasso", "Onderhoud", "Communicatie", "Rapportage", "Contractbeheer"],
+    soulMemory: "Je bent een professionele AI employee voor vastgoedbeheer. Je beheert panden, houdt huurders tevreden, monitort facturen en coördineert onderhoud. Je communiceert helder en handelt proactief.",
+    personality: { tone: 30, proactivity: 75, autonomy: 60 },
+  },
+  {
+    id: "klantenservice",
+    icon: Headset,
+    name: "Klantenservice",
+    beschrijving: "Beantwoordt vragen, verwerkt klachten en beheert e-mail",
+    skills: ["Klantenservice", "Communicatie", "Email Management"],
+    soulMemory: "Je bent een vriendelijke en geduldige AI employee voor klantenservice. Je beantwoordt vragen snel en accuraat, verwerkt klachten empathisch en zorgt dat klanten zich gehoord voelen.",
+    personality: { tone: 65, proactivity: 50, autonomy: 40 },
+  },
+  {
+    id: "receptie",
+    icon: DoorOpen,
+    name: "Receptie",
+    beschrijving: "Ontvangt bezoekers, beheert afspraken en verstrekt informatie",
+    skills: ["Receptie", "Communicatie"],
+    soulMemory: "Je bent de receptionist. Je verwelkomt bezoekers warm, helpt met afspraken en verstrekt informatie over het gebouw. Je bent altijd beleefd en behulpzaam.",
+    personality: { tone: 55, proactivity: 60, autonomy: 35 },
+  },
+  {
+    id: "communicatie",
+    icon: Mail,
+    name: "Communicatie & Email",
+    beschrijving: "Stelt berichten op, beheert inbox en verzorgt correspondentie",
+    skills: ["Communicatie", "Email Management", "Rapportage"],
+    soulMemory: "Je bent verantwoordelijk voor alle communicatie. Je stelt professionele berichten op, beheert de inbox, en zorgt dat alle correspondentie tijdig en correct wordt afgehandeld.",
+    personality: { tone: 25, proactivity: 65, autonomy: 55 },
+  },
+];
+
+// ─── Personality Presets ─────────────────────────────────
+
+const personalityPresets = [
+  {
+    id: "zakelijk",
+    label: "Zakelijk & Professioneel",
+    beschrijving: "Formeel, efficiënt, houdt zich aan de feiten",
+    personality: { tone: 20, proactivity: 60, autonomy: 55 },
+  },
+  {
+    id: "warm",
+    label: "Warm & Persoonlijk",
+    beschrijving: "Vriendelijk, empathisch, bouwt relaties op",
+    personality: { tone: 70, proactivity: 55, autonomy: 45 },
+  },
+  {
+    id: "direct",
+    label: "Direct & Efficiënt",
+    beschrijving: "Kort, to-the-point, handelt zelfstandig",
+    personality: { tone: 35, proactivity: 80, autonomy: 75 },
+  },
+  {
+    id: "voorzichtig",
+    label: "Voorzichtig & Betrouwbaar",
+    beschrijving: "Vraagt altijd bevestiging, maakt geen fouten",
+    personality: { tone: 30, proactivity: 40, autonomy: 20 },
+  },
+];
+
+// ─── Guardrail Options ───────────────────────────────────
+
+const guardrailOptions = [
+  "Max €500 uitgeven zonder goedkeuring",
+  "Geen contracten wijzigen of opzeggen",
+  "Altijd in het Nederlands communiceren",
+  "Bevestiging vragen bij externe communicatie",
+  "Geen persoonlijke data delen met derden",
+  "Dagelijks rapport sturen naar eigenaar",
+  "Geen financiële beslissingen zonder goedkeuring",
+  "Alleen binnen kantooruren reageren (9-17)",
+];
+
+// ─── Component ───────────────────────────────────────────
+
+type Step = "role" | "name" | "personality" | "guardrails" | "deploy";
+const allSteps: Step[] = ["role", "name", "personality", "guardrails", "deploy"];
 
 export default function CreateEmployeePage() {
   const router = useRouter();
-  const [step, setStep] = useState<Step>("identity");
+  const [step, setStep] = useState<Step>("role");
   const [saving, setSaving] = useState(false);
-  const [availableSkills, setAvailableSkills] = useState<Skill[]>([]);
+  const [allSkills, setAllSkills] = useState<Skill[]>([]);
 
-  // Form state
+  const [selectedRole, setSelectedRole] = useState<typeof roleTemplates[0] | null>(null);
   const [name, setName] = useState("");
-  const [role, setRole] = useState("");
-  const [soulMemory, setSoulMemory] = useState("");
-  const [tone, setTone] = useState(35);
-  const [proactivity, setProactivity] = useState(70);
-  const [autonomy, setAutonomy] = useState(50);
-  const [languages, setLanguages] = useState<string[]>(["nl"]);
-  const [model, setModel] = useState("claude-sonnet-4");
-  const [memoryMode, setMemoryMode] = useState("persistent");
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-  const [guardrails, setGuardrails] = useState<string[]>([]);
-  const [newGuardrail, setNewGuardrail] = useState("");
+  const [selectedPersonality, setSelectedPersonality] = useState<typeof personalityPresets[0] | null>(null);
+  const [selectedGuardrails, setSelectedGuardrails] = useState<string[]>([]);
 
   useEffect(() => {
-    getSkills().then(setAvailableSkills).catch(() => {});
+    getSkills().then(setAllSkills).catch(() => {});
   }, []);
 
-  const stepIndex = steps.indexOf(step);
-  const canNext = step === "identity" ? name.trim().length > 0 : true;
+  const stepIndex = allSteps.indexOf(step);
+
+  const canNext = () => {
+    if (step === "role") return selectedRole !== null;
+    if (step === "name") return name.trim().length > 0;
+    if (step === "personality") return selectedPersonality !== null;
+    return true;
+  };
 
   const next = () => {
-    const i = steps.indexOf(step);
-    if (i < steps.length - 1) setStep(steps[i + 1]!);
+    const i = allSteps.indexOf(step);
+    if (i < allSteps.length - 1) setStep(allSteps[i + 1]!);
   };
   const prev = () => {
-    const i = steps.indexOf(step);
-    if (i > 0) setStep(steps[i - 1]!);
+    const i = allSteps.indexOf(step);
+    if (i > 0) setStep(allSteps[i - 1]!);
+  };
+
+  const toggleGuardrail = (g: string) => {
+    setSelectedGuardrails((prev) =>
+      prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g]
+    );
   };
 
   const handleDeploy = async () => {
+    if (!selectedRole || !selectedPersonality) return;
     setSaving(true);
+
     try {
       const employee = await createEmployee({
         name,
-        role: role || null,
+        role: selectedRole.name,
         avatar: name[0]?.toUpperCase() ?? "?",
-        model,
-        memoryMode,
-        soulMemory: soulMemory || null,
-        personality: { tone, proactivity, autonomy },
-        languages,
+        model: "claude-sonnet-4",
+        memoryMode: "persistent",
+        soulMemory: selectedRole.soulMemory,
+        personality: selectedPersonality.personality,
+        languages: ["nl"],
         channels: ["dashboard"],
-        guardrails: guardrails.length > 0 ? guardrails : null,
+        guardrails: selectedGuardrails.length > 0 ? selectedGuardrails : null,
       });
 
-      // Assign skills
-      for (const skillId of selectedSkills) {
-        await assignSkill(employee.id, skillId);
+      // Match skill names to IDs and assign
+      for (const skillName of selectedRole.skills) {
+        const skill = allSkills.find((s) => s.name === skillName);
+        if (skill) await assignSkill(employee.id, skill.id);
       }
 
-      // Deploy
       await deployEmployee(employee.id);
-
       router.push(`/dashboard/${employee.id}`);
     } catch (err) {
       console.error(err);
@@ -84,28 +165,8 @@ export default function CreateEmployeePage() {
     }
   };
 
-  const toggleLang = (lang: string) => {
-    setLanguages((prev) =>
-      prev.includes(lang) ? prev.filter((l) => l !== lang) : [...prev, lang]
-    );
-  };
-
-  const toggleSkill = (id: string) => {
-    setSelectedSkills((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-    );
-  };
-
-  const addGuardrail = () => {
-    if (newGuardrail.trim()) {
-      setGuardrails((prev) => [...prev, newGuardrail.trim()]);
-      setNewGuardrail("");
-    }
-  };
-
   return (
     <div className="mx-auto max-w-2xl px-6 py-10">
-      {/* Back */}
       <button
         onClick={() => router.push("/dashboard")}
         className="flex items-center gap-1.5 text-sm text-primary-400 hover:text-primary transition-colors mb-6"
@@ -116,285 +177,211 @@ export default function CreateEmployeePage() {
 
       {/* Progress */}
       <div className="flex items-center gap-1 mb-8">
-        {steps.map((s, i) => (
-          <div
-            key={s}
-            className={`h-1 flex-1 rounded-full transition-all ${
-              i <= stepIndex ? "bg-primary-900" : "bg-primary-200"
-            }`}
-          />
+        {allSteps.map((_, i) => (
+          <div key={i} className={`h-1 flex-1 rounded-full transition-all ${i <= stepIndex ? "bg-primary-900" : "bg-primary-200"}`} />
         ))}
       </div>
 
-      <div className="mb-2">
-        <p className="text-xs font-semibold uppercase tracking-wider text-primary-400">
-          Stap {stepIndex + 1} van {steps.length}
-        </p>
-        <h1 className="text-xl font-semibold tracking-tight text-primary mt-1">
-          {stepLabels[step]}
-        </h1>
-      </div>
-
-      {/* Steps */}
-      <div className="mt-6 space-y-4">
-        {step === "identity" && (
-          <>
-            <div>
-              <label className="text-xs font-medium text-primary-500 mb-1 block">Naam</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Bijv. Sophie, Max, Receptie..."
-                className="w-full rounded-xl border border-primary-200 bg-white px-4 py-3 text-sm text-primary outline-none placeholder:text-primary-400 focus:border-primary-400"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-primary-500 mb-1 block">Rol</label>
-              <input
-                type="text"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                placeholder="Bijv. Vastgoedbeheer, Klantenservice..."
-                className="w-full rounded-xl border border-primary-200 bg-white px-4 py-3 text-sm text-primary outline-none placeholder:text-primary-400 focus:border-primary-400"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-primary-500 mb-1 block">Soul Memory</label>
-              <textarea
-                value={soulMemory}
-                onChange={(e) => setSoulMemory(e.target.value)}
-                rows={4}
-                placeholder="Beschrijf wie deze employee is. Persoonlijkheid, kennis, context..."
-                className="w-full rounded-xl border border-primary-200 bg-white px-4 py-3 text-sm text-primary outline-none placeholder:text-primary-400 focus:border-primary-400 resize-none"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-primary-500 mb-1.5 block">Taal</label>
-              <div className="flex gap-2">
-                {["nl", "en", "de", "fr", "es"].map((lang) => (
-                  <button
-                    key={lang}
-                    onClick={() => toggleLang(lang)}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                      languages.includes(lang)
-                        ? "bg-primary-900 text-white"
-                        : "bg-primary-100 text-primary-500 hover:bg-primary-200"
-                    }`}
-                  >
-                    {lang.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-
-        {step === "personality" && (
-          <>
-            <p className="text-sm text-primary-400 mb-4">
-              Bepaal hoe je employee communiceert en handelt.
-            </p>
-            {[
-              { label: "Communicatiestijl", left: "Formeel", right: "Informeel", value: tone, set: setTone },
-              { label: "Initiatief", left: "Reactief", right: "Proactief", value: proactivity, set: setProactivity },
-              { label: "Zelfstandigheid", left: "Vraagt altijd", right: "Autonoom", value: autonomy, set: setAutonomy },
-            ].map((s) => (
-              <div key={s.label}>
-                <label className="text-xs font-medium text-primary-500 mb-2 block">{s.label}</label>
-                <div className="flex justify-between text-[11px] text-primary-400 mb-1">
-                  <span>{s.left}</span>
-                  <span>{s.right}</span>
-                </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={s.value}
-                  onChange={(e) => s.set(Number(e.target.value))}
-                  className="w-full accent-accent"
-                />
-              </div>
-            ))}
-          </>
-        )}
-
-        {step === "model" && (
-          <>
-            <div>
-              <label className="text-xs font-medium text-primary-500 mb-1.5 block">LLM Model</label>
-              <div className="space-y-2">
-                {[
-                  { id: "claude-sonnet-4", label: "Claude Sonnet 4", desc: "Snel en slim — beste prijs/kwaliteit" },
-                  { id: "claude-haiku-4", label: "Claude Haiku 4.5", desc: "Snelst — voor eenvoudige taken" },
-                  { id: "claude-opus-4", label: "Claude Opus 4", desc: "Meest capable — voor complexe taken" },
-                ].map((m) => (
-                  <button
-                    key={m.id}
-                    onClick={() => setModel(m.id)}
-                    className={`flex w-full items-center justify-between rounded-xl border p-4 text-left transition-colors ${
-                      model === m.id
-                        ? "border-primary-900 bg-primary-50"
-                        : "border-primary-200 bg-white hover:bg-primary-50"
-                    }`}
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-primary">{m.label}</p>
-                      <p className="text-xs text-primary-400">{m.desc}</p>
-                    </div>
-                    {model === m.id && (
-                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary-900">
-                        <Check size={12} className="text-white" />
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-primary-500 mb-1.5 block">Geheugen</label>
-              <div className="space-y-2">
-                {[
-                  { id: "persistent", label: "Persistent + Context", desc: "Onthoudt alles tussen sessies" },
-                  { id: "session", label: "Alleen sessie", desc: "Vergeet na elk gesprek" },
-                ].map((m) => (
-                  <button
-                    key={m.id}
-                    onClick={() => setMemoryMode(m.id)}
-                    className={`flex w-full items-center justify-between rounded-xl border p-4 text-left transition-colors ${
-                      memoryMode === m.id
-                        ? "border-primary-900 bg-primary-50"
-                        : "border-primary-200 bg-white hover:bg-primary-50"
-                    }`}
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-primary">{m.label}</p>
-                      <p className="text-xs text-primary-400">{m.desc}</p>
-                    </div>
-                    {memoryMode === m.id && (
-                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary-900">
-                        <Check size={12} className="text-white" />
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-
-        {step === "skills" && (
-          <>
-            <p className="text-sm text-primary-400 mb-2">
-              Kies welke skills je employee krijgt.
-            </p>
-            <div className="space-y-2">
-              {availableSkills.map((skill) => (
+      {/* Step: Choose Role */}
+      {step === "role" && (
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-primary mb-1">Kies een rol</h1>
+          <p className="text-sm text-primary-400 mb-6">Selecteer wat je employee moet doen. Skills worden automatisch toegewezen.</p>
+          <div className="space-y-2">
+            {roleTemplates.map((role) => {
+              const Icon = role.icon;
+              const selected = selectedRole?.id === role.id;
+              return (
                 <button
-                  key={skill.id}
-                  onClick={() => toggleSkill(skill.id)}
-                  className={`flex w-full items-center justify-between rounded-xl border p-4 text-left transition-colors ${
-                    selectedSkills.includes(skill.id)
-                      ? "border-accent bg-accent/5"
-                      : "border-primary-200 bg-white hover:bg-primary-50"
+                  key={role.id}
+                  onClick={() => setSelectedRole(role)}
+                  className={`flex w-full items-center gap-4 rounded-xl border p-4 text-left transition-colors ${
+                    selected ? "border-primary-900 bg-primary-50" : "border-primary-200 bg-white hover:bg-primary-50"
                   }`}
                 >
-                  <div>
-                    <p className="text-sm font-medium text-primary">{skill.name}</p>
-                    <p className="text-xs text-primary-400">{skill.description}</p>
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${selected ? "bg-primary-900" : "bg-primary-100"}`}>
+                    <Icon size={18} className={selected ? "text-white" : "text-primary-500"} />
                   </div>
-                  {selectedSkills.includes(skill.id) && (
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent">
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-primary">{role.name}</p>
+                    <p className="text-xs text-primary-400">{role.beschrijving}</p>
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {role.skills.map((s) => (
+                        <span key={s} className="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] font-medium text-primary-500">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                  {selected && (
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary-900 shrink-0">
                       <Check size={12} className="text-white" />
                     </div>
                   )}
                 </button>
-              ))}
-            </div>
-          </>
-        )}
+              );
+            })}
+          </div>
 
-        {step === "guardrails" && (
-          <>
-            <p className="text-sm text-primary-400 mb-2">
-              Stel grenzen in voor wat je employee mag doen.
-            </p>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newGuardrail}
-                onChange={(e) => setNewGuardrail(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addGuardrail()}
-                placeholder="Bijv. Max €500 zonder goedkeuring"
-                className="flex-1 rounded-xl border border-primary-200 bg-white px-4 py-3 text-sm text-primary outline-none placeholder:text-primary-400 focus:border-primary-400"
-              />
-              <button
-                onClick={addGuardrail}
-                className="rounded-xl bg-primary-900 px-4 py-3 text-sm font-semibold text-white hover:bg-primary-800 transition-colors"
-              >
-                Toevoegen
-              </button>
+          {/* Custom option */}
+          <div className="mt-4 rounded-xl border border-dashed border-primary-300 bg-white p-4 text-center">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <Sparkles size={14} className="text-accent" />
+              <p className="text-sm font-medium text-primary">Iets anders nodig?</p>
             </div>
-            {guardrails.length > 0 && (
-              <div className="space-y-1.5 mt-2">
-                {guardrails.map((g, i) => (
-                  <div key={i} className="flex items-center justify-between rounded-xl border border-primary-200 bg-white px-4 py-2.5">
-                    <div className="flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                      <span className="text-sm text-primary">{g}</span>
-                    </div>
-                    <button
-                      onClick={() => setGuardrails((prev) => prev.filter((_, j) => j !== i))}
-                      className="text-xs text-primary-400 hover:text-red-500 transition-colors"
-                    >
-                      Verwijder
-                    </button>
+            <p className="text-xs text-primary-400 mb-3">
+              Wij bouwen custom roles en skills op maat voor je business.
+            </p>
+            <a
+              href="mailto:info@vdmnexus.com?subject=Custom AI Employee"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-primary-200 px-4 py-2 text-xs font-semibold text-primary-600 hover:bg-primary-50 transition-colors"
+            >
+              <MessageSquare size={12} />
+              Neem contact op
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* Step: Name */}
+      {step === "name" && (
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-primary mb-1">Geef je employee een naam</h1>
+          <p className="text-sm text-primary-400 mb-6">Dit is hoe je employee zich presenteert.</p>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Bijv. Sophie, Max, Nexis..."
+            autoFocus
+            className="w-full rounded-xl border border-primary-200 bg-white px-4 py-3.5 text-base text-primary outline-none placeholder:text-primary-400 focus:border-primary-400"
+          />
+          {name && (
+            <div className="mt-6 flex items-center gap-3 rounded-xl bg-primary-50 p-4">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent text-lg font-bold text-white">
+                {name[0]?.toUpperCase()}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-primary">{name}</p>
+                <p className="text-xs text-primary-400">{selectedRole?.name} Employee</p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Step: Personality */}
+      {step === "personality" && (
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-primary mb-1">Kies een persoonlijkheid</h1>
+          <p className="text-sm text-primary-400 mb-6">Bepaal hoe {name} communiceert.</p>
+          <div className="space-y-2">
+            {personalityPresets.map((preset) => {
+              const selected = selectedPersonality?.id === preset.id;
+              return (
+                <button
+                  key={preset.id}
+                  onClick={() => setSelectedPersonality(preset)}
+                  className={`flex w-full items-center justify-between rounded-xl border p-4 text-left transition-colors ${
+                    selected ? "border-primary-900 bg-primary-50" : "border-primary-200 bg-white hover:bg-primary-50"
+                  }`}
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-primary">{preset.label}</p>
+                    <p className="text-xs text-primary-400">{preset.beschrijving}</p>
                   </div>
+                  {selected && (
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary-900 shrink-0">
+                      <Check size={12} className="text-white" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Step: Guardrails */}
+      {step === "guardrails" && (
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-primary mb-1">Stel grenzen in</h1>
+          <p className="text-sm text-primary-400 mb-6">Kies wat {name} wel en niet mag. Je kunt dit later altijd aanpassen.</p>
+          <div className="space-y-1.5">
+            {guardrailOptions.map((g) => {
+              const selected = selectedGuardrails.includes(g);
+              return (
+                <button
+                  key={g}
+                  onClick={() => toggleGuardrail(g)}
+                  className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
+                    selected ? "border-primary-900 bg-primary-50" : "border-primary-200 bg-white hover:bg-primary-50"
+                  }`}
+                >
+                  <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors ${
+                    selected ? "border-primary-900 bg-primary-900" : "border-primary-300"
+                  }`}>
+                    {selected && <Check size={12} className="text-white" />}
+                  </div>
+                  <span className="text-sm text-primary">{g}</span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-xs text-primary-400 mt-3">
+            Geen selectie = geen beperkingen. Je kunt guardrails later toevoegen.
+          </p>
+        </div>
+      )}
+
+      {/* Step: Deploy */}
+      {step === "deploy" && selectedRole && selectedPersonality && (
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-primary mb-1">Klaar om te deployen</h1>
+          <p className="text-sm text-primary-400 mb-6">Controleer de configuratie en zet {name} aan het werk.</p>
+          <div className="rounded-xl border border-primary-200 bg-white divide-y divide-primary-100">
+            <div className="flex items-center gap-4 p-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-lg font-bold text-white">
+                {name[0]?.toUpperCase()}
+              </div>
+              <div>
+                <p className="text-base font-semibold text-primary">{name}</p>
+                <p className="text-xs text-primary-400">{selectedRole.name} · {selectedPersonality.label}</p>
+              </div>
+            </div>
+            <div className="px-4 py-3">
+              <p className="text-xs text-primary-400 mb-1.5">Skills</p>
+              <div className="flex flex-wrap gap-1">
+                {selectedRole.skills.map((s) => (
+                  <span key={s} className="flex items-center gap-1 rounded-lg bg-accent/10 px-2 py-1 text-xs font-medium text-accent">
+                    <span className="h-1 w-1 rounded-full bg-accent" />
+                    {s}
+                  </span>
                 ))}
               </div>
-            )}
-            {guardrails.length === 0 && (
-              <p className="text-xs text-primary-400 mt-2">
-                Geen guardrails — je employee heeft volledige vrijheid. Je kunt deze stap overslaan.
-              </p>
-            )}
-          </>
-        )}
-
-        {step === "review" && (
-          <>
-            <div className="rounded-xl border border-primary-200 bg-white divide-y divide-primary-100">
-              <div className="flex items-center gap-4 p-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-lg font-bold text-white">
-                  {name[0]?.toUpperCase() ?? "?"}
-                </div>
-                <div>
-                  <p className="text-base font-semibold text-primary">{name}</p>
-                  <p className="text-xs text-primary-400">{role || "Geen rol"}</p>
+            </div>
+            {selectedGuardrails.length > 0 && (
+              <div className="px-4 py-3">
+                <p className="text-xs text-primary-400 mb-1.5">Guardrails</p>
+                <div className="space-y-1">
+                  {selectedGuardrails.map((g) => (
+                    <div key={g} className="flex items-center gap-2 text-xs text-primary">
+                      <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                      {g}
+                    </div>
+                  ))}
                 </div>
               </div>
-              {[
-                { label: "Model", value: model },
-                { label: "Geheugen", value: memoryMode === "persistent" ? "Persistent + Context" : "Alleen sessie" },
-                { label: "Talen", value: languages.map((l) => l.toUpperCase()).join(", ") },
-                { label: "Skills", value: selectedSkills.length > 0 ? `${selectedSkills.length} geselecteerd` : "Geen" },
-                { label: "Guardrails", value: guardrails.length > 0 ? `${guardrails.length} ingesteld` : "Geen" },
-              ].map((row) => (
-                <div key={row.label} className="flex justify-between px-4 py-3">
-                  <span className="text-sm text-primary-400">{row.label}</span>
-                  <span className="text-sm font-medium text-primary">{row.value}</span>
-                </div>
-              ))}
-              {soulMemory && (
-                <div className="px-4 py-3">
-                  <p className="text-xs text-primary-400 mb-1">Soul Memory</p>
-                  <p className="text-sm text-primary leading-relaxed">{soulMemory}</p>
-                </div>
-              )}
+            )}
+            <div className="flex justify-between px-4 py-3 text-sm">
+              <span className="text-primary-400">Model</span>
+              <span className="font-medium text-primary">Claude Sonnet 4</span>
             </div>
-          </>
-        )}
-      </div>
+            <div className="flex justify-between px-4 py-3 text-sm">
+              <span className="text-primary-400">Geheugen</span>
+              <span className="font-medium text-primary">Persistent + Context</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Navigation */}
       <div className="flex items-center justify-between mt-8">
@@ -407,7 +394,7 @@ export default function CreateEmployeePage() {
           <div />
         )}
 
-        {step === "review" ? (
+        {step === "deploy" ? (
           <button
             onClick={handleDeploy}
             disabled={saving}
@@ -421,18 +408,17 @@ export default function CreateEmployeePage() {
             ) : (
               <>
                 <Check size={15} />
-                Deploy Employee
+                Deploy {name}
               </>
             )}
           </button>
         ) : (
           <button
             onClick={next}
-            disabled={!canNext}
-            className="flex items-center gap-1.5 rounded-xl bg-primary-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-800 transition-colors disabled:opacity-50"
+            disabled={!canNext()}
+            className="flex items-center gap-1.5 rounded-xl bg-primary-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-800 transition-colors disabled:opacity-30"
           >
             Volgende
-            <ArrowRight size={15} />
           </button>
         )}
       </div>
