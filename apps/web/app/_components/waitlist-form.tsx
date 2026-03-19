@@ -63,7 +63,7 @@ export function WaitlistForm() {
         className="w-full px-4 py-3 rounded-lg bg-white border border-primary-200 text-primary placeholder:text-primary-400 focus:outline-none focus:ring-2 focus:ring-accent"
       />
       <textarea
-        placeholder="Waarvoor wil je AI agents inzetten?"
+        placeholder="Waarvoor wil je AI employees inzetten?"
         rows={3}
         value={useCase}
         onChange={(e) => setUseCase(e.target.value)}
