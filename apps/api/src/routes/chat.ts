@@ -135,23 +135,34 @@ async function callLLM(
   systemPrompt: string,
   history: { role: string; content: string }[]
 ): Promise<LLMResponse> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  // Try Anthropic first, then Moonshot/Kimi, then dev mode
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  const moonshotKey = process.env.MOONSHOT_API_KEY;
 
-  if (!apiKey) {
-    // Fallback: echo mode for development
-    return {
-      content: `[Dev mode — geen API key] Je bericht is ontvangen. Model: ${model}. Configureer ANTHROPIC_API_KEY voor echte responses.`,
-    };
+  if (anthropicKey && model.startsWith("claude")) {
+    return callAnthropic(anthropicKey, model, systemPrompt, history);
   }
 
-  // Map model name to Anthropic model ID
+  if (moonshotKey) {
+    return callMoonshot(moonshotKey, systemPrompt, history);
+  }
+
+  return {
+    content: `[Dev mode — geen API key] Je bericht is ontvangen. Model: ${model}. Configureer een API key voor echte responses.`,
+  };
+}
+
+async function callAnthropic(
+  apiKey: string,
+  model: string,
+  systemPrompt: string,
+  history: { role: string; content: string }[]
+): Promise<LLMResponse> {
   const modelMap: Record<string, string> = {
     "claude-sonnet-4": "claude-sonnet-4-20250514",
     "claude-haiku-4": "claude-haiku-4-5-20251001",
     "claude-opus-4": "claude-opus-4-20250514",
   };
-
-  const modelId = modelMap[model] ?? "claude-sonnet-4-20250514";
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -161,7 +172,7 @@ async function callLLM(
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: modelId,
+      model: modelMap[model] ?? "claude-sonnet-4-20250514",
       max_tokens: 2048,
       system: systemPrompt,
       messages: history.map((m) => ({
@@ -172,9 +183,8 @@ async function callLLM(
   });
 
   if (!response.ok) {
-    const err = await response.text();
-    console.error("LLM error:", err);
-    return { content: "Er ging iets mis bij het verwerken van je bericht. Probeer het opnieuw." };
+    console.error("Anthropic error:", await response.text());
+    return { content: "Er ging iets mis. Probeer het opnieuw." };
   }
 
   const data = await response.json() as {
@@ -186,5 +196,48 @@ async function callLLM(
     content: data.content[0]?.text ?? "",
     tokensIn: data.usage.input_tokens,
     tokensOut: data.usage.output_tokens,
+  };
+}
+
+async function callMoonshot(
+  apiKey: string,
+  systemPrompt: string,
+  history: { role: string; content: string }[]
+): Promise<LLMResponse> {
+  const messages = [
+    { role: "system", content: systemPrompt },
+    ...history.map((m) => ({
+      role: m.role === "assistant" ? "assistant" : "user",
+      content: m.content,
+    })),
+  ];
+
+  const response = await fetch("https://api.moonshot.ai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "kimi-k2.5",
+      messages,
+      max_tokens: 2048,
+    }),
+  });
+
+  if (!response.ok) {
+    console.error("Moonshot error:", await response.text());
+    return { content: "Er ging iets mis. Probeer het opnieuw." };
+  }
+
+  const data = await response.json() as {
+    choices: { message: { content: string } }[];
+    usage: { prompt_tokens: number; completion_tokens: number };
+  };
+
+  return {
+    content: data.choices[0]?.message.content ?? "",
+    tokensIn: data.usage?.prompt_tokens,
+    tokensOut: data.usage?.completion_tokens,
   };
 }
