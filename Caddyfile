@@ -1,0 +1,3 @@
+api.vdmnexus.com {
+	reverse_proxy api:4000
+}
