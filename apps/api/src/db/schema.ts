@@ -17,6 +17,7 @@ export const users = pgTable("users", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   email: text("email").notNull().unique(),
   name: text("name"),
+  passwordHash: text("password_hash"),
   plan: text("plan").default("starter").notNull(), // starter, growth, scale
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

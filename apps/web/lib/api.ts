@@ -1,5 +1,11 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://api.vdmnexus.com";
 
+function getAuthHeader(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  const token = localStorage.getItem("nexus_token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export async function api<T = unknown>(
   path: string,
   options?: RequestInit
@@ -8,6 +14,7 @@ export async function api<T = unknown>(
     ...options,
     headers: {
       "Content-Type": "application/json",
+      ...getAuthHeader(),
       ...options?.headers,
     },
   });
@@ -66,11 +73,14 @@ export interface Message {
 
 // ─── Employee API ────────────────────────────────────────
 
-// Temp: hardcoded userId until auth is built
-const DEMO_USER_ID = "demo-user";
+function getUserId(): string {
+  if (typeof window === "undefined") return "";
+  const raw = localStorage.getItem("nexus_user");
+  return raw ? JSON.parse(raw).id : "";
+}
 
 export async function getEmployees() {
-  return api<Employee[]>(`/employees?userId=${DEMO_USER_ID}`);
+  return api<Employee[]>(`/employees?userId=${getUserId()}`);
 }
 
 export async function getEmployee(id: string) {
@@ -80,7 +90,7 @@ export async function getEmployee(id: string) {
 export async function createEmployee(data: Partial<Employee>) {
   return api<Employee>("/employees", {
     method: "POST",
-    body: JSON.stringify({ ...data, userId: DEMO_USER_ID }),
+    body: JSON.stringify({ ...data, userId: getUserId() }),
   });
 }
 
@@ -111,7 +121,7 @@ export async function assignSkill(employeeId: string, skillId: string) {
 // ─── Skills API ──────────────────────────────────────────
 
 export async function getSkills() {
-  return api<Skill[]>(`/skills?userId=${DEMO_USER_ID}`);
+  return api<Skill[]>(`/skills?userId=${getUserId()}`);
 }
 
 // ─── Chat API ────────────────────────────────────────────

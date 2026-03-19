@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { serve } from "@hono/node-server";
 import { waitlistRouter } from "./routes/waitlist.js";
+import { authRouter } from "./routes/auth.js";
 import { employeesRouter } from "./routes/employees.js";
 import { skillsRouter } from "./routes/skills.js";
 import { chatRouter } from "./routes/chat.js";
@@ -33,6 +34,7 @@ app.get("/", (c) => c.json({ name: "VDM Nexus API", version: "0.1.0", status: "o
 app.get("/health", (c) => c.json({ status: "ok" }));
 
 // Routes
+app.route("/auth", authRouter);
 app.route("/waitlist", waitlistRouter);
 app.route("/employees", employeesRouter);
 app.route("/skills", skillsRouter);

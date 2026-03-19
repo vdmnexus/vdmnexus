@@ -7,7 +7,9 @@ export const employeesRouter = new Hono();
 
 // List all employees for a user
 employeesRouter.get("/", async (c) => {
-  const userId = c.req.query("userId");
+  // Support both auth token and query param (backwards compat)
+  let userId = c.get("userId") as string | undefined;
+  if (!userId) userId = c.req.query("userId") ?? undefined;
   if (!userId) return c.json({ error: "userId required" }, 400);
 
   const result = await db.select().from(employees).where(eq(employees.userId, userId));
