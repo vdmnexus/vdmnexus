@@ -133,6 +133,85 @@ export async function sendMessage(employeeId: string, message: string, conversat
   });
 }
 
+export async function sendMessageStream(
+  employeeId: string,
+  message: string,
+  conversationId: string | undefined,
+  onMeta: (meta: { conversationId: string }) => void,
+  onChunk: (text: string) => void,
+  onDone: () => void,
+  onError: (error: string) => void
+): Promise<void> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/chat/${employeeId}/stream`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeader(),
+      },
+      body: JSON.stringify({ message, conversationId }),
+    });
+  } catch {
+    onError("Kan geen verbinding maken met de server.");
+    return;
+  }
+
+  if (!res.ok) {
+    onError("Chat request failed");
+    return;
+  }
+
+  const reader = res.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let currentEvent = "message";
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+
+      for (const line of lines) {
+        if (line === "") {
+          currentEvent = "message";
+          continue;
+        }
+        if (line.startsWith("event: ")) {
+          currentEvent = line.slice(7).trim();
+          continue;
+        }
+        if (line.startsWith("data: ")) {
+          const data = line.slice(6);
+          switch (currentEvent) {
+            case "meta":
+              try { onMeta(JSON.parse(data)); } catch {}
+              break;
+            case "chunk":
+              onChunk(data);
+              break;
+            case "done":
+              onDone();
+              return;
+            case "error":
+              onError(data);
+              return;
+          }
+        }
+      }
+    }
+  } catch {
+    onError("Stream verbinding verbroken.");
+    return;
+  }
+
+  onDone();
+}
+
 export async function getConversationMessages(conversationId: string) {
   return api<Message[]>(`/chat/conversations/${conversationId}/messages`);
 }

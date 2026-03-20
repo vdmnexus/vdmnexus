@@ -2,7 +2,7 @@
 
 import { useReducer, useCallback, useRef, useEffect } from "react";
 import { Send, Bot } from "lucide-react";
-import { sendChatMessage } from "../../lib/api";
+import { sendChatMessageStream, sendChatMessage } from "../../lib/api";
 
 interface ChatMessage {
   role: "user" | "agent";
@@ -10,13 +10,16 @@ interface ChatMessage {
 }
 
 type State = {
-  phase: "idle" | "thinking";
+  phase: "idle" | "thinking" | "streaming";
   messages: ChatMessage[];
   conversationId: string | null;
 };
 
 type Action =
   | { type: "USER_MESSAGE"; text: string }
+  | { type: "AGENT_START_STREAMING"; conversationId: string }
+  | { type: "AGENT_CHUNK"; text: string }
+  | { type: "AGENT_DONE" }
   | { type: "AGENT_RESPONSE"; text: string; conversationId: string }
   | { type: "ERROR"; text: string };
 
@@ -24,6 +27,18 @@ function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "USER_MESSAGE":
       return { ...state, phase: "thinking", messages: [...state.messages, { role: "user", text: action.text }] };
+    case "AGENT_START_STREAMING":
+      return { ...state, phase: "streaming", conversationId: action.conversationId, messages: [...state.messages, { role: "agent", text: "" }] };
+    case "AGENT_CHUNK": {
+      const msgs = [...state.messages];
+      const last = msgs[msgs.length - 1];
+      if (last && last.role === "agent") {
+        msgs[msgs.length - 1] = { ...last, text: last.text + action.text };
+      }
+      return { ...state, messages: msgs };
+    }
+    case "AGENT_DONE":
+      return { ...state, phase: "idle" };
     case "AGENT_RESPONSE":
       return { ...state, phase: "idle", conversationId: action.conversationId, messages: [...state.messages, { role: "agent", text: action.text }] };
     case "ERROR":
@@ -49,8 +64,20 @@ export function AgentChat() {
     dispatch({ type: "USER_MESSAGE", text: message });
 
     try {
-      const res = await sendChatMessage(message, state.conversationId ?? undefined);
-      dispatch({ type: "AGENT_RESPONSE", text: res.message.content, conversationId: res.conversationId });
+      await sendChatMessageStream(
+        message,
+        state.conversationId ?? undefined,
+        (meta) => dispatch({ type: "AGENT_START_STREAMING", conversationId: meta.conversationId }),
+        (chunk) => dispatch({ type: "AGENT_CHUNK", text: chunk }),
+        () => dispatch({ type: "AGENT_DONE" }),
+        (error) => {
+          console.error("Stream error:", error);
+          // Fallback to non-streaming
+          sendChatMessage(message, state.conversationId ?? undefined)
+            .then((res) => dispatch({ type: "AGENT_RESPONSE", text: res.message.content, conversationId: res.conversationId }))
+            .catch(() => dispatch({ type: "ERROR", text: "Er ging iets mis. Probeer het opnieuw." }));
+        }
+      );
     } catch {
       dispatch({ type: "ERROR", text: "Er ging iets mis. Probeer het opnieuw." });
     }
@@ -93,6 +120,9 @@ export function AgentChat() {
                 : "bg-primary-50 text-primary-700 rounded-bl-sm"
             }`}>
               {msg.text}
+              {state.phase === "streaming" && i === state.messages.length - 1 && msg.role === "agent" && (
+                <span className="inline-block w-1.5 h-3 bg-primary-400 animate-pulse ml-0.5 -mb-0.5 rounded-sm" />
+              )}
             </div>
           </div>
         ))}

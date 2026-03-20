@@ -6,6 +6,7 @@ import { ArrowLeft, Send, Settings, Trash2, Loader2, Bot } from "lucide-react";
 import {
   getEmployee,
   sendMessage,
+  sendMessageStream,
   deleteEmployee,
   type Employee,
   type Skill,
@@ -50,12 +51,47 @@ export default function EmployeeDetailPage({ params }: { params: Promise<{ id: s
     setSending(true);
 
     try {
-      const res = await sendMessage(id, text, conversationId ?? undefined);
-      setConversationId(res.conversationId);
-      setMessages((prev) => [...prev, { role: "assistant", content: res.message.content }]);
+      // Add empty assistant message for streaming
+      let streamStarted = false;
+      await sendMessageStream(
+        id,
+        text,
+        conversationId ?? undefined,
+        (meta) => {
+          setConversationId(meta.conversationId);
+          streamStarted = true;
+          setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+        },
+        (chunk) => {
+          setMessages((prev) => {
+            const msgs = [...prev];
+            const last = msgs[msgs.length - 1];
+            if (last && last.role === "assistant") {
+              msgs[msgs.length - 1] = { ...last, content: last.content + chunk };
+            }
+            return msgs;
+          });
+        },
+        () => setSending(false),
+        async (error) => {
+          console.error("Stream error:", error);
+          // Remove empty streaming message if it was added
+          if (streamStarted) {
+            setMessages((prev) => prev.slice(0, -1));
+          }
+          // Fallback to non-streaming
+          try {
+            const res = await sendMessage(id, text, conversationId ?? undefined);
+            setConversationId(res.conversationId);
+            setMessages((prev) => [...prev, { role: "assistant", content: res.message.content }]);
+          } catch {
+            setMessages((prev) => [...prev, { role: "assistant", content: "Er ging iets mis. Probeer het opnieuw." }]);
+          }
+          setSending(false);
+        }
+      );
     } catch {
       setMessages((prev) => [...prev, { role: "assistant", content: "Er ging iets mis. Probeer het opnieuw." }]);
-    } finally {
       setSending(false);
     }
   };
@@ -145,10 +181,13 @@ export default function EmployeeDetailPage({ params }: { params: Promise<{ id: s
                     : "bg-primary-100 text-primary rounded-bl-sm"
                 }`}>
                   {msg.content}
+                  {sending && i === messages.length - 1 && msg.role === "assistant" && msg.content.length > 0 && (
+                    <span className="inline-block w-1.5 h-3.5 bg-primary-400 animate-pulse ml-0.5 -mb-0.5 rounded-sm" />
+                  )}
                 </div>
               </div>
             ))}
-            {sending && (
+            {sending && (messages.length === 0 || messages[messages.length - 1]?.role === "user") && (
               <div className="flex justify-start">
                 <div className="bg-primary-100 text-primary-400 rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm">
                   <span className="inline-flex gap-1">

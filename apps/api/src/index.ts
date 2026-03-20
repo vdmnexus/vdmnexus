@@ -7,6 +7,10 @@ import { authRouter } from "./routes/auth.js";
 import { employeesRouter } from "./routes/employees.js";
 import { skillsRouter } from "./routes/skills.js";
 import { chatRouter } from "./routes/chat.js";
+import { registerAllTools } from "./lib/tools/index.js";
+
+// Register all tools (RushFiles, etc.) before starting
+registerAllTools();
 
 const app = new Hono();
 

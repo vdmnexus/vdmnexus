@@ -16,6 +16,7 @@ import {
   Plus,
 } from "lucide-react";
 import { panden, huurders } from "../../lib/mock-data";
+import { sendChatMessageStream } from "../../lib/api";
 
 // ─── Types ───────────────────────────────────────────────
 
@@ -88,40 +89,16 @@ const domeinen: Domein[] = [
   },
 ];
 
-function getResultaat(domeinId: string, actieId: string, doelNaam?: string): string {
-  const msgs: Record<string, Record<string, string>> = {
-    incasso: {
-      herinnering: `Betalingsherinnering opgesteld voor ${doelNaam}. Klaar om te versturen.`,
-      "incasso-alle": "4 betalingsherinneringen opgesteld. Wachten op goedkeuring in Incasso.",
-      overzicht: "Facturoverzicht maart 2026 gegenereerd. Download beschikbaar.",
-    },
-    onderhoud: {
-      ticket: `Onderhoudsticket aangemaakt voor ${doelNaam}.`,
-      escaleer: "Ticket geëscaleerd naar externe aannemer.",
-      inspectie: `Inspectie ingepland voor ${doelNaam}. Huurders worden geïnformeerd.`,
-    },
-    communicatie: {
-      "bericht-huurder": `Conceptbericht opgesteld voor ${doelNaam}. Beschikbaar voor review.`,
-      "bericht-pand": `Conceptbericht opgesteld voor alle huurders van ${doelNaam}.`,
-      nieuwsbrief: "Conceptnieuwsbrief opgesteld. Beschikbaar voor review.",
-    },
-    rapportage: {
-      dagrapport: "Dagrapportage 19 maart 2026 gegenereerd.",
-      maandrapport: "Maandrapport maart 2026 gegenereerd. Download beschikbaar.",
-      pandrapport: `Pandrapport gegenereerd voor ${doelNaam}.`,
-    },
-    contracten: {
-      verlenging: `Verlengingsvoorstel opgesteld voor ${doelNaam} met CPI-indexatie (+3,1%).`,
-      opzegging: `Opzegging verwerkt voor ${doelNaam}. Eindinspectie wordt ingepland.`,
-      scan: "Contractscan uitgevoerd: 3 verlopen, 2 aflopend binnen 6 maanden.",
-    },
-    portefeuille: {
-      bezetting: "Bezettingsanalyse gegenereerd. Gemiddeld 88%.",
-      rendement: "Rendementoverzicht gegenereerd. Gemiddeld rendement: 5,2%.",
-      pandinfo: `Pandinfo opgehaald voor ${doelNaam}.`,
-    },
-  };
-  return msgs[domeinId]?.[actieId] ?? "Taak uitgevoerd.";
+function buildTaskPrompt(domein: Domein, actie: Actie, doelNaam?: string): string {
+  const parts = [`Voer de volgende taak uit:\n\nDomein: ${domein.label}\nActie: ${actie.label}`];
+  if (doelNaam) parts.push(`Doel: ${doelNaam}`);
+  parts.push(`\nBeschrijving: ${actie.beschrijving}`);
+  if (doelNaam) {
+    parts.push(`\nGebruik de beschikbare data om deze taak zo concreet en volledig mogelijk uit te voeren voor ${doelNaam}. Geef een duidelijk, professioneel resultaat.`);
+  } else {
+    parts.push(`\nGebruik de beschikbare data om deze taak zo concreet en volledig mogelijk uit te voeren. Geef een duidelijk, professioneel resultaat.`);
+  }
+  return parts.join("\n");
 }
 
 // ─── Component ───────────────────────────────────────────
@@ -133,17 +110,38 @@ export function TaskBuilder() {
   const [gekozenActie, setGekozenActie] = useState<Actie | null>(null);
   const [gekozenDoel, setGekozenDoel] = useState<{ id: string; naam: string } | null>(null);
   const [resultaat, setResultaat] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const reset = () => { setStap("domein"); setGekozenDomein(null); setGekozenActie(null); setGekozenDoel(null); setResultaat(""); };
+  const reset = () => { setStap("domein"); setGekozenDomein(null); setGekozenActie(null); setGekozenDoel(null); setResultaat(""); setIsLoading(false); };
   const sluiten = () => { setOpen(false); setTimeout(reset, 300); };
 
   const kiesDomein = (d: Domein) => { setGekozenDomein(d); setStap("actie"); };
   const kiesActie = (a: Actie) => { setGekozenActie(a); setStap(a.doelType === "geen" ? "bevestig" : "doel"); };
   const kiesDoel = (id: string, naam: string) => { setGekozenDoel({ id, naam }); setStap("bevestig"); };
 
-  const bevestig = () => {
+  const bevestig = async () => {
     setStap("uitgevoerd");
-    setTimeout(() => setResultaat(getResultaat(gekozenDomein!.id, gekozenActie!.id, gekozenDoel?.naam)), 1200);
+    setIsLoading(true);
+    setResultaat("");
+
+    const prompt = buildTaskPrompt(gekozenDomein!, gekozenActie!, gekozenDoel?.naam);
+
+    try {
+      await sendChatMessageStream(
+        prompt,
+        undefined, // new conversation for each task
+        () => { /* meta — we don't need the conversationId here */ },
+        (chunk) => setResultaat((prev) => prev + chunk),
+        () => setIsLoading(false),
+        () => {
+          setResultaat("Er ging iets mis bij het uitvoeren van de taak. Probeer het opnieuw.");
+          setIsLoading(false);
+        }
+      );
+    } catch {
+      setResultaat("Er ging iets mis bij het uitvoeren van de taak. Probeer het opnieuw.");
+      setIsLoading(false);
+    }
   };
 
   const terug = () => {
@@ -193,7 +191,7 @@ export function TaskBuilder() {
             {stap === "actie" && gekozenDomein?.label}
             {stap === "doel" && gekozenActie?.label}
             {stap === "bevestig" && "Bevestig taak"}
-            {stap === "uitgevoerd" && "Taak uitgevoerd"}
+            {stap === "uitgevoerd" && (isLoading ? "Sophie voert taak uit..." : "Taak uitgevoerd")}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -305,32 +303,41 @@ export function TaskBuilder() {
         )}
 
         {stap === "uitgevoerd" && (
-          <div className="text-center py-2">
-            {!resultaat ? (
+          <div className="py-2">
+            {!resultaat && isLoading ? (
               <div className="flex flex-col items-center gap-3 py-4">
                 <Loader2 size={20} className="text-primary-400 animate-spin" />
-                <p className="text-sm text-primary-400">Agent voert taak uit...</p>
+                <p className="text-sm text-primary-400">Sophie voert de taak uit...</p>
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="flex flex-col items-center gap-2">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100">
-                    <Check size={16} className="text-primary-700" />
+                {!isLoading && (
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100">
+                      <Check size={16} className="text-primary-700" />
+                    </div>
+                    <p className="text-sm font-medium text-primary">Taak uitgevoerd</p>
                   </div>
-                  <p className="text-sm font-medium text-primary">Taak uitgevoerd</p>
+                )}
+                <div className="rounded-lg bg-primary-50 p-3 max-h-80 overflow-y-auto">
+                  <p className="text-sm text-primary-600 leading-relaxed whitespace-pre-wrap">
+                    {resultaat}
+                    {isLoading && (
+                      <span className="inline-block w-1.5 h-3 bg-primary-400 animate-pulse ml-0.5 -mb-0.5 rounded-sm" />
+                    )}
+                  </p>
                 </div>
-                <div className="rounded-lg bg-primary-50 p-3">
-                  <p className="text-sm text-primary-600 leading-relaxed">{resultaat}</p>
-                </div>
-                <div className="flex gap-2 justify-center">
-                  <button onClick={reset} className="flex items-center gap-1.5 rounded-lg bg-primary-900 px-3 py-2 text-xs font-medium text-white hover:bg-primary-800">
-                    <Plus size={13} />
-                    Nieuwe taak
-                  </button>
-                  <button onClick={sluiten} className="rounded-lg border border-primary-200 px-3 py-2 text-xs font-medium text-primary-500 hover:bg-primary-50">
-                    Sluiten
-                  </button>
-                </div>
+                {!isLoading && (
+                  <div className="flex gap-2 justify-center">
+                    <button onClick={reset} className="flex items-center gap-1.5 rounded-lg bg-primary-900 px-3 py-2 text-xs font-medium text-white hover:bg-primary-800">
+                      <Plus size={13} />
+                      Nieuwe taak
+                    </button>
+                    <button onClick={sluiten} className="rounded-lg border border-primary-200 px-3 py-2 text-xs font-medium text-primary-500 hover:bg-primary-50">
+                      Sluiten
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
