@@ -506,7 +506,7 @@ async function callMoonshotWithTools(
     }
 
     const data = await response.json() as {
-      choices: { message: { content: string | null; tool_calls?: OpenAIToolCall[] }; finish_reason: string }[];
+      choices: { message: Record<string, unknown> & { content: string | null; tool_calls?: OpenAIToolCall[]; reasoning_content?: string }; finish_reason: string }[];
       usage: { prompt_tokens: number; completion_tokens: number };
     };
 
@@ -523,12 +523,8 @@ async function callMoonshotWithTools(
       break;
     }
 
-    // Add assistant message with tool_calls
-    conversationMessages.push({
-      role: "assistant",
-      content: choice.message.content,
-      tool_calls: choice.message.tool_calls,
-    });
+    // Preserve the full assistant message (including reasoning_content for Kimi thinking mode)
+    conversationMessages.push(choice.message as unknown as OpenAIMessage);
 
     // Execute tools and add results
     for (const tc of choice.message.tool_calls) {
@@ -814,19 +810,23 @@ async function streamMoonshotWithTools(
     }
 
     // Parse streaming response, collecting text and tool calls
-    const { text, toolCalls, finishReason } = await parseMoonshotStream(response, onChunk, onUsage);
+    const { text, reasoningContent, toolCalls, finishReason } = await parseMoonshotStream(response, onChunk, onUsage);
 
     // If no tool calls, we're done
     if (finishReason !== "tool_calls" || toolCalls.length === 0) {
       return;
     }
 
-    // Add assistant message with tool calls to conversation
-    conversationMessages.push({
+    // Add assistant message with tool calls + reasoning_content (required by Kimi thinking mode)
+    const assistantMsg: Record<string, unknown> = {
       role: "assistant",
       content: text || null,
       tool_calls: toolCalls,
-    });
+    };
+    if (reasoningContent) {
+      assistantMsg.reasoning_content = reasoningContent;
+    }
+    conversationMessages.push(assistantMsg as unknown as OpenAIMessage);
 
     // Execute tools
     for (const tc of toolCalls) {
@@ -863,11 +863,12 @@ async function parseMoonshotStream(
   response: Response,
   onTextChunk: (text: string) => Promise<void>,
   onUsage: (usage: { inputTokens: number; outputTokens: number }) => void
-): Promise<{ text: string; toolCalls: OpenAIToolCall[]; finishReason: string }> {
+): Promise<{ text: string; reasoningContent: string; toolCalls: OpenAIToolCall[]; finishReason: string }> {
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
   let text = "";
+  let reasoningContent = "";
   let finishReason = "stop";
 
   // Collect tool calls from streamed deltas
@@ -892,6 +893,12 @@ async function parseMoonshotStream(
 
         if (choice?.finish_reason) {
           finishReason = choice.finish_reason;
+        }
+
+        // Reasoning content (Kimi thinking mode)
+        const reasoning = choice?.delta?.reasoning_content;
+        if (reasoning) {
+          reasoningContent += reasoning;
         }
 
         // Text content
@@ -935,5 +942,5 @@ async function parseMoonshotStream(
     function: { name: tc.name, arguments: tc.arguments },
   }));
 
-  return { text, toolCalls, finishReason };
+  return { text, reasoningContent, toolCalls, finishReason };
 }
