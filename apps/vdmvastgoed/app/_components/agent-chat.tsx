@@ -2,7 +2,7 @@
 
 import { useReducer, useCallback, useRef, useEffect } from "react";
 import { Send, Bot } from "lucide-react";
-import { getAgentResponse, type AgentResponse } from "../../lib/agent-responses";
+import { sendChatMessage } from "../../lib/api";
 
 interface ChatMessage {
   role: "user" | "agent";
@@ -10,63 +10,51 @@ interface ChatMessage {
 }
 
 type State = {
-  phase: "idle" | "thinking" | "streaming";
+  phase: "idle" | "thinking";
   messages: ChatMessage[];
-  streamingText: string;
+  conversationId: string | null;
 };
 
 type Action =
   | { type: "USER_MESSAGE"; text: string }
-  | { type: "STREAM_UPDATE"; text: string }
-  | { type: "STREAM_COMPLETE"; text: string }
-  | { type: "RESET" };
+  | { type: "AGENT_RESPONSE"; text: string; conversationId: string }
+  | { type: "ERROR"; text: string };
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "USER_MESSAGE":
-      return { ...state, phase: "thinking", messages: [...state.messages, { role: "user", text: action.text }], streamingText: "" };
-    case "STREAM_UPDATE":
-      return { ...state, phase: "streaming", streamingText: action.text };
-    case "STREAM_COMPLETE":
-      return { ...state, phase: "idle", messages: [...state.messages, { role: "agent", text: action.text }], streamingText: "" };
-    case "RESET":
-      return { phase: "idle", messages: [], streamingText: "" };
+      return { ...state, phase: "thinking", messages: [...state.messages, { role: "user", text: action.text }] };
+    case "AGENT_RESPONSE":
+      return { ...state, phase: "idle", conversationId: action.conversationId, messages: [...state.messages, { role: "agent", text: action.text }] };
+    case "ERROR":
+      return { ...state, phase: "idle", messages: [...state.messages, { role: "agent", text: action.text }] };
     default:
       return state;
   }
 }
 
 export function AgentChat() {
-  const [state, dispatch] = useReducer(reducer, { phase: "idle", messages: [], streamingText: "" });
+  const [state, dispatch] = useReducer(reducer, { phase: "idle", messages: [], conversationId: null });
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [state.messages, state.streamingText, state.phase]);
+  }, [state.messages, state.phase]);
 
-  const handleSend = useCallback((text?: string) => {
+  const handleSend = useCallback(async (text?: string) => {
     const message = text ?? inputRef.current?.value.trim();
     if (!message || state.phase !== "idle") return;
     if (inputRef.current) inputRef.current.value = "";
     dispatch({ type: "USER_MESSAGE", text: message });
 
-    const thinkDelay = 600 + Math.random() * 600;
-    setTimeout(() => {
-      const response = getAgentResponse(message);
-      let i = 0;
-      const chars = response.text.split("");
-      const interval = setInterval(() => {
-        i += 3;
-        if (i >= chars.length) {
-          clearInterval(interval);
-          dispatch({ type: "STREAM_COMPLETE", text: response.text });
-        } else {
-          dispatch({ type: "STREAM_UPDATE", text: chars.slice(0, i).join("") });
-        }
-      }, 20);
-    }, thinkDelay);
-  }, [state.phase]);
+    try {
+      const res = await sendChatMessage(message, state.conversationId ?? undefined);
+      dispatch({ type: "AGENT_RESPONSE", text: res.message.content, conversationId: res.conversationId });
+    } catch {
+      dispatch({ type: "ERROR", text: "Er ging iets mis. Probeer het opnieuw." });
+    }
+  }, [state.phase, state.conversationId]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
@@ -76,13 +64,15 @@ export function AgentChat() {
 
   return (
     <div className="flex h-full flex-col">
-      {/* Header */}
       <div className="flex items-center gap-2 border-b border-primary-200 px-4 py-3">
         <Bot size={14} className="text-primary-400" />
-        <span className="text-xs font-medium text-primary-500 uppercase tracking-wider">Agent</span>
+        <span className="text-xs font-medium text-primary-500 uppercase tracking-wider">Sophie</span>
+        <span className="flex items-center gap-1 ml-auto">
+          <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+          <span className="text-[10px] text-green-600">Online</span>
+        </span>
       </div>
 
-      {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3">
         {empty && (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
@@ -90,7 +80,7 @@ export function AgentChat() {
               <Bot size={14} className="text-primary-500" />
             </div>
             <p className="text-xs text-primary-400 leading-relaxed">
-              Stel een vraag over je portefeuille, facturen, huurders of onderhoud.
+              Vraag Sophie over facturen, huurders, panden, onderhoud of contracten.
             </p>
           </div>
         )}
@@ -102,7 +92,7 @@ export function AgentChat() {
                 ? "bg-primary-900 text-white rounded-br-sm"
                 : "bg-primary-50 text-primary-700 rounded-bl-sm"
             }`}>
-              {msg.role === "agent" ? renderMarkdown(msg.text) : msg.text}
+              {msg.text}
             </div>
           </div>
         ))}
@@ -118,18 +108,8 @@ export function AgentChat() {
             </div>
           </div>
         )}
-
-        {state.phase === "streaming" && (
-          <div className="flex justify-start">
-            <div className="max-w-[90%] bg-primary-50 text-primary-700 px-3 py-2 rounded-xl rounded-bl-sm text-xs leading-relaxed whitespace-pre-wrap">
-              {renderMarkdown(state.streamingText)}
-              <span className="inline-block w-0.5 h-3 bg-primary-400 animate-pulse ml-0.5 align-text-bottom" />
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Input */}
       <div className="border-t border-primary-200 p-2">
         <div className="flex gap-1.5">
           <input
@@ -151,14 +131,4 @@ export function AgentChat() {
       </div>
     </div>
   );
-}
-
-function renderMarkdown(text: string) {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>;
-    }
-    return part;
-  });
 }
