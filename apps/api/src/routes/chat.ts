@@ -3,7 +3,6 @@ import { streamSSE } from "hono/streaming";
 import { eq } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { employees, conversations, messages, employeeSkills, skills } from "../db/schema.js";
-import { buildVastgoedContext } from "../lib/vastgoed-context.js";
 import { getAllTools, getTool, toolsToAnthropicFormat, type ToolDefinition } from "../lib/tools/index.js";
 
 export const chatRouter = new Hono();
@@ -308,11 +307,8 @@ async function buildSystemPrompt(employee: typeof employees.$inferSelect): Promi
   // Tools instruction
   const tools = getAllTools();
   if (tools.length > 0) {
-    parts.push(`\n# Beschikbare tools\nJe hebt toegang tot ${tools.length} tools waarmee je echte acties kunt uitvoeren (bestanden opzoeken in RushFiles, etc.). Gebruik deze tools wanneer de gebruiker om iets vraagt dat je niet alleen uit de data-context kunt beantwoorden. Bij het zoeken in RushFiles, begin altijd met rushfiles_list_shares als je nog geen share ID hebt.`);
+    parts.push(`\n# Beschikbare tools\nJe hebt toegang tot ${tools.length} tools waarmee je echte acties kunt uitvoeren. Alle vastgoeddata (huurders, contracten, facturen, onderhoud) staat in RushFiles. Je hebt GEEN ingebouwde data — gebruik altijd de browser tools om informatie op te zoeken in RushFiles wanneer een gebruiker vraagt naar specifieke gegevens.\n\nBij het zoeken in RushFiles:\n1. Gebruik browser_rushfiles_browse met action "list_shares" om de beschikbare shares te zien\n2. Open de "Vastgoed" share om door mappen te navigeren\n3. Gebruik browser_rushfiles_search om bestanden te zoeken\n\nAls je iets niet kunt vinden, zeg dat eerlijk en stel voor om in een specifieke map te kijken.`);
   }
-
-  // Vastgoeddata context
-  parts.push("\n" + buildVastgoedContext());
 
   return parts.join("\n\n");
 }
