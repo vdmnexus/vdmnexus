@@ -1,23 +1,30 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "@vdmnexus/ui/globals.css";
+import "./globals.css";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "VDM Nexus — AI Employee Platform",
+  title: "VDM Nexus — The infrastructure layer for autonomous AI",
   description:
-    "Bouw, configureer en run AI employees met custom skills, geheugen en persoonlijkheid. VDM Nexus is de runtime voor jouw AI workforce.",
+    "VDM Nexus routes AI compute intelligently, accepts crypto-native payments, and gives autonomous agents the infrastructure they need to operate independently.",
+  metadataBase: new URL("https://vdmnexus.com"),
   openGraph: {
-    title: "VDM Nexus — AI Employee Platform",
+    title: "VDM Nexus — The infrastructure layer for autonomous AI",
     description:
-      "Build AI Employees for Your Business. Custom skills, soul memory, any LLM.",
+      "Smart compute routing for AI businesses. Crypto-native payments for autonomous agents. One endpoint, full control.",
     url: "https://vdmnexus.com",
     siteName: "VDM Nexus",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "VDM Nexus",
+    description: "The infrastructure layer for autonomous AI.",
   },
 };
 
@@ -27,8 +34,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="nl" className={inter.variable}>
-      <body className="font-sans">{children}</body>
+    <html lang="en" className={inter.variable}>
+      <body className="font-sans bg-bg text-text antialiased">{children}</body>
     </html>
   );
 }
