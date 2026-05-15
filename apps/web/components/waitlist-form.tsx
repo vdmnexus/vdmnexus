@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Check } from "lucide-react";
-import { getSupabase } from "@/lib/supabase";
 import { useWaitlist } from "./waitlist-context";
 import { cn } from "@/lib/utils";
 
@@ -15,12 +14,53 @@ const BUILDING_OPTIONS = [
 
 type Status = "idle" | "submitting" | "success" | "error";
 
+type Attribution = {
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_term?: string;
+  utm_content?: string;
+  referrer?: string;
+};
+
+function captureAttribution(): Attribution {
+  if (typeof window === "undefined") return {};
+  const params = new URLSearchParams(window.location.search);
+  const out: Attribution = {};
+  for (const key of [
+    "utm_source",
+    "utm_medium",
+    "utm_campaign",
+    "utm_term",
+    "utm_content",
+  ] as const) {
+    const v = params.get(key);
+    if (v) out[key] = v;
+  }
+  const ref = document.referrer;
+  if (ref) {
+    try {
+      const parsed = new URL(ref);
+      if (parsed.hostname !== window.location.hostname) out.referrer = ref;
+    } catch {
+      // ignore malformed referrer
+    }
+  }
+  return out;
+}
+
 export function WaitlistForm() {
   const ctx = useWaitlist();
   const [email, setEmail] = useState("");
   const [building, setBuilding] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const honeypotRef = useRef<HTMLInputElement>(null);
+  const attributionRef = useRef<Attribution>({});
+
+  useEffect(() => {
+    attributionRef.current = captureAttribution();
+  }, []);
 
   useEffect(() => {
     if (ctx?.prefilledEmail) {
@@ -41,38 +81,38 @@ export function WaitlistForm() {
 
     setStatus("submitting");
 
-    const supabase = getSupabase();
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: trimmedEmail,
+          building: building || null,
+          website: honeypotRef.current?.value ?? "",
+          ...attributionRef.current,
+        }),
+      });
 
-    if (!supabase) {
-      setErrorMessage(
-        "Waitlist is temporarily unavailable. Please try again later."
-      );
-      setStatus("error");
-      return;
-    }
-
-    const { error } = await supabase
-      .from("waitlist")
-      .insert({ email: trimmedEmail, building: building || null });
-
-    if (error) {
-      const isDuplicate =
-        error.code === "23505" ||
-        /duplicate|unique/i.test(error.message ?? "");
-
-      if (isDuplicate) {
+      if (res.ok) {
         setStatus("success");
         return;
       }
 
-      setErrorMessage(
-        error.message || "Something went wrong. Please try again."
-      );
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (data.error === "rate_limited") {
+        setErrorMessage("Too many attempts. Please try again later.");
+      } else if (data.error === "invalid_email") {
+        setErrorMessage("Please enter a valid email address.");
+      } else if (data.error === "service_unavailable") {
+        setErrorMessage("Waitlist is temporarily unavailable. Please try again later.");
+      } else {
+        setErrorMessage("Something went wrong. Please try again.");
+      }
       setStatus("error");
-      return;
+    } catch {
+      setErrorMessage("Network error. Please try again.");
+      setStatus("error");
     }
-
-    setStatus("success");
   }
 
   if (status === "success") {
@@ -90,7 +130,29 @@ export function WaitlistForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-4" noValidate>
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          width: "1px",
+          height: "1px",
+          overflow: "hidden",
+        }}
+      >
+        <label htmlFor="website">Website (leave blank)</label>
+        <input
+          ref={honeypotRef}
+          type="text"
+          id="website"
+          name="website"
+          tabIndex={-1}
+          autoComplete="off"
+          defaultValue=""
+        />
+      </div>
+
       <div className="space-y-2">
         <label
           htmlFor="email"
