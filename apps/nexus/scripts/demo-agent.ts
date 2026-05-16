@@ -29,7 +29,7 @@ const PROMPTS: Array<{ task_type: TaskType; prompt: string }> = [
     prompt: "What is the moat of a compute infrastructure protocol?",
   },
   {
-    task_type: "fast",
+    task_type: "reasoning",
     prompt: "Write a one-line pitch for autonomous compute payments",
   },
 ];
@@ -122,13 +122,6 @@ async function main() {
   console.log(
     "This agent paid for its own compute. No API keys. No humans. No middlemen."
   );
-
-  if (!secret) {
-    console.log();
-    console.log(
-      `(Save DEMO_AGENT_SECRET_KEY=${agent.secretKeyBase58} to reuse this agent.)`
-    );
-  }
 }
 
 main().catch((e) => {
