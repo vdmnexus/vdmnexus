@@ -48,7 +48,7 @@ export function Nav() {
             <XIcon className="h-4 w-4" />
           </a>
           <a
-            href="https://t.me/+UxrwXIu7XOZlY2Rk"
+            href="https://t.me/vdmnexus"
             target="_blank"
             rel="noreferrer noopener"
             aria-label="VDM Nexus on Telegram"
