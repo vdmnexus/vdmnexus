@@ -95,6 +95,11 @@ Next.js 15 App Router, API-only, port 3001 in dev.
 
 - `GET  /api/health` — liveness
 - `POST /api/v1/inference` — the signed-request inference endpoint
+- `GET  /api/v1/deposit-address` — returns `{ address, mint, network }` so
+  agents can discover where to send USDC
+- `POST /api/v1/deposits/scan` — cron-triggered scanner; requires
+  `CRON_SECRET` (Vercel Cron passes it via `Authorization: Bearer ...`,
+  the `X-Cron-Secret` header is also accepted for manual triggers)
 
 **Auth scheme.** Every request to `/v1/inference` carries:
 
@@ -117,6 +122,15 @@ The body is JSON: `{ prompt, model, timestamp, nonce }`. The server:
 
 **Pricing source of truth.** OpenRouter's returned `usage.cost` (USD). We
 pass it through 1:1 to the ledger — no markup at the protocol layer yet.
+
+**Deposit detection.** `apps/nexus/lib/deposits.ts` polls Solana RPC for
+recent signatures against `NEXUS_DEPOSIT_ADDRESS`, parses each transaction's
+`pre/postTokenBalances` for USDC mint deltas owned by the deposit address,
+identifies the agent as the transaction's first signer, and credits the
+ledger keyed by sender pubkey with the `tx_signature` set. The unique index
+`credits_ledger_tx_idx` makes credits idempotent — a repeated scan of the
+same tx never double-credits. Vercel Cron hits `POST /api/v1/deposits/scan`
+every 2 minutes (`apps/nexus/vercel.json`).
 
 ### `packages/sdk` — `@vdmnexus/sdk`
 
@@ -184,8 +198,14 @@ SLACK_WEBHOOK_URL=       # optional
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 OPENROUTER_API_KEY=
-NEXUS_REQUEST_MAX_AGE_SECONDS=60     # optional
+NEXUS_DEPOSIT_ADDRESS=               # Solana pubkey agents send USDC to
+NEXUS_DEPOSIT_SECRET_KEY=            # devnet only; mainnet must use a KMS
+CRON_SECRET=                         # required by /api/v1/deposits/scan
 SOLANA_NETWORK=devnet                # devnet for v1
+SOLANA_RPC_URL=                      # optional; defaults to public RPC
+NEXUS_USDC_MINT=                     # optional override (test mints)
+NEXUS_DEPOSIT_SCAN_LIMIT=50          # optional
+NEXUS_REQUEST_MAX_AGE_SECONDS=60     # optional
 ```
 
 Demo script also reads:
@@ -198,7 +218,7 @@ DEMO_SEED_USDC=1.00
 
 ## Built vs. not built
 
-### Built (this session)
+### Built
 
 - Ed25519 agent identity (Solana-compatible)
 - Signed-request auth with timestamp window + nonce replay protection
@@ -207,15 +227,22 @@ DEMO_SEED_USDC=1.00
 - `@vdmnexus/sdk` — `Agent.generate()`, `Agent.fromBase58()`, `.inference()`
 - Demo script: `pnpm --filter nexus demo` seeds credits, runs three
   prompts, prints the dropping balance
+- **On-chain deposit detection.** Polls Solana RPC every 2 minutes (Vercel
+  Cron), parses USDC transfers to `NEXUS_DEPOSIT_ADDRESS`, credits the
+  ledger keyed by sender pubkey. Idempotent via unique `tx_signature` index.
+- Public roadmap page (`/roadmap`) on apps/web with live build log + admin
+  editor at `/admin/roadmap`.
 
-### NOT built — explicit non-goals for this session
+### NOT built — explicit non-goals
 
-- **On-chain deposit detection.** v1 seeds balances directly in Supabase
-  via the demo script. Real flow: agent sends USDC to a Nexus deposit
-  address → we observe the tx (Helius webhook / poll) → `credits_ledger`
-  insert with `tx_signature`. **Next session.**
-- **Mainnet.** Devnet only. Switch behind `SOLANA_NETWORK=mainnet-beta`
-  once deposit detection is solid.
+- **Mainnet.** Devnet only. The deposit secret key currently lives in
+  `apps/nexus/.env` (fine for devnet, unacceptable for mainnet). Switch
+  behind `SOLANA_NETWORK=mainnet-beta` only after moving the key to a real
+  KMS and stress-testing deposit detection on devnet.
+- **SDK helper to send USDC.** `Agent.deposit()` would let agents top
+  themselves up; needs `@solana/web3.js` + `@solana/spl-token`. Deferred
+  until the SDK package split (`@vdmnexus/wallet`) makes the dep cost
+  justifiable.
 - **Multi-provider routing.** OpenRouter is the only upstream. Real
   routing intelligence comes after the agent rail is in customer hands.
 - **A web UI.** No `/admin`, no balance dashboard. The waitlist `/admin`
