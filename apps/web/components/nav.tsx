@@ -12,11 +12,17 @@ export function Nav() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-soft bg-bg/70 backdrop-blur">
       <nav className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="group flex items-center gap-2">
-          <Logo />
-          <span className="text-sm font-semibold tracking-tight text-text">
-            VDM Nexus
-          </span>
+        <Link
+          href="/"
+          aria-label="VDM Nexus"
+          className="group flex items-center"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="VDM Nexus"
+            className="h-8 w-auto md:h-9"
+          />
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
@@ -88,16 +94,3 @@ function XIcon({ className }: { className?: string }) {
   );
 }
 
-function Logo() {
-  return (
-    <span className="relative grid h-7 w-7 place-items-center overflow-hidden rounded-md border border-soft bg-surface">
-      <span
-        aria-hidden
-        className="absolute inset-0 bg-gradient-to-br from-accent-indigo/30 to-accent-blue/10"
-      />
-      <span className="relative text-[11px] font-bold tracking-tighter text-text">
-        N
-      </span>
-    </span>
-  );
-}
