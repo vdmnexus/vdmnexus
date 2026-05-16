@@ -1,13 +1,30 @@
 {
   "name": "@vdmnexus/sdk",
-  "version": "0.0.1",
-  "description": "Open-source SDK for VDM Nexus — autonomous agents that pay for compute on-chain.",
+  "version": "0.1.0",
+  "description": "Open-source SDK for VDM Nexus — autonomous AI agents that authenticate and pay for compute with a Solana keypair. No API keys.",
   "license": "MIT",
+  "author": "VDM Nexus",
+  "homepage": "https://vdmnexus.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/2504VDM/vdmnexus.git",
     "directory": "packages/sdk"
   },
+  "bugs": {
+    "url": "https://github.com/2504VDM/vdmnexus/issues"
+  },
+  "keywords": [
+    "solana",
+    "ai",
+    "ai-agents",
+    "autonomous-agents",
+    "llm",
+    "inference",
+    "ed25519",
+    "usdc",
+    "compute",
+    "vdmnexus"
+  ],
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -21,9 +38,13 @@
     "./package.json": "./package.json"
   },
   "files": ["dist", "LICENSE", "README.md"],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "prepublishOnly": "tsc"
   },
   "dependencies": {
     "bs58": "^6.0.0",
