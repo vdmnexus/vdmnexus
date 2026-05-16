@@ -26,8 +26,16 @@ export function Footer() {
           <Link href="/agents" className="transition-colors hover:text-text">
             Nexus Agents
           </Link>
-          <a href="#" className="transition-colors hover:text-text">
-            GitHub
+          <Link href="/roadmap" className="transition-colors hover:text-text">
+            Roadmap
+          </Link>
+          <a
+            href="https://x.com/vdmnexus"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="transition-colors hover:text-text"
+          >
+            @vdmnexus
           </a>
           <Link href="/#waitlist" className="transition-colors hover:text-text">
             Waitlist

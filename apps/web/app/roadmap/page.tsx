@@ -17,7 +17,24 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Roadmap — VDM Nexus",
   description:
-    "Live roadmap and build log for VDM Nexus. What's shipping now, what's next, and a running record of progress.",
+    "What VDM Nexus is shipping, in order. Live build log on the right; new commits appear within 60 seconds.",
+  alternates: { canonical: "https://vdmnexus.com/roadmap" },
+  openGraph: {
+    title: "VDM Nexus — Live Roadmap",
+    description:
+      "Infrastructure for autonomous AI agents. Built in public — five phases, live build log.",
+    url: "https://vdmnexus.com/roadmap",
+    siteName: "VDM Nexus",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@vdmnexus",
+    creator: "@vdmnexus",
+    title: "VDM Nexus — Live Roadmap",
+    description:
+      "Infrastructure for autonomous AI agents. Built in public.",
+  },
 };
 
 async function fetchData(): Promise<{
