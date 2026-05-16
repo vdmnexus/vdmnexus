@@ -1,103 +1,277 @@
 # VDM Nexus
 
-VDM Nexus is an AI infrastructure company. This repo is a Turbo + pnpm monorepo. The public marketing site at **vdmnexus.com** lives in `apps/web` and is the focus of this document.
+> Infrastructure for autonomous AI agents.
 
-## Positioning
+## What this repo is
 
-- **Tagline**: The infrastructure layer for autonomous AI.
-- **Tone**: Dark, technical, credible. No hype.
-- **Products**:
-  - **Nexus Compute** — Smart compute routing for AI businesses. Routes workloads to the cheapest or best provider in real-time. Accepts crypto payments for on-chain agents. (Live)
-  - **Nexus Agents** — Infrastructure for autonomous on-chain AI agents that acquire and spend compute independently. (Coming soon)
-- The SDK is open source. The cloud routing layer is closed.
-
-## Repo layout
+A Turbo + pnpm monorepo with two apps and one open-source package:
 
 ```
 apps/
-  web/         ← the marketing site (this document)
-  api/         ← separate backend (out of scope here)
-  vdmvastgoed/ ← separate product (out of scope here)
+  web/         ← Marketing site at vdmnexus.com (live)
+  nexus/       ← Agent payment rail + inference API (in development)
 packages/
-  ui/          ← shared package (not used by apps/web)
+  sdk/         ← @vdmnexus/sdk — open source, MIT
 ```
 
-## `apps/web` stack
+## Strategic stance
 
-- Next.js 15 (App Router)
-- React 19
-- Tailwind CSS 3
-- Framer Motion
-- Supabase (`@supabase/supabase-js`) — direct client-side writes to the `waitlist` table
-- Inter via `next/font/google`
+The marketing copy on vdmnexus.com positions Nexus Compute as a smart compute
+router. Building a router *first* would put us in a crowded, low-margin market
+(OpenRouter, Portkey, LiteLLM, AWS Bedrock, Vercel AI Gateway). The actual
+wedge is the layer below: **autonomous AI agents that authenticate and pay
+with a Solana keypair, with no API keys**.
 
-### Routes
+So this codebase builds the agent payment rail first and proxies the
+inference side to OpenRouter for now. Real routing intelligence is a later
+session, after the rail is shipping value.
 
-- `/` — Homepage (hero → problem → products → how it works → audience split → open source → waitlist → footer)
-- `/compute` — Nexus Compute product page
-- `/agents` — Nexus Agents (coming soon)
+## Products
 
-### Key files
+### Nexus Compute
 
-- `apps/web/app/layout.tsx` — root layout, metadata, Inter font
-- `apps/web/app/globals.css` — dark theme tokens, grid/dot backgrounds, reduced-motion overrides
-- `apps/web/app/page.tsx` — homepage composition
-- `apps/web/app/compute/page.tsx`, `apps/web/app/agents/page.tsx` — product pages
-- `apps/web/components/` — Nav, Footer, GridBg, Card, Section, WaitlistForm, HeroWaitlistInput, FadeIn, WaitlistProvider
-- `apps/web/lib/supabase.ts` — singleton Supabase client
-- `apps/web/tailwind.config.ts` — design tokens
+What the site says: smart compute routing for AI businesses.
+What's actually built: a thin OpenRouter passthrough, gated by Solana-signed
+auth, with usage charged against an off-chain credit ledger.
 
-### Design tokens
+### Nexus Agents
+
+What the site says: infrastructure for autonomous on-chain agents.
+What's actually built: agents authenticate with an Ed25519 keypair, sign
+every request, and have credits debited from a Supabase ledger. **The
+on-chain deposit side is not built yet** — credits are seeded manually by the
+demo script. Closing that loop is the next session.
+
+## Apps
+
+### `apps/web` — marketing site
+
+Next.js 15 App Router, React 19, Tailwind 3, Framer Motion, Supabase, Inter
+via `next/font/google`. Mobile baseline 375px, all animations respect
+`prefers-reduced-motion`.
+
+**Routes:** `/`, `/compute`, `/agents`, `/api/waitlist`.
+
+**Waitlist flow.** Form posts to `/api/waitlist` (Next.js route, Node
+runtime). The route uses the Supabase service role to insert into
+`public.waitlist`, enforces a per-IP rate limit via `public.waitlist_rate_limit`,
+silently accepts honeypot submissions, captures UTM + referrer + hashed IP +
+user-agent. Resend (confirmation) and Slack (internal notification) fire
+fire-and-forget when their env vars are present.
+
+**Design tokens:**
 
 ```
-bg:        #080810
-surface:   #0e0e18
-border:    #1e1e2e
-text:      #f1f5f9 (default), #94a3b8 (muted)
-accent:    #6366f1 (indigo), #3b82f6 (blue)
+bg:      #080810
+surface: #0e0e18
+border:  #1e1e2e
+text:    #f1f5f9 default, #94a3b8 muted
+accent:  #6366f1 indigo, #3b82f6 blue
 ```
 
-## Env vars
+### `apps/nexus` — agent payment rail + inference API
 
-`apps/web/.env.local` must define:
+Next.js 15 App Router, API-only, port 3001 in dev.
+
+**Endpoints**
+
+- `GET  /api/health` — liveness
+- `POST /api/v1/inference` — the signed-request inference endpoint
+
+**Auth scheme.** Every request to `/v1/inference` carries:
+
+- `X-Nexus-Pubkey: <base58 Ed25519 public key>` (32 bytes)
+- `X-Nexus-Signature: <base58 Ed25519 signature>` (64 bytes, over the raw
+  body bytes)
+
+The body is JSON: `{ prompt, model, timestamp, nonce }`. The server:
+
+1. Verifies the signature with `tweetnacl` against the raw body bytes.
+2. Rejects when `timestamp` is more than `NEXUS_REQUEST_MAX_AGE_SECONDS`
+   away from now (default 60s — replay protection).
+3. Rejects reused `(agent_pubkey, nonce)` via a unique index on the credits
+   ledger.
+4. Auto-registers the agent in `public.agents` if first seen.
+5. Checks `balance_usdc > 0` via the `agent_balances` view.
+6. Calls OpenRouter with `usage.include = true`, debits the returned
+   `usage.cost`, writes an `inference_logs` row.
+7. Returns the completion plus the new remaining balance.
+
+**Pricing source of truth.** OpenRouter's returned `usage.cost` (USD). We
+pass it through 1:1 to the ledger — no markup at the protocol layer yet.
+
+### `packages/sdk` — `@vdmnexus/sdk`
+
+MIT, TypeScript, ESM-only. Two runtime deps: `tweetnacl` and `bs58`. Builds
+with `tsc` to `dist/`.
+
+```ts
+import { Agent } from "@vdmnexus/sdk";
+
+const agent = Agent.generate();
+const reply = await agent.inference("https://nexus.vdmnexus.com/api/v1", {
+  prompt: "...",
+  model: "openai/gpt-4o-mini",
+});
+```
+
+The class owns the keypair and handles signing. It does NOT depend on
+`@solana/web3.js` — that comes later when wallet operations (deposits,
+transfers) get added.
+
+## Supabase
+
+One project: `vdmnexus-web` (ref `wuxorxtniyfwjaqurwoe`, EU-West-3).
+
+**Marketing site tables:**
+
+- `waitlist` — emails + UTM/referrer + hashed IP + user agent
+- `waitlist_rate_limit` — per-IP-hash count + sliding window
+
+**Agent rail tables:**
+
+- `agents (pubkey PK, label, status, created_at)`
+- `credits_ledger` — append-only deltas, `delta_usdc` is positive for credits
+  (topups) and negative for debits (inference). Unique index on
+  `(agent_pubkey, request_nonce)` for replay protection.
+- `agent_balances` view — `sum(delta_usdc)` per agent
+- `inference_logs` — every call, including failures, with token counts and
+  latency
+
+All tables have RLS enabled. The agent rail tables have **no policies** —
+only the service role touches them, server-side from `apps/nexus`.
+
+## Environment variables
+
+### `apps/web/.env.local`
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+IP_HASH_SALT=
+RESEND_API_KEY=          # optional
+RESEND_FROM=             # optional, e.g. hello@vdmnexus.com
+SLACK_WEBHOOK_URL=       # optional
 ```
 
-If either is missing the waitlist form fails closed with a user-facing error; the rest of the site renders normally.
+### `apps/nexus/.env`
 
-## Supabase schema
-
-```sql
-create table waitlist (
-  id uuid primary key default gen_random_uuid(),
-  email text not null unique,
-  building text,
-  created_at timestamptz default now()
-);
-
-alter table waitlist enable row level security;
-
-create policy "anon can insert waitlist"
-  on waitlist for insert to anon with check (true);
+```
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+OPENROUTER_API_KEY=
+NEXUS_REQUEST_MAX_AGE_SECONDS=60     # optional
+SOLANA_NETWORK=devnet                # devnet for v1
 ```
 
-Duplicate emails return a unique-violation; the form treats this as success (idempotent join).
+Demo script also reads:
+
+```
+NEXUS_ENDPOINT=http://localhost:3001/api/v1
+DEMO_AGENT_SECRET_KEY=               # base58 64 bytes; generated if blank
+DEMO_SEED_USDC=1.00
+```
+
+## Built vs. not built
+
+### Built (this session)
+
+- Ed25519 agent identity (Solana-compatible)
+- Signed-request auth with timestamp window + nonce replay protection
+- Off-chain credits ledger (append-only deltas, balance view)
+- OpenRouter passthrough, cost reconciled from upstream `usage`
+- `@vdmnexus/sdk` — `Agent.generate()`, `Agent.fromBase58()`, `.inference()`
+- Demo script: `pnpm --filter nexus demo` seeds credits, runs three
+  prompts, prints the dropping balance
+
+### NOT built — explicit non-goals for this session
+
+- **On-chain deposit detection.** v1 seeds balances directly in Supabase
+  via the demo script. Real flow: agent sends USDC to a Nexus deposit
+  address → we observe the tx (Helius webhook / poll) → `credits_ledger`
+  insert with `tx_signature`. **Next session.**
+- **Mainnet.** Devnet only. Switch behind `SOLANA_NETWORK=mainnet-beta`
+  once deposit detection is solid.
+- **Multi-provider routing.** OpenRouter is the only upstream. Real
+  routing intelligence comes after the agent rail is in customer hands.
+- **A web UI.** No `/admin`, no balance dashboard. The waitlist `/admin`
+  page is owed from the earlier session; agents UI is its own session.
+- **Hermes / agent frameworks.** An earlier session prompt proposed
+  Hermes as the execution runtime. Rejected — Hermes is an agent loop,
+  not an execution layer. Framework adapters (Hermes, LangGraph, Mastra,
+  OpenAI Assistants) belong in the SDK as opt-in bindings, not as a
+  platform mandate.
+- **Markup / pricing strategy.** OpenRouter cost is passed through 1:1.
+  The economic model (subscription, markup, token) is undecided.
+
+## Target on-chain payment flow
+
+```
+   Agent wallet (Solana)
+        │
+        │  signed USDC transfer to a Nexus deposit address
+        ▼
+   Solana mainnet (devnet for v1)
+        │
+        │  Helius webhook on confirmed tx, or poll
+        ▼
+   apps/nexus  (deposit watcher)
+        │
+        │  insert into credits_ledger with tx_signature
+        ▼
+   Supabase                           Agent now has spendable balance.
+        │
+   inference requests signed by the agent's keypair drop the balance
+   linearly; agents are expected to top themselves back up before
+   running dry. There is no human-managed credit card path on this rail.
+```
+
+The agent's wallet is theirs. Nexus never holds private keys. The deposit
+address is Nexus-owned; deposits credit the ledger keyed by the **sender's**
+public key.
 
 ## Dev commands
 
 ```bash
 pnpm install
-pnpm --filter web dev      # http://localhost:3000
-pnpm --filter web build
-pnpm --filter web lint
+pnpm --filter web build              # marketing site
+pnpm --filter @vdmnexus/sdk build    # SDK to dist/
+pnpm --filter nexus build            # agent rail
+pnpm --filter web dev                # http://localhost:3000
+pnpm --filter nexus dev              # http://localhost:3001
+pnpm --filter nexus demo             # run the demo agent
 ```
 
 ## Conventions
 
-- Use the copy in this document verbatim. Don't invent features.
-- All animations must respect `prefers-reduced-motion` (handled in `globals.css` and `FadeIn`).
-- Mobile baseline: 375px. Cards stack, nav stays usable, no horizontal scroll.
-- Do not modify `apps/api`, `apps/vdmvastgoed`, or `packages/ui` from this site's workflows.
+- TypeScript everywhere. Strict mode. ESM in the SDK; Next.js conventions
+  in the apps.
+- The SDK keeps a tiny dependency surface (currently two runtime deps).
+  Adding a third needs justification here.
+- Marketing copy describes what's real; flagged "Coming soon" otherwise.
+- All animations on the web app respect `prefers-reduced-motion`.
+- All tables RLS-enabled. Inserts run server-side via the service role,
+  never via the anon key.
+
+## Roadmap (rough order)
+
+1. **On-chain deposit detection.** Watch a Nexus-owned Solana account for
+   incoming USDC, credit the ledger keyed by the sender. Webhook via
+   Helius.
+2. **Auto-topup demo.** SDK helper that signs+sends USDC when balance
+   crosses a threshold. End-to-end "agent that tops itself up."
+3. **`/admin` views.** Waitlist admin (owed from earlier session) + an
+   agents admin for balances and recent inferences.
+4. **Real multi-provider routing.** Replace OpenRouter passthrough with
+   per-request decisions on live price + latency + quality.
+5. **Framework adapters in the SDK.** LangGraph / Mastra / OpenAI
+   Assistants bindings.
+
+## What older commits looked like
+
+Commits `33cd01f..185f30d` contained an Express prototype API, a
+Sophie/RushFiles chat product under `apps/vdmvastgoed`, a shared
+`packages/ui`, and a Docker Compose stack with Postgres/Redis/Caddy. All
+removed in the cleanup commit. Anything from that era is still recoverable
+via `git checkout 185f30d -- <path>`.
