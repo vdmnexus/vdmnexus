@@ -27,6 +27,14 @@ export function Footer() {
           >
             @vdmnexus
           </a>
+          <a
+            href="https://t.me/+UxrwXIu7XOZlY2Rk"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="transition-colors hover:text-text"
+          >
+            Telegram
+          </a>
           <Link href="/#waitlist" className="transition-colors hover:text-text">
             Waitlist
           </Link>
