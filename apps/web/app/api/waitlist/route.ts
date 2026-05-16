@@ -213,21 +213,54 @@ async function notifySlack(row: {
 function confirmationHtml(): string {
   return `<!doctype html>
 <html>
-  <body style="background:#080810;color:#f1f5f9;font-family:Inter,system-ui,-apple-system,sans-serif;padding:32px 0;margin:0;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;">
-      <tr><td style="padding:32px 24px;border:1px solid #1e1e2e;border-radius:12px;background:#0e0e18;">
-        <p style="margin:0 0 16px;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#94a3b8;">VDM Nexus</p>
-        <h1 style="margin:0 0 16px;font-size:22px;font-weight:600;color:#f1f5f9;line-height:1.3;">You're on the list.</h1>
-        <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#cbd5e1;">
-          Thanks for signing up. We're building the infrastructure layer for autonomous AI &mdash;
-          smart compute routing today, on-chain agent infrastructure next.
-        </p>
-        <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#cbd5e1;">
-          We'll be in touch as we onboard the first cohort. If you want to skip the queue,
-          reply to this email and tell us what you're building.
-        </p>
-        <p style="margin:24px 0 0;font-size:12px;color:#64748b;">vdmnexus.com</p>
-      </td></tr>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>You're on the VDM Nexus waitlist</title>
+  </head>
+  <body style="margin:0;padding:0;background:#f4f4f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#0e0e18;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f4f7;padding:48px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:#ffffff;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden;">
+            <tr>
+              <td style="padding:36px 36px 8px 36px;text-align:left;">
+                <img src="https://vdmnexus.com/logo.png" alt="VDM Nexus" width="140" style="display:block;height:auto;max-width:140px;border:0;outline:none;text-decoration:none;" />
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 36px 0 36px;">
+                <h1 style="margin:0 0 12px 0;font-size:24px;font-weight:700;color:#0e0e18;line-height:1.25;letter-spacing:-0.01em;">
+                  You're on the list.
+                </h1>
+                <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#374151;">
+                  Thanks for signing up. We're building the infrastructure layer for autonomous AI &mdash; smart compute routing today, on-chain agent infrastructure next.
+                </p>
+                <p style="margin:0 0 28px 0;font-size:15px;line-height:1.6;color:#374151;">
+                  We'll be in touch as we onboard the first cohort. If you want to skip the queue, just reply to this email and tell us what you're building.
+                </p>
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 8px 0;">
+                  <tr>
+                    <td style="background:#6366f1;border-radius:8px;">
+                      <a href="https://vdmnexus.com/roadmap" style="display:inline-block;padding:12px 22px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;letter-spacing:-0.005em;">
+                        See the live roadmap &rarr;
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:32px 36px 28px 36px;">
+                <hr style="border:none;border-top:1px solid #e5e7eb;margin:0 0 16px 0;" />
+                <p style="margin:0;font-size:12px;color:#9ca3af;line-height:1.5;">
+                  VDM Nexus &middot; <a href="https://vdmnexus.com" style="color:#6366f1;text-decoration:none;">vdmnexus.com</a> &middot; <a href="https://x.com/vdmnexus" style="color:#6366f1;text-decoration:none;">@vdmnexus</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
     </table>
   </body>
 </html>`;
