@@ -103,22 +103,30 @@ Next.js 15 App Router, API-only, port 3001 in dev.
 
 **Auth scheme.** Every request to `/v1/inference` carries:
 
-- `X-Nexus-Pubkey: <base58 Ed25519 public key>` (32 bytes)
+- `X-Agent-Pubkey: <base58 Ed25519 public key>` (32 bytes)
 - `X-Nexus-Signature: <base58 Ed25519 signature>` (64 bytes, over the raw
-  body bytes)
+  body bytes — i.e. the exact string the client `JSON.stringify`d)
 
-The body is JSON: `{ prompt, model, timestamp, nonce }`. The server:
+The body is JSON:
+`{ prompt, task_type, nonce, timestamp, max_cost_usdc? }`. `task_type` is one
+of `fast | reasoning | general`; `timestamp` is unix ms. The server:
 
 1. Verifies the signature with `tweetnacl` against the raw body bytes.
-2. Rejects when `timestamp` is more than `NEXUS_REQUEST_MAX_AGE_SECONDS`
-   away from now (default 60s — replay protection).
-3. Rejects reused `(agent_pubkey, nonce)` via a unique index on the credits
-   ledger.
-4. Auto-registers the agent in `public.agents` if first seen.
-5. Checks `balance_usdc > 0` via the `agent_balances` view.
+2. Rejects when `|now - timestamp|` exceeds 30 seconds (replay protection).
+3. Auto-registers the agent in `public.agents` if first seen, then inserts
+   `(agent_pubkey, nonce)` into `public.nonces` — duplicate insert (23505)
+   returns `409 nonce_replay`.
+4. Checks `balance_usdc >= 0.001` via the `agent_balances` view (402 if not).
+5. Routes the request: `fast` or `max_cost_usdc < 0.001` → Groq Llama 3 70B;
+   `reasoning` → Anthropic Claude Haiku; otherwise → OpenAI GPT-4o-mini.
+   Routing returns both the user-facing labels for the receipt and the
+   actual OpenRouter model slug used upstream.
 6. Calls OpenRouter with `usage.include = true`, debits the returned
-   `usage.cost`, writes an `inference_logs` row.
-7. Returns the completion plus the new remaining balance.
+   `usage.cost`, writes an `inference_logs` row, captures its id.
+7. Returns `{ ok, result, receipt }` where `receipt` carries:
+   `{ agent_pubkey, provider, model, cost_usdc, balance_remaining,
+   prompt_hash, response_hash, timestamp, inference_id }`. Hashes are
+   sha256 of the prompt and response text.
 
 **Pricing source of truth.** OpenRouter's returned `usage.cost` (USD). We
 pass it through 1:1 to the ledger — no markup at the protocol layer yet.
@@ -169,10 +177,15 @@ One project: `vdmnexus-web` (ref `wuxorxtniyfwjaqurwoe`, EU-West-3).
 - `agents (pubkey PK, label, status, created_at)`
 - `credits_ledger` — append-only deltas, `delta_usdc` is positive for credits
   (topups) and negative for debits (inference). Unique index on
-  `(agent_pubkey, request_nonce)` for replay protection.
+  `(tx_signature) where tx_signature is not null` keeps deposit detection
+  idempotent.
 - `agent_balances` view — `sum(delta_usdc)` per agent
+- `nonces (id, agent_pubkey FK, nonce, created_at)` — replay protection,
+  unique on `(agent_pubkey, nonce)`. The inference route inserts before
+  doing any work and treats a duplicate as `409 nonce_replay`.
 - `inference_logs` — every call, including failures, with token counts and
-  latency
+  latency. The successful row's id is returned in the receipt as
+  `inference_id`.
 
 All tables have RLS enabled. The agent rail tables have **no policies** —
 only the service role touches them, server-side from `apps/nexus`.

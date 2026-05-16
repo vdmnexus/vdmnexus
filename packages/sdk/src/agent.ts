@@ -1,27 +1,35 @@
 import bs58 from "bs58";
 import nacl from "tweetnacl";
 
+export type TaskType = "fast" | "reasoning" | "general";
+
+export type Receipt = {
+  agent_pubkey: string;
+  provider: string;
+  model: string;
+  cost_usdc: number;
+  balance_remaining: number;
+  prompt_hash: string;
+  response_hash: string;
+  timestamp: number;
+  inference_id: string | null;
+};
+
 export type InferenceResponse = {
   ok: boolean;
-  text?: string;
-  model?: string;
-  usage?: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    cost_usdc: number;
-    latency_ms: number;
-  };
-  balance_usdc?: number;
+  result?: string;
+  receipt?: Receipt;
   error?: string;
   detail?: string;
 };
 
 export type InferenceOptions = {
   prompt: string;
-  model?: string;
+  task_type?: TaskType;
+  max_cost_usdc?: number;
 };
 
-const DEFAULT_MODEL = "openai/gpt-4o-mini";
+const DEFAULT_TASK_TYPE: TaskType = "general";
 
 export class Agent {
   readonly publicKey: Uint8Array;
@@ -58,27 +66,26 @@ export class Agent {
     return bs58.encode(sig);
   }
 
-  buildRequestBody(opts: InferenceOptions): string {
-    return JSON.stringify({
-      prompt: opts.prompt,
-      model: opts.model ?? DEFAULT_MODEL,
-      timestamp: new Date().toISOString(),
-      nonce: cryptoRandomUUID(),
-    });
-  }
-
   async inference(
     endpoint: string,
     opts: InferenceOptions
   ): Promise<InferenceResponse> {
-    const body = this.buildRequestBody(opts);
+    const body = JSON.stringify({
+      prompt: opts.prompt,
+      task_type: opts.task_type ?? DEFAULT_TASK_TYPE,
+      nonce: cryptoRandomUUID(),
+      timestamp: Date.now(),
+      ...(opts.max_cost_usdc !== undefined
+        ? { max_cost_usdc: opts.max_cost_usdc }
+        : {}),
+    });
     const signature = this.signBody(body);
 
     const res = await fetch(`${endpoint.replace(/\/$/, "")}/inference`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Nexus-Pubkey": this.pubkey,
+        "X-Agent-Pubkey": this.pubkey,
         "X-Nexus-Signature": signature,
       },
       body,

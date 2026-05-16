@@ -1,11 +1,12 @@
 export type InferenceParams = {
-  model: string;
+  /** OpenRouter model slug (e.g. "openai/gpt-4o-mini"). */
+  upstreamModel: string;
   prompt: string;
 };
 
 export type InferenceResult = {
   text: string;
-  model: string;
+  modelReturned: string;
   upstream: "openrouter";
   prompt_tokens: number;
   completion_tokens: number;
@@ -44,7 +45,7 @@ export async function runInference(
       "X-Title": "VDM Nexus",
     },
     body: JSON.stringify({
-      model: params.model,
+      model: params.upstreamModel,
       messages: [{ role: "user", content: params.prompt }],
       usage: { include: true },
     }),
@@ -63,7 +64,7 @@ export async function runInference(
 
   return {
     text: choice.message.content,
-    model: data.model,
+    modelReturned: data.model,
     upstream: "openrouter",
     prompt_tokens: data.usage.prompt_tokens,
     completion_tokens: data.usage.completion_tokens,
