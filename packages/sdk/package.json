@@ -1,0 +1,36 @@
+{
+  "name": "@vdmnexus/sdk",
+  "version": "0.0.1",
+  "description": "Open-source SDK for VDM Nexus — autonomous agents that pay for compute on-chain.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/2504VDM/vdmnexus.git",
+    "directory": "packages/sdk"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "LICENSE", "README.md"],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "bs58": "^6.0.0",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "typescript": "^5"
+  }
+}
