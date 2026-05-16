@@ -32,10 +32,15 @@ const config: Config = {
           "0%, 100%": { opacity: "0.35" },
           "50%": { opacity: "0.55" },
         },
+        "soft-pulse": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.3" },
+        },
       },
       animation: {
         "fade-up": "fade-up 600ms ease-out both",
         "grid-pulse": "grid-pulse 8s ease-in-out infinite",
+        "soft-pulse": "soft-pulse 1.6s ease-in-out infinite",
       },
     },
   },

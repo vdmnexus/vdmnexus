@@ -50,7 +50,11 @@ Next.js 15 App Router, React 19, Tailwind 3, Framer Motion, Supabase, Inter
 via `next/font/google`. Mobile baseline 375px, all animations respect
 `prefers-reduced-motion`.
 
-**Routes:** `/`, `/compute`, `/agents`, `/api/waitlist`.
+**Public routes:** `/`, `/compute`, `/agents`, `/roadmap`.
+**Admin routes:** `/admin/login`, `/admin/roadmap` (password-gated).
+**API routes:** `/api/waitlist`, `/api/roadmap`, `/api/buildlog`,
+`/api/roadmap/items[/:id[/move]]`, `/api/buildlog/:id`,
+`/api/admin/{login,logout}`.
 
 **Waitlist flow.** Form posts to `/api/waitlist` (Next.js route, Node
 runtime). The route uses the Supabase service role to insert into
@@ -58,6 +62,20 @@ runtime). The route uses the Supabase service role to insert into
 silently accepts honeypot submissions, captures UTM + referrer + hashed IP +
 user-agent. Resend (confirmation) and Slack (internal notification) fire
 fire-and-forget when their env vars are present.
+
+**Roadmap page** (`/roadmap`) — built-in-public view of phases + a live build
+log. Server-rendered phase cards on the left (60% width), client-side build
+log on the right (40%, sticky on desktop) that polls `/api/buildlog` every
+60s. `active` phase gets an indigo border + glow; `upcoming` phases render
+at 60% opacity. Items show three states: `done` (filled indigo check),
+`in_progress` (pulsing indigo dot via `animate-soft-pulse`), `planned`
+(empty gray circle).
+
+**Admin** (`/admin/roadmap`) — single-user editor protected by a cookie set
+via `ADMIN_PASSWORD`. Cycles item status, adds/deletes items, reorders via
+up/down (atomic swap of `order_index`), creates/deletes build log entries
+(280-char cap). All write endpoints accept either the cookie or an
+`X-Admin-Secret` header for tooling.
 
 **Design tokens:**
 
@@ -127,6 +145,10 @@ One project: `vdmnexus-web` (ref `wuxorxtniyfwjaqurwoe`, EU-West-3).
 
 - `waitlist` — emails + UTM/referrer + hashed IP + user agent
 - `waitlist_rate_limit` — per-IP-hash count + sliding window
+- `roadmap_phases` — public phases (`active|upcoming|completed`)
+- `roadmap_items` — items per phase (`done|in_progress|planned`); public read
+  via RLS policy, writes via service role only
+- `build_log` — append-only commit-log-style entries shown on `/roadmap`
 
 **Agent rail tables:**
 
@@ -150,6 +172,7 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 IP_HASH_SALT=
+ADMIN_PASSWORD=          # protects /admin/* and admin write endpoints
 RESEND_API_KEY=          # optional
 RESEND_FROM=             # optional, e.g. hello@vdmnexus.com
 SLACK_WEBHOOK_URL=       # optional
