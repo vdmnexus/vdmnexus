@@ -19,7 +19,7 @@ export function Nav() {
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/logo.png"
+            src="/logo.svg"
             alt="VDM Nexus"
             className="h-10 w-auto md:h-12"
           />
