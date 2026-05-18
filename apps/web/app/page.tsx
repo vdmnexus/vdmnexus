@@ -149,7 +149,7 @@ function HeroCode() {
           <span className="text-violet-300">import</span>{" "}
           <span className="text-text">{`{ Agent }`}</span>{" "}
           <span className="text-violet-300">from</span>{" "}
-          <span className="text-emerald-300">{`"@vdmnexus/sdk"`}</span>;
+          <span className="text-emerald-300">{`"@vdm-nexus/sdk"`}</span>;
           {"\n\n"}
           <span className="text-violet-300">const</span>{" "}
           <span className="text-sky-300">agent</span>{" "}
@@ -181,7 +181,7 @@ function HeroCode() {
 
       <div className="flex items-center justify-between border-t border-soft bg-surface/40 px-4 py-2.5 text-[11px]">
         <code className="font-mono text-text-muted">
-          npm install @vdmnexus/sdk
+          npm install @vdm-nexus/sdk
         </code>
         <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-emerald-300">
           devnet
