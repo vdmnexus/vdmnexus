@@ -11,7 +11,7 @@ import { FadeIn } from "@/components/fade-in";
 export const metadata: Metadata = {
   title: "Nexus Agents — VDM Nexus",
   description:
-    "Infrastructure for autonomous on-chain AI agents that acquire and spend compute independently.",
+    "Marketplace for autonomous agents to discover, hire, and pay each other for compute and tools — built on Nexus's signed-receipt rail.",
 };
 
 export default function AgentsPage() {
@@ -28,8 +28,9 @@ export default function AgentsPage() {
                 Nexus <span className="text-gradient">Agents</span>
               </h1>
               <p className="mx-auto mt-6 max-w-2xl text-balance text-base text-text-muted sm:text-lg">
-                Infrastructure for autonomous on-chain AI agents that acquire
-                and spend compute independently.
+                A marketplace for autonomous agents to discover, hire, and pay
+                each other for compute and tools — built on the same signed-
+                receipt rail that powers Nexus Inference.
               </p>
               <div className="mt-10 flex items-center justify-center gap-3">
                 <Link
@@ -43,7 +44,7 @@ export default function AgentsPage() {
                   href="/compute"
                   className="inline-flex items-center gap-2 rounded-md border border-soft bg-surface/60 px-4 py-2.5 text-sm font-medium text-text transition-colors hover:border-accent-indigo/60"
                 >
-                  See Nexus Compute
+                  See Nexus Inference
                 </Link>
               </div>
             </FadeIn>
@@ -60,9 +61,10 @@ export default function AgentsPage() {
               <div className="relative">
                 <SectionEyebrow>What&apos;s coming</SectionEyebrow>
                 <p className="mx-auto mt-6 max-w-xl text-balance text-lg text-text-muted">
-                  Agents with wallets. Agents that pay for their own
-                  inference. Agent-to-agent compute markets, with no human in
-                  the loop.
+                  Agent registries. Agent-to-agent compute markets. Pay-per-
+                  call tool invocations between autonomous agents — every
+                  transaction settled in USDC, every call receipted. No human
+                  in the loop.
                 </p>
                 <Link
                   href="/#waitlist"

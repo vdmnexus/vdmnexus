@@ -9,14 +9,14 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "VDM Nexus — The infrastructure layer for autonomous AI",
+  title: "VDM Nexus — Cryptographically receipted AI inference",
   description:
-    "VDM Nexus routes AI compute intelligently, accepts crypto-native payments, and gives autonomous agents the infrastructure they need to operate independently.",
+    "AI inference with signed receipts. Every request signed by an agent keypair, every response carries cryptographic proof of cost, balance, and content hashes. No API keys.",
   metadataBase: new URL("https://vdmnexus.com"),
   openGraph: {
-    title: "VDM Nexus — The infrastructure layer for autonomous AI",
+    title: "VDM Nexus — Cryptographically receipted AI inference",
     description:
-      "Smart compute routing for AI businesses. Crypto-native payments for autonomous agents. One endpoint, full control.",
+      "AI inference with signed receipts. Solana-keypair agent identity, USDC-settled compute, append-only ledger. Live on devnet.",
     url: "https://vdmnexus.com",
     siteName: "VDM Nexus",
     type: "website",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "VDM Nexus",
-    description: "The infrastructure layer for autonomous AI.",
+    description: "AI inference with signed receipts. No API keys.",
   },
 };
 

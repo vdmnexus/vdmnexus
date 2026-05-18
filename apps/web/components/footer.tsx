@@ -11,7 +11,7 @@ export function Footer() {
 
         <nav className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-text-muted">
           <Link href="/compute" className="transition-colors hover:text-text">
-            Nexus Compute
+            Nexus Inference
           </Link>
           <Link href="/agents" className="transition-colors hover:text-text">
             Nexus Agents

@@ -13,51 +13,51 @@ import { WaitlistForm } from "@/components/waitlist-form";
 import { FadeIn } from "@/components/fade-in";
 import { WaitlistProvider } from "@/components/waitlist-context";
 
-const GITHUB_URL = "https://github.com/2504VDM/vdmnexus";
+const GITHUB_URL = "https://github.com/vdmnexus/vdmnexus";
 
 const PROBLEMS = [
   {
-    title: "Fragmented providers",
+    title: "API keys are bearer auth",
     body:
-      "Dozens of GPU and inference providers, each with different pricing, APIs, and reliability. No single source of truth.",
+      "Anyone who copies your OpenAI key can spend your account. No identity, no per-agent attribution, no revocation that doesn't break everything else.",
   },
   {
-    title: "Agents can't pay for infra",
+    title: "You can't prove what was logged",
     body:
-      "Autonomous on-chain agents have wallets but can't access compute. The bridge between crypto and inference doesn't exist yet.",
+      "Major providers log prompts and responses in plaintext. You're trusting their retention policy and their database — no cryptographic proof either way.",
   },
   {
-    title: "Unpredictable costs",
+    title: "Audit trails don't exist",
     body:
-      "AI businesses overpay because they can't see, route, or control compute spend in real-time.",
+      "Regulated buyers need to show what their AI did and what it cost. Without signed receipts, every call is an unverifiable line in someone else's log.",
   },
 ];
 
 const STEPS = [
   {
-    title: "Connect",
-    body: "Point your workload or agent at a single Nexus API endpoint.",
+    title: "Sign",
+    body: "Your agent signs every request with its Ed25519 secret key. The public key is the identity — no API key to leak or rotate.",
   },
   {
-    title: "Route",
-    body: "We normalize pricing across providers and route to the best option in real-time.",
+    title: "Verify",
+    body: "Nexus verifies the signature, checks the nonce and timestamp, debits the agent's USDC balance, and routes to the inference provider.",
   },
   {
-    title: "Control",
-    body: "Track spend, set budgets, and let agents operate autonomously within defined limits.",
+    title: "Receipt",
+    body: "The response carries a signed receipt: prompt hash, response hash, cost, balance remaining, timestamp. Cryptographic proof of what happened.",
   },
 ];
 
 const FOR_BUSINESSES = [
-  "Route smarter",
-  "Reduce compute costs",
-  "Full spend visibility",
+  "Signed receipts on every inference call",
+  "No API keys to leak, rotate, or revoke",
+  "Append-only ledger of every USDC debit",
 ];
 
 const FOR_BUILDERS = [
-  "Crypto-native compute payments",
-  "Agent-to-agent compute markets",
-  "No human in the loop",
+  "Solana-keypair agent identity",
+  "USDC-settled compute, no human in the loop",
+  "Open source SDK, MIT licensed",
 ];
 
 export default function Home() {
@@ -197,7 +197,7 @@ function Problem() {
       <FadeIn className="max-w-2xl">
         <SectionEyebrow>The problem</SectionEyebrow>
         <SectionHeading className="mt-4">
-          Compute shouldn&apos;t be this hard
+          AI inference shouldn&apos;t be a black box
         </SectionHeading>
       </FadeIn>
       <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -237,12 +237,12 @@ function Products() {
                 <ArrowRight className="h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-text" />
               </div>
               <h3 className="mt-4 text-xl font-semibold text-text">
-                Nexus Compute
+                Nexus Inference
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-text-muted">
-                Smart compute routing for AI businesses. Routes workloads to
-                the cheapest or best provider in real-time. Accepts crypto
-                payments for on-chain agents.
+                Cryptographically receipted AI inference. Solana-keypair agent
+                identity, USDC-settled compute, append-only ledger. Live on
+                devnet. Mainnet next.
               </p>
             </Card>
           </Link>
@@ -259,8 +259,9 @@ function Products() {
                 Nexus Agents
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-text-muted">
-                Infrastructure for autonomous on-chain AI agents that acquire
-                and spend compute independently.
+                Marketplace for autonomous agents to discover, hire, and pay
+                each other for compute and tools — built on the same signed-
+                receipt rail.
               </p>
             </Card>
           </Link>
@@ -276,7 +277,7 @@ function HowItWorks() {
       <FadeIn className="max-w-2xl">
         <SectionEyebrow>How it works</SectionEyebrow>
         <SectionHeading className="mt-4">
-          One endpoint. Full control.
+          Cryptographic proof in three steps.
         </SectionHeading>
       </FadeIn>
 
@@ -311,7 +312,7 @@ function Audiences() {
               For AI businesses
             </span>
             <h3 className="mt-4 text-xl font-semibold text-text">
-              Cut your inference bill. Take back control.
+              Inference you can prove to your auditor.
             </h3>
             <ul className="mt-6 space-y-3 text-sm text-text-muted">
               {FOR_BUSINESSES.map((item) => (

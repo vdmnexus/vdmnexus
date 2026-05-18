@@ -234,7 +234,7 @@ function confirmationHtml(): string {
                   You're on the list.
                 </h1>
                 <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#374151;">
-                  Thanks for signing up. We're building the infrastructure layer for autonomous AI &mdash; smart compute routing today, on-chain agent infrastructure next.
+                  Thanks for signing up. We're building cryptographically receipted AI inference &mdash; agents authenticate with a Solana keypair, every request is signed, every response carries a verifiable receipt. No API keys.
                 </p>
                 <p style="margin:0 0 28px 0;font-size:15px;line-height:1.6;color:#374151;">
                   We'll be in touch as we onboard the first cohort. If you want to skip the queue, just reply to this email and tell us what you're building.

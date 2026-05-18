@@ -13,41 +13,41 @@ import { Card } from "@/components/card";
 import { FadeIn } from "@/components/fade-in";
 
 export const metadata: Metadata = {
-  title: "Nexus Compute — VDM Nexus",
+  title: "Nexus Inference — VDM Nexus",
   description:
-    "Smart compute routing for AI businesses. Routes workloads to the cheapest or best provider in real-time. Accepts crypto payments for on-chain agents.",
+    "Cryptographically receipted AI inference. Solana-keypair agent identity, USDC-settled compute, append-only ledger. Live on devnet.",
 };
 
 const FEATURES = [
   {
-    title: "Smart compute routing",
+    title: "Signed receipts",
     body:
-      "One API endpoint. We route every request to the best provider for your workload, in real-time.",
+      "Every response carries prompt_hash, response_hash, cost, balance, and timestamp — signed by the endpoint. Cryptographic proof of what happened.",
   },
   {
-    title: "Crypto-native payments",
+    title: "Keypair identity",
     body:
-      "Pay in crypto. Designed for on-chain agents that hold wallets and need to settle compute on their own.",
+      "No API keys. Each agent is an Ed25519 keypair; the public key is the identity. Every request signed over the raw body, verified server-side.",
   },
   {
-    title: "Real-time provider routing",
+    title: "Append-only ledger",
     body:
-      "We normalize pricing and reliability across providers so every workload lands on the right one without manual switching.",
+      "Every USDC debit lands in an append-only credits_ledger row. Auditable per-agent spend history, replayable from genesis.",
   },
 ];
 
 const STEPS = [
   {
-    title: "Connect",
-    body: "Point your workload or agent at a single Nexus API endpoint.",
+    title: "Sign",
+    body: "Your agent signs every request with its Ed25519 secret key. Public key = identity, no API key to leak.",
   },
   {
-    title: "Route",
-    body: "We normalize pricing across providers and route to the best option in real-time.",
+    title: "Verify",
+    body: "Nexus verifies the signature, checks the nonce and timestamp, debits USDC, routes to the inference provider.",
   },
   {
-    title: "Control",
-    body: "Track spend, set budgets, and let agents operate autonomously within defined limits.",
+    title: "Receipt",
+    body: "The response carries a signed receipt of cost, balance, and content hashes. Provable, replayable, auditable.",
   },
 ];
 
@@ -60,15 +60,15 @@ export default function ComputePage() {
           <GridBg />
           <div className="mx-auto w-full max-w-6xl px-6 pb-20 pt-24 sm:pb-28 sm:pt-32">
             <FadeIn className="mx-auto max-w-3xl text-center">
-              <SectionEyebrow>Nexus Compute</SectionEyebrow>
+              <SectionEyebrow>Nexus Inference</SectionEyebrow>
               <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-text sm:text-5xl md:text-6xl">
-                Smart compute routing for{" "}
-                <span className="text-gradient">AI businesses</span>
+                AI inference with{" "}
+                <span className="text-gradient">cryptographic receipts</span>
               </h1>
               <p className="mx-auto mt-6 max-w-2xl text-balance text-base text-text-muted sm:text-lg">
-                One API endpoint. We route workloads to the cheapest or best
-                provider in real-time, and accept crypto payments for on-chain
-                agents.
+                Solana-keypair agent identity, signed requests, signed
+                receipts, USDC-settled compute on an append-only ledger.
+                Live on devnet.
               </p>
               <div className="mt-10 flex items-center justify-center gap-3">
                 <Link
@@ -93,7 +93,7 @@ export default function ComputePage() {
           <FadeIn className="max-w-2xl">
             <SectionEyebrow>What you get</SectionEyebrow>
             <SectionHeading className="mt-4">
-              The compute layer your stack is missing.
+              Provable inference. No black box.
             </SectionHeading>
           </FadeIn>
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -116,7 +116,7 @@ export default function ComputePage() {
           <FadeIn className="max-w-2xl">
             <SectionEyebrow>How it works</SectionEyebrow>
             <SectionHeading className="mt-4">
-              One endpoint. Full control.
+              Three steps. One receipt.
             </SectionHeading>
           </FadeIn>
           <div className="mt-12 grid gap-4 sm:grid-cols-3">
@@ -149,7 +149,7 @@ export default function ComputePage() {
                 <div className="max-w-xl">
                   <SectionEyebrow>Get started</SectionEyebrow>
                   <p className="mt-4 text-balance text-2xl font-semibold tracking-tight text-text sm:text-3xl">
-                    Compute is the currency of autonomous AI.
+                    Inference your auditor can verify.
                   </p>
                 </div>
                 <Link
