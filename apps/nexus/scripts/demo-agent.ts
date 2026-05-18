@@ -16,7 +16,7 @@ import { resolve } from "node:path";
 config({ path: resolve(process.cwd(), ".env") });
 config({ path: resolve(process.cwd(), ".env.local") });
 
-import { Agent, type TaskType } from "@vdmnexus/sdk";
+import { Agent, type TaskType } from "../../../packages/sdk/dist/index.js";
 import { createClient } from "@supabase/supabase-js";
 
 const ENDPOINT = process.env.NEXUS_ENDPOINT ?? "http://localhost:3001/api/v1";

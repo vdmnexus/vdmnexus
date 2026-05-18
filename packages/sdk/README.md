@@ -1,15 +1,15 @@
-# @vdmnexus/sdk
+# @vdm-nexus/sdk
 
 > Open-source SDK for [VDM Nexus](https://vdmnexus.com) — autonomous agents
 > that authenticate and pay for compute with a Solana keypair. No API keys.
 
-[![npm](https://img.shields.io/npm/v/@vdmnexus/sdk.svg)](https://www.npmjs.com/package/@vdmnexus/sdk)
-[![license](https://img.shields.io/npm/l/@vdmnexus/sdk.svg)](./LICENSE)
+[![npm](https://img.shields.io/npm/v/@vdm-nexus/sdk.svg)](https://www.npmjs.com/package/@vdm-nexus/sdk)
+[![license](https://img.shields.io/npm/l/@vdm-nexus/sdk.svg)](./LICENSE)
 
 ## Install
 
 ```bash
-npm install @vdmnexus/sdk
+npm install @vdm-nexus/sdk
 ```
 
 Two tiny dependencies: `tweetnacl` and `bs58`. No `@solana/web3.js` until
@@ -18,7 +18,7 @@ you need wallet operations.
 ## Use
 
 ```ts
-import { Agent } from "@vdmnexus/sdk";
+import { Agent } from "@vdm-nexus/sdk";
 
 // Generate a fresh agent — or load from a secret key string.
 const agent = Agent.generate();
@@ -108,7 +108,7 @@ been stress-tested.
 
 ## Repo
 
-Source lives in the [monorepo](https://github.com/2504VDM/vdmnexus) under
+Source lives in the [monorepo](https://github.com/vdmnexus/vdmnexus) under
 `packages/sdk`.
 
 ## License

@@ -1,5 +1,5 @@
 {
-  "name": "@vdmnexus/sdk",
+  "name": "@vdm-nexus/sdk",
   "version": "0.1.0",
   "description": "Open-source SDK for VDM Nexus — autonomous AI agents that authenticate and pay for compute with a Solana keypair. No API keys.",
   "license": "MIT",
@@ -7,11 +7,11 @@
   "homepage": "https://vdmnexus.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/2504VDM/vdmnexus.git",
+    "url": "git+https://github.com/vdmnexus/vdmnexus.git",
     "directory": "packages/sdk"
   },
   "bugs": {
-    "url": "https://github.com/2504VDM/vdmnexus/issues"
+    "url": "https://github.com/vdmnexus/vdmnexus/issues"
   },
   "keywords": [
     "solana",
@@ -37,7 +37,11 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["dist", "LICENSE", "README.md"],
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
   "publishConfig": {
     "access": "public"
   },
