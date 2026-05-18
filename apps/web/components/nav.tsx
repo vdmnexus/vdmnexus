@@ -21,7 +21,7 @@ export function Nav() {
           <img
             src="/logo.png"
             alt="VDM Nexus"
-            className="h-8 w-auto md:h-9"
+            className="h-10 w-auto md:h-12"
           />
         </Link>
 

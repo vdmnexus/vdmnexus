@@ -6,7 +6,7 @@ export function Footer() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-10 sm:flex-row sm:items-center sm:justify-between">
         <Link href="/" aria-label="VDM Nexus" className="flex items-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="VDM Nexus" className="h-8 w-auto" />
+          <img src="/logo.png" alt="VDM Nexus" className="h-10 w-auto" />
         </Link>
 
         <nav className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-text-muted">
