@@ -11,7 +11,7 @@ export function Nav() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-soft bg-bg/70 backdrop-blur">
-      <nav className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
+      <nav className="mx-auto flex h-20 w-full max-w-6xl items-center justify-between px-6">
         <Link
           href="/"
           aria-label="VDM Nexus"
@@ -21,7 +21,7 @@ export function Nav() {
           <img
             src="/logo.svg"
             alt="VDM Nexus"
-            className="h-10 w-auto md:h-12"
+            className="h-14 w-auto md:h-16"
           />
         </Link>
 
