@@ -17,19 +17,19 @@ const GITHUB_URL = "https://github.com/vdmnexus/vdmnexus";
 
 const PROBLEMS = [
   {
-    title: "API keys are bearer auth",
+    title: "API keys don't model agents",
     body:
-      "Anyone who copies your OpenAI key can spend your account. No identity, no per-agent attribution, no revocation that doesn't break everything else.",
+      "Autonomous agents can't share a bearer key with humans. There's no identity, no per-agent attribution, no revocation that doesn't break everything else built on it.",
   },
   {
-    title: "You can't prove what was logged",
+    title: "On-chain actions need verifiable inputs",
     body:
-      "Major providers log prompts and responses in plaintext. You're trusting their retention policy and their database — no cryptographic proof either way.",
+      "An agent executing a trade, signing a contract, or calling another agent needs cryptographic proof of what the model returned — not a black-box JSON blob.",
   },
   {
-    title: "Audit trails don't exist",
+    title: "No standard for agent inference payment",
     body:
-      "Regulated buyers need to show what their AI did and what it cost. Without signed receipts, every call is an unverifiable line in someone else's log.",
+      "Providers assume human accounts and credit cards. Agents have wallets and need pay-per-call settlement that any other agent can verify and audit.",
   },
 ];
 
@@ -48,16 +48,16 @@ const STEPS = [
   },
 ];
 
-const FOR_BUSINESSES = [
-  "Signed receipts on every inference call",
-  "No API keys to leak, rotate, or revoke",
-  "Append-only ledger of every USDC debit",
-];
-
 const FOR_BUILDERS = [
   "Solana-keypair agent identity",
   "USDC-settled compute, no human in the loop",
   "Open source SDK, MIT licensed",
+];
+
+const FOR_PLATFORMS = [
+  "x402-native pay-per-call (coming soon)",
+  "Signed receipts for downstream verification",
+  "Plug-in identity layer for agent marketplaces",
 ];
 
 export default function Home() {
@@ -87,7 +87,7 @@ function Hero() {
           <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
             {/* Copy + CTAs */}
             <div className="text-center lg:text-left">
-              <SectionEyebrow>Infrastructure for autonomous AI</SectionEyebrow>
+              <SectionEyebrow>Verifiable inference for the agent economy</SectionEyebrow>
               <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-text sm:text-5xl md:text-6xl">
                 AI agents that{" "}
                 <span className="text-gradient">pay for their own compute</span>
@@ -197,7 +197,7 @@ function Problem() {
       <FadeIn className="max-w-2xl">
         <SectionEyebrow>The problem</SectionEyebrow>
         <SectionHeading className="mt-4">
-          AI inference shouldn&apos;t be a black box
+          Agents can&apos;t trust black-box inference
         </SectionHeading>
       </FadeIn>
       <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -309,13 +309,13 @@ function Audiences() {
         <FadeIn>
           <Card className="h-full">
             <span className="text-xs font-medium uppercase tracking-[0.16em] text-text-muted">
-              For AI businesses
+              For agent builders
             </span>
             <h3 className="mt-4 text-xl font-semibold text-text">
-              Inference you can prove to your auditor.
+              Spawn an agent, fund it, let it pay its own way.
             </h3>
             <ul className="mt-6 space-y-3 text-sm text-text-muted">
-              {FOR_BUSINESSES.map((item) => (
+              {FOR_BUILDERS.map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-accent-indigo" />
                   <span>{item}</span>
@@ -328,13 +328,13 @@ function Audiences() {
         <FadeIn delay={0.08}>
           <Card className="h-full">
             <span className="text-xs font-medium uppercase tracking-[0.16em] text-text-muted">
-              For agent builders
+              For agent platforms
             </span>
             <h3 className="mt-4 text-xl font-semibold text-text">
-              Compute as the currency of autonomous AI.
+              Drop-in identity + payment for any agent.
             </h3>
             <ul className="mt-6 space-y-3 text-sm text-text-muted">
-              {FOR_BUILDERS.map((item) => (
+              {FOR_PLATFORMS.map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-accent-blue" />
                   <span>{item}</span>
