@@ -6,6 +6,7 @@ import { debit, ensureAgent, getBalance } from "@/lib/credits";
 import { runInference } from "@/lib/inference";
 import { isTaskType, route, type TaskType } from "@/lib/routing";
 import { recordNonce } from "@/lib/nonces";
+import { signReceipt } from "@/lib/receipts";
 import { log, newRequestId } from "@/lib/log";
 import {
   enforcePubkey,
@@ -259,6 +260,19 @@ export async function POST(req: NextRequest) {
     balance_remaining: newBalance,
   });
 
+  const receipt = signReceipt({
+    v: 2 as const,
+    agent_pubkey: pubkey,
+    provider: decision.provider,
+    model: decision.model,
+    cost_usdc: result.cost_usdc,
+    balance_remaining: newBalance,
+    prompt_hash: sha256(prompt),
+    response_hash: sha256(result.text),
+    timestamp: Date.now(),
+    inference_id: logRow?.id ?? null,
+  });
+
   log.info({
     event: "response.sent",
     request_id,
@@ -271,17 +285,7 @@ export async function POST(req: NextRequest) {
     {
       ok: true,
       result: result.text,
-      receipt: {
-        agent_pubkey: pubkey,
-        provider: decision.provider,
-        model: decision.model,
-        cost_usdc: result.cost_usdc,
-        balance_remaining: newBalance,
-        prompt_hash: sha256(prompt),
-        response_hash: sha256(result.text),
-        timestamp: Date.now(),
-        inference_id: logRow?.id ?? null,
-      },
+      receipt,
     },
     {
       headers: {

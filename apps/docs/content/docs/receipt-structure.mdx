@@ -4,10 +4,11 @@ description: Field-by-field walkthrough of what's in a Nexus receipt.
 ---
 
 A signed-inference receipt is JSON, returned in the `X-Nexus-Receipt`
-response header as base64. Here's every field:
+response header as base64. Here's every field on a `v: 2` receipt:
 
 ```ts
 type NexusReceipt = {
+  v: 2;                            // receipt schema version
   agent_pubkey: string;            // base58 Ed25519 pubkey (= Solana pubkey)
   upstream: "openrouter";          // which inference provider was used
   model: string;                   // the slug we passed upstream
@@ -21,11 +22,20 @@ type NexusReceipt = {
     amount_usdc: number;           // what we charged (the flat fee today)
     tx_signature: string;          // Solana tx signature
     network: string;               // CAIP-2, e.g. solana:EtWTRABZ…
+    pay_to: string;                // recipient address of the USDC transfer
   };
+  nexus_signature: string;         // base58 Ed25519 signature by Nexus
 };
 ```
 
 ## Field details
+
+### `v`
+
+Receipt schema version. Always `2` on signed receipts. Verifiers should
+branch on this — a missing or different `v` means the operator
+signature check does not apply (and the receipt is treated as
+untrusted).
 
 ### `agent_pubkey`
 
@@ -85,9 +95,14 @@ Solana transaction signature (base58). Look it up on
 [Solscan devnet](https://solscan.io/?cluster=devnet) to see the
 on-chain settlement.
 
-This is **the strongest external verifier** of the receipt. The hashes
-above can be tampered with by anyone holding the receipt; the
-tx_signature is anchored to Solana and can't be forged.
+The combination of `tx_signature` + `pay_to` + `amount_usdc` is the
+verifier's anchor for *did the payment happen?*
+
+### `payment.pay_to`
+
+Recipient address of the USDC transfer. `verifyReceipt` walks the
+transaction's `pre/postTokenBalances` and confirms a USDC delta of at
+least `amount_usdc` to this owner.
 
 ### `payment.network`
 
@@ -97,12 +112,33 @@ CAIP-2 network identifier, e.g.
 form is what `@x402/svm` recognizes — short forms like `solana:devnet`
 are not spec-compliant.
 
-## What's missing from v0.1 (and tracked)
+### `nexus_signature`
 
-- **Nexus signature over the receipt JSON.** Today the receipt is a
-  structured object but not signed by a Nexus operator key. The
-  v0.2 release adds an `_signature` field signed by a published Ed25519
-  key.
+Base58-encoded Ed25519 signature by the Nexus operator key. The
+signature is computed over the **canonical JSON** of the receipt
+object with `nexus_signature` excluded:
+
+- Object keys sorted recursively
+- No whitespace
+- Primitives via standard `JSON.stringify`
+- Arrays preserve order
+
+Verifiers strip `nexus_signature`, canonicalize the rest, and call
+`nacl.sign.detached.verify` against the operator's public key
+(`GET /api/v1/operator-key`).
+
+## Shipped in v0.2
+
+- **Receipt signing.** Receipts now carry `nexus_signature`, allowing a
+  third party to verify they were issued by Nexus without trusting the
+  agent that delivered them.
+- **Bundled verifier.** `@vdm-nexus/x402` exports `verifyReceipt`; see
+  [Verify a receipt](/docs/verify-a-receipt).
+
+## Still tracked
+
 - **Streaming receipt continuation.** Multi-chunk streamed responses
   need a multi-segment receipt that ties the final hash to each chunk.
-  Not in v0.1.
+- **Key-rotation manifest.** Today the operator key endpoint returns a
+  single current pubkey; a multi-key manifest would let verifiers
+  accept receipts signed by recently-rotated keys.

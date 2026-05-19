@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { getServiceClient } from "@/lib/supabase";
 import { credit, debit, ensureAgent } from "@/lib/credits";
 import { runChatInference, type ChatMessage } from "@/lib/chat-inference";
+import { signReceipt } from "@/lib/receipts";
 import {
   getFacilitator,
   FacilitatorNotConfiguredError,
@@ -465,7 +466,8 @@ export async function POST(req: NextRequest) {
     .join("\n");
   const responseText = result.openaiResponse.choices[0]?.message.content ?? "";
 
-  const receipt = {
+  const receipt = signReceipt({
+    v: 2 as const,
     agent_pubkey: payerWallet,
     upstream: result.upstream,
     model: body.model,
@@ -479,8 +481,9 @@ export async function POST(req: NextRequest) {
       amount_usdc: amountUsdc,
       tx_signature: settled.transaction,
       network,
+      pay_to: recipient,
     },
-  };
+  });
 
   log.info({
     event: "response.sent",

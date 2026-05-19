@@ -17,7 +17,7 @@ behavior we model:
 |---|---|---|
 | **An agent** | Lie about what the model returned | The receipt is hash-bound to the prompt + response. Recompute → mismatch detectable. |
 | **A man-in-the-middle** | Modify the response in flight | TLS everywhere. Plus the `response_hash` binds the content. |
-| **Nexus itself** | Issue fraudulent receipts (claim a call happened that didn't) | **Partial gap today.** Solana `tx_signature` proves the on-chain payment happened; the receipt JSON isn't yet Ed25519-signed by us. Fix on the roadmap: signed receipts in v0.2 SDK. |
+| **Nexus itself** | Issue fraudulent receipts (claim a call happened that didn't) | The receipt JSON is Ed25519-signed by the Nexus operator key (`receipt.nexus_signature`, v=2). The on-chain `tx_signature` independently anchors the payment. `verifyReceipt` from `@vdm-nexus/x402` runs both checks. |
 
 ## What's secured today
 
@@ -26,14 +26,13 @@ behavior we model:
 - **Failure mode:** route fails-closed if no facilitator is configured; no silent acceptance
 - **Transit:** TLS everywhere
 - **Idempotency:** repeating a paid call returns `409 payment_replay`, not double-charge
-- **Receipt integrity (partial):** hashes bind content; on-chain tx proves payment
+- **Receipt integrity:** hashes bind content; on-chain tx proves payment; Ed25519
+  signature by the Nexus operator key proves Nexus issued the receipt. Fetch the public
+  key at [`GET /api/v1/operator-key`](https://nexus.vdmnexus.com/api/v1/operator-key)
+  and verify with `verifyReceipt` from `@vdm-nexus/x402`.
 
 ## What's NOT secured yet (and tracked)
 
-- **Receipt signatures by Nexus.** Today the receipt JSON isn't yet Ed25519-signed by us.
-  The verification chain is: hashes match + on-chain tx exists. If you don't trust the
-  entity that handed you the receipt, you can independently verify the on-chain payment
-  but the receipt object itself isn't tamper-proof. **Roadmap item, Horizon 1.**
 - **Per-agent rate limiting.** An attacker can hammer the 402 challenge endpoint without
   paying. Costs us bandwidth, not money (inference only fires after settled payment).
   Still a hardening priority. **Roadmap item, Horizon 1.**
@@ -93,14 +92,14 @@ Being honest about the limits:
 | Privacy of prompt content from Nexus | Already done — we don't store prompt text |
 | Privacy of prompt content from the model provider | Wait for TEE / ZKML upstream support, or self-host |
 | Unlinkability across calls | Rotate agent pubkeys per use case |
-| Cryptographic proof Nexus itself issued the receipt | Wait for v0.2 SDK + signed receipts (Horizon 1) |
+| Cryptographic proof Nexus itself issued the receipt | `verifyReceipt` from `@vdm-nexus/x402` v0.2 — shipped |
 
 ## The honest summary
 
-Nexus today is **strong on verifiability and integrity**, **decent on availability**
-(self-hosted facilitator removes a third-party dependency), **partial on operator
-authentication** (the receipt-signing gap), and explicitly **not a privacy product
-for content sent to the model**. If privacy of prompt content is the requirement,
+Nexus today is **strong on verifiability and integrity** (hash-bound content,
+operator-signed receipts, on-chain settlement), **decent on availability**
+(self-hosted facilitator removes a third-party dependency), and explicitly **not a
+privacy product for content sent to the model**. If privacy of prompt content is the requirement,
 signed inference alone is the wrong tool — we'd need to add a private-inference
 upstream first, which is a Horizon 3+ roadmap item.
 

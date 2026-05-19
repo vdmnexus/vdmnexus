@@ -5,6 +5,9 @@ export {
   X402UpstreamError,
 } from "./x402-agent.js";
 
+export { verifyReceipt } from "./verify.js";
+export type { VerifyReceiptParams, VerifyReceiptResult } from "./verify.js";
+
 export type {
   ChatMessage,
   NexusReceipt,

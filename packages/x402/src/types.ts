@@ -42,6 +42,8 @@ export type OpenAIChatCompletion = {
 };
 
 export type NexusReceipt = {
+  /** Receipt schema version. Present (=== 2) on signed receipts. */
+  v?: 2;
   agent_pubkey: string;
   upstream: string;
   model: string;
@@ -55,7 +57,12 @@ export type NexusReceipt = {
     amount_usdc: number;
     tx_signature: string;
     network: string;
+    /** Recipient address that received the USDC. Present on v=2 receipts. */
+    pay_to?: string;
   };
+  /** Base58-encoded Ed25519 signature over the canonical JSON of the
+   * receipt object with `nexus_signature` field excluded. v=2 only. */
+  nexus_signature?: string;
 };
 
 export type X402PaymentResponse = {

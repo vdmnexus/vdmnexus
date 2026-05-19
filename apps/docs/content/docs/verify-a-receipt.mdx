@@ -6,87 +6,102 @@ description: How a third party can confirm a Nexus signed-inference receipt is r
 A signed-inference receipt is only useful if downstream actors can
 *verify* it without trusting the agent that received it. Here's how.
 
-## What you can verify locally
+## The five checks
 
-Given a receipt + the prompt + the response that were claimed:
+A `v: 2` receipt can be independently verified along five axes:
 
-1. **The prompt is what the agent says it is.** Recompute
-   `sha256(role:content concatenated by newline)` over the messages and
-   compare to `receipt.prompt_hash`.
-2. **The response is what the agent says it is.** Recompute
-   `sha256(response_text)` and compare to `receipt.response_hash`.
-3. **The receipt format hasn't been tampered with.** Today the receipt
-   is a structured object, not yet Ed25519-signed by Nexus — that's
-   coming. For now, the verification chain is:
-   - Prompt + response hashes match the claimed values
-   - Payment `tx_signature` exists on Solana and pays the claimed amount
-     to the claimed recipient
+1. **Prompt hash matches.** `sha256(role:content joined by \n)` over
+   the messages equals `receipt.prompt_hash`.
+2. **Response hash matches.** `sha256(response_text)` equals
+   `receipt.response_hash`.
+3. **Nexus signature is valid.** `receipt.nexus_signature` is an
+   Ed25519 signature, by the Nexus operator key, over the canonical JSON
+   of the receipt (with `nexus_signature` stripped).
+4. **Payment exists on Solana.** `receipt.payment.tx_signature` is a
+   confirmed transaction with a USDC transfer of
+   `receipt.payment.amount_usdc` to `receipt.payment.pay_to`.
+5. **Payer matches.** The fee-payer / first signer of that transaction
+   equals `receipt.agent_pubkey`.
 
-## What you can verify on-chain
+If all five pass, the receipt is end-to-end verifiable: the operator
+signed it, the agent actually paid for it, and the prompt/response you
+hold are the ones the operator saw.
 
-The `receipt.payment.tx_signature` is the strongest signal — it's a
-Solana transaction that anyone can fetch:
-
-```ts
-import { Connection } from "@solana/web3.js";
-
-const conn = new Connection("https://api.devnet.solana.com");
-const tx = await conn.getTransaction(receipt.payment.tx_signature, {
-  maxSupportedTransactionVersion: 0,
-});
-
-// Verify:
-// - Status is Success
-// - One USDC transfer instruction is present
-// - The transfer source ATA is owned by receipt.agent_pubkey
-// - The transfer dest ATA is owned by the expected Nexus deposit address
-// - The amount matches receipt.payment.amount_usdc (× 1_000_000 atomic)
-```
-
-If all four checks pass, you know:
-
-- The agent claimed by the receipt actually paid the claimed amount of
-  USDC on-chain
-- The Solana settlement timestamp is roughly when the receipt says it is
-  (`receipt.timestamp` is server-set; the on-chain `blockTime` is
-  authoritative)
-
-## What's NOT yet verifiable
-
-Today there's no Ed25519 signature by Nexus over the receipt. That
-means if you don't trust the entity that handed you the receipt, you
-can't *prove* Nexus issued it (only that the payment happened).
-
-The fix is to sign the receipt JSON with a Nexus operator key and
-publish the public key alongside the SDK. **That ships in the
-post-v0.1 hardening pass** — tracked as a roadmap item.
-
-For agent-to-agent flows where both ends trust Nexus, the current
-hash-based receipt + on-chain payment is sufficient: the receiving
-agent independently fetches the tx, recomputes hashes, and acts.
-
-## Reference verifier
-
-A runnable verifier ships in the SDK starting in v0.2:
+## One call
 
 ```ts
-// (preview — not yet released)
-import { verifyReceipt } from "@vdm-nexus/x402/verify";
+import { verifyReceipt } from "@vdm-nexus/x402";
 
 const result = await verifyReceipt({
   receipt,
   prompt: originalMessages,
-  response: replyText,
-  rpc: "https://api.devnet.solana.com",
+  response: openaiResponse,
+  endpoint: "https://nexus.vdmnexus.com",
 });
 
 // result: {
-//   prompt_hash_ok: boolean,
-//   response_hash_ok: boolean,
-//   payment_on_chain: boolean,
-//   payer_matches: boolean,
-//   amount_matches: boolean,
+//   ok: boolean,
+//   checks: {
+//     prompt_hash_ok: boolean,
+//     response_hash_ok: boolean,
+//     nexus_signature_ok: boolean,
+//     payment_on_chain_ok: boolean,
+//     payer_matches: boolean,
+//   },
 // }
 ```
 
-Until v0.2 ships, the manual checks above are the path.
+Pass `endpoint` and `verifyReceipt` will fetch the current Nexus
+operator public key from `GET /api/v1/operator-key`. If you've pinned
+the key out-of-band, pass `operatorKey` (base58) directly and skip the
+fetch.
+
+The Solana RPC defaults to public devnet/mainnet based on
+`receipt.payment.network`; override with `rpc` if you have a private
+RPC.
+
+## The operator key
+
+```bash
+curl https://nexus.vdmnexus.com/api/v1/operator-key
+# { "pubkey": "...", "algorithm": "ed25519", "encoding": "base58" }
+```
+
+Pin this in your verifier if you want to detect key rotation explicitly
+rather than implicitly trusting whatever the endpoint currently serves.
+
+## Doing it by hand
+
+If you don't want to depend on `@vdm-nexus/x402`, the checks are simple
+enough to reproduce:
+
+```ts
+import { createHash } from "node:crypto";
+import nacl from "tweetnacl";
+import bs58 from "bs58";
+
+// 1 + 2: hashes
+const promptStr = messages.map((m) => `${m.role}:${m.content}`).join("\n");
+const promptOk =
+  createHash("sha256").update(promptStr).digest("hex") === receipt.prompt_hash;
+const respOk =
+  createHash("sha256").update(response.choices[0].message.content).digest("hex")
+  === receipt.response_hash;
+
+// 3: nexus signature (over canonical JSON with nexus_signature stripped)
+const { nexus_signature, ...rest } = receipt;
+const canonical = canonicalize(rest); // sorted-key JSON, no whitespace
+const sigOk = nacl.sign.detached.verify(
+  new TextEncoder().encode(canonical),
+  bs58.decode(nexus_signature),
+  bs58.decode(operatorPubkey),
+);
+
+// 4 + 5: on-chain — fetch the tx, walk pre/postTokenBalances, confirm a
+// USDC transfer of receipt.payment.amount_usdc to receipt.payment.pay_to;
+// confirm the first signer is receipt.agent_pubkey.
+```
+
+The canonical JSON rule is "sort object keys recursively, no
+whitespace, primitives via JSON.stringify, arrays preserve order" — the
+same as JCS for the subset of values we serialize.
