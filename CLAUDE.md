@@ -117,6 +117,10 @@ Next.js 15 App Router, API-only, port 3001 in dev.
 - `POST /api/v1/deposits/scan` — cron-triggered scanner; requires
   `CRON_SECRET` (Vercel Cron passes it via `Authorization: Bearer ...`,
   the `X-Cron-Secret` header is also accepted for manual triggers)
+- `GET  /api/v1/operator-key` — returns the Nexus operator Ed25519
+  public key (base58) used to sign receipts: `{ pubkey, algorithm:
+  "ed25519", encoding: "base58" }`. Verifiers fetch this to check
+  `receipt.nexus_signature`.
 
 **Auth scheme.** Every request to `/v1/inference` carries:
 
@@ -140,10 +144,14 @@ of `fast | reasoning | general`; `timestamp` is unix ms. The server:
    actual OpenRouter model slug used upstream.
 6. Calls OpenRouter with `usage.include = true`, debits the returned
    `usage.cost`, writes an `inference_logs` row, captures its id.
-7. Returns `{ ok, result, receipt }` where `receipt` carries:
-   `{ agent_pubkey, provider, model, cost_usdc, balance_remaining,
-   prompt_hash, response_hash, timestamp, inference_id }`. Hashes are
-   sha256 of the prompt and response text.
+7. Returns `{ ok, result, receipt }` where `receipt` is a `v: 2`
+   object: `{ v, agent_pubkey, provider, model, cost_usdc,
+   balance_remaining, prompt_hash, response_hash, timestamp,
+   inference_id, nexus_signature }`. Hashes are sha256 of the prompt
+   and response text. `nexus_signature` is a base58 Ed25519 signature
+   by the operator key over the canonical JSON of the receipt with
+   `nexus_signature` excluded (sorted keys, no whitespace). Signing is
+   shared with `/chat/completions` via `apps/nexus/lib/receipts.ts`.
 
 **Pricing source of truth.** OpenRouter's returned `usage.cost` (USD). We
 pass it through 1:1 to the ledger — no markup at the protocol layer yet.
@@ -175,6 +183,34 @@ const reply = await agent.inference("https://nexus.vdmnexus.com/api/v1", {
 The class owns the keypair and handles signing. It does NOT depend on
 `@solana/web3.js` — that comes later when wallet operations (deposits,
 transfers) get added.
+
+### `packages/x402` — `@vdm-nexus/x402`
+
+MIT, TypeScript, ESM-only. x402 client + receipt verifier. Runtime deps:
+`@solana/kit`, `@x402/core`, `@x402/svm`, `bs58`, `tweetnacl`, plus
+`@vdm-nexus/sdk` as a workspace dep.
+
+```ts
+import { X402Agent, verifyReceipt } from "@vdm-nexus/x402";
+
+const agent = X402Agent.fromBase58(process.env.AGENT_SECRET);
+const res = await agent.payAndInfer("https://nexus.vdmnexus.com/api/v1", {
+  model: "openai/gpt-4o-mini",
+  messages: [{ role: "user", content: "hello" }],
+});
+
+const v = await verifyReceipt({
+  receipt: res.receipt,
+  prompt: messages,
+  response: res.openai,
+  endpoint: "https://nexus.vdmnexus.com",
+});
+// v.ok === true when all five checks pass
+```
+
+`X402Agent.payAndInfer` does the unpaid POST → 402 → sign SPL → paid
+POST handshake against `/chat/completions`. `verifyReceipt` runs the
+five-check verification described in the Built section above.
 
 ## Supabase
 
@@ -246,6 +282,11 @@ X402_FACILITATOR_URL=                # OR remote facilitator URL (CDP, etc.)
                                      # Public x402.org has no Solana handler yet
 X402_FACILITATOR_API_KEY=            # Bearer token for remote facilitator
 NEXUS_ALLOW_MOCK_FACILITATOR=        # dev-only escape hatch; "true" + no URL/LOCAL → mock
+
+# Receipt signing (required — routes fail-closed if missing)
+NEXUS_OPERATOR_SECRET_KEY=           # base58 64-byte tweetnacl secretKey; generate
+                                     # via nacl.sign.keyPair(). Pubkey is exposed
+                                     # at GET /api/v1/operator-key for verifiers.
 ```
 
 Demo script also reads:
@@ -287,6 +328,23 @@ DEMO_SEED_USDC=1.00
   `X402_FACILITATOR_URL` for remote, `NEXUS_ALLOW_MOCK_FACILITATOR=true`
   + nothing else for dev mock). If none is set the endpoint fails-closed
   with 500 server_misconfigured — no silent acceptance.
+- **Ed25519-signed receipts (`v: 2`).** Both `/v1/inference` and
+  `/v1/chat/completions` emit receipts carrying `nexus_signature` —
+  base58 Ed25519 over the canonical JSON of the receipt (sorted keys,
+  no whitespace, `nexus_signature` field excluded). Operator key is
+  loaded from `NEXUS_OPERATOR_SECRET_KEY` (64-byte tweetnacl
+  secretKey, base58). Pubkey published at `GET /api/v1/operator-key`.
+  Chat-completion receipts also include `payment.pay_to` so verifiers
+  have a trusted recipient anchor for the on-chain check.
+  Shared canonicalize + sign helper lives in `apps/nexus/lib/receipts.ts`.
+- **`verifyReceipt` shipped in `@vdm-nexus/x402@0.2.0`.** End-to-end
+  verifier: recomputes `prompt_hash` + `response_hash`, verifies
+  `nexus_signature` against the operator pubkey (auto-fetched from
+  the endpoint or passed in), and fetches the Solana tx to confirm
+  the USDC transfer landed at `payment.pay_to` and that the first
+  signer matches `agent_pubkey`. Returns `{ ok, checks: { … } }` with
+  five boolean checks (`payment_on_chain_ok` + `payer_matches` are
+  vacuously true on prepaid receipts that have no `payment` field).
 
 ### NOT built — explicit non-goals
 
