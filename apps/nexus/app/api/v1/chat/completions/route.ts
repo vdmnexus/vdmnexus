@@ -400,6 +400,7 @@ export async function POST(req: NextRequest) {
       latency_ms: 0,
       status: "error",
       error: message,
+      points: 0,
     });
     if (logError) {
       log.error({
@@ -448,6 +449,7 @@ export async function POST(req: NextRequest) {
       cost_usdc: result.cost_usdc,
       latency_ms: result.latency_ms,
       status: "success",
+      points: 1,
     })
     .select("id")
     .single();
@@ -460,6 +462,14 @@ export async function POST(req: NextRequest) {
       detail: logError.message,
     });
   }
+
+  const { data: pointsRow } = await supabase
+    .from("inference_logs")
+    .select("points.sum()")
+    .eq("agent_pubkey", payerWallet)
+    .eq("status", "success")
+    .single();
+  const pointsTotal = (pointsRow as { sum?: number } | null)?.sum ?? 0;
 
   const promptForHash = body.messages
     .map((m) => `${m.role}:${m.content}`)
@@ -476,6 +486,7 @@ export async function POST(req: NextRequest) {
     response_hash: sha256(responseText),
     timestamp: Date.now(),
     inference_id: logRow?.id ?? null,
+    points_total: pointsTotal,
     payment: {
       scheme: "x402",
       amount_usdc: amountUsdc,

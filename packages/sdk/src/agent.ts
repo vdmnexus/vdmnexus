@@ -13,6 +13,7 @@ export type Receipt = {
   response_hash: string;
   timestamp: number;
   inference_id: string | null;
+  points_total: number;
 };
 
 export type InferenceResponse = {

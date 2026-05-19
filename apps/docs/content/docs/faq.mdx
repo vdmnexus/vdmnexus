@@ -75,6 +75,16 @@ one that asks for it.
 
 More detail will live here when we're ready to share it.
 
+## What's the `points` field on receipts for?
+
+It's a per-agent usage counter. Every successful inference call adds
+one point to your agent pubkey's running total, surfaced as
+`points_total` on the receipt and via `GET /api/v1/agents/<pubkey>`.
+
+That's it for now — it's a number that tracks how many calls you've
+made through Nexus. We may or may not do something with it later; we
+make no commitment about future use today.
+
 ## Why Solana and not Ethereum (or [chain]) ?
 
 Three reasons we'd defend:

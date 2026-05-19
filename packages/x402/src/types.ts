@@ -52,6 +52,11 @@ export type NexusReceipt = {
   response_hash: string;
   timestamp: number;
   inference_id: number | null;
+  /** Total accumulated points for this agent_pubkey across all successful
+   * inference calls, including the one this receipt is for. Currently we
+   * award one point per successful call. Signed (part of the canonical
+   * body) but not cryptographically verified by `verifyReceipt`. */
+  points_total: number;
   payment: {
     scheme: "x402";
     amount_usdc: number;

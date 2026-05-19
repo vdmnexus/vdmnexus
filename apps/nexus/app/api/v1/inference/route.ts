@@ -212,6 +212,7 @@ export async function POST(req: NextRequest) {
       latency_ms: 0,
       status: "error",
       error: message,
+      points: 0,
     });
     return err("upstream_error", 502, { detail: message });
   }
@@ -246,6 +247,7 @@ export async function POST(req: NextRequest) {
       cost_usdc: result.cost_usdc,
       latency_ms: result.latency_ms,
       status: "success",
+      points: 1,
     })
     .select("id")
     .single();
@@ -260,6 +262,14 @@ export async function POST(req: NextRequest) {
     balance_remaining: newBalance,
   });
 
+  const { data: pointsRow } = await supabase
+    .from("inference_logs")
+    .select("points.sum()")
+    .eq("agent_pubkey", pubkey)
+    .eq("status", "success")
+    .single();
+  const pointsTotal = (pointsRow as { sum?: number } | null)?.sum ?? 0;
+
   const receipt = signReceipt({
     v: 2 as const,
     agent_pubkey: pubkey,
@@ -271,6 +281,7 @@ export async function POST(req: NextRequest) {
     response_hash: sha256(result.text),
     timestamp: Date.now(),
     inference_id: logRow?.id ?? null,
+    points_total: pointsTotal,
   });
 
   log.info({

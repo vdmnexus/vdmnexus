@@ -106,6 +106,7 @@ async function main() {
     console.log(`  Provider: ${r.provider} / ${r.model}`);
     console.log(`  Cost:     ${money(r.cost_usdc)}`);
     console.log(`  Balance:  ${money(r.balance_remaining)}`);
+    console.log(`  Points:   ${r.points_total}`);
     console.log(`  ✓`);
     console.log();
 

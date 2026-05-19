@@ -17,6 +17,7 @@ type NexusReceipt = {
   response_hash: string;           // sha256(first choice's message content)
   timestamp: number;               // server-set wall-clock ms
   inference_id: string | null;     // UUID of the inference_logs row
+  points_total: number;            // accumulated points across all successful calls
   payment: {
     scheme: "x402";
     amount_usdc: number;           // what we charged (the flat fee today)
@@ -88,6 +89,19 @@ sub-second precision version.
 UUID of the row in our private `inference_logs` table. Useful for
 support: if you DM us with `inference_id` we can look up exactly what
 happened on our side without you having to reconstruct it.
+
+### `points_total`
+
+A running counter of points attributed to this `agent_pubkey` across
+all of its successful inference calls — including the one this receipt
+is for. We currently award one point per successful call; the value
+on the receipt is the sum after that point has been recorded.
+
+The field is included in the canonical body, so the operator signature
+covers it (it can't be silently mutated). `verifyReceipt` does not
+check it against anything, though — it's informational tracking, not
+a cryptographic claim. Also exposed via
+`GET /api/v1/agents/<pubkey>`.
 
 ### `payment.tx_signature`
 

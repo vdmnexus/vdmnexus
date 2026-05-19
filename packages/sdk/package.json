@@ -1,6 +1,6 @@
 {
   "name": "@vdm-nexus/sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Open-source SDK for VDM Nexus — autonomous AI agents that authenticate and pay for compute with a Solana keypair. No API keys.",
   "license": "MIT",
   "author": "VDM Nexus",
