@@ -1,0 +1,63 @@
+{
+  "name": "@vdm-nexus/x402",
+  "version": "0.1.0",
+  "description": "x402 client for VDM Nexus — agents pay AI inference per call with a signed Solana USDC transfer.",
+  "license": "MIT",
+  "author": "VDM Nexus",
+  "homepage": "https://vdmnexus.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vdmnexus/vdmnexus.git",
+    "directory": "packages/x402"
+  },
+  "bugs": {
+    "url": "https://github.com/vdmnexus/vdmnexus/issues"
+  },
+  "keywords": [
+    "x402",
+    "solana",
+    "ai",
+    "ai-agents",
+    "autonomous-agents",
+    "llm",
+    "inference",
+    "usdc",
+    "vdmnexus"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "tsc"
+  },
+  "dependencies": {
+    "@solana/kit": "^5",
+    "@vdm-nexus/sdk": "workspace:*",
+    "@x402/core": "^2.12.0",
+    "@x402/svm": "^2.12.0",
+    "bs58": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "typescript": "^5"
+  }
+}
