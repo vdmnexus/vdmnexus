@@ -248,8 +248,12 @@ X402_FACILITATOR_API_KEY=            # Bearer token for remote facilitator
 NEXUS_ALLOW_MOCK_FACILITATOR=        # dev-only escape hatch; "true" + no URL/LOCAL → mock
 
 # Rate limiting (Upstash Redis; missing both → limiter fails open + warn log once)
+# Code reads UPSTASH_REDIS_REST_URL first, then KV_REST_API_URL — the Vercel
+# Marketplace Upstash integration writes the KV_* names.
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
+# KV_REST_API_URL=                   # set automatically by Vercel Marketplace
+# KV_REST_API_TOKEN=                 # set automatically by Vercel Marketplace
 ```
 
 Demo script also reads:

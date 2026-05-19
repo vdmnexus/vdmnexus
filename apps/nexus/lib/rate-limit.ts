@@ -10,8 +10,13 @@ let pubkeyLimiter: Ratelimit | null = null;
 let warnedUnavailable = false;
 
 function init() {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  // The Vercel Marketplace Upstash integration writes KV_REST_API_* env vars
+  // (legacy naming, same Upstash backend). Standalone Upstash uses UPSTASH_*.
+  // Accept either; UPSTASH_* takes precedence if both are set.
+  const url =
+    process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
+  const token =
+    process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN;
   if (!url || !token) return;
 
   const redis = new Redis({ url, token });
