@@ -1,8 +1,14 @@
 # @vdm-nexus/x402
 
-Pay-per-call AI inference. An x402 client for [VDM Nexus](https://vdmnexus.com)
-and any other [x402-spec-v2](https://github.com/coinbase/x402) endpoint that
-accepts Solana USDC.
+**Signed inference** for AI agents. An x402 client for
+[VDM Nexus](https://vdmnexus.com) and any other
+[x402-spec-v2](https://github.com/coinbase/x402) endpoint that accepts
+Solana USDC.
+
+Every call returns a cryptographic receipt of exactly what the model
+returned — that's the wedge. *Signed inference* = inference call +
+on-chain payment + signed receipt the caller can verify and downstream
+systems can audit.
 
 ```ts
 import { X402Agent } from "@vdm-nexus/x402";

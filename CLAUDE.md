@@ -16,15 +16,21 @@ packages/
 
 ## Strategic stance
 
-The marketing copy on vdmnexus.com positions Nexus Compute as a smart compute
-router. Building a router *first* would put us in a crowded, low-margin market
-(OpenRouter, Portkey, LiteLLM, AWS Bedrock, Vercel AI Gateway). The actual
-wedge is the layer below: **autonomous AI agents that authenticate and pay
-with a Solana keypair, with no API keys**.
+The wedge is **signed inference**: inference call + on-chain payment +
+cryptographic receipt the caller can verify. We're not OpenRouter (a
+multi-provider router) and we're not Akash/0G (a decentralized compute
+substrate). We're a single-purpose endpoint that pairs an LLM call with a
+signed receipt of what the model returned, gated by x402 on Solana.
 
-So this codebase builds the agent payment rail first and proxies the
-inference side to OpenRouter for now. Real routing intelligence is a later
-session, after the rail is shipping value.
+The codebase builds the agent payment rail first and proxies the inference
+side to OpenRouter for now. Real routing intelligence is a later session,
+after the rail is shipping value.
+
+**Vocabulary (locked in 2026-05-19):** use *signed inference* as the noun
+for the product everywhere — package READMEs, marketing copy, tweets. It's
+descriptive, brandable, two-words memorable, and verb-able. Avoid
+"verifiable inference" (already taken by Inference Labs / ZKML projects)
+and "proof of inference" (crypto-jargon-heavy).
 
 ## Products
 
