@@ -26,7 +26,7 @@ export function Nav() {
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
-          <NavLink href="/compute" active={pathname === "/compute"}>
+          <NavLink href="/inference" active={pathname === "/inference"}>
             Inference
           </NavLink>
           <NavLink href="/agents" active={pathname === "/agents"}>

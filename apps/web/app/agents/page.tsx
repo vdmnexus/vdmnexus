@@ -41,7 +41,7 @@ export default function AgentsPage() {
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
                 <Link
-                  href="/compute"
+                  href="/inference"
                   className="inline-flex items-center gap-2 rounded-md border border-soft bg-surface/60 px-4 py-2.5 text-sm font-medium text-text transition-colors hover:border-accent-indigo/60"
                 >
                   See Nexus Inference

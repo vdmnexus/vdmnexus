@@ -228,7 +228,7 @@ function Products() {
 
       <div className="mt-12 grid gap-4 md:grid-cols-2">
         <FadeIn>
-          <Link href="/compute" className="block h-full">
+          <Link href="/inference" className="block h-full">
             <Card className="group h-full">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium uppercase tracking-[0.16em] text-accent-indigo">
