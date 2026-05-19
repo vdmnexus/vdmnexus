@@ -235,10 +235,11 @@ NEXUS_REQUEST_MAX_AGE_SECONDS=60     # optional
 X402_FLAT_PRICE_USDC=0.01            # flat fee declared in the 402 challenge
 X402_NETWORK=solana:devnet           # CAIP-2 — solana:devnet | solana:mainnet
 X402_RECIPIENT_ADDRESS=              # falls back to NEXUS_DEPOSIT_ADDRESS
-X402_FACILITATOR_URL=                # empty → MockFacilitator (dev)
-                                     # public devnet: https://x402.org/facilitator
+X402_FACILITATOR_URL=                # MUST be set in production
+                                     # public devnet (no Solana yet): https://x402.org/facilitator
                                      # Coinbase CDP:  https://api.cdp.coinbase.com/platform/v2/x402
 X402_FACILITATOR_API_KEY=            # Bearer token (CDP only; x402.org needs none)
+NEXUS_ALLOW_MOCK_FACILITATOR=        # dev-only escape hatch; "true" + empty URL → MockFacilitator
 ```
 
 Demo script also reads:

@@ -3,7 +3,10 @@ import { createHash } from "node:crypto";
 import { getServiceClient } from "@/lib/supabase";
 import { credit, debit, ensureAgent } from "@/lib/credits";
 import { runChatInference, type ChatMessage } from "@/lib/chat-inference";
-import { getFacilitator } from "@/lib/x402-facilitator";
+import {
+  getFacilitator,
+  FacilitatorNotConfiguredError,
+} from "@/lib/x402-facilitator";
 import {
   X402_PAYMENT_HEADER,
   X402_REQUIRED_HEADER,
@@ -155,7 +158,15 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const facilitator = getFacilitator();
+  let facilitator;
+  try {
+    facilitator = getFacilitator();
+  } catch (e) {
+    if (e instanceof FacilitatorNotConfiguredError) {
+      return err("server_misconfigured", 500, { detail: e.message });
+    }
+    throw e;
+  }
   let verified;
   try {
     verified = await facilitator.verify(payload, requirement);
@@ -215,8 +226,9 @@ export async function POST(req: NextRequest) {
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : "upstream_error";
-    await supabase.from("inference_logs").insert({
+    const { error: logError } = await supabase.from("inference_logs").insert({
       agent_pubkey: payerWallet,
+      request_nonce: settled.transaction,
       upstream: "openrouter",
       model: body.model,
       cost_usdc: 0,
@@ -224,6 +236,12 @@ export async function POST(req: NextRequest) {
       status: "error",
       error: message,
     });
+    if (logError) {
+      console.error("inference_logs (error row) insert failed", {
+        tx: settled.transaction,
+        error: logError,
+      });
+    }
     return err("upstream_error", 502, { detail: message });
   }
 
@@ -233,10 +251,11 @@ export async function POST(req: NextRequest) {
     reason: "inference",
   });
 
-  const { data: logRow } = await supabase
+  const { data: logRow, error: logError } = await supabase
     .from("inference_logs")
     .insert({
       agent_pubkey: payerWallet,
+      request_nonce: settled.transaction,
       upstream: result.upstream,
       model: body.model,
       prompt_tokens: result.prompt_tokens,
@@ -247,6 +266,12 @@ export async function POST(req: NextRequest) {
     })
     .select("id")
     .single();
+  if (logError) {
+    console.error("inference_logs insert failed", {
+      tx: settled.transaction,
+      error: logError,
+    });
+  }
 
   const promptForHash = body.messages
     .map((m) => `${m.role}:${m.content}`)

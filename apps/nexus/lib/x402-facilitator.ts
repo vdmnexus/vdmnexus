@@ -67,12 +67,31 @@ class MockFacilitator implements FacilitatorClient {
 
 let cached: FacilitatorClient | null = null;
 
+/**
+ * Returned by getFacilitator() when no facilitator is configured AND mock
+ * is not explicitly enabled. Surfaces a clear server_misconfigured error
+ * instead of silently letting the MockFacilitator accept bogus payments.
+ */
+export class FacilitatorNotConfiguredError extends Error {
+  constructor() {
+    super(
+      "X402_FACILITATOR_URL is not set and NEXUS_ALLOW_MOCK_FACILITATOR is not 'true'. " +
+        "Refusing to use MockFacilitator without an explicit opt-in."
+    );
+    this.name = "FacilitatorNotConfiguredError";
+  }
+}
+
 export function getFacilitator(): FacilitatorClient {
   if (cached) return cached;
   const url = process.env.X402_FACILITATOR_URL?.trim();
+
   if (!url) {
-    cached = new MockFacilitator();
-    return cached;
+    if (process.env.NEXUS_ALLOW_MOCK_FACILITATOR?.trim() === "true") {
+      cached = new MockFacilitator();
+      return cached;
+    }
+    throw new FacilitatorNotConfiguredError();
   }
 
   const apiKey = process.env.X402_FACILITATOR_API_KEY?.trim();
