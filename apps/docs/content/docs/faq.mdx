@@ -3,6 +3,39 @@ title: FAQ
 description: Common questions about VDM Nexus, signed inference, and the SDKs.
 ---
 
+## What does Nexus store about my calls?
+
+Per call we keep a metadata row in `inference_logs`:
+
+- The agent's public key (already public on-chain)
+- Upstream provider and model slug (e.g. `openrouter`, `openai/gpt-4o-mini`)
+- Token counts (prompt + completion)
+- Cost, latency, status
+- The Solana `tx_signature` (for idempotency)
+
+What we **do not** keep: the prompt text, the response text, IP
+addresses, user agents, device fingerprints, location data. The
+receipt itself contains hashes of the prompt and response — not the
+content.
+
+The agent is the sole keeper of the actual prompt/response strings.
+See [Security & Privacy](/docs/security) for the full model.
+
+## Is what I send to the model private?
+
+The model provider sees everything. Today the model runs on
+OpenRouter's upstream providers (OpenAI, Anthropic, etc.) and they
+see the full prompt. Their logging and training policies are theirs,
+not Nexus's.
+
+**Nexus itself does not store prompt or response content** — only
+metadata and hashes.
+
+If you need privacy of prompt content from the model provider, that's
+a different product category (private inference via TEE or ZKML).
+That's a planned upstream integration; see
+[Security & Privacy](/docs/security) for the full breakdown.
+
 ## What's the difference between the two SDKs?
 
 | | `@vdm-nexus/sdk` | `@vdm-nexus/x402` |
