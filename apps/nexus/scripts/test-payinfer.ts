@@ -86,6 +86,10 @@ async function main() {
     prompt: messages,
     response: res.openai,
     endpoint: ENDPOINT,
+    // api.devnet.solana.com indexes getTransaction >2min behind
+    // confirmation. Pass SOLANA_RPC_URL to point at a fast RPC
+    // (Helius / Triton / QuickNode) for sub-second verify.
+    rpc: process.env.SOLANA_RPC_URL,
   });
   console.log(`  ok: ${v.ok}`);
   for (const [k, val] of Object.entries(v.checks)) {

@@ -93,34 +93,83 @@ type ParsedTransaction = {
   } | null;
 };
 
+type RpcResult =
+  | { kind: "ok"; tx: ParsedTransaction }
+  | { kind: "missing" }
+  | { kind: "transient"; reason: string };
+
+async function rpcGetTransactionOnce(
+  rpc: string,
+  signature: string
+): Promise<RpcResult> {
+  let res: Response;
+  try {
+    res = await fetch(rpc, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "getTransaction",
+        params: [
+          signature,
+          {
+            encoding: "jsonParsed",
+            commitment: "confirmed",
+            maxSupportedTransactionVersion: 0,
+          },
+        ],
+      }),
+    });
+  } catch (e) {
+    return { kind: "transient", reason: `network: ${(e as Error).message}` };
+  }
+  // 429 (rate limit) and 5xx (RPC node hiccup) are transient.
+  if (res.status === 429 || res.status >= 500) {
+    return { kind: "transient", reason: `HTTP ${res.status}` };
+  }
+  if (!res.ok) throw new Error(`RPC getTransaction HTTP ${res.status}`);
+  const data = (await res.json()) as {
+    result?: ParsedTransaction | null;
+    error?: { code?: number; message: string };
+  };
+  if (data.error) {
+    // -32005 is the standard "node is behind / rate limited" rejection.
+    if (data.error.code === -32005) {
+      return { kind: "transient", reason: data.error.message };
+    }
+    throw new Error(`RPC getTransaction: ${data.error.message}`);
+  }
+  if (!data.result) return { kind: "missing" };
+  return { kind: "ok", tx: data.result };
+}
+
+/**
+ * Wraps `rpcGetTransactionOnce` with a short retry loop. The public Solana
+ * RPCs (especially devnet) can lag well past commitment confirmation
+ * before indexing a `getTransaction` lookup — we've seen 60–90s on
+ * api.devnet.solana.com. Without a retry, verifyReceipt called immediately
+ * after payAndInfer falsely fails its on-chain checks. We poll up to ~120s
+ * before giving up. Pass `params.rpc` pointing at a faster provider
+ * (Helius, Triton, QuickNode) to skip most of this wait.
+ */
 async function rpcGetTransaction(
   rpc: string,
   signature: string
 ): Promise<ParsedTransaction | null> {
-  const res = await fetch(rpc, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: 1,
-      method: "getTransaction",
-      params: [
-        signature,
-        {
-          encoding: "jsonParsed",
-          commitment: "confirmed",
-          maxSupportedTransactionVersion: 0,
-        },
-      ],
-    }),
-  });
-  if (!res.ok) throw new Error(`RPC getTransaction HTTP ${res.status}`);
-  const data = (await res.json()) as {
-    result?: ParsedTransaction | null;
-    error?: { message: string };
-  };
-  if (data.error) throw new Error(`RPC getTransaction: ${data.error.message}`);
-  return data.result ?? null;
+  const deadline = Date.now() + 120_000;
+  let attempt = 0;
+  while (true) {
+    const r = await rpcGetTransactionOnce(rpc, signature);
+    if (r.kind === "ok") return r.tx;
+    if (Date.now() >= deadline) return null;
+    // 1.5s, 3s, 6s, capped at 6s. Public RPCs both lag a few seconds after
+    // confirmation AND rate-limit aggressive polling, so be patient between
+    // tries.
+    const delay = Math.min(1_500 * 2 ** attempt, 6_000);
+    attempt++;
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
 }
 
 async function verifyOnChain(
@@ -131,9 +180,15 @@ async function verifyOnChain(
   const tx = await rpcGetTransaction(rpc, payment.tx_signature);
   if (!tx || tx.meta?.err) return { tx_ok: false, payer_ok: false };
 
-  const signer =
-    tx.transaction.message.accountKeys.find((k) => k.signer)?.pubkey ?? null;
-  const payer_ok = signer === expectedSigner;
+  // The agent signs the SPL transfer as authority over the source token
+  // account, but is NOT necessarily the fee payer (signer index 0). In an
+  // x402-svm consolidated topology the facilitator pays SOL fees and the
+  // agent signs the transfer — so we check the agent is *any* signer on
+  // the tx, not specifically the first one.
+  const signers = tx.transaction.message.accountKeys
+    .filter((k) => k.signer)
+    .map((k) => k.pubkey);
+  const payer_ok = signers.includes(expectedSigner);
 
   if (!payment.pay_to) {
     // No pay_to in the receipt — we can't anchor the recipient. Treat as
