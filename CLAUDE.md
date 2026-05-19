@@ -95,6 +95,15 @@ Next.js 15 App Router, API-only, port 3001 in dev.
 
 - `GET  /api/health` — liveness
 - `POST /api/v1/inference` — the signed-request inference endpoint
+- `POST /api/v1/chat/completions` — **x402-gated, OpenAI-shape** (day 1
+  scaffolding; mock facilitator active by default). Unpaid POST returns
+  `402 + X-Payment-Required` carrying a base64-encoded `{ x402Version,
+  accepts: [{ scheme:"exact", network, asset, amountAtomic, payTo }] }`.
+  Paid retry sends the same payload with an `X-Payment` header (base64
+  JSON containing the signed Solana SPL transfer). Successful response is
+  an OpenAI `chat.completion` body plus `X-Nexus-Receipt` and
+  `X-Payment-Response` headers. The payer wallet IS the agent identity —
+  no separate auth headers.
 - `GET  /api/v1/deposit-address` — returns `{ address, mint, network }` so
   agents can discover where to send USDC
 - `POST /api/v1/deposits/scan` — cron-triggered scanner; requires
@@ -219,6 +228,13 @@ SOLANA_RPC_URL=                      # optional; defaults to public RPC
 NEXUS_USDC_MINT=                     # optional override (test mints)
 NEXUS_DEPOSIT_SCAN_LIMIT=50          # optional
 NEXUS_REQUEST_MAX_AGE_SECONDS=60     # optional
+
+# x402-gated /chat/completions (day 1 scaffolding)
+X402_FLAT_PRICE_USDC=0.01            # flat fee declared in the 402 challenge
+X402_NETWORK=solana-devnet           # solana-devnet | solana-mainnet
+X402_RECIPIENT_ADDRESS=              # falls back to NEXUS_DEPOSIT_ADDRESS
+X402_FACILITATOR_URL=                # empty → MockFacilitator (dev)
+X402_FACILITATOR_API_KEY=            # required when X402_FACILITATOR_URL set
 ```
 
 Demo script also reads:
@@ -245,6 +261,16 @@ DEMO_SEED_USDC=1.00
   ledger keyed by sender pubkey. Idempotent via unique `tx_signature` index.
 - Public roadmap page (`/roadmap`) on apps/web with live build log + admin
   editor at `/admin/roadmap`.
+- **x402-gated `/chat/completions` endpoint (day 1 scaffolding).**
+  OpenAI-shape request/response. Unpaid POST → 402 with `X-Payment-Required`
+  challenge (`scheme=exact`, Solana devnet USDC, flat 0.01 USDC). Paid retry
+  carries `X-Payment` (base64 JSON of the signed Solana SPL transfer);
+  facilitator verifies + co-signs + broadcasts; route credits the ledger
+  with the returned `tx_signature` (idempotent via the existing unique index)
+  and runs inference. Response is OpenAI body + `X-Nexus-Receipt` +
+  `X-Payment-Response`. **Mock facilitator is active by default** — real
+  Coinbase CDP facilitator is wired by setting `X402_FACILITATOR_URL`
+  (day 2 work).
 
 ### NOT built — explicit non-goals
 

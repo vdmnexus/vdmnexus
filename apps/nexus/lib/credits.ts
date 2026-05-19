@@ -30,14 +30,14 @@ export async function debit(
     pubkey: string;
     usdc: number;
     reason: string;
-    nonce: string;
+    nonce?: string;
   }
 ): Promise<void> {
   const { error } = await supabase.from("credits_ledger").insert({
     agent_pubkey: args.pubkey,
     delta_usdc: -Math.abs(args.usdc),
     reason: args.reason,
-    request_nonce: args.nonce,
+    request_nonce: args.nonce ?? null,
   });
   if (error) throw error;
 }
