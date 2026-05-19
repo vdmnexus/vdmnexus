@@ -1,69 +1,44 @@
 /**
- * x402 — protocol types, header constants, and wire-format codec.
+ * x402 — protocol header constants and wire-format codec.
  *
- * The spec is moving fast; keep header names + payload shapes behind these
- * constants so we can swap to v2 naming (no X- prefix) with one edit.
+ * Types come from `@x402/core` (canonical, version 2 spec). This module
+ * just adds header-name constants, base64-JSON encoding helpers, and a
+ * small challenge-builder for the common Solana-devnet USDC case.
  *
- * Reference: https://github.com/coinbase/x402
+ * Reference: https://github.com/coinbase/x402, npm: @x402/core
  */
 
-export const X402_VERSION = "0.4";
+import type {
+  Network,
+  PaymentPayload,
+  PaymentRequired,
+  PaymentRequirements,
+  ResourceInfo,
+} from "@x402/core/types";
+
+export type {
+  Network,
+  PaymentPayload,
+  PaymentRequired,
+  PaymentRequirements,
+  ResourceInfo,
+};
+
+/** Wire-format protocol version we declare in challenges. */
+export const X402_VERSION = 2;
 
 export const X402_PAYMENT_HEADER = "x-payment";
 export const X402_REQUIRED_HEADER = "x-payment-required";
 export const X402_RESPONSE_HEADER = "x-payment-response";
 
+/** CAIP-2-style network identifiers used by the x402 protocol. */
 export const X402_NETWORKS = {
-  solanaDevnet: "solana-devnet",
-  solanaMainnet: "solana-mainnet",
-} as const;
-export type X402Network = (typeof X402_NETWORKS)[keyof typeof X402_NETWORKS];
+  solanaDevnet: "solana:devnet",
+  solanaMainnet: "solana:mainnet",
+} as const satisfies Record<string, Network>;
 
-/** Devnet USDC mint (Circle's official devnet token). */
+/** Devnet USDC mint (Circle's official Solana devnet token). */
 export const USDC_MINT_DEVNET = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU";
-
-/**
- * Payment option declared in the 402 challenge. Matches the x402 v0.4 spec's
- * `accepts[]` entry shape.
- */
-export type X402PaymentOption = {
-  scheme: "exact";
-  network: X402Network;
-  asset: string;
-  amountAtomic: string;
-  payTo: string;
-  maxTimeoutSeconds?: number;
-};
-
-export type X402Challenge = {
-  x402Version: string;
-  accepts: X402PaymentOption[];
-};
-
-/**
- * Payment payload — what the client sends back in the X-PAYMENT header.
- * For Solana the `authorization` carries a partially-signed SPL transfer tx
- * encoded as base64. The facilitator co-signs (fee payer) and broadcasts.
- */
-export type X402SolanaAuthorization = {
-  /** Base64-encoded partially-signed Solana transaction. */
-  transaction: string;
-  /** Payer wallet (first signer) — base58. Server uses this as identity. */
-  payer: string;
-};
-
-export type X402PaymentPayload = {
-  x402Version: string;
-  scheme: "exact";
-  network: X402Network;
-  authorization: X402SolanaAuthorization;
-};
-
-export type X402SettlementResult = {
-  status: "settled";
-  txSignature: string;
-  network: X402Network;
-};
 
 /** Encode a JSON object to a base64 string suitable for an HTTP header value. */
 export function encodeHeader(obj: unknown): string {
@@ -80,42 +55,54 @@ export function decodeHeader<T = unknown>(value: string): T | null {
   }
 }
 
-/**
- * Convert a USDC dollar amount to atomic units (6 decimals). The x402 spec
- * wants the amount as a decimal string to avoid float precision drift.
- */
+/** Convert a USDC dollar amount to atomic units (6 decimals, decimal string). */
 export function usdcToAtomicString(usdc: number): string {
   return Math.round(usdc * 1_000_000).toString();
 }
 
 /**
- * Build a challenge for a single Solana-devnet USDC payment option.
- * Today we only declare one option; multi-option support is trivial later.
+ * Build a spec-conformant PaymentRequired challenge for a single
+ * Solana USDC payment option.
  */
 export function buildChallenge(args: {
   amountUsdc: number;
   payTo: string;
-  network: X402Network;
+  network: Network;
   asset?: string;
   maxTimeoutSeconds?: number;
-}): X402Challenge {
+  resource: ResourceInfo;
+}): PaymentRequired {
+  const requirement: PaymentRequirements = {
+    scheme: "exact",
+    network: args.network,
+    asset: args.asset ?? USDC_MINT_DEVNET,
+    amount: usdcToAtomicString(args.amountUsdc),
+    payTo: args.payTo,
+    maxTimeoutSeconds: args.maxTimeoutSeconds ?? 60,
+    extra: {},
+  };
   return {
     x402Version: X402_VERSION,
-    accepts: [
-      {
-        scheme: "exact",
-        network: args.network,
-        asset: args.asset ?? USDC_MINT_DEVNET,
-        amountAtomic: usdcToAtomicString(args.amountUsdc),
-        payTo: args.payTo,
-        maxTimeoutSeconds: args.maxTimeoutSeconds ?? 60,
-      },
-    ],
+    resource: args.resource,
+    accepts: [requirement],
   };
 }
 
-/** Best-effort payer extraction. Spec puts it in authorization.payer. */
-export function extractPayerFromPayload(p: X402PaymentPayload): string | null {
-  const payer = p.authorization?.payer;
+/**
+ * Solana-flavored payment payload — what the spec calls `payload.payload`
+ * for a Solana SPL transfer. The client encodes a partially-signed
+ * Solana transaction here; the facilitator co-signs and broadcasts.
+ */
+export type SolanaPaymentPayload = {
+  /** Base64-encoded partially-signed Solana transaction. */
+  transaction: string;
+  /** Payer wallet (first signer) in base58. The server treats this as identity. */
+  payer: string;
+};
+
+/** Best-effort payer extraction from a PaymentPayload's scheme-specific payload. */
+export function extractPayerFromPayload(p: PaymentPayload): string | null {
+  const inner = p.payload as Partial<SolanaPaymentPayload> | undefined;
+  const payer = inner?.payer;
   return typeof payer === "string" && payer.length > 0 ? payer : null;
 }

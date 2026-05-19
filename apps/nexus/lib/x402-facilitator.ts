@@ -1,68 +1,96 @@
 /**
  * x402 facilitator — verifies and settles signed Solana payments.
  *
- * Day 1: MockFacilitator only. CdpFacilitator is a TODO stub; wire on day 2.
+ * Two implementations behind one interface:
+ *   - MockFacilitator: dev-only, always returns success with a synthetic
+ *     tx signature. Active when X402_FACILITATOR_URL is unset.
+ *   - HttpFacilitator: wraps the canonical HTTPFacilitatorClient from
+ *     @x402/core. Active when X402_FACILITATOR_URL is set.
  *
- * Selection is env-driven via X402_FACILITATOR_URL:
- *   - empty / unset → MockFacilitator (dev only)
- *   - set           → CdpFacilitator (real Coinbase CDP endpoint)
+ * Default suggested URLs:
+ *   - https://x402.org/facilitator                  ← free, devnet, no auth
+ *   - https://api.cdp.coinbase.com/platform/v2/x402 ← Coinbase CDP, paid
  */
 
 import { randomUUID } from "node:crypto";
+import { HTTPFacilitatorClient } from "@x402/core/server";
+import type { FacilitatorClient } from "@x402/core/server";
 import type {
-  X402PaymentOption,
-  X402PaymentPayload,
-} from "./x402";
+  PaymentPayload,
+  PaymentRequirements,
+  SettleResponse,
+  SupportedResponse,
+  VerifyResponse,
+} from "@x402/core/types";
 
-export type VerifyResult = { ok: true } | { ok: false; error: string };
-export type SettleResult =
-  | { ok: true; txSignature: string }
-  | { ok: false; error: string };
+class MockFacilitator implements FacilitatorClient {
+  async verify(
+    _payload: PaymentPayload,
+    _requirements: PaymentRequirements
+  ): Promise<VerifyResponse> {
+    const payer = (
+      (_payload.payload as { payer?: string } | undefined)?.payer ?? ""
+    ).trim();
+    return { isValid: true, payer };
+  }
 
-export interface Facilitator {
-  verify(
-    payload: X402PaymentPayload,
-    requirement: X402PaymentOption
-  ): Promise<VerifyResult>;
-  settle(
-    payload: X402PaymentPayload,
-    requirement: X402PaymentOption
-  ): Promise<SettleResult>;
+  async settle(
+    payload: PaymentPayload,
+    requirements: PaymentRequirements
+  ): Promise<SettleResponse> {
+    const payer = (
+      (payload.payload as { payer?: string } | undefined)?.payer ?? ""
+    ).trim();
+    return {
+      success: true,
+      transaction: `MOCK_${randomUUID()}`,
+      network: requirements.network,
+      amount: requirements.amount,
+      payer,
+    };
+  }
+
+  async getSupported(): Promise<SupportedResponse> {
+    return {
+      kinds: [
+        {
+          x402Version: 2,
+          scheme: "exact",
+          network: "solana:devnet",
+        },
+      ],
+      extensions: [],
+      signers: {},
+    };
+  }
 }
 
-class MockFacilitator implements Facilitator {
-  async verify(): Promise<VerifyResult> {
-    return { ok: true };
-  }
-  async settle(): Promise<SettleResult> {
-    return { ok: true, txSignature: `MOCK_${randomUUID()}` };
-  }
-}
+let cached: FacilitatorClient | null = null;
 
-class CdpFacilitator implements Facilitator {
-  constructor(
-    private readonly baseUrl: string,
-    private readonly apiKey: string | undefined
-  ) {}
-
-  async verify(): Promise<VerifyResult> {
-    return { ok: false, error: "cdp_facilitator_not_wired_yet" };
-  }
-  async settle(): Promise<SettleResult> {
-    return { ok: false, error: "cdp_facilitator_not_wired_yet" };
-  }
-}
-
-let cached: Facilitator | null = null;
-
-export function getFacilitator(): Facilitator {
+export function getFacilitator(): FacilitatorClient {
   if (cached) return cached;
   const url = process.env.X402_FACILITATOR_URL?.trim();
   if (!url) {
     cached = new MockFacilitator();
-  } else {
-    cached = new CdpFacilitator(url, process.env.X402_FACILITATOR_API_KEY);
+    return cached;
   }
+
+  const apiKey = process.env.X402_FACILITATOR_API_KEY?.trim();
+  const createAuthHeaders = apiKey
+    ? async () => {
+        const headers = { Authorization: `Bearer ${apiKey}` };
+        return {
+          verify: headers,
+          settle: headers,
+          supported: headers,
+        };
+      }
+    : undefined;
+
+  cached = new HTTPFacilitatorClient({
+    url,
+    createAuthHeaders,
+  });
   return cached;
 }
 

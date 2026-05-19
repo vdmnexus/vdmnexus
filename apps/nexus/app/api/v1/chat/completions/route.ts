@@ -13,8 +13,9 @@ import {
   decodeHeader,
   encodeHeader,
   extractPayerFromPayload,
-  type X402PaymentPayload,
-  type X402Network,
+  type Network,
+  type PaymentPayload,
+  type ResourceInfo,
 } from "@/lib/x402";
 
 export const runtime = "nodejs";
@@ -38,7 +39,7 @@ function sha256(input: string): string {
   return createHash("sha256").update(input).digest("hex");
 }
 
-function getNetwork(): X402Network {
+function getNetwork(): Network {
   const env = process.env.X402_NETWORK?.trim();
   if (env === X402_NETWORKS.solanaMainnet) return X402_NETWORKS.solanaMainnet;
   return X402_NETWORKS.solanaDevnet;
@@ -56,6 +57,15 @@ function getRecipient(): string | null {
     process.env.NEXUS_DEPOSIT_ADDRESS?.trim() ||
     null
   );
+}
+
+function getResource(req: NextRequest): ResourceInfo {
+  return {
+    url: new URL("/api/v1/chat/completions", req.nextUrl.origin).toString(),
+    description: "OpenAI-compatible chat completions, paid per call in USDC.",
+    serviceName: "VDM Nexus",
+    mimeType: "application/json",
+  };
 }
 
 function isValidBody(b: ChatCompletionsBody): b is Required<
@@ -106,15 +116,22 @@ export async function POST(req: NextRequest) {
 
   const amountUsdc = getFlatPriceUsdc();
   const network = getNetwork();
+  const resource = getResource(req);
+
+  const challenge = buildChallenge({
+    amountUsdc,
+    payTo: recipient,
+    network,
+    resource,
+  });
+  const requirement = challenge.accepts[0];
+  if (!requirement) {
+    return err("server_misconfigured", 500, { detail: "no payment option" });
+  }
 
   const paymentHeader = req.headers.get(X402_PAYMENT_HEADER);
 
   if (!paymentHeader) {
-    const challenge = buildChallenge({
-      amountUsdc,
-      payTo: recipient,
-      network,
-    });
     return new NextResponse(
       JSON.stringify({
         ok: false,
@@ -131,31 +148,44 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const payload = decodeHeader<X402PaymentPayload>(paymentHeader);
+  const payload = decodeHeader<PaymentPayload>(paymentHeader);
   if (!payload) {
     return err("payment_malformed", 402, {
       detail: "X-PAYMENT header is not valid base64 JSON",
     });
   }
 
-  const challenge = buildChallenge({
-    amountUsdc,
-    payTo: recipient,
-    network,
-  });
-  const requirement = challenge.accepts[0];
-
   const facilitator = getFacilitator();
-  const verified = await facilitator.verify(payload, requirement);
-  if (!verified.ok) {
-    return err("payment_invalid", 402, { detail: verified.error });
+  let verified;
+  try {
+    verified = await facilitator.verify(payload, requirement);
+  } catch (e) {
+    return err("facilitator_unreachable", 502, {
+      detail: e instanceof Error ? e.message : "verify_threw",
+    });
   }
-  const settled = await facilitator.settle(payload, requirement);
-  if (!settled.ok) {
-    return err("payment_failed", 402, { detail: settled.error });
+  if (!verified.isValid) {
+    return err("payment_invalid", 402, {
+      detail: verified.invalidReason ?? verified.invalidMessage ?? "invalid",
+    });
   }
 
-  const payerWallet = extractPayerFromPayload(payload);
+  let settled;
+  try {
+    settled = await facilitator.settle(payload, requirement);
+  } catch (e) {
+    return err("facilitator_unreachable", 502, {
+      detail: e instanceof Error ? e.message : "settle_threw",
+    });
+  }
+  if (!settled.success) {
+    return err("payment_failed", 402, {
+      detail: settled.errorReason ?? settled.errorMessage ?? "failed",
+    });
+  }
+
+  const payerWallet =
+    settled.payer ?? verified.payer ?? extractPayerFromPayload(payload);
   if (!payerWallet) {
     return err("payment_missing_payer", 402);
   }
@@ -168,7 +198,7 @@ export async function POST(req: NextRequest) {
       pubkey: payerWallet,
       usdc: amountUsdc,
       reason: "x402_payment",
-      tx_signature: settled.txSignature,
+      tx_signature: settled.transaction,
     });
   } catch (e) {
     if ((e as { code?: string }).code === "23505") {
@@ -218,7 +248,9 @@ export async function POST(req: NextRequest) {
     .select("id")
     .single();
 
-  const promptForHash = body.messages.map((m) => `${m.role}:${m.content}`).join("\n");
+  const promptForHash = body.messages
+    .map((m) => `${m.role}:${m.content}`)
+    .join("\n");
   const responseText = result.openaiResponse.choices[0]?.message.content ?? "";
 
   const receipt = {
@@ -233,7 +265,7 @@ export async function POST(req: NextRequest) {
     payment: {
       scheme: "x402",
       amount_usdc: amountUsdc,
-      tx_signature: settled.txSignature,
+      tx_signature: settled.transaction,
       network,
     },
   };
@@ -245,7 +277,7 @@ export async function POST(req: NextRequest) {
       "x-nexus-receipt": encodeHeader(receipt),
       [X402_RESPONSE_HEADER]: encodeHeader({
         status: "settled",
-        txSignature: settled.txSignature,
+        txSignature: settled.transaction,
         network,
       }),
     },
