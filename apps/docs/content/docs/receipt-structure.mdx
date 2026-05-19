@@ -1,0 +1,108 @@
+---
+title: Receipt structure
+description: Field-by-field walkthrough of what's in a Nexus receipt.
+---
+
+A signed-inference receipt is JSON, returned in the `X-Nexus-Receipt`
+response header as base64. Here's every field:
+
+```ts
+type NexusReceipt = {
+  agent_pubkey: string;            // base58 Ed25519 pubkey (= Solana pubkey)
+  upstream: "openrouter";          // which inference provider was used
+  model: string;                   // the slug we passed upstream
+  cost_usdc: number;               // actual upstream cost (USD, ~6 decimals)
+  prompt_hash: string;             // sha256(messages.role:content joined by \n)
+  response_hash: string;           // sha256(first choice's message content)
+  timestamp: number;               // server-set wall-clock ms
+  inference_id: string | null;     // UUID of the inference_logs row
+  payment: {
+    scheme: "x402";
+    amount_usdc: number;           // what we charged (the flat fee today)
+    tx_signature: string;          // Solana tx signature
+    network: string;               // CAIP-2, e.g. solana:EtWTRABZ…
+  };
+};
+```
+
+## Field details
+
+### `agent_pubkey`
+
+The agent's Ed25519 public key in base58. Identical to the Solana wallet
+address — same key format, same encoding. This is the identity Nexus
+attributes the call to, regardless of which IP, region, or client
+library made the request.
+
+### `upstream` + `model`
+
+`upstream` is always `"openrouter"` today; future releases may add
+direct connections to specific providers. `model` is the slug we passed
+upstream, not the OpenAI-vs-Anthropic-vs-Llama family name.
+
+### `cost_usdc`
+
+The **actual cost the upstream provider charged us**, NOT the amount
+the agent paid. This is the raw input to whatever pricing model
+overlays it.
+
+For the x402 flow today, `payment.amount_usdc` is a flat fee
+(`X402_FLAT_PRICE_USDC=0.01` by default) and `cost_usdc` is whatever
+OpenRouter returned. The difference is the spread we hold; a future
+release will move toward refund-on-overpay to tighten this.
+
+### `prompt_hash` + `response_hash`
+
+`prompt_hash` is computed server-side over the message list, joined as:
+
+```
+${role}:${content}\n${role}:${content}\n…
+```
+
+This is hex sha256 (64 chars). The exact join algorithm is in
+[apps/nexus/app/api/v1/chat/completions/route.ts](https://github.com/vdmnexus/vdmnexus/blob/main/apps/nexus/app/api/v1/chat/completions/route.ts).
+
+`response_hash` is hex sha256 of the first choice's `message.content`
+string. If the model produces multiple choices, only the first is
+hashed — this matches what 99% of callers care about.
+
+### `timestamp`
+
+Server wall-clock `Date.now()` at the moment the receipt object was
+built. Authoritative timestamp for time-window verification is the
+on-chain `blockTime` of `payment.tx_signature`, but `timestamp` is the
+sub-second precision version.
+
+### `inference_id`
+
+UUID of the row in our private `inference_logs` table. Useful for
+support: if you DM us with `inference_id` we can look up exactly what
+happened on our side without you having to reconstruct it.
+
+### `payment.tx_signature`
+
+Solana transaction signature (base58). Look it up on
+[Solscan devnet](https://solscan.io/?cluster=devnet) to see the
+on-chain settlement.
+
+This is **the strongest external verifier** of the receipt. The hashes
+above can be tampered with by anyone holding the receipt; the
+tx_signature is anchored to Solana and can't be forged.
+
+### `payment.network`
+
+CAIP-2 network identifier, e.g.
+`solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` (devnet) or
+`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` (mainnet). The genesis-hash
+form is what `@x402/svm` recognizes — short forms like `solana:devnet`
+are not spec-compliant.
+
+## What's missing from v0.1 (and tracked)
+
+- **Nexus signature over the receipt JSON.** Today the receipt is a
+  structured object but not signed by a Nexus operator key. The
+  v0.2 release adds an `_signature` field signed by a published Ed25519
+  key.
+- **Streaming receipt continuation.** Multi-chunk streamed responses
+  need a multi-segment receipt that ties the final hash to each chunk.
+  Not in v0.1.

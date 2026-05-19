@@ -1,0 +1,22 @@
+{
+  "title": "VDM Nexus Docs",
+  "pages": [
+    "introduction",
+    "why-vdm-nexus",
+    "architecture",
+    "---Quickstart---",
+    "quickstart",
+    "first-payment",
+    "verify-a-receipt",
+    "---Concepts---",
+    "signed-inference",
+    "receipt-structure",
+    "---SDKs---",
+    "sdk/sdk-reference",
+    "sdk/x402-reference",
+    "---Operations---",
+    "ops/self-host-facilitator",
+    "---Reference---",
+    "faq"
+  ]
+}

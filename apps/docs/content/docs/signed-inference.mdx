@@ -1,0 +1,82 @@
+---
+title: Signed inference
+description: The concept, the rationale, and how it differs from adjacent ideas.
+---
+
+**Signed inference** = an LLM call paired with two cryptographic
+artifacts:
+
+1. A **receipt** — a structured record of what was asked and what was
+   returned, hash-bound and timestamp-bound
+2. An **on-chain payment** — proof the call happened, settled in a
+   programmable asset (USDC) on a public chain (Solana)
+
+Together they let a third party verify that a specific LLM call actually
+happened with the parameters claimed, without trusting the agent that
+made the call.
+
+## Why this matters for agents specifically
+
+For human users of an LLM, "did the model actually say that?" is rarely
+a load-bearing question — you can ask the model again, you can
+screenshot, you have context. For an autonomous agent acting on the
+output:
+
+- **Auditors** (humans reviewing what an agent did) need to see what the
+  model produced before the action was taken
+- **Other agents** receiving the output as input need to verify it's not
+  fabricated
+- **Smart contracts** consuming agent decisions need an on-chain
+  reference to the inference call
+- **The agent itself**, hours or days later, needs to reconstruct its
+  own reasoning trace from durable artifacts, not from a chat log it
+  might lose
+
+Without signed inference, every agent reduces to "trust this string the
+agent told me the model said." With it, the string is verifiable.
+
+## What signed inference is *not*
+
+- It's **not zero-knowledge proof of inference** (ZKML). ZKML proves
+  the model ran a specific computation with no information leakage —
+  expensive and slow. Signed inference proves the inference *happened*
+  via hash + payment, not what computation occurred inside the model.
+- It's **not TEE-attested inference**. TEEs (Intel SGX, AMD SEV) give
+  hardware-level attestations that the model ran in a sealed enclave;
+  signed inference gives a software-level proof of inputs/outputs
+  bound to an on-chain payment.
+- It's **not "decentralized inference."** The model still runs in a
+  centralized API (today, OpenRouter). Signed inference is
+  orthogonal — you can have centralized inference with cryptographic
+  verifiability, which is what we provide.
+
+The lineage chart:
+
+| Property | API key call | Signed inference | TEE-attested | ZKML |
+|---|---|---|---|---|
+| Caller can identify themselves | weak (key) | strong (keypair) | strong | strong |
+| Audit trail | server log | **receipt + on-chain payment** | TEE attestation | ZK proof |
+| Trust assumption | full trust in API | trust API + Solana | trust hardware | trust nothing |
+| Latency overhead | 0 | ~2-5s | small | seconds-minutes |
+| Cost overhead | 0 | tx fee (~$0.0001) | small | high |
+| Available today | yes | **yes (Solana devnet)** | limited | research |
+
+Signed inference is the **earliest deployable rung** of cryptographic
+verifiability for AI agents. ZKML and TEEs come later, on different
+budgets and different trust models. We start here because it ships
+today, on infrastructure that already exists.
+
+## Why Solana specifically
+
+Three reasons:
+
+1. **400ms finality** — settle a payment in under half a second; the
+   wall-clock budget for "user-perceptible latency" is intact
+2. **$0.0001 transaction fees** — affordable for per-call settlement
+   (versus Ethereum's $0.50+ which kills the model)
+3. **Ed25519 keys** — the same keypair format used everywhere else in
+   modern crypto; agents can have one identity for signing requests
+   and signing payments
+
+Mainnet is on the roadmap; today is Solana devnet because the
+facilitator's signing key isn't in a KMS yet.

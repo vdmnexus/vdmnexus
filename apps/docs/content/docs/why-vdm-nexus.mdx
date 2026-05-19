@@ -1,0 +1,49 @@
+---
+title: Why VDM Nexus
+description: The problem we solve, and the three jobs we don't try to do.
+---
+
+## The problem
+
+Three properties of agentic AI that today's inference APIs ignore:
+
+1. **Agents don't have human accounts.** API keys are designed for a
+   human operator; an autonomous agent that needs to pay can't share
+   credentials with one, and there's no clean way to attribute a call
+   to a specific autonomous actor.
+2. **On-chain actions need verifiable inputs.** When an LLM call drives
+   a trade, a contract signature, or a payment, the downstream observer
+   has to be able to verify *what the model said*. Today they trust the
+   agent's after-the-fact report.
+3. **No native pay-per-call standard.** Inference providers assume a
+   subscription or a postpaid credit card; agents have wallets and want
+   to settle individual calls.
+
+## What VDM Nexus does about it
+
+For each problem, a specific design choice:
+
+| Problem | VDM Nexus design |
+|---|---|
+| Agent identity | The agent's Ed25519 / Solana keypair is the only identity. No API keys, no accounts. |
+| Verifiable inputs | Every response carries a *signed receipt* — sha256 hashes of prompt and response, model name, cost, timestamp, and (for x402) the on-chain settlement tx signature. |
+| Pay-per-call | x402-spec-v2 challenge/response on `/chat/completions`, settled in USDC on Solana. |
+
+## What we explicitly don't try to do
+
+VDM Nexus is a service, not a platform. We don't build:
+
+- A new L1 or DePIN compute network
+- A decentralized model marketplace
+- A storage or data-availability layer
+- A multi-provider router (today; later, maybe)
+
+For those needs, look at:
+
+- **0G** — decentralized AI substrate
+- **Akash / io.net** — compute marketplaces
+- **OpenRouter / Portkey** — multi-provider routers
+- **Grace Protocol** — payment-protocol aggregator (x402 + MPP)
+
+VDM Nexus is **one endpoint**, **one wedge**: signed inference. It's the
+specific service slot that fits into any of those broader stacks.

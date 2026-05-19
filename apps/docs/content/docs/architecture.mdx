@@ -1,0 +1,97 @@
+---
+title: Architecture
+description: How a signed inference call flows from agent intent to on-chain settlement and back.
+---
+
+## The pay-per-call flow
+
+```
+Agent (SDK)                  nexus.vdmnexus.com             Facilitator (self-hosted)
+     │                                │                                 │
+     │  POST /chat/completions ──────►│                                 │
+     │  (OpenAI shape, no payment)    │                                 │
+     │                                │  build x402 challenge           │
+     │  ◄── 402 + X-Payment-Required  │                                 │
+     │                                │                                 │
+     │  build + partially sign        │                                 │
+     │  Solana SPL USDC transfer      │                                 │
+     │                                │                                 │
+     │  POST /chat/completions ──────►│  verify ───────────────────────►│
+     │  + X-Payment header            │                                 │
+     │                                │  ◄── { isValid: true }          │
+     │                                │  settle ───────────────────────►│
+     │                                │                                 │
+     │                                │              co-sign as feePayer
+     │                                │              broadcast to Solana
+     │                                │  ◄── { txSignature }            │
+     │                                │                                 │
+     │                                │  credit ledger += amount        │
+     │                                │  runChatInference()             │
+     │                                │  debit ledger -= cost           │
+     │                                │  insert inference_logs row      │
+     │                                │                                 │
+     │  ◄── 200 + OpenAI body         │                                 │
+     │      + X-Nexus-Receipt         │                                 │
+     │      + X-Payment-Response      │                                 │
+```
+
+Real wall-clock latency for the full flow on devnet: **~5 seconds**.
+Most of that is Solana confirmation. The verify/settle pair is the
+critical path; OpenRouter inference is parallel-able in future versions.
+
+## What's a "signed receipt"?
+
+Returned in the `X-Nexus-Receipt` header (base64-encoded JSON):
+
+```json
+{
+  "agent_pubkey": "FFcH3cdWFLy3i1zprtRWFY8D8P6QX6DQmcwwmABqP77U",
+  "upstream": "openrouter",
+  "model": "openai/gpt-4o-mini",
+  "cost_usdc": 0.000025,
+  "prompt_hash": "64914968…",
+  "response_hash": "9861ad24…",
+  "timestamp": 1779210181044,
+  "inference_id": "98dc7bb0-…",
+  "payment": {
+    "scheme": "x402",
+    "amount_usdc": 0.01,
+    "tx_signature": "rVTKk6X…",
+    "network": "solana:EtWTRABZ…"
+  }
+}
+```
+
+Anyone holding both the prompt + response can verify the receipt was
+generated for that exact call by recomputing the hashes. The
+`tx_signature` ties the receipt to a Solana settlement that's
+independently verifiable on-chain.
+
+## What's a "facilitator"?
+
+The component that turns a partially-signed x402 payment into a real
+Solana transaction. It:
+
+1. Verifies the agent's signed transfer is well-formed and adequate
+2. Co-signs as the fee payer (the agent doesn't need SOL)
+3. Broadcasts to a Solana RPC and waits for confirmation
+4. Returns the tx signature back to the inference route
+
+The Nexus production facilitator is **self-hosted** on `apps/nexus`
+using `@x402/svm`'s `ExactSvmScheme`. The same fee-payer key plays both
+the deposit-recipient and the fee-payer role. See
+[Self-host the facilitator](/docs/ops/self-host-facilitator) if you
+want to run your own.
+
+## The two SDKs
+
+The Nexus API has two flows; the SDKs map 1:1:
+
+| SDK | Endpoint | Flow |
+|---|---|---|
+| `@vdm-nexus/sdk` | `POST /api/v1/inference` | Prepaid credits, Ed25519-signed request body |
+| `@vdm-nexus/x402` | `POST /api/v1/chat/completions` | Pay-per-call x402 USDC transfer per request |
+
+`X402Agent` extends `Agent`, so the same Ed25519 keypair can pay both
+ways. You can hold prepaid credits and also pay individual high-value
+calls with x402 — the ledger handles both.

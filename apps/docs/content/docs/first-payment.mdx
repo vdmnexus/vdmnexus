@@ -1,0 +1,110 @@
+---
+title: Your first payment
+description: A worked end-to-end example with real on-chain data.
+---
+
+This is the exact code we ran to validate the live production endpoint.
+The transaction is on Solana devnet and you can inspect it.
+
+## The full script
+
+```ts
+import { X402Agent } from "@vdm-nexus/x402";
+
+// Throwaway demo keypair — replace with your own.
+const agent = X402Agent.fromBase58(process.env.AGENT_SECRET!);
+
+const reply = await agent.payAndInfer(
+  "https://nexus.vdmnexus.com/api/v1",
+  {
+    model: "openai/gpt-4o-mini",
+    messages: [
+      {
+        role: "user",
+        content:
+          "In one sentence, what's the point of a cryptographic receipt on an LLM call?",
+      },
+    ],
+  }
+);
+
+console.log("Response:", reply.openai.choices[0].message.content);
+console.log("Receipt:", reply.receipt);
+console.log("Payment:", reply.payment);
+console.log(
+  "Solscan:",
+  `https://solscan.io/tx/${reply.payment?.txSignature}?cluster=devnet`
+);
+```
+
+## What the response looked like
+
+```
+Response: A cryptographic receipt on an LLM call serves to provide
+verifiable proof of the transaction or interaction, ensuring data
+integrity and authenticity while allowing for auditability and
+accountability.
+
+Receipt: {
+  agent_pubkey: 'FFcH3cdWFLy3i1zprtRWFY8D8P6QX6DQmcwwmABqP77U',
+  upstream: 'openrouter',
+  model: 'openai/gpt-4o-mini',
+  cost_usdc: 0.000025,
+  prompt_hash: '64914968651ba207c2dee425f15d8cacc671647227106ea149e06a959db40b52',
+  response_hash: '9861ad24639cea52d146ff3b64e003084ceeba5c2d3348791bfa6a9b753afb91',
+  timestamp: 1779210181044,
+  inference_id: '98dc7bb0-24a0-41f3-872c-9b4c4786c280',
+  payment: {
+    scheme: 'x402',
+    amount_usdc: 0.01,
+    tx_signature: 'rVTKk6XguuWKLpqt3mMNKSSBCTm5LLeAHJo4ckCc2f8yGmSgEyGCPR9va1EB23C8i71mJm7r34ecDo7V4pKxyrr',
+    network: 'solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1'
+  }
+}
+```
+
+**Solscan link:** [tx rVTKk6X…](https://solscan.io/tx/rVTKk6XguuWKLpqt3mMNKSSBCTm5LLeAHJo4ckCc2f8yGmSgEyGCPR9va1EB23C8i71mJm7r34ecDo7V4pKxyrr?cluster=devnet)
+
+Total wall-clock time from intent to receipt: **4.9 seconds**, almost
+all of it Solana confirmation.
+
+## Cost breakdown
+
+- **Charged to the agent:** 0.01 USDC (the flat fee declared in the
+  402 challenge)
+- **Real OpenRouter cost:** 0.000025 USDC (25 prompt tokens +
+  35 completion tokens at gpt-4o-mini rates)
+- **Difference:** held as a positive ledger balance for the agent. The
+  current flat-fee pricing model overshoots actual cost by ~400×; a
+  token-priced refund model is on the roadmap.
+
+## Error cases worth handling
+
+```ts
+import {
+  X402PaymentRequiredError,
+  X402PaymentReplayError,
+  X402UpstreamError,
+} from "@vdm-nexus/x402";
+
+try {
+  await agent.payAndInfer(endpoint, opts);
+} catch (e) {
+  if (e instanceof X402PaymentReplayError) {
+    // 409 — same tx_signature already credited. The agent's call was
+    // already paid for. Treat as success or surface to the operator.
+  } else if (e instanceof X402PaymentRequiredError) {
+    // 402 from a deeper check — payment was malformed or facilitator
+    // rejected it. Inspect e.detail.
+  } else if (e instanceof X402UpstreamError) {
+    // 502 or unexpected status. Inspect e.status and e.detail.
+  } else {
+    throw e;
+  }
+}
+```
+
+## Next
+
+- [Verify the receipt](/docs/verify-a-receipt)
+- [Receipt structure](/docs/receipt-structure)

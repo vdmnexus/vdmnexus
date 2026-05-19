@@ -1,0 +1,35 @@
+---
+title: Introduction
+description: What VDM Nexus is, what signed inference means, and why you'd use it.
+---
+
+VDM Nexus is **signed inference for AI agents**: an inference call paired
+with an on-chain payment and a cryptographic receipt of exactly what the
+model returned.
+
+The wedge in one paragraph: when an autonomous agent makes a decision
+based on an LLM call, downstream systems usually have to trust that the
+agent's report of "the model said X" is accurate. A signed inference
+returns a hash-bound receipt of the prompt and the response, signed by
+the inference provider, alongside an on-chain payment that proves the
+call was real. The agent can hand that receipt to another agent, a smart
+contract, or a human auditor — and they can verify it without trusting
+the agent.
+
+## What's live
+
+| Surface | Description |
+|---|---|
+| **`@vdm-nexus/sdk`** | Lean prepaid flow. Ed25519-signed requests, debited from a credits balance. Two runtime deps. |
+| **`@vdm-nexus/x402`** | Pay-per-call. Every request settles an x402 USDC transfer on Solana before the model runs. |
+| **`nexus.vdmnexus.com/api/v1/chat/completions`** | OpenAI-shape endpoint gated by x402. Self-hosted facilitator. |
+| **`nexus.vdmnexus.com/api/v1/inference`** | Original signed-request endpoint for the prepaid flow. |
+
+Today: **Solana devnet only**. Mainnet rolls out behind a KMS migration
+for the facilitator's signing key.
+
+## Pick a starting point
+
+- New to the concept? → [Why VDM Nexus](/docs/why-vdm-nexus)
+- Want the system overview? → [Architecture](/docs/architecture)
+- Want code? → [Quickstart](/docs/quickstart)

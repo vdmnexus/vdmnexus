@@ -1,0 +1,71 @@
+---
+title: Quickstart
+description: Install the SDK, generate an agent, get devnet USDC, and make a signed inference call.
+---
+
+The fastest path from zero to your first signed inference call. **Five
+minutes once devnet USDC is in your hands.**
+
+## 1. Install
+
+```bash
+npm install @vdm-nexus/x402
+# or
+pnpm add @vdm-nexus/x402
+```
+
+## 2. Generate an agent + grab its pubkey
+
+```ts
+import { X402Agent } from "@vdm-nexus/x402";
+
+const agent = X402Agent.generate();
+console.log("pubkey:", agent.pubkey);
+console.log("secret (save somewhere safe):", agent.secretKeyBase58);
+```
+
+The `pubkey` is what you fund with USDC. The secret is the 64-byte
+Ed25519 keypair encoded in base58 — losing it means losing the agent.
+
+## 3. Get devnet USDC
+
+Go to [faucet.circle.com](https://faucet.circle.com), select **Solana
+Devnet**, paste your agent's `pubkey`, request 5+ USDC. It arrives in
+seconds and auto-creates the USDC associated token account.
+
+No SOL needed — the facilitator pays the transaction fees.
+
+## 4. Make the call
+
+```ts
+const reply = await agent.payAndInfer("https://nexus.vdmnexus.com/api/v1", {
+  model: "openai/gpt-4o-mini",
+  messages: [
+    { role: "user", content: "Explain signed inference in one sentence." }
+  ],
+});
+
+console.log("Model said:", reply.openai.choices[0].message.content);
+console.log("Tx:", reply.payment?.txSignature);
+console.log("Cost:", reply.receipt?.cost_usdc, "USDC");
+```
+
+That's a real signed inference. Check the `tx_signature` on Solana
+explorer — it's a real on-chain transaction.
+
+## What just happened
+
+1. The SDK POSTed to `/chat/completions` with no payment header
+2. Got back a 402 with the x402 challenge (amount, recipient, network)
+3. Built a signed Solana SPL USDC transfer matching the challenge
+4. POSTed again with the signed transfer in the `X-Payment` header
+5. Nexus's facilitator verified, co-signed, broadcast to Solana, ran
+   OpenRouter inference, returned OpenAI body + signed receipt
+
+The full sequence, [diagrammed](/docs/architecture).
+
+## Next
+
+- [Verify a receipt](/docs/verify-a-receipt) — what the receipt contains and how to validate it
+- [`@vdm-nexus/x402` API reference](/docs/sdk/x402-reference)
+- [Signed inference concept](/docs/signed-inference) — the longer rationale

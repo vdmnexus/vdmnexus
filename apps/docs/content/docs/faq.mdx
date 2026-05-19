@@ -1,0 +1,103 @@
+---
+title: FAQ
+description: Common questions about VDM Nexus, signed inference, and the SDKs.
+---
+
+## What's the difference between the two SDKs?
+
+| | `@vdm-nexus/sdk` | `@vdm-nexus/x402` |
+|---|---|---|
+| Flow | Prepaid balance, debited per call | Pay-per-call, settled on-chain per call |
+| Auth | Ed25519-signed request body | x402 USDC transfer signature |
+| Runtime deps | 2 (`tweetnacl`, `bs58`) | ~6 (adds Solana + x402 stack) |
+| Latency overhead | None | ~2-5s for Solana settlement |
+| When to use | High-volume, low-latency, sub-cent per call | Audited spend, one call at a time, no prepaid setup |
+
+`X402Agent` extends `Agent`, so the same keypair works for both.
+
+## When does mainnet ship?
+
+The blocker is the facilitator's signing key. It currently lives in a
+Vercel env var — fine for devnet, unacceptable for mainnet. The
+migration is:
+
+1. Move the key to a KMS (AWS / GCP / Vercel secrets vault / HSM)
+2. Replace the inline signer with a KMS-backed one
+3. Validate on mainnet at small volume for ~1 week
+4. Announce
+
+Realistic timeline: weeks, not months.
+
+## Do you have a token?
+
+No. The economic model is deliberately deferred until product-market
+fit is clearer. Pricing today is flat USDC per call, configurable via
+the `X402_FLAT_PRICE_USDC` env on the operator side.
+
+Note that bigger players in this space (Grace, 0G, etc.) all have
+tokens — we don't, and that's intentional, not an oversight.
+
+## Why Solana and not Ethereum (or [chain]) ?
+
+Three reasons we'd defend:
+
+1. **400ms finality.** Settlement happens inside a single user-visible
+   API call. Ethereum L1's ~12s blocks would make this UX impossible;
+   L2s have settlement-finality gaps that defeat the verifiability
+   property.
+2. **$0.0001 transaction fees.** Per-call settlement at sub-cent
+   amounts only makes economic sense on a cheap chain.
+3. **Ed25519 keys.** The same keypair format used everywhere else in
+   modern crypto. Agents can sign requests AND payments with one
+   identity.
+
+The x402 protocol itself is chain-agnostic; we picked the chain that
+made the wedge ship.
+
+## Does Nexus run the model itself?
+
+No — today we proxy to OpenRouter. The inference still happens at
+OpenAI, Anthropic, Together, Groq, etc. via their normal APIs.
+"Decentralized inference" or "TEE-attested inference" providers are
+on the roadmap as alternative upstreams, not replacements.
+
+## Is streaming supported?
+
+Not in v0.1. The endpoint rejects `stream: true` with a 400. Streaming
+requires a different receipt model (per-chunk hash binding); planned
+for post-v0.1.
+
+## Can I run the facilitator myself instead of using yours?
+
+Yes — see [Self-host the facilitator](/docs/ops/self-host-facilitator).
+Anyone with a Solana keypair, some SOL for fees, and the
+`@x402/svm` package can run their own. The SDK doesn't care.
+
+## What's the relationship between VDM Nexus and Coinbase x402?
+
+x402 is an open HTTP payment protocol [(github.com/coinbase/x402)](https://github.com/coinbase/x402).
+Coinbase originated and stewards the spec; VDM Nexus is one
+implementation of an x402-compliant inference endpoint, with our own
+self-hosted facilitator (we don't depend on Coinbase's CDP service).
+
+## How does this compare to Grace Protocol?
+
+Grace is a **payment-protocol gateway** — one API call across x402 and
+MPP and other protocols. They abstract the payment layer. VDM Nexus is
+**a service that uses x402** — we live at the destination end of the
+flow. An agent could route through Grace's gateway to land at our
+endpoint.
+
+## How does this compare to 0G or Inference Labs or Ambient?
+
+Those are decentralized AI substrate projects (new L1s, DePIN networks,
+ZK / TEE attestation layers). They're at a different layer of the stack
+from us. We're not trying to be a substrate — we're a single service
+that gives you cryptographic receipts on your inference calls, today,
+on a chain that already works.
+
+## Where do I report bugs / ask questions?
+
+- **GitHub issues:** https://github.com/vdmnexus/vdmnexus/issues
+- **X:** [@vdmnexus](https://x.com/vdmnexus)
+- **Telegram:** [t.me/vdmnexus](https://t.me/vdmnexus)

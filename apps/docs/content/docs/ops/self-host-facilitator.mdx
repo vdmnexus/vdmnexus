@@ -1,0 +1,142 @@
+---
+title: Self-host the facilitator
+description: Run your own x402 facilitator backed by @x402/svm.
+---
+
+A **facilitator** is the component that turns a partially-signed x402
+payment into a real on-chain Solana transaction. Self-hosting one means
+no third-party dependency, full control of the fee-payer key, and no
+per-transaction fee to an external service.
+
+This page walks through running the same facilitator we use in production,
+either inside `apps/nexus` or as a standalone service.
+
+## What you need
+
+| Requirement | Why |
+|---|---|
+| A Solana keypair (64-byte base58 secret) | Used both as the deposit recipient and the fee payer in our consolidated topology |
+| SOL on the target network | Fee payer pays Solana fees (~0.000005 SOL per tx) |
+| Node.js 20+ | `@x402/svm` requires modern Node |
+| Supabase or equivalent Postgres | The credits/inference logs schema; see [Architecture](/docs/architecture) |
+
+## Install the packages
+
+```bash
+pnpm add @x402/core @x402/svm @solana/kit bs58
+```
+
+> Pin `@solana/kit` to v5 to match `@x402/svm`'s peer expectation:
+> `pnpm add @solana/kit@^5`
+
+## Build the facilitator instance
+
+```ts
+import bs58 from "bs58";
+import { createKeyPairSignerFromBytes } from "@solana/kit";
+import {
+  toFacilitatorSvmSigner,
+  SOLANA_DEVNET_CAIP2,
+  SOLANA_MAINNET_CAIP2,
+} from "@x402/svm";
+import { ExactSvmScheme } from "@x402/svm/exact/facilitator";
+import { x402Facilitator } from "@x402/core/facilitator";
+
+async function buildFacilitator() {
+  const secretKey = bs58.decode(process.env.NEXUS_DEPOSIT_SECRET_KEY!);
+  const keypair = await createKeyPairSignerFromBytes(secretKey);
+  const signer = toFacilitatorSvmSigner(keypair);
+  const scheme = new ExactSvmScheme(signer);
+  return new x402Facilitator().register(
+    [SOLANA_DEVNET_CAIP2, SOLANA_MAINNET_CAIP2],
+    scheme
+  );
+}
+```
+
+## Call it from your route
+
+```ts
+const facilitator = await buildFacilitator();
+
+const verifyResult = await facilitator.verify(paymentPayload, requirements);
+if (!verifyResult.isValid) {
+  return error402(verifyResult.invalidReason);
+}
+
+const settleResult = await facilitator.settle(paymentPayload, requirements);
+if (!settleResult.success) {
+  return error402(settleResult.errorReason);
+}
+
+// settleResult.transaction → Solana tx signature, on-chain settled
+// settleResult.payer       → the agent's wallet (extracted from the tx)
+```
+
+Cache the facilitator instance — building it parses a keypair and is
+not free. In our production code that lives in
+[`apps/nexus/lib/local-facilitator.ts`](https://github.com/vdmnexus/vdmnexus/blob/main/apps/nexus/lib/local-facilitator.ts).
+
+## Critical operational notes
+
+### 1. Fund the fee-payer wallet with SOL
+
+The facilitator pays Solana transaction fees out of the keypair's SOL
+balance. Without SOL, settle silently fails at broadcast. For devnet
+testing, [faucet.solana.com](https://faucet.solana.com) gives you 0.5
+SOL at a time, enough for ~100,000 settlements.
+
+For mainnet, fund the wallet via a real exchange withdrawal and
+**monitor the balance** — a depleted fee payer takes the endpoint down.
+
+### 2. Use the CAIP-2 network identifier, not the short form
+
+`@x402/svm` expects the full Solana genesis-hash CAIP-2 form
+(`solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` for devnet). The short
+`solana:devnet` looks valid but is silently rejected one level deeper.
+Import the constants from `@x402/svm` directly to stay correct.
+
+### 3. Include `feePayer` in the challenge's `extra`
+
+The `@x402/svm` client refuses to build a payment payload unless
+`paymentRequirements.extra.feePayer` is set. The natural default in a
+consolidated topology (recipient = fee payer) is
+`extra.feePayer = payTo`.
+
+### 4. Pre-create the recipient USDC ATA
+
+If the recipient wallet has never received USDC on the target network,
+its associated token account doesn't exist yet — the first transaction
+will fail at simulation. Solve once by airdropping any amount of USDC
+to the recipient via [faucet.circle.com](https://faucet.circle.com).
+
+### 5. Gate the facilitator behind explicit env
+
+In production, default to fail-closed. Our code's pattern:
+
+```ts
+if (!process.env.NEXUS_FACILITATOR_LOCAL && !process.env.X402_FACILITATOR_URL) {
+  throw new FacilitatorNotConfiguredError();
+}
+```
+
+The mock facilitator (accepts any payload) should require an explicit
+opt-in env var like `NEXUS_ALLOW_MOCK_FACILITATOR=true` so it can
+never accidentally activate in production. We learned this the hard
+way today — a misconfigured prod environment ran the mock for ~10
+seconds and accepted a fake payment, charging us $0.000007 to
+OpenRouter before we caught it.
+
+## Mainnet readiness
+
+Today our reference facilitator runs on Solana devnet with the
+fee-payer key in a Vercel env var. Acceptable for devnet; **not
+acceptable for mainnet**. The migration path:
+
+1. Move `NEXUS_DEPOSIT_SECRET_KEY` to a real KMS (AWS KMS, Google
+   Cloud KMS, Vercel/Turso secrets vault, or a hardware HSM)
+2. Replace the inline `createKeyPairSignerFromBytes` with a signer
+   that calls the KMS for the signing step
+3. Set `X402_NETWORK=solana:mainnet` (or the genesis-hash form)
+4. Validate against mainnet on a small budget for ~1 week before
+   announcing

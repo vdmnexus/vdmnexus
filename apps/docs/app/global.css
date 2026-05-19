@@ -1,0 +1,27 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+
+/* VDM Nexus theme — match vdmnexus.com */
+@theme {
+  --color-fd-background: #080810;
+  --color-fd-foreground: #f1f5f9;
+  --color-fd-muted: #0e0e18;
+  --color-fd-muted-foreground: #94a3b8;
+  --color-fd-popover: #0e0e18;
+  --color-fd-popover-foreground: #f1f5f9;
+  --color-fd-card: #0e0e18;
+  --color-fd-card-foreground: #f1f5f9;
+  --color-fd-border: #1e1e2e;
+  --color-fd-primary: #6366f1;
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-secondary: #0e0e18;
+  --color-fd-secondary-foreground: #f1f5f9;
+  --color-fd-accent: #6366f1;
+  --color-fd-accent-foreground: #ffffff;
+  --color-fd-ring: #6366f1;
+}
+
+body {
+  background-color: #080810;
+}

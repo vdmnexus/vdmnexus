@@ -1,0 +1,110 @@
+---
+title: "@vdm-nexus/sdk reference"
+description: API reference for the lean prepaid-flow SDK.
+---
+
+The base SDK for the **Ed25519-signed prepaid flow**. Two runtime deps.
+For the pay-per-call x402 flow, see [`@vdm-nexus/x402`](/docs/sdk/x402-reference).
+
+```bash
+npm install @vdm-nexus/sdk
+```
+
+## `class Agent`
+
+The agent identity. Encapsulates a 64-byte Ed25519 keypair (32-byte
+seed + 32-byte derived public key).
+
+### `Agent.generate(): Agent`
+
+Generate a fresh random keypair.
+
+```ts
+import { Agent } from "@vdm-nexus/sdk";
+const a = Agent.generate();
+```
+
+### `Agent.fromBase58(secretKeyBase58: string): Agent`
+
+Restore an agent from a base58-encoded 64-byte secret.
+
+```ts
+const a = Agent.fromBase58(process.env.AGENT_SECRET!);
+```
+
+### `agent.pubkey: string`
+
+Getter — the agent's base58 public key (32 bytes encoded), identical
+to the Solana wallet address.
+
+### `agent.secretKeyBase58: string`
+
+Getter — the full 64-byte secret encoded as base58. Save this; losing
+it means losing the agent.
+
+### `agent.signBody(body: string): string`
+
+Sign an arbitrary UTF-8 string with Ed25519. Used internally by
+`.inference()`; exposed for callers who need to sign other request
+shapes.
+
+Returns the base58-encoded 64-byte detached signature.
+
+### `agent.inference(endpoint, opts): Promise<InferenceResponse>`
+
+Make a prepaid inference call. Signs the request body, posts to
+`${endpoint}/inference` with the `X-Agent-Pubkey` + `X-Nexus-Signature`
+headers, parses the JSON response.
+
+```ts
+const reply = await agent.inference("https://nexus.vdmnexus.com/api/v1", {
+  prompt: "Why Ed25519?",
+  task_type: "fast", // "fast" | "reasoning" | "general"
+});
+
+reply.ok;                     // boolean
+reply.result;                 // string — the model's response
+reply.receipt;                // Receipt
+reply.receipt?.cost_usdc;     // upstream cost
+reply.receipt?.balance_remaining;
+```
+
+#### `InferenceOptions`
+
+```ts
+type InferenceOptions = {
+  prompt: string;
+  task_type?: "fast" | "reasoning" | "general";   // default "general"
+  max_cost_usdc?: number;                         // route-cheaper-if-below
+};
+```
+
+#### `Receipt`
+
+```ts
+type Receipt = {
+  agent_pubkey: string;
+  provider: string;
+  model: string;
+  cost_usdc: number;
+  balance_remaining: number;
+  prompt_hash: string;       // sha256 hex of the prompt string
+  response_hash: string;     // sha256 hex of the response string
+  timestamp: number;
+  inference_id: string | null;
+};
+```
+
+### Funding an agent (today)
+
+The prepaid flow debits a server-side `credits_ledger`. Topping up
+the ledger happens by sending devnet USDC to the Nexus deposit address
+(see [Architecture](/docs/architecture)) — the deposit watcher polls
+Solana for incoming transfers and credits the ledger keyed by sender.
+
+The full self-topup story (`Agent.deposit(...)` that constructs and
+sends the transfer) is deferred until the `@vdm-nexus/wallet` package
+ships.
+
+For pay-per-call, use [`@vdm-nexus/x402`](/docs/sdk/x402-reference)
+instead — no topup needed, each call settles standalone.

@@ -1,0 +1,123 @@
+---
+title: "@vdm-nexus/x402 reference"
+description: API reference for the pay-per-call SDK.
+---
+
+The pay-per-call SDK. Extends `@vdm-nexus/sdk`'s `Agent` so the same
+keypair works for both flows. Adds Solana / x402 dependencies; install
+this package only if you actually need pay-per-call.
+
+```bash
+npm install @vdm-nexus/x402
+```
+
+## `class X402Agent extends Agent`
+
+Inherits everything from the base `Agent` (see [SDK
+reference](/docs/sdk/sdk-reference)) and adds `payAndInfer`.
+
+### `X402Agent.generate(): X402Agent`
+
+Same as `Agent.generate()` but returns an `X402Agent`.
+
+### `X402Agent.fromBase58(secretKeyBase58: string): X402Agent`
+
+Same as `Agent.fromBase58()` but returns an `X402Agent`. A keypair
+generated with the base SDK can be passed here.
+
+### `agent.payAndInfer(endpoint, opts): Promise<X402ChatResponse>`
+
+The full x402 handshake in one call.
+
+```ts
+const reply = await agent.payAndInfer(
+  "https://nexus.vdmnexus.com/api/v1",
+  {
+    model: "openai/gpt-4o-mini",
+    messages: [{ role: "user", content: "Hello." }],
+  }
+);
+```
+
+Internally:
+
+1. POST `${endpoint}/chat/completions` with no payment header (probe)
+2. Decode the `X-Payment-Required` 402 challenge
+3. Build a partially-signed Solana SPL USDC transfer via `@x402/svm`
+4. Encode it as the `X-Payment` header
+5. POST again
+6. On 200, parse the OpenAI body + decode `x-nexus-receipt` and
+   `x-payment-response` headers
+
+#### `X402ChatRequest`
+
+```ts
+type X402ChatRequest = {
+  model: string;                  // OpenRouter model slug
+  messages: ChatMessage[];
+};
+
+type ChatMessage = {
+  role: "system" | "user" | "assistant";
+  content: string;
+};
+```
+
+#### `X402ChatResponse`
+
+```ts
+type X402ChatResponse = {
+  openai: OpenAIChatCompletion;        // pass-through OpenAI body
+  receipt: NexusReceipt | null;        // x-nexus-receipt, decoded
+  payment: X402PaymentResponse | null; // x-payment-response, decoded
+};
+
+type X402PaymentResponse = {
+  status: "settled";
+  txSignature: string;     // Solana transaction signature
+  network: string;         // CAIP-2, e.g. solana:EtWTRABZ…
+};
+```
+
+For `NexusReceipt`, see [Receipt structure](/docs/receipt-structure).
+
+## Typed errors
+
+```ts
+import {
+  X402PaymentRequiredError,
+  X402PaymentReplayError,
+  X402UpstreamError,
+} from "@vdm-nexus/x402";
+```
+
+### `X402PaymentRequiredError`
+
+The facilitator rejected the payment payload. Likely causes:
+
+- Recipient USDC ATA doesn't exist yet (rare, devnet edge case)
+- Transaction simulation failed for amount, blockhash, or fee reasons
+- Agent's signed payload was malformed
+
+Inspect `error.detail` for the facilitator-side explanation.
+
+### `X402PaymentReplayError`
+
+HTTP 409 — the same `tx_signature` was already credited to the ledger.
+This means the payment succeeded on a previous attempt. Idempotent
+clients should treat it as success and avoid re-debiting upstream.
+
+### `X402UpstreamError`
+
+Anything else upstream went wrong — usually a 502 from OpenRouter
+having a bad day. `error.status` is the HTTP status, `error.detail` is
+the server's message.
+
+## Things this SDK doesn't do (yet)
+
+- **Streaming** — the endpoint rejects `stream: true` today
+- **Embeddings / image gen** — chat completions only
+- **Refunds on overpay** — flat fee is whatever the server declares
+- **Multi-option payments** — only `accepts[0]` from the challenge is honored
+
+All four are tracked for post-v0.1.
