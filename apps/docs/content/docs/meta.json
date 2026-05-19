@@ -15,6 +15,7 @@
     "---SDKs---",
     "sdk/sdk-reference",
     "sdk/x402-reference",
+    "sdk/verify-api",
     "---Operations---",
     "ops/self-host-facilitator",
     "ops/observability",
