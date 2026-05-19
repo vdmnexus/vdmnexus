@@ -33,6 +33,29 @@ const PROBLEMS = [
   },
 ];
 
+const USE_CASES = [
+  {
+    title: "Trading agent",
+    body:
+      "Watch a market condition, pull a signed inference for the decision, execute on-chain. The receipt is the audit log when the strategy gets reviewed.",
+  },
+  {
+    title: "Multi-agent workflow",
+    body:
+      "Agent A asks Agent B for a judgment call. Agent B routes through Nexus and returns a signed receipt. Agent A verifies the inference before acting on it.",
+  },
+  {
+    title: "Tweet-to-execute",
+    body:
+      "A user tweets an intent. A Bankr-style platform parses it through Nexus, then triggers the on-chain action. The receipt proves what the model actually returned.",
+  },
+  {
+    title: "Autonomous research agent",
+    body:
+      "An agent crawls papers and pays per inference. Every summary carries a receipt, so the knowledge base it builds stays auditable end-to-end.",
+  },
+];
+
 const STEPS = [
   {
     title: "Sign",
@@ -68,6 +91,7 @@ export default function Home() {
         <Hero />
         <Problem />
         <Products />
+        <UseCases />
         <HowItWorks />
         <Audiences />
         <OpenSource />
@@ -266,6 +290,32 @@ function Products() {
             </Card>
           </Link>
         </FadeIn>
+      </div>
+    </Section>
+  );
+}
+
+function UseCases() {
+  return (
+    <Section>
+      <FadeIn className="max-w-2xl">
+        <SectionEyebrow>Use cases</SectionEyebrow>
+        <SectionHeading className="mt-4">
+          What you can build on the rail.
+        </SectionHeading>
+      </FadeIn>
+
+      <div className="mt-12 grid gap-4 sm:grid-cols-2">
+        {USE_CASES.map((u, i) => (
+          <FadeIn key={u.title} delay={i * 0.08}>
+            <Card className="h-full">
+              <h3 className="text-base font-semibold text-text">{u.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-text-muted">
+                {u.body}
+              </p>
+            </Card>
+          </FadeIn>
+        ))}
       </div>
     </Section>
   );
