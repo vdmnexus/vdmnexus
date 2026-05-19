@@ -246,6 +246,10 @@ X402_FACILITATOR_URL=                # OR remote facilitator URL (CDP, etc.)
                                      # Public x402.org has no Solana handler yet
 X402_FACILITATOR_API_KEY=            # Bearer token for remote facilitator
 NEXUS_ALLOW_MOCK_FACILITATOR=        # dev-only escape hatch; "true" + no URL/LOCAL → mock
+
+# Rate limiting (Upstash Redis; missing both → limiter fails open + warn log once)
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
 ```
 
 Demo script also reads:
@@ -287,6 +291,16 @@ DEMO_SEED_USDC=1.00
   `X402_FACILITATOR_URL` for remote, `NEXUS_ALLOW_MOCK_FACILITATOR=true`
   + nothing else for dev mock). If none is set the endpoint fails-closed
   with 500 server_misconfigured — no silent acceptance.
+- **Structured JSON logging + per-IP / per-agent rate limiting.** Both
+  inference routes emit `{ ts, level, event, request_id, agent_pubkey?, … }`
+  lines at every meaningful state transition (probe, verify, settle, ledger,
+  inference start/end, response). Shared event vocabulary across
+  `/v1/inference` and `/v1/chat/completions` so Vercel log search spans both.
+  Upstash sliding-window rate limit: 30/min per IP on chat-completions,
+  100/min per agent pubkey on both routes. 429 responses include
+  `X-RateLimit-{Limit,Remaining,Reset}` headers. Fails open with a one-shot
+  `rate_limit.unavailable` warn log when Upstash env vars are absent.
+  Operator docs at `/docs/ops/observability`.
 
 ### NOT built — explicit non-goals
 

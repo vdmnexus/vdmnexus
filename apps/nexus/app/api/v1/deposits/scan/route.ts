@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getServiceClient } from "@/lib/supabase";
 import { scanDeposits } from "@/lib/deposits";
 import { credit, ensureAgent } from "@/lib/credits";
+import { log, newRequestId } from "@/lib/log";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,9 +26,11 @@ function authorized(req: NextRequest): boolean {
   return false;
 }
 
-async function scan() {
+async function scan(req: NextRequest) {
+  const request_id = newRequestId(req);
   const depositAddress = process.env.NEXUS_DEPOSIT_ADDRESS;
   if (!depositAddress) {
+    log.error({ event: "deposit.misconfigured", request_id, reason: "no_deposit_address" });
     return NextResponse.json(
       { ok: false, error: "deposit_address_not_set" },
       { status: 500 }
@@ -36,8 +39,10 @@ async function scan() {
   const usdcMint = process.env.NEXUS_USDC_MINT ?? defaultUsdcMint();
   const limit = Number(process.env.NEXUS_DEPOSIT_SCAN_LIMIT ?? 50);
 
+  log.info({ event: "deposit.scan_started", request_id, limit });
   const matches = await scanDeposits({ depositAddress, usdcMint, limit });
   if (matches.length === 0) {
+    log.info({ event: "deposit.scan_completed", request_id, txs_seen: 0, credited: 0, skipped: 0 });
     return NextResponse.json({ ok: true, scanned: limit, credited: 0, skipped: 0 });
   }
 
@@ -60,10 +65,24 @@ async function scan() {
       if (code === "23505") {
         skipped++;
       } else {
-        console.error("[deposits] credit failed", m.tx_signature, e);
+        log.error({
+          event: "deposit.credit_failed",
+          request_id,
+          tx_signature: m.tx_signature,
+          sender: m.sender,
+          detail: e instanceof Error ? e.message : "unknown",
+        });
       }
     }
   }
+
+  log.info({
+    event: "deposit.scan_completed",
+    request_id,
+    txs_seen: matches.length,
+    credited,
+    skipped,
+  });
 
   return NextResponse.json({
     ok: true,
@@ -77,12 +96,12 @@ export async function POST(req: NextRequest) {
   if (!authorized(req)) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
-  return scan();
+  return scan(req);
 }
 
 export async function GET(req: NextRequest) {
   if (!authorized(req)) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
-  return scan();
+  return scan(req);
 }

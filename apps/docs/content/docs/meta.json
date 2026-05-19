@@ -17,6 +17,7 @@
     "sdk/x402-reference",
     "---Operations---",
     "ops/self-host-facilitator",
+    "ops/observability",
     "---Reference---",
     "faq"
   ]
