@@ -113,6 +113,43 @@ importers:
         specifier: ^5
         version: 5.9.3
 
+  apps/verify:
+    dependencies:
+      '@vdm-nexus/x402':
+        specifier: workspace:*
+        version: link:../../packages/x402
+      bs58:
+        specifier: ^6.0.0
+        version: 6.0.0
+      next:
+        specifier: ^16
+        version: 16.2.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      react:
+        specifier: ^19.2
+        version: 19.2.4
+      react-dom:
+        specifier: ^19.2
+        version: 19.2.4(react@19.2.4)
+      tweetnacl:
+        specifier: ^1.0.3
+        version: 1.0.3
+    devDependencies:
+      '@types/node':
+        specifier: ^22
+        version: 22.19.15
+      '@types/react':
+        specifier: ^19
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19
+        version: 19.2.3(@types/react@19.2.14)
+      tsx:
+        specifier: ^4.19.2
+        version: 4.21.0
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
   apps/web:
     dependencies:
       '@supabase/supabase-js':

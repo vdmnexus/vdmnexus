@@ -1,0 +1,133 @@
+---
+title: "Verify API (hosted)"
+description: The hosted receipt-verifier service — POST a receipt, get back a signed verdict.
+---
+
+A signed-inference receipt is fully self-verifying — anyone holding the
+SDK can re-check the five integrity properties locally via
+[`verifyReceipt`](/docs/verify-a-receipt). This page covers the
+**hosted** path: `https://verify.vdmnexus.com`, a stateless service
+that runs `verifyReceipt` on the server and returns a verdict signed by
+a separate **Verify operator key**.
+
+Use the hosted path when you'd rather POST a JSON blob than embed
+`tweetnacl`, `bs58`, and a Solana RPC client. The local path remains
+the trust-minimized option.
+
+## Endpoint
+
+```
+POST https://verify.vdmnexus.com/api/verify
+Content-Type: application/json
+```
+
+No auth. No rate limit in v0.1. Stateless — every request stands alone.
+
+### Request
+
+```ts
+type VerifyRequest = {
+  receipt: NexusReceipt;
+  prompt: ChatMessage[];
+  response: OpenAIChatCompletion;
+  endpoint?: string;     // default "https://nexus.vdmnexus.com" — where to fetch the Nexus operator key from
+  operatorKey?: string;  // optional base58 pin; skips the endpoint fetch
+  rpc?: string;          // optional Solana RPC override
+};
+```
+
+`NexusReceipt`, `ChatMessage`, and `OpenAIChatCompletion` are exported
+by [`@vdm-nexus/x402`](/docs/sdk/x402-reference). Their shapes are
+defined in [Receipt structure](/docs/receipt-structure).
+
+### Response
+
+```ts
+type VerifyResponse = {
+  v: 1;
+  ok: boolean;
+  checks: {
+    prompt_hash_ok: boolean;
+    response_hash_ok: boolean;
+    nexus_signature_ok: boolean;
+    payment_on_chain_ok: boolean;  // vacuously true for prepaid receipts
+    payer_matches: boolean;        // vacuously true for prepaid receipts
+  };
+  receipt_signature: string | null; // mirrors the input receipt.nexus_signature
+  verified_at: number;              // unix ms
+  verifier_pubkey: string;          // base58 Ed25519
+  verifier_signature: string;       // base58 Ed25519 — see "chain of trust" below
+};
+```
+
+### Curl
+
+```bash
+curl -X POST https://verify.vdmnexus.com/api/verify \
+  -H "content-type: application/json" \
+  -d '{
+    "receipt":  { "v": 2, "agent_pubkey": "...", "...": "..." },
+    "prompt":   [{ "role": "user", "content": "Hello." }],
+    "response": { "id": "...", "object": "chat.completion", "...": "..." }
+  }'
+```
+
+### Error responses
+
+| HTTP | `error`               | When                                                                 |
+| ---- | --------------------- | -------------------------------------------------------------------- |
+| 400  | `invalid_request`     | Body isn't valid JSON or doesn't match the required shape.           |
+| 502  | `upstream_error`      | `verifyReceipt` threw — usually Solana RPC down or operator-key 404. |
+| 500  | `server_misconfigured`| Service is missing its signing key. Report it.                       |
+
+Error responses do not include `verifier_signature`.
+
+## Operator key
+
+The Verify operator key is **separate** from the Nexus receipt operator
+key. Two services, two keys.
+
+```bash
+curl https://verify.vdmnexus.com/api/verify/operator-key
+# { "pubkey": "<base58>", "algorithm": "ed25519", "encoding": "base58" }
+```
+
+Pin this in your downstream consumers so they can re-verify a
+`VerifyResponse` independently — without needing to call Nexus Verify
+again.
+
+## Chain of trust
+
+There are two signatures in play. Don't confuse them.
+
+| Signature             | Signer's key                                  | Covers                                                          |
+| --------------------- | --------------------------------------------- | --------------------------------------------------------------- |
+| `receipt.nexus_signature` | Nexus operator key (`nexus.vdmnexus.com`) | Canonical JSON of the receipt body, `nexus_signature` excluded. |
+| `verifier_signature`  | Verify operator key (`verify.vdmnexus.com`)   | Canonical JSON of the verify response, `verifier_signature` excluded. |
+
+The verify response includes `receipt_signature` (the receipt's own
+`nexus_signature`, or `null` for v=1 receipts) inside its signed
+payload. That binding is load-bearing: without it, a signed
+`{ ok: true, checks: { ...all true } }` blob could be replayed as
+"proof" that some other receipt verified. Re-verifiers should check
+that `receipt_signature` in the verdict matches the
+`nexus_signature` on the receipt they hold.
+
+A downstream system can therefore accept a Nexus Verify response,
+re-check `verifier_signature` against the published verifier pubkey,
+and trust the verdict without itself running the on-chain check or
+re-fetching the Nexus operator key. That's the whole point of
+publishing the verifier key.
+
+## Hosted vs. local
+
+|                         | Hosted (`verify.vdmnexus.com`)                            | Local ([`verifyReceipt`](/docs/verify-a-receipt))     |
+| ----------------------- | --------------------------------------------------------- | ----------------------------------------------------- |
+| Trust model             | Trust the Verify operator key + a Solana RPC of its choice | Trust your own code + a Solana RPC of your choice    |
+| Extra deps in your app  | None — just `fetch`                                       | `@vdm-nexus/x402`, `tweetnacl`, `bs58`                |
+| Solana RPC              | Run by Nexus                                              | Run by you (use a private one for production)         |
+| Re-verifiable           | Yes — `verifier_signature` is itself an Ed25519 proof     | Trivially, since you computed it                      |
+| Round-trip latency      | One HTTPS call                                            | One Solana RPC call (the bulk of `verifyReceipt`)     |
+
+When in doubt, run [`verifyReceipt`](/docs/verify-a-receipt) locally.
+This service is convenience, not the source of truth.
