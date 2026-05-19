@@ -54,12 +54,13 @@ class MockFacilitator implements FacilitatorClient {
   }
 
   async getSupported(): Promise<SupportedResponse> {
+    const { SOLANA_DEVNET_CAIP2 } = await import("@x402/svm");
     return {
       kinds: [
         {
           x402Version: 2,
           scheme: "exact",
-          network: "solana:devnet",
+          network: SOLANA_DEVNET_CAIP2,
         },
       ],
       extensions: [],

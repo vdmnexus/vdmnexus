@@ -10,7 +10,11 @@
 
 import bs58 from "bs58";
 import { createKeyPairSignerFromBytes } from "@solana/kit";
-import { toFacilitatorSvmSigner } from "@x402/svm";
+import {
+  toFacilitatorSvmSigner,
+  SOLANA_DEVNET_CAIP2,
+  SOLANA_MAINNET_CAIP2,
+} from "@x402/svm";
 import { ExactSvmScheme } from "@x402/svm/exact/facilitator";
 import { x402Facilitator } from "@x402/core/facilitator";
 import type {
@@ -34,7 +38,7 @@ async function build(): Promise<x402Facilitator> {
   const signer = toFacilitatorSvmSigner(keypair);
   const scheme = new ExactSvmScheme(signer);
   return new x402Facilitator().register(
-    ["solana:devnet", "solana:mainnet"],
+    [SOLANA_DEVNET_CAIP2, SOLANA_MAINNET_CAIP2],
     scheme
   );
 }

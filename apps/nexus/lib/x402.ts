@@ -15,6 +15,10 @@ import type {
   PaymentRequirements,
   ResourceInfo,
 } from "@x402/core/types";
+import {
+  SOLANA_DEVNET_CAIP2,
+  SOLANA_MAINNET_CAIP2,
+} from "@x402/svm";
 
 export type {
   Network,
@@ -31,10 +35,14 @@ export const X402_PAYMENT_HEADER = "x-payment";
 export const X402_REQUIRED_HEADER = "x-payment-required";
 export const X402_RESPONSE_HEADER = "x-payment-response";
 
-/** CAIP-2-style network identifiers used by the x402 protocol. */
+/**
+ * CAIP-2 network identifiers for x402. @x402/svm expects the full form
+ * (chain namespace + genesis-hash reference) — the short "solana:devnet"
+ * lookalike is silently unsupported by the SVM scheme's RPC lookup.
+ */
 export const X402_NETWORKS = {
-  solanaDevnet: "solana:devnet",
-  solanaMainnet: "solana:mainnet",
+  solanaDevnet: SOLANA_DEVNET_CAIP2,
+  solanaMainnet: SOLANA_MAINNET_CAIP2,
 } as const satisfies Record<string, Network>;
 
 /** Devnet USDC mint (Circle's official Solana devnet token). */
