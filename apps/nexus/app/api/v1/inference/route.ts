@@ -6,6 +6,7 @@ import { debit, ensureAgent, getBalance } from "@/lib/credits";
 import { runInference } from "@/lib/inference";
 import { isTaskType, route, type TaskType } from "@/lib/routing";
 import { recordNonce } from "@/lib/nonces";
+import { signReceipt } from "@/lib/receipts";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -138,19 +139,22 @@ export async function POST(req: NextRequest) {
 
   const newBalance = await getBalance(supabase, pubkey);
 
+  const receipt = signReceipt({
+    v: 2 as const,
+    agent_pubkey: pubkey,
+    provider: decision.provider,
+    model: decision.model,
+    cost_usdc: result.cost_usdc,
+    balance_remaining: newBalance,
+    prompt_hash: sha256(prompt),
+    response_hash: sha256(result.text),
+    timestamp: Date.now(),
+    inference_id: logRow?.id ?? null,
+  });
+
   return NextResponse.json({
     ok: true,
     result: result.text,
-    receipt: {
-      agent_pubkey: pubkey,
-      provider: decision.provider,
-      model: decision.model,
-      cost_usdc: result.cost_usdc,
-      balance_remaining: newBalance,
-      prompt_hash: sha256(prompt),
-      response_hash: sha256(result.text),
-      timestamp: Date.now(),
-      inference_id: logRow?.id ?? null,
-    },
+    receipt,
   });
 }
