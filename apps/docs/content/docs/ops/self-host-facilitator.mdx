@@ -127,16 +127,100 @@ way today — a misconfigured prod environment ran the mock for ~10
 seconds and accepted a fake payment, charging us $0.000007 to
 OpenRouter before we caught it.
 
-## Mainnet readiness
+## KMS-backed signing
 
-Today our reference facilitator runs on Solana devnet with the
-fee-payer key in a Vercel env var. Acceptable for devnet; **not
-acceptable for mainnet**. The migration path:
+`NEXUS_DEPOSIT_SECRET_KEY` lives in lambda env — fine for devnet,
+unacceptable for mainnet. The Nexus reference implementation switches
+the signing step to AWS KMS when `NEXUS_KMS_KEY_ID` is set: the Ed25519
+private key stays inside KMS and the lambda only ever holds AWS creds
+scoped to `kms:Sign` against a single key ARN. The code lives in
+[`apps/nexus/lib/kms-signer.ts`](https://github.com/vdmnexus/vdmnexus/blob/main/apps/nexus/lib/kms-signer.ts).
 
-1. Move `NEXUS_DEPOSIT_SECRET_KEY` to a real KMS (AWS KMS, Google
-   Cloud KMS, Vercel/Turso secrets vault, or a hardware HSM)
-2. Replace the inline `createKeyPairSignerFromBytes` with a signer
-   that calls the KMS for the signing step
-3. Set `X402_NETWORK=solana:mainnet` (or the genesis-hash form)
-4. Validate against mainnet on a small budget for ~1 week before
-   announcing
+### 1. Create the KMS key
+
+```bash
+aws kms create-key \
+  --key-spec ECC_NIST_EDWARDS25519 \
+  --key-usage SIGN_VERIFY \
+  --region us-east-1
+```
+
+Note the returned `KeyId` (and `Arn` — you'll use the ARN as
+`NEXUS_KMS_KEY_ID`).
+
+### 2. Derive the Solana address from the KMS public key
+
+`KMS.GetPublicKey` returns an SPKI DER. For Ed25519, the leading
+12-byte ASN.1 prefix is fixed and the trailing 32 bytes are the raw
+public key. base58-encode those 32 bytes → Solana address.
+
+```bash
+aws kms get-public-key --key-id <key-id> --region us-east-1 \
+  --query PublicKey --output text | base64 -d | tail -c 32 | base58
+```
+
+That address is your new facilitator fee payer. Set
+`NEXUS_DEPOSIT_ADDRESS` to it.
+
+### 3. Fund the derived address
+
+- SOL via [faucet.solana.com](https://faucet.solana.com) — ~0.5 SOL
+  covers ~100k settlements at devnet rates.
+- USDC via [faucet.circle.com](https://faucet.circle.com) to
+  pre-create the associated token account.
+
+### 4. Create an IAM user with least privilege
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["kms:Sign", "kms:GetPublicKey", "kms:DescribeKey"],
+      "Resource": "<your-key-arn>"
+    }
+  ]
+}
+```
+
+Generate access keys for this user. **Do not** attach broader KMS
+permissions — the runtime principal should only be able to sign with
+this one key.
+
+### 5. Wire the env vars
+
+```
+NEXUS_FACILITATOR_LOCAL=true
+NEXUS_KMS_KEY_ID=arn:aws:kms:us-east-1:<account-id>:key/<key-id>
+NEXUS_KMS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+NEXUS_DEPOSIT_ADDRESS=<derived-from-step-2>
+# Leave NEXUS_DEPOSIT_SECRET_KEY UNSET in production.
+```
+
+### 6. Verify the address binding at startup
+
+On first request the facilitator emits:
+
+```json
+{"event":"facilitator.kms.ready","address":"<derived-pubkey>"}
+```
+
+If it sees `NEXUS_DEPOSIT_ADDRESS` set and it doesn't match the derived
+address, it logs `facilitator.kms.address_mismatch` and throws — the
+route never serves a 402, so settlements can't accidentally credit the
+wrong wallet.
+
+### Mainnet readiness
+
+KMS-backed signing is necessary but not sufficient for mainnet. Before
+flipping `SOLANA_NETWORK=mainnet-beta` you also need:
+
+- Deposit detection stress-tested at expected mainnet volume
+- A monitored SOL balance on the fee-payer address with a top-up plan
+- ~1 week of mainnet validation against a small budget before
+  announcing
+
+The mainnet flip is tracked as a separate roadmap item.

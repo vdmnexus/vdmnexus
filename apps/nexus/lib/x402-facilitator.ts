@@ -2,8 +2,9 @@
  * x402 facilitator — verifies and settles signed Solana payments.
  *
  * Three modes behind one interface, selected by env:
- *   - LOCAL  — NEXUS_FACILITATOR_LOCAL=true → in-process facilitator
- *              built from NEXUS_DEPOSIT_SECRET_KEY (preferred default)
+ *   - LOCAL  — NEXUS_FACILITATOR_LOCAL=true → in-process facilitator.
+ *              Signs via AWS KMS when NEXUS_KMS_KEY_ID is set (preferred
+ *              for production), else falls back to NEXUS_DEPOSIT_SECRET_KEY.
  *   - HTTP   — X402_FACILITATOR_URL set → wraps @x402/core's
  *              HTTPFacilitatorClient against that URL (CDP, etc.)
  *   - MOCK   — NEXUS_ALLOW_MOCK_FACILITATOR=true (and the others

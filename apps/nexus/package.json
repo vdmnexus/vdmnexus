@@ -6,9 +6,11 @@
     "dev": "next dev --port 3001",
     "build": "next build",
     "start": "next start --port 3001",
-    "demo": "tsx scripts/demo-agent.ts"
+    "demo": "tsx scripts/demo-agent.ts",
+    "test:payinfer": "tsx scripts/test-payinfer.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-kms": "^3",
     "@solana/kit": "^5.5.1",
     "@supabase/supabase-js": "^2.45.4",
     "@upstash/ratelimit": "^2.0.5",

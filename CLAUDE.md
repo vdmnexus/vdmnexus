@@ -264,8 +264,12 @@ SLACK_WEBHOOK_URL=       # optional
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 OPENROUTER_API_KEY=
-NEXUS_DEPOSIT_ADDRESS=               # Solana pubkey agents send USDC to
-NEXUS_DEPOSIT_SECRET_KEY=            # devnet only; mainnet must use a KMS
+NEXUS_DEPOSIT_ADDRESS=               # Solana pubkey agents send USDC to.
+                                     # When NEXUS_KMS_KEY_ID is set, MUST
+                                     # match the KMS-derived address — the
+                                     # facilitator fails closed on mismatch.
+NEXUS_DEPOSIT_SECRET_KEY=            # Fallback signing key — used only when
+                                     # NEXUS_KMS_KEY_ID is unset. Dev only.
 CRON_SECRET=                         # required by /api/v1/deposits/scan
 SOLANA_NETWORK=devnet                # devnet for v1
 SOLANA_RPC_URL=                      # optional; defaults to public RPC
@@ -282,6 +286,17 @@ X402_FACILITATOR_URL=                # OR remote facilitator URL (CDP, etc.)
                                      # Public x402.org has no Solana handler yet
 X402_FACILITATOR_API_KEY=            # Bearer token for remote facilitator
 NEXUS_ALLOW_MOCK_FACILITATOR=        # dev-only escape hatch; "true" + no URL/LOCAL → mock
+
+# Facilitator signing — KMS path (preferred for production).
+# When NEXUS_KMS_KEY_ID is set AND NEXUS_FACILITATOR_LOCAL=true, the
+# local facilitator signs via AWS KMS instead of reading
+# NEXUS_DEPOSIT_SECRET_KEY. The KMS key MUST be an Ed25519 asymmetric
+# key (KeySpec=ECC_NIST_EDWARDS25519). IAM principal needs kms:Sign +
+# kms:GetPublicKey + kms:DescribeKey scoped to the key.
+NEXUS_KMS_KEY_ID=                    # full ARN of the Ed25519 KMS key
+NEXUS_KMS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
 
 # Receipt signing (required — routes fail-closed if missing)
 NEXUS_OPERATOR_SECRET_KEY=           # base58 64-byte tweetnacl secretKey; generate
@@ -363,13 +378,27 @@ DEMO_SEED_USDC=1.00
   `X-RateLimit-{Limit,Remaining,Reset}` headers. Fails open with a one-shot
   `rate_limit.unavailable` warn log when Upstash env vars are absent.
   Operator docs at `/docs/ops/observability`.
+- **AWS KMS-backed facilitator signing (devnet).** When `NEXUS_KMS_KEY_ID`
+  is set, the in-process facilitator signs every Solana tx via `KMS.Sign`
+  (algorithm `ED25519_SHA_512`) instead of an in-memory keypair — the
+  Ed25519 private key never enters lambda memory. Public key derived
+  from `KMS.GetPublicKey` at startup, base58-encoded from the trailing
+  32 bytes of the SPKI DER; asserts it matches `NEXUS_DEPOSIT_ADDRESS`
+  or fails closed. Legacy facilitator address
+  `AfUC2CamMUyTJe4eY1TCz2mASZpYpChJHfPQRnxzpsAK` is no longer the active
+  fee payer; receipts referencing it remain verifiable on-chain. Mainnet
+  flip is a separate roadmap item. Code lives in
+  `apps/nexus/lib/kms-signer.ts`; selection happens in
+  `apps/nexus/lib/local-facilitator.ts`.
 
 ### NOT built — explicit non-goals
 
-- **Mainnet.** Devnet only. The deposit secret key currently lives in
-  `apps/nexus/.env` (fine for devnet, unacceptable for mainnet). Switch
-  behind `SOLANA_NETWORK=mainnet-beta` only after moving the key to a real
-  KMS and stress-testing deposit detection on devnet.
+- **Mainnet.** Devnet only. The KMS-backed facilitator signer is live
+  on devnet (see Built section); flipping `SOLANA_NETWORK=mainnet-beta`
+  is a separate roadmap item that needs deposit-detection stress
+  testing and a mainnet fee-payer top-up plan first. The legacy env-var
+  signing path (`NEXUS_DEPOSIT_SECRET_KEY`) is still wired as a dev
+  fallback when `NEXUS_KMS_KEY_ID` is unset.
 - **SDK helper to send USDC.** `Agent.deposit()` would let agents top
   themselves up; needs `@solana/web3.js` + `@solana/spl-token`. Deferred
   until the SDK package split (`@vdmnexus/wallet`) makes the dep cost
