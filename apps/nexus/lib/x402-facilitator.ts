@@ -1,15 +1,17 @@
 /**
  * x402 facilitator — verifies and settles signed Solana payments.
  *
- * Two implementations behind one interface:
- *   - MockFacilitator: dev-only, always returns success with a synthetic
- *     tx signature. Active when X402_FACILITATOR_URL is unset.
- *   - HttpFacilitator: wraps the canonical HTTPFacilitatorClient from
- *     @x402/core. Active when X402_FACILITATOR_URL is set.
+ * Three modes behind one interface, selected by env:
+ *   - LOCAL  — NEXUS_FACILITATOR_LOCAL=true → in-process facilitator
+ *              built from NEXUS_DEPOSIT_SECRET_KEY (preferred default)
+ *   - HTTP   — X402_FACILITATOR_URL set → wraps @x402/core's
+ *              HTTPFacilitatorClient against that URL (CDP, etc.)
+ *   - MOCK   — NEXUS_ALLOW_MOCK_FACILITATOR=true (and the others
+ *              unset) → permissive mock for local dev only
  *
- * Default suggested URLs:
- *   - https://x402.org/facilitator                  ← free, devnet, no auth
- *   - https://api.cdp.coinbase.com/platform/v2/x402 ← Coinbase CDP, paid
+ * If none of the above is set, getFacilitator() throws
+ * FacilitatorNotConfiguredError so the route fails closed in production
+ * rather than silently accepting bogus payments.
  */
 
 import { randomUUID } from "node:crypto";
@@ -22,6 +24,7 @@ import type {
   SupportedResponse,
   VerifyResponse,
 } from "@x402/core/types";
+import { getLocalFacilitator } from "./local-facilitator";
 
 class MockFacilitator implements FacilitatorClient {
   async verify(
@@ -65,52 +68,59 @@ class MockFacilitator implements FacilitatorClient {
   }
 }
 
-let cached: FacilitatorClient | null = null;
-
-/**
- * Returned by getFacilitator() when no facilitator is configured AND mock
- * is not explicitly enabled. Surfaces a clear server_misconfigured error
- * instead of silently letting the MockFacilitator accept bogus payments.
- */
 export class FacilitatorNotConfiguredError extends Error {
   constructor() {
     super(
-      "X402_FACILITATOR_URL is not set and NEXUS_ALLOW_MOCK_FACILITATOR is not 'true'. " +
-        "Refusing to use MockFacilitator without an explicit opt-in."
+      "No facilitator configured. Set NEXUS_FACILITATOR_LOCAL=true " +
+        "(self-host) or X402_FACILITATOR_URL=<url> (remote), or in dev " +
+        "set NEXUS_ALLOW_MOCK_FACILITATOR=true."
     );
     this.name = "FacilitatorNotConfiguredError";
   }
 }
 
-export function getFacilitator(): FacilitatorClient {
-  if (cached) return cached;
-  const url = process.env.X402_FACILITATOR_URL?.trim();
+let cached: Promise<FacilitatorClient> | null = null;
 
-  if (!url) {
-    if (process.env.NEXUS_ALLOW_MOCK_FACILITATOR?.trim() === "true") {
-      cached = new MockFacilitator();
-      return cached;
-    }
-    throw new FacilitatorNotConfiguredError();
+export function getFacilitator(): Promise<FacilitatorClient> {
+  if (cached) return cached;
+
+  if (process.env.NEXUS_FACILITATOR_LOCAL?.trim() === "true") {
+    cached = getLocalFacilitator();
+    return cached;
   }
 
-  const apiKey = process.env.X402_FACILITATOR_API_KEY?.trim();
-  const createAuthHeaders = apiKey
-    ? async () => {
-        const headers = { Authorization: `Bearer ${apiKey}` };
-        return {
-          verify: headers,
-          settle: headers,
-          supported: headers,
-        };
-      }
-    : undefined;
+  const url = process.env.X402_FACILITATOR_URL?.trim();
+  if (url) {
+    const apiKey = process.env.X402_FACILITATOR_API_KEY?.trim();
+    const createAuthHeaders = apiKey
+      ? async () => {
+          const headers = { Authorization: `Bearer ${apiKey}` };
+          return {
+            verify: headers,
+            settle: headers,
+            supported: headers,
+          };
+        }
+      : undefined;
+    cached = Promise.resolve(
+      new HTTPFacilitatorClient({
+        url,
+        createAuthHeaders,
+      })
+    );
+    return cached;
+  }
 
-  cached = new HTTPFacilitatorClient({
-    url,
-    createAuthHeaders,
-  });
-  return cached;
+  if (process.env.NEXUS_ALLOW_MOCK_FACILITATOR?.trim() === "true") {
+    cached = Promise.resolve(new MockFacilitator());
+    return cached;
+  }
+
+  cached = Promise.reject(new FacilitatorNotConfiguredError());
+  // Don't cache the rejection — let the next call retry if env changed.
+  const out = cached;
+  cached = null;
+  return out;
 }
 
 /** Test hook — reset the cached facilitator (used by tests). */

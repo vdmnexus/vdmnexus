@@ -235,11 +235,11 @@ NEXUS_REQUEST_MAX_AGE_SECONDS=60     # optional
 X402_FLAT_PRICE_USDC=0.01            # flat fee declared in the 402 challenge
 X402_NETWORK=solana:devnet           # CAIP-2 — solana:devnet | solana:mainnet
 X402_RECIPIENT_ADDRESS=              # falls back to NEXUS_DEPOSIT_ADDRESS
-X402_FACILITATOR_URL=                # MUST be set in production
-                                     # public devnet (no Solana yet): https://x402.org/facilitator
-                                     # Coinbase CDP:  https://api.cdp.coinbase.com/platform/v2/x402
-X402_FACILITATOR_API_KEY=            # Bearer token (CDP only; x402.org needs none)
-NEXUS_ALLOW_MOCK_FACILITATOR=        # dev-only escape hatch; "true" + empty URL → MockFacilitator
+NEXUS_FACILITATOR_LOCAL=             # "true" → self-hosted facilitator (preferred)
+X402_FACILITATOR_URL=                # OR remote facilitator URL (CDP, etc.)
+                                     # Public x402.org has no Solana handler yet
+X402_FACILITATOR_API_KEY=            # Bearer token for remote facilitator
+NEXUS_ALLOW_MOCK_FACILITATOR=        # dev-only escape hatch; "true" + no URL/LOCAL → mock
 ```
 
 Demo script also reads:
@@ -266,20 +266,21 @@ DEMO_SEED_USDC=1.00
   ledger keyed by sender pubkey. Idempotent via unique `tx_signature` index.
 - Public roadmap page (`/roadmap`) on apps/web with live build log + admin
   editor at `/admin/roadmap`.
-- **x402-gated `/chat/completions` endpoint (spec v2).**
-  OpenAI-shape request/response, gated by an x402 v2 challenge that uses
-  the canonical types from `@x402/core`. Unpaid POST → 402 with
-  `X-Payment-Required` (`scheme=exact`, CAIP-2 `solana:devnet`, USDC,
-  flat 0.01 USDC, includes `resource` info). Paid retry carries
-  `X-Payment` (base64 JSON `{ x402Version, accepted, payload }`);
-  facilitator verifies + co-signs + broadcasts via the official
-  `HTTPFacilitatorClient`; route credits the ledger with the returned
-  `tx_signature` (idempotent via the existing unique index) and runs
-  inference. Response is OpenAI body + `X-Nexus-Receipt` + `X-Payment-Response`.
-  Facilitator is env-driven — empty `X402_FACILITATOR_URL` keeps the
-  built-in `MockFacilitator` (dev), set to `https://x402.org/facilitator`
-  for free public devnet, or to the Coinbase CDP endpoint with a Bearer
-  key for production-paid settlement.
+- **x402-gated `/chat/completions` endpoint (spec v2) with self-hosted
+  facilitator.** OpenAI-shape request/response, gated by an x402 v2
+  challenge that uses the canonical types from `@x402/core`. Unpaid POST
+  → 402 with `X-Payment-Required` (`scheme=exact`, CAIP-2
+  `solana:devnet`, USDC, flat 0.01 USDC, includes `resource` info).
+  Paid retry carries `X-Payment` (base64 JSON
+  `{ x402Version, accepted, payload }`); facilitator verifies the SPL
+  transfer, co-signs as fee payer, and broadcasts to Solana; route
+  credits the ledger with the returned `tx_signature` (idempotent via
+  the existing unique index) and runs inference. Response is OpenAI
+  body + `X-Nexus-Receipt` + `X-Payment-Response`. Facilitator is
+  env-driven (`NEXUS_FACILITATOR_LOCAL=true` for in-process self-hosted,
+  `X402_FACILITATOR_URL` for remote, `NEXUS_ALLOW_MOCK_FACILITATOR=true`
+  + nothing else for dev mock). If none is set the endpoint fails-closed
+  with 500 server_misconfigured — no silent acceptance.
 
 ### NOT built — explicit non-goals
 

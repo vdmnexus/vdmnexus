@@ -160,12 +160,14 @@ export async function POST(req: NextRequest) {
 
   let facilitator;
   try {
-    facilitator = getFacilitator();
+    facilitator = await getFacilitator();
   } catch (e) {
     if (e instanceof FacilitatorNotConfiguredError) {
       return err("server_misconfigured", 500, { detail: e.message });
     }
-    throw e;
+    return err("facilitator_init_failed", 500, {
+      detail: e instanceof Error ? e.message : "unknown",
+    });
   }
   let verified;
   try {
