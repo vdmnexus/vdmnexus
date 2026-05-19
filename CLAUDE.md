@@ -287,6 +287,14 @@ NEXUS_ALLOW_MOCK_FACILITATOR=        # dev-only escape hatch; "true" + no URL/LO
 NEXUS_OPERATOR_SECRET_KEY=           # base58 64-byte tweetnacl secretKey; generate
                                      # via nacl.sign.keyPair(). Pubkey is exposed
                                      # at GET /api/v1/operator-key for verifiers.
+
+# Rate limiting (Upstash Redis; missing both → limiter fails open + warn log once)
+# Code reads UPSTASH_REDIS_REST_URL first, then KV_REST_API_URL — the Vercel
+# Marketplace Upstash integration writes the KV_* names.
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+# KV_REST_API_URL=                   # set automatically by Vercel Marketplace
+# KV_REST_API_TOKEN=                 # set automatically by Vercel Marketplace
 ```
 
 Demo script also reads:
@@ -345,6 +353,16 @@ DEMO_SEED_USDC=1.00
   signer matches `agent_pubkey`. Returns `{ ok, checks: { … } }` with
   five boolean checks (`payment_on_chain_ok` + `payer_matches` are
   vacuously true on prepaid receipts that have no `payment` field).
+- **Structured JSON logging + per-IP / per-agent rate limiting.** Both
+  inference routes emit `{ ts, level, event, request_id, agent_pubkey?, … }`
+  lines at every meaningful state transition (probe, verify, settle, ledger,
+  inference start/end, response). Shared event vocabulary across
+  `/v1/inference` and `/v1/chat/completions` so Vercel log search spans both.
+  Upstash sliding-window rate limit: 30/min per IP on chat-completions,
+  100/min per agent pubkey on both routes. 429 responses include
+  `X-RateLimit-{Limit,Remaining,Reset}` headers. Fails open with a one-shot
+  `rate_limit.unavailable` warn log when Upstash env vars are absent.
+  Operator docs at `/docs/ops/observability`.
 
 ### NOT built — explicit non-goals
 

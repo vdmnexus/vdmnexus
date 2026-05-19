@@ -21,6 +21,14 @@ import {
   type PaymentPayload,
   type ResourceInfo,
 } from "@/lib/x402";
+import { log, newRequestId } from "@/lib/log";
+import {
+  clientIp,
+  enforceIp,
+  enforcePubkey,
+  rateLimitHeaders,
+  type RateLimitDecision,
+} from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,6 +45,25 @@ function err(
   extra?: Record<string, unknown>
 ): NextResponse {
   return NextResponse.json({ ok: false, error, ...extra }, { status });
+}
+
+function rateLimited(d: RateLimitDecision): NextResponse {
+  const retry_after_ms = Math.max(0, d.reset - Date.now());
+  return new NextResponse(
+    JSON.stringify({
+      ok: false,
+      error: "rate_limited",
+      key_type: d.key_type,
+      retry_after_ms,
+    }),
+    {
+      status: 429,
+      headers: {
+        "content-type": "application/json",
+        ...rateLimitHeaders(d),
+      },
+    }
+  );
 }
 
 function sha256(input: string): string {
@@ -92,20 +119,49 @@ function isValidBody(b: ChatCompletionsBody): b is Required<
 }
 
 export async function POST(req: NextRequest) {
+  const request_id = newRequestId(req);
+  const t0 = Date.now();
+  const ip = clientIp(req);
+  const hasPaymentHeader = req.headers.get(X402_PAYMENT_HEADER) != null;
+
+  log.info({
+    event: "chat.probe_received",
+    request_id,
+    route: "/v1/chat/completions",
+    method: "POST",
+    has_payment_header: hasPaymentHeader,
+  });
+
+  const ipDecision = await enforceIp(ip);
+  if (!ipDecision.allowed) {
+    log.warn({
+      event: "rate_limit.blocked",
+      request_id,
+      key_type: "ip",
+      limit: ipDecision.limit,
+      remaining: ipDecision.remaining,
+      reset_ms: ipDecision.reset,
+    });
+    return rateLimited(ipDecision);
+  }
+
   let body: ChatCompletionsBody;
   try {
     body = (await req.json()) as ChatCompletionsBody;
   } catch {
+    log.warn({ event: "chat.body_invalid", request_id, reason: "json_parse" });
     return err("invalid_json", 400);
   }
 
   if (!isValidBody(body)) {
+    log.warn({ event: "chat.body_invalid", request_id, reason: "shape" });
     return err("invalid_request", 400, {
       detail: "model + messages[] (each with role + content) required",
     });
   }
 
   if (body.stream) {
+    log.warn({ event: "chat.body_invalid", request_id, reason: "stream_unsupported" });
     return err("streaming_not_supported", 400, {
       detail: "set stream=false; streaming arrives in a future release",
     });
@@ -113,6 +169,7 @@ export async function POST(req: NextRequest) {
 
   const recipient = getRecipient();
   if (!recipient) {
+    log.error({ event: "chat.server_misconfigured", request_id, reason: "no_recipient" });
     return err("server_misconfigured", 500, {
       detail: "X402_RECIPIENT_ADDRESS or NEXUS_DEPOSIT_ADDRESS must be set",
     });
@@ -130,12 +187,14 @@ export async function POST(req: NextRequest) {
   });
   const requirement = challenge.accepts[0];
   if (!requirement) {
+    log.error({ event: "chat.server_misconfigured", request_id, reason: "no_payment_option" });
     return err("server_misconfigured", 500, { detail: "no payment option" });
   }
 
   const paymentHeader = req.headers.get(X402_PAYMENT_HEADER);
 
   if (!paymentHeader) {
+    log.info({ event: "chat.challenge_issued", request_id, network, amount_usdc: amountUsdc });
     return new NextResponse(
       JSON.stringify({
         ok: false,
@@ -154,9 +213,35 @@ export async function POST(req: NextRequest) {
 
   const payload = decodeHeader<PaymentPayload>(paymentHeader);
   if (!payload) {
+    log.warn({ event: "chat.payment_malformed", request_id });
     return err("payment_malformed", 402, {
       detail: "X-PAYMENT header is not valid base64 JSON",
     });
+  }
+
+  const claimedPayer = extractPayerFromPayload(payload);
+  log.info({
+    event: "chat.payment_decoded",
+    request_id,
+    scheme: requirement.scheme,
+    network,
+    payer: claimedPayer ?? null,
+  });
+
+  if (claimedPayer) {
+    const pkDecision = await enforcePubkey(claimedPayer);
+    if (!pkDecision.allowed) {
+      log.warn({
+        event: "rate_limit.blocked",
+        request_id,
+        agent_pubkey: claimedPayer,
+        key_type: "pubkey",
+        limit: pkDecision.limit,
+        remaining: pkDecision.remaining,
+        reset_ms: pkDecision.reset,
+      });
+      return rateLimited(pkDecision);
+    }
   }
 
   let facilitator;
@@ -164,8 +249,19 @@ export async function POST(req: NextRequest) {
     facilitator = await getFacilitator();
   } catch (e) {
     if (e instanceof FacilitatorNotConfiguredError) {
+      log.error({
+        event: "chat.server_misconfigured",
+        request_id,
+        reason: "facilitator_unconfigured",
+        detail: e.message,
+      });
       return err("server_misconfigured", 500, { detail: e.message });
     }
+    log.error({
+      event: "chat.facilitator_init_failed",
+      request_id,
+      reason: e instanceof Error ? e.message : "unknown",
+    });
     return err("facilitator_init_failed", 500, {
       detail: e instanceof Error ? e.message : "unknown",
     });
@@ -174,25 +270,55 @@ export async function POST(req: NextRequest) {
   try {
     verified = await facilitator.verify(payload, requirement);
   } catch (e) {
+    log.error({
+      event: "chat.verify_failed",
+      request_id,
+      agent_pubkey: claimedPayer ?? undefined,
+      reason: e instanceof Error ? e.message : "verify_threw",
+    });
     return err("facilitator_unreachable", 502, {
       detail: e instanceof Error ? e.message : "verify_threw",
     });
   }
   if (!verified.isValid) {
+    log.warn({
+      event: "chat.verify_failed",
+      request_id,
+      agent_pubkey: claimedPayer ?? undefined,
+      reason: verified.invalidReason ?? verified.invalidMessage ?? "invalid",
+    });
     return err("payment_invalid", 402, {
       detail: verified.invalidReason ?? verified.invalidMessage ?? "invalid",
     });
   }
+  log.info({
+    event: "chat.verify_ok",
+    request_id,
+    agent_pubkey: verified.payer ?? claimedPayer ?? undefined,
+    amount_usdc: amountUsdc,
+  });
 
   let settled;
   try {
     settled = await facilitator.settle(payload, requirement);
   } catch (e) {
+    log.error({
+      event: "chat.settle_failed",
+      request_id,
+      agent_pubkey: verified.payer ?? claimedPayer ?? undefined,
+      reason: e instanceof Error ? e.message : "settle_threw",
+    });
     return err("facilitator_unreachable", 502, {
       detail: e instanceof Error ? e.message : "settle_threw",
     });
   }
   if (!settled.success) {
+    log.warn({
+      event: "chat.settle_failed",
+      request_id,
+      agent_pubkey: verified.payer ?? claimedPayer ?? undefined,
+      reason: settled.errorReason ?? settled.errorMessage ?? "failed",
+    });
     return err("payment_failed", 402, {
       detail: settled.errorReason ?? settled.errorMessage ?? "failed",
     });
@@ -201,8 +327,15 @@ export async function POST(req: NextRequest) {
   const payerWallet =
     settled.payer ?? verified.payer ?? extractPayerFromPayload(payload);
   if (!payerWallet) {
+    log.error({ event: "chat.settle_failed", request_id, reason: "missing_payer" });
     return err("payment_missing_payer", 402);
   }
+  log.info({
+    event: "chat.settle_ok",
+    request_id,
+    agent_pubkey: payerWallet,
+    tx_signature: settled.transaction,
+  });
 
   const supabase = getServiceClient();
   await ensureAgent(supabase, payerWallet);
@@ -214,12 +347,33 @@ export async function POST(req: NextRequest) {
       reason: "x402_payment",
       tx_signature: settled.transaction,
     });
+    log.info({
+      event: "chat.credit_written",
+      request_id,
+      agent_pubkey: payerWallet,
+      amount_usdc: amountUsdc,
+      tx_signature: settled.transaction,
+    });
   } catch (e) {
     if ((e as { code?: string }).code === "23505") {
+      log.warn({
+        event: "chat.credit_replay",
+        request_id,
+        agent_pubkey: payerWallet,
+        tx_signature: settled.transaction,
+      });
       return err("payment_replay", 409);
     }
     throw e;
   }
+
+  log.info({
+    event: "inference.upstream_started",
+    request_id,
+    agent_pubkey: payerWallet,
+    upstream_model: body.model,
+  });
+  const tInference = Date.now();
 
   let result;
   try {
@@ -229,6 +383,14 @@ export async function POST(req: NextRequest) {
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : "upstream_error";
+    log.error({
+      event: "inference.upstream_failed",
+      request_id,
+      agent_pubkey: payerWallet,
+      upstream_model: body.model,
+      latency_ms: Date.now() - tInference,
+      reason: message,
+    });
     const { error: logError } = await supabase.from("inference_logs").insert({
       agent_pubkey: payerWallet,
       request_nonce: settled.transaction,
@@ -240,18 +402,38 @@ export async function POST(req: NextRequest) {
       error: message,
     });
     if (logError) {
-      console.error("inference_logs (error row) insert failed", {
-        tx: settled.transaction,
-        error: logError,
+      log.error({
+        event: "log_insert_failed",
+        request_id,
+        agent_pubkey: payerWallet,
+        tx_signature: settled.transaction,
+        detail: logError.message,
       });
     }
     return err("upstream_error", 502, { detail: message });
   }
 
+  log.info({
+    event: "inference.upstream_ok",
+    request_id,
+    agent_pubkey: payerWallet,
+    upstream_model: body.model,
+    cost_usdc: result.cost_usdc,
+    latency_ms: result.latency_ms,
+    prompt_tokens: result.prompt_tokens,
+    completion_tokens: result.completion_tokens,
+  });
+
   await debit(supabase, {
     pubkey: payerWallet,
     usdc: result.cost_usdc,
     reason: "inference",
+  });
+  log.info({
+    event: "ledger.debited",
+    request_id,
+    agent_pubkey: payerWallet,
+    cost_usdc: result.cost_usdc,
   });
 
   const { data: logRow, error: logError } = await supabase
@@ -270,9 +452,12 @@ export async function POST(req: NextRequest) {
     .select("id")
     .single();
   if (logError) {
-    console.error("inference_logs insert failed", {
-      tx: settled.transaction,
-      error: logError,
+    log.error({
+      event: "log_insert_failed",
+      request_id,
+      agent_pubkey: payerWallet,
+      tx_signature: settled.transaction,
+      detail: logError.message,
     });
   }
 
@@ -300,6 +485,14 @@ export async function POST(req: NextRequest) {
     },
   });
 
+  log.info({
+    event: "response.sent",
+    request_id,
+    agent_pubkey: payerWallet,
+    status: 200,
+    total_latency_ms: Date.now() - t0,
+  });
+
   return new NextResponse(JSON.stringify(result.openaiResponse), {
     status: 200,
     headers: {
@@ -310,6 +503,9 @@ export async function POST(req: NextRequest) {
         txSignature: settled.transaction,
         network,
       }),
+      "X-RateLimit-Limit": String(ipDecision.limit),
+      "X-RateLimit-Remaining": String(ipDecision.remaining),
+      "X-RateLimit-Reset": String(ipDecision.reset),
     },
   });
 }

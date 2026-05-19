@@ -1,0 +1,175 @@
+---
+title: Observability & rate limits
+description: Structured log format, the event vocabulary, rate-limit headers, and how operators verify the rail is healthy.
+---
+
+`apps/nexus` emits structured JSON logs and enforces sliding-window rate limits
+on both the signed-inference and x402-gated endpoints. This page is the reference
+for operators reading Vercel logs or troubleshooting a noisy caller.
+
+## Log format
+
+Every meaningful state transition in the request pipeline writes one JSON line
+to stdout. Vercel Runtime Logs pipes them straight through, so the search bar
+works on the keys below.
+
+```json
+{
+  "ts": "2026-05-19T20:31:14.812Z",
+  "level": "info",
+  "event": "inference.upstream_ok",
+  "request_id": "fra1::xxxxxxxx",
+  "agent_pubkey": "8VK2...",
+  "upstream_model": "openai/gpt-4o-mini",
+  "cost_usdc": 0.000071,
+  "latency_ms": 612
+}
+```
+
+Standard fields on every line:
+
+| Field | Notes |
+|---|---|
+| `ts` | ISO 8601 UTC timestamp |
+| `level` | `info`, `warn`, or `error`. `error` lines also go to Vercel's error log |
+| `event` | Stable identifier from the vocabulary below |
+| `request_id` | `x-vercel-id` when present, otherwise a freshly minted UUID |
+| `agent_pubkey` | Base58 Ed25519 pubkey of the calling agent, once known |
+
+## Event vocabulary
+
+The chat and inference routes share a vocabulary so one log filter can span
+both. Settlement events (`chat.*`) only fire on `/v1/chat/completions`;
+inference and ledger events fire on both.
+
+| Event | Where | Notes |
+|---|---|---|
+| `chat.probe_received` | chat | every request entry; carries `has_payment_header` |
+| `chat.challenge_issued` | chat | 402 returned because no `X-PAYMENT` |
+| `chat.body_invalid` | chat | JSON parse fail, missing fields, stream requested |
+| `chat.payment_decoded` | chat | base64+JSON decode of `X-PAYMENT` succeeded |
+| `chat.payment_malformed` | chat | header decode failed |
+| `chat.verify_ok` / `chat.verify_failed` | chat | facilitator verify result |
+| `chat.settle_ok` / `chat.settle_failed` | chat | facilitator settle result; `tx_signature` on success |
+| `chat.credit_written` / `chat.credit_replay` | chat | ledger write outcome |
+| `chat.server_misconfigured` | chat | missing recipient or facilitator at request time |
+| `chat.facilitator_init_failed` | chat | facilitator threw during construction |
+| `inference.signed_request` | inference | signature verified, agent identified |
+| `inference.sig_invalid` | inference | missing headers, bad pubkey, or bad signature |
+| `inference.body_invalid` | inference | post-sig body validation failure |
+| `inference.timestamp_skew` | inference | clock skew outside the 30-second window |
+| `inference.nonce_replay` | inference | duplicate nonce rejected |
+| `inference.balance_insufficient` | inference | credits below the floor |
+| `inference.route_chosen` | inference | provider/model pick for this call |
+| `inference.upstream_started` | both | right before OpenRouter call |
+| `inference.upstream_ok` | both | success; carries `cost_usdc`, `latency_ms`, token counts |
+| `inference.upstream_failed` | both | OpenRouter error |
+| `ledger.debited` | both | post-inference debit recorded |
+| `response.sent` | both | terminal event; carries `status`, `total_latency_ms` |
+| `rate_limit.blocked` | both | 429 about to be returned |
+| `rate_limit.unavailable` | both | Upstash env vars missing — fail-open warning, emitted once per process |
+| `deposit.scan_started` / `deposit.scan_completed` | cron | output of the deposit watcher |
+| `deposit.credit_failed` | cron | non-replay error inserting a deposit credit |
+| `log_insert_failed` | chat, inference | the `inference_logs` row couldn't be written |
+
+## Searching Vercel logs
+
+A few queries worth bookmarking:
+
+```text
+# Every failed payment verify in the last hour
+event:chat.verify_failed
+
+# All activity from one agent
+agent_pubkey:8VK2...
+
+# Upstream failures across both routes
+event:inference.upstream_failed level:error
+
+# Pin a single request end-to-end
+request_id:fra1::xxxxxxxx
+```
+
+Vercel's runtime log search is full-text over the JSON line, so any field
+above is queryable.
+
+## Rate limits
+
+| Bucket | Limit | Window | Applied to |
+|---|---|---|---|
+| Per IP | 30 requests | 1 minute, sliding | All entries to `/v1/chat/completions` (probes + paid retries) |
+| Per agent pubkey | 100 requests | 1 minute, sliding | `/v1/inference` after signature verify; `/v1/chat/completions` after `X-PAYMENT` decode |
+
+The backend is Upstash Redis. Counters are global across regions and stay
+within Upstash's free tier under expected v1 volume.
+
+### Response headers
+
+Every 2xx, 4xx, and 429 response carries:
+
+```http
+X-RateLimit-Limit: 30
+X-RateLimit-Remaining: 14
+X-RateLimit-Reset: 1747668000123
+```
+
+`X-RateLimit-Reset` is a unix millisecond timestamp — the next-window edge,
+not a duration.
+
+### 429 body
+
+```json
+{
+  "ok": false,
+  "error": "rate_limited",
+  "key_type": "ip",
+  "retry_after_ms": 12345
+}
+```
+
+`key_type` is `"ip"` or `"pubkey"` so callers can pick the right backoff
+strategy. An agent that's only being IP-throttled (e.g. shared NAT) can
+switch IPs or wait; an agent that's pubkey-throttled has to slow down or
+spread load across multiple keys.
+
+## Operator checklist
+
+After deploying nexus, confirm:
+
+1. **Upstash is wired.** Check the logs after the first real request — there
+   should be **no** `rate_limit.unavailable` event. If you see one, neither
+   pair of env vars is set:
+   - Vercel Marketplace install writes `KV_REST_API_URL` + `KV_REST_API_TOKEN`
+   - Standalone Upstash uses `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`
+   - Either pair works; the code checks `UPSTASH_*` first, then falls back to `KV_*`.
+2. **Logs are flowing.** Trigger a paid call via
+   `pnpm --filter nexus demo` (signed inference path) and watch
+   `vercel logs --follow`. You should see, in order, the events
+   `inference.signed_request → inference.route_chosen →
+   inference.upstream_started → inference.upstream_ok → ledger.debited →
+   response.sent`, all sharing a `request_id`.
+3. **The 402 path is gated.** Hammer `/v1/chat/completions` from a single
+   IP without `X-PAYMENT`. After 30 requests inside one minute, subsequent
+   responses should be `429` with `X-RateLimit-Remaining: 0` and a
+   `retry_after_ms` body.
+
+### Bumping limits
+
+The 30 / 100 thresholds are constants in
+[`apps/nexus/lib/rate-limit.ts`](https://github.com/vdmnexus/vdmnexus/blob/main/apps/nexus/lib/rate-limit.ts).
+v1 keeps them hardcoded — change there, redeploy. Env-var-tunable thresholds
+will land once real traffic patterns dictate a number.
+
+### Fail-open by design
+
+If Upstash is unreachable or the env vars are unset, the limiter returns
+"allowed" and emits a `rate_limit.unavailable` warning on the first request
+of the process. This is deliberate — it prevents a degraded Upstash from
+taking the rail offline. The tradeoff: a brief unbounded window in that
+exact failure mode. Acceptable for v1; revisit when mainnet traffic is on.
+
+## What isn't logged
+
+By design, logs never contain prompt or response text. We also don't log
+client IPs at info level — only the IP rate limiter sees them. See
+[Security & Privacy](/docs/security) for the full data-retention story.
