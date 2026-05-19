@@ -71,6 +71,12 @@ export function usdcToAtomicString(usdc: number): string {
 /**
  * Build a spec-conformant PaymentRequired challenge for a single
  * Solana USDC payment option.
+ *
+ * For SVM the client's `@x402/svm` ExactSvmScheme requires
+ * `extra.feePayer` so it knows whose key will co-sign as fee payer at
+ * settlement. We use the recipient as the fee payer because the
+ * self-hosted facilitator consolidates both roles into a single
+ * wallet (NEXUS_DEPOSIT_ADDRESS).
  */
 export function buildChallenge(args: {
   amountUsdc: number;
@@ -79,6 +85,7 @@ export function buildChallenge(args: {
   asset?: string;
   maxTimeoutSeconds?: number;
   resource: ResourceInfo;
+  feePayer?: string;
 }): PaymentRequired {
   const requirement: PaymentRequirements = {
     scheme: "exact",
@@ -87,7 +94,7 @@ export function buildChallenge(args: {
     amount: usdcToAtomicString(args.amountUsdc),
     payTo: args.payTo,
     maxTimeoutSeconds: args.maxTimeoutSeconds ?? 60,
-    extra: {},
+    extra: { feePayer: args.feePayer ?? args.payTo },
   };
   return {
     x402Version: X402_VERSION,
