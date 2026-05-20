@@ -304,11 +304,9 @@ export default async function ReceiptPermalinkPage({
         </div>
       </section>
 
-      {row.source === "playground" ? (
-        <section className="relative mx-auto w-full max-w-4xl px-6 pb-12">
-          <VerifyWidget receiptId={row.id} />
-        </section>
-      ) : null}
+      <section className="relative mx-auto w-full max-w-4xl px-6 pb-12">
+        <VerifyWidget receiptId={row.id} />
+      </section>
 
       <section className="relative mx-auto w-full max-w-4xl px-6 pb-16">
         <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-soft bg-surface/60 p-6 backdrop-blur sm:flex-row sm:items-center">

@@ -60,6 +60,29 @@ The Solana RPC defaults to public devnet/mainnet based on
 `receipt.payment.network`; override with `rpc` if you have a private
 RPC.
 
+## Signature-only verification
+
+When you only have the receipt JSON — for example, fetched from a
+public permalink at `/api/v1/receipts/<id>` where the original prompt
+and response stayed with the agent — call `verifySignatureOnly`
+instead. It runs check 3 (the operator's Ed25519 signature) and
+nothing else.
+
+```ts
+import { verifySignatureOnly } from "@vdm-nexus/x402";
+
+const result = await verifySignatureOnly({
+  receipt,
+  endpoint: "https://nexus.vdmnexus.com",
+});
+// result: { ok: boolean, checks: { nexus_signature_ok: boolean } }
+```
+
+This is enough to prove the receipt was minted by the operator whose
+pubkey lives at `/api/v1/operator-key`. It does NOT prove the
+prompt/response hashes match the bodies the operator actually saw —
+for that, you need the original text and `verifyReceipt`.
+
 ## The operator key
 
 ```bash
