@@ -20,6 +20,8 @@
     "ops/self-host-facilitator",
     "ops/observability",
     "---Reference---",
-    "faq"
+    "faq",
+    "---Specifications---",
+    "spec/sir-v2"
   ]
 }

@@ -5,12 +5,20 @@ import type {
   ChatMessage,
   NexusReceipt,
   OpenAIChatCompletion,
+  SirX402,
 } from "./types.js";
 
 export type VerifyReceiptParams = {
   receipt: NexusReceipt;
-  prompt: ChatMessage[];
-  response: OpenAIChatCompletion;
+  /** The prompt the receipt covers. For x402 chat-completion receipts,
+   * pass the `ChatMessage[]` you sent. For prepaid `/v1/inference`
+   * receipts, pass the raw prompt string. See spec §10. */
+  prompt: ChatMessage[] | string;
+  /** The response the receipt covers. For x402 chat-completion receipts,
+   * pass the `OpenAIChatCompletion` body you received. For prepaid
+   * `/v1/inference` receipts, pass `result` (the raw response string).
+   * See spec §10. */
+  response: OpenAIChatCompletion | string;
   /** Override Solana RPC URL. Default derived from receipt.payment.network. */
   rpc?: string;
   /** Base URL (e.g. "https://nexus.vdmnexus.com"). Used to fetch the
@@ -174,7 +182,7 @@ async function rpcGetTransaction(
 
 async function verifyOnChain(
   rpc: string,
-  payment: NexusReceipt["payment"],
+  payment: SirX402["payment"],
   expectedSigner: string
 ): Promise<{ tx_ok: boolean; payer_ok: boolean }> {
   const tx = await rpcGetTransaction(rpc, payment.tx_signature);
@@ -190,9 +198,9 @@ async function verifyOnChain(
     .map((k) => k.pubkey);
   const payer_ok = signers.includes(expectedSigner);
 
+  // Defensive: spec requires `pay_to` on v=2, but a malformed receipt
+  // (e.g. pre-spec wire data) could arrive without it.
   if (!payment.pay_to) {
-    // No pay_to in the receipt — we can't anchor the recipient. Treat as
-    // not verifiable rather than passing silently.
     return { tx_ok: false, payer_ok };
   }
 
@@ -217,13 +225,21 @@ async function verifyOnChain(
   return { tx_ok, payer_ok };
 }
 
+function promptToString(p: ChatMessage[] | string): string {
+  return typeof p === "string"
+    ? p
+    : p.map((m) => `${m.role}:${m.content}`).join("\n");
+}
+
+function responseToString(r: OpenAIChatCompletion | string): string {
+  return typeof r === "string" ? r : r.choices?.[0]?.message?.content ?? "";
+}
+
 export async function verifyReceipt(
   params: VerifyReceiptParams
 ): Promise<VerifyReceiptResult> {
-  const promptStr = params.prompt
-    .map((m) => `${m.role}:${m.content}`)
-    .join("\n");
-  const respText = params.response.choices?.[0]?.message?.content ?? "";
+  const promptStr = promptToString(params.prompt);
+  const respText = responseToString(params.response);
   const prompt_hash_ok = sha256Hex(promptStr) === params.receipt.prompt_hash;
   const response_hash_ok = sha256Hex(respText) === params.receipt.response_hash;
 

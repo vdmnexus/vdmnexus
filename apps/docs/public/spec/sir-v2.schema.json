@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docs.vdmnexus.com/spec/sir-v2.schema.json",
+  "title": "Signed Inference Receipt (SIR) — Wire Format v2",
+  "description": "Canonical JSON Schema for a v=2 Signed Inference Receipt. See https://docs.vdmnexus.com/docs/spec/sir-v2 for the full specification.",
+  "type": "object",
+  "required": [
+    "v",
+    "agent_pubkey",
+    "model",
+    "cost_usdc",
+    "prompt_hash",
+    "response_hash",
+    "timestamp",
+    "inference_id",
+    "points_total",
+    "nexus_signature"
+  ],
+  "properties": {
+    "v": {
+      "const": 2,
+      "description": "Wire format version. MUST be the integer 2 on a conformant v=2 receipt."
+    },
+    "agent_pubkey": {
+      "type": "string",
+      "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$",
+      "description": "Base58-encoded Ed25519 public key of the agent. On Solana this is identical to the agent's wallet address."
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Model identifier as routed by the operator. Free-form; operator-defined."
+    },
+    "cost_usdc": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Actual upstream cost (USD) paid by the operator. NOT the amount charged to the agent — that is payment.amount_usdc on the x402 variant."
+    },
+    "prompt_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Lowercase hex SHA-256 of the prompt. Construction depends on the request shape — see spec §10."
+    },
+    "response_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Lowercase hex SHA-256 of the response text. Construction depends on the request shape — see spec §10."
+    },
+    "timestamp": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Operator wall-clock at receipt construction, milliseconds since the Unix epoch."
+    },
+    "inference_id": {
+      "type": ["integer", "null"],
+      "description": "Operator-side row identifier (e.g. a database id). MAY be null if the operator failed to persist the row but issued a receipt regardless."
+    },
+    "points_total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Cumulative points attributed to this agent_pubkey by the operator, including this call. The operator signs this field but a verifier MUST NOT treat it as a cryptographic claim about external state — only as the operator's own assertion."
+    },
+    "nexus_signature": {
+      "type": "string",
+      "pattern": "^[1-9A-HJ-NP-Za-km-z]+$",
+      "description": "Base58-encoded Ed25519 detached signature by the operator key over the canonical JSON of this receipt with `nexus_signature` excluded. See spec §8 and §9."
+    },
+    "provider": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Prepaid variant only. Operator-defined routing tag (e.g. \"openrouter:fast\")."
+    },
+    "balance_remaining": {
+      "type": "number",
+      "description": "Prepaid variant only. Operator-credit balance remaining after this debit (USD)."
+    },
+    "upstream": {
+      "type": "string",
+      "minLength": 1,
+      "description": "x402 variant only. Inference provider name (e.g. \"openrouter\")."
+    },
+    "payment": {
+      "type": "object",
+      "required": ["scheme", "amount_usdc", "tx_signature", "network", "pay_to"],
+      "additionalProperties": false,
+      "properties": {
+        "scheme": {
+          "const": "x402",
+          "description": "Payment scheme identifier. MUST be \"x402\" on this variant."
+        },
+        "amount_usdc": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Amount paid by the agent (USD). Anchored by the verifier to an on-chain token-balance delta."
+        },
+        "tx_signature": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Blockchain transaction signature. On Solana this is the base58 transaction signature."
+        },
+        "network": {
+          "type": "string",
+          "pattern": "^[-a-z0-9]+:[A-Za-z0-9]+$",
+          "description": "CAIP-2 network identifier. Conformant operators MUST use the genesis-hash form (e.g. \"solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1aFoKMcMZ9YTs\"). Short forms (e.g. \"solana:devnet\") are non-normative and MAY be accepted by tolerant verifiers."
+        },
+        "pay_to": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Recipient address that received the payment. Verifiers MUST confirm a token-balance delta to this address of at least amount_usdc."
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "title": "SirPrepaid",
+      "description": "Prepaid variant — settlement via operator-credit ledger.",
+      "type": "object",
+      "required": ["provider", "balance_remaining"],
+      "not": {
+        "anyOf": [
+          { "required": ["payment"] },
+          { "required": ["upstream"] }
+        ]
+      }
+    },
+    {
+      "title": "SirX402",
+      "description": "x402 variant — per-call settlement on a blockchain.",
+      "type": "object",
+      "required": ["upstream", "payment"],
+      "not": {
+        "anyOf": [
+          { "required": ["provider"] },
+          { "required": ["balance_remaining"] }
+        ]
+      }
+    }
+  ],
+  "additionalProperties": false
+}

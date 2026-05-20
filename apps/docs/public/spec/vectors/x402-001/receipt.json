@@ -1,0 +1,20 @@
+{
+  "v": 2,
+  "agent_pubkey": "AKnL4NNf3DGWZJS6cPknBuEGnVsV4A4m5tgebLHaRSZ9",
+  "upstream": "openrouter",
+  "model": "openai/gpt-4o-mini",
+  "cost_usdc": 0.000045,
+  "prompt_hash": "9f7d414fbcad1114ab17f59f27e53975db24b80d07e91be196091971bfc35045",
+  "response_hash": "334d016f755cd6dc58c53a86e183882f8ec14f52fb05345887c8a5edd42c87b7",
+  "timestamp": 1700000010234,
+  "inference_id": 1337,
+  "points_total": 2,
+  "payment": {
+    "scheme": "x402",
+    "amount_usdc": 0.01,
+    "tx_signature": "5gMvA8YJrkbtBoRZHPwYAyqVqEYPFPq8e7DEFGsB7Wr5jKLNm2pQ9ZYDVTHbV3uXk1nWnpkbX7vRz9aGqFvw8sZP",
+    "network": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1aFoKMcMZ9YTs",
+    "pay_to": "8wFSAv3VrwYP7Vh9pTU8DcRSPp31wH2X3VqJXm4Hk1Lb"
+  },
+  "nexus_signature": "4t3pwJRHV8FLXVdjj6epk9ixPJTU7LErx4wfDh45mcem8FWEgeErg7M9aWQsLonkep9iCCuEVBYaxAV4eDuqbPaa"
+}

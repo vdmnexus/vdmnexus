@@ -1,0 +1,598 @@
+---
+title: Signed Inference Receipt — Wire Format v2
+description: Open specification for a cryptographically verifiable record of an AI inference call. JWT-shaped, payment-aware, chain-agnostic.
+---
+
+> **Status:** Draft · **Spec version:** 1.0 · **Wire format version:** 2
+> **Editor:** VDM Nexus · **Last updated:** 2026-05-20
+
+## Abstract
+
+A **Signed Inference Receipt (SIR)** is a small JSON object that records
+that a specific AI inference call happened, what prompt produced what
+response, what it cost, who paid for it, and which operator stood behind
+the result. Any third party with the receipt and the operator's public
+key can verify the record cryptographically — without trusting the agent
+that delivered it, without contacting the operator, and (for paid
+variants) by independently checking an on-chain settlement.
+
+SIR is to agent actions what JWT is to user sessions: a compact,
+verifiable, transport-friendly token of "something happened, and here
+is proof."
+
+## 1. Introduction and motivation
+
+Every AI agent that does anything consequential — trades money, signs
+contracts, executes code, hires other agents — eventually needs to
+leave a trail a third party can verify. Today that trail is a log line
+on a server somebody else controls. SIR replaces that log line with a
+receipt the agent can hand over, the counterparty can verify, and an
+auditor can check months later.
+
+The receipt commits to four things:
+
+1. **What was asked** — `prompt_hash`
+2. **What was answered** — `response_hash`
+3. **What it cost, who paid, and where it settled** — `cost_usdc`, `payment.*`
+4. **Which operator stands behind the result** — `nexus_signature` over the operator's published public key
+
+That bundle is small (~600 bytes JSON), self-describing, and
+transport-agnostic. It can ride in an HTTP header, a database column,
+a Merkle leaf, or a CAR file.
+
+## 2. Terminology
+
+**Operator** — the party that runs the inference and signs the receipt.
+The operator MUST hold an Ed25519 keypair and MUST publish the public
+key at a stable, authoritative URL.
+
+**Agent** — the party that requested the inference and (in the x402
+variant) paid for it. Identified by its Ed25519 public key, which
+doubles as its blockchain wallet address on chains that use Ed25519.
+
+**Verifier** — any third party with the receipt who wants to confirm
+it represents a real inference call. The verifier MAY be the agent
+itself, a counterparty, an auditor, or an automated service.
+
+**Receipt** — a JSON object conforming to this specification.
+Equivalent terms: *signed inference receipt*, *SIR*. The wire format
+defined by this document is version 2 (`v: 2`).
+
+## 3. Notational conventions
+
+The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**,
+**SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **MAY**,
+and **OPTIONAL** in this document are to be interpreted as described in
+[RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) when, and only when,
+they appear in all capitals.
+
+This document uses **lowercase hex** for SHA-256 digests (64 chars,
+matching the output of `sha256sum`) and **base58** with the Bitcoin
+alphabet for Ed25519 keys and signatures.
+
+## 4. Receipt structure: common fields
+
+Every v=2 receipt is a JSON object containing at least the following
+fields, with the types listed. Implementations MUST emit all common
+fields and MUST reject a receipt that omits any of them.
+
+| Field             | Type            | Description                                                                                         |
+| ----------------- | --------------- | --------------------------------------------------------------------------------------------------- |
+| `v`               | `2`             | Wire format version. MUST be the integer `2`.                                                       |
+| `agent_pubkey`    | string (base58) | The agent's Ed25519 public key, 32 bytes encoded base58.                                            |
+| `model`           | string          | Model identifier as routed by the operator. Free-form; operator-defined.                            |
+| `cost_usdc`       | number          | Actual upstream cost (USD). Operator-asserted — see §14 for verifier limits on trust.               |
+| `prompt_hash`     | string (hex)    | SHA-256 hex digest of the prompt. Construction depends on the variant — see §10.                    |
+| `response_hash`   | string (hex)    | SHA-256 hex digest of the response. Construction depends on the variant — see §10.                  |
+| `timestamp`       | integer         | Milliseconds since the Unix epoch at receipt construction.                                          |
+| `inference_id`    | integer or null | Operator-side row identifier. MAY be null if the operator failed to persist a row.                  |
+| `points_total`    | integer         | Cumulative points the operator has attributed to this `agent_pubkey`. Operator-asserted (see §14).  |
+| `nexus_signature` | string (base58) | Base58-encoded Ed25519 detached signature by the operator key over the canonical receipt — see §8.  |
+
+## 5. Receipt variants
+
+A v=2 receipt is one of two variants, discriminated by the presence of
+the `payment` field:
+
+- **§5.1 Prepaid** — no `payment`, has `provider` and `balance_remaining`.
+- **§5.2 x402** — has `payment` and `upstream`, no `provider` or `balance_remaining`.
+
+Implementations MUST NOT emit a receipt with fields from both variants.
+Verifiers MUST reject a receipt that mixes variant-specific fields.
+
+### 5.1 Prepaid variant
+
+For settlement via an operator-credit ledger (no per-call on-chain
+payment). The operator records the call against a pre-funded balance.
+
+Adds these fields to the common set:
+
+| Field               | Type   | Description                                                  |
+| ------------------- | ------ | ------------------------------------------------------------ |
+| `provider`          | string | Routing-decision tag, operator-defined (e.g. `openrouter:fast`). |
+| `balance_remaining` | number | Operator-credit balance remaining after this debit (USD).    |
+
+The verifier checks `payment_on_chain_ok` and `payer_matches` are
+**vacuously true** on prepaid receipts (no on-chain transaction to verify).
+
+### 5.2 x402 variant
+
+For per-call settlement on a blockchain. The receipt anchors to an
+on-chain transaction that any verifier can independently confirm.
+
+Adds these fields to the common set:
+
+| Field      | Type   | Description                                                |
+| ---------- | ------ | ---------------------------------------------------------- |
+| `upstream` | string | Inference provider name (e.g. `openrouter`).               |
+| `payment`  | object | On-chain settlement details. See below.                    |
+
+The `payment` object has all of:
+
+| Field          | Type            | Description                                                                                   |
+| -------------- | --------------- | --------------------------------------------------------------------------------------------- |
+| `scheme`       | `"x402"`        | Payment scheme identifier. MUST be the string `"x402"`.                                       |
+| `amount_usdc`  | number          | Amount paid by the agent (USD).                                                               |
+| `tx_signature` | string          | Blockchain transaction signature (base58 on Solana).                                          |
+| `network`      | string (CAIP-2) | CAIP-2 network identifier. Conformant operators MUST use the genesis-hash form (see §13).     |
+| `pay_to`       | string          | Recipient address that received the payment.                                                  |
+
+## 6. Canonical example
+
+Prepaid (`/v1/inference`) receipt:
+
+```json
+{
+  "v": 2,
+  "agent_pubkey": "AKnL4NNf3DGWZJS6cPknBuEGnVsV4A4m5tgebLHaRSZ9",
+  "provider": "openrouter:fast",
+  "model": "llama-3-70b",
+  "cost_usdc": 0.000123,
+  "balance_remaining": 0.999877,
+  "prompt_hash": "115049a298532be2f181edb03f766770c0db84c22aff39003fec340deaec7545",
+  "response_hash": "a1b7eb2ee7a6aded8dda4e6cf30826f5afffb28a5597ee9389e91eb326d4e319",
+  "timestamp": 1700000000123,
+  "inference_id": 42,
+  "points_total": 1,
+  "nexus_signature": "..."
+}
+```
+
+x402 (`/v1/chat/completions`) receipt:
+
+```json
+{
+  "v": 2,
+  "agent_pubkey": "AKnL4NNf3DGWZJS6cPknBuEGnVsV4A4m5tgebLHaRSZ9",
+  "upstream": "openrouter",
+  "model": "openai/gpt-4o-mini",
+  "cost_usdc": 0.000045,
+  "prompt_hash": "...",
+  "response_hash": "...",
+  "timestamp": 1700000010234,
+  "inference_id": 1337,
+  "points_total": 2,
+  "payment": {
+    "scheme": "x402",
+    "amount_usdc": 0.01,
+    "tx_signature": "5gMvA8YJrkbtBoRZHPwYAyqVqEYPFPq8e7DEFGsB7Wr5jKLNm2pQ9ZYDVTHbV3uXk1nWnpkbX7vRz9aGqFvw8sZP",
+    "network": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1aFoKMcMZ9YTs",
+    "pay_to": "8wFSAv3VrwYP7Vh9pTU8DcRSPp31wH2X3VqJXm4Hk1Lb"
+  },
+  "nexus_signature": "..."
+}
+```
+
+## 7. Field constraints
+
+In addition to JSON types and presence rules in §4 and §5:
+
+- `agent_pubkey`, `pay_to`, `tx_signature`, and `nexus_signature` MUST be encoded base58 using the Bitcoin alphabet (`123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz`).
+- `agent_pubkey` MUST decode to 32 bytes (Ed25519 public key).
+- `nexus_signature` MUST decode to 64 bytes (Ed25519 detached signature).
+- `prompt_hash` and `response_hash` MUST be lowercase hex of exactly 64 characters (SHA-256 output).
+- `timestamp` MUST be a non-negative integer expressing Unix milliseconds.
+- `cost_usdc` and `amount_usdc` MUST be finite numbers ≥ 0.
+- Operators MUST NOT emit non-finite numbers (`NaN`, `+Infinity`, `-Infinity`) in any field.
+
+Conformant verifiers MUST reject a receipt whose field types, encodings,
+or numeric ranges violate any of these constraints.
+
+## 8. Canonicalization algorithm
+
+Before signing or verifying, the receipt is reduced to a canonical UTF-8
+byte sequence using the following algorithm:
+
+1. Take the receipt object excluding the `nexus_signature` field.
+2. Recursively canonicalize every value:
+   - **Objects:** emit `{`, then for each key in **lexicographically sorted order** emit the key (JSON-stringified), `:`, the canonicalized value, separated by `,`. Then emit `}`.
+   - **Arrays:** emit `[`, then each element canonicalized in **original order**, separated by `,`. Then emit `]`.
+   - **Primitives** (string, number, boolean, null): emit the standard `JSON.stringify` form.
+3. UTF-8 encode the resulting string.
+
+No whitespace is inserted at any step. Keys are sorted with a standard
+codepoint comparison (e.g. JavaScript `Array.prototype.sort` default).
+
+### Reference
+
+```ts
+function canonicalize(value: unknown): string {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) {
+    return "[" + value.map(canonicalize).join(",") + "]";
+  }
+  const keys = Object.keys(value).sort();
+  return (
+    "{" +
+    keys.map((k) => JSON.stringify(k) + ":" + canonicalize(value[k])).join(",") +
+    "}"
+  );
+}
+```
+
+### Edge cases
+
+This algorithm intentionally does **not** support `undefined`, non-finite
+numbers, or `-0`. Implementations MUST refuse to canonicalize a receipt
+containing any of those (see §7 — operators MUST NOT emit them in the
+first place). This is a deliberate divergence from
+[RFC 8785 JCS](https://www.rfc-editor.org/rfc/rfc8785) — SIR fixes the
+problem at the receipt level rather than at the canonicalization level.
+
+## 9. Signing
+
+The `nexus_signature` field is an Ed25519 detached signature ([RFC 8032](https://www.rfc-editor.org/rfc/rfc8032))
+by the operator's Ed25519 secret key over the canonical UTF-8 bytes of
+the receipt (as defined in §8). The signature MUST be base58-encoded
+(Bitcoin alphabet) and MUST decode to exactly 64 bytes.
+
+### Operator key discovery
+
+Operators MUST publish their Ed25519 public key at an authoritative URL
+under their primary HTTPS origin. A conformant operator endpoint
+responds to a GET request at the path `/api/v1/operator-key` with a JSON
+body of the form:
+
+```json
+{
+  "pubkey": "<base58-encoded 32-byte Ed25519 public key>",
+  "algorithm": "ed25519",
+  "encoding": "base58"
+}
+```
+
+The endpoint MUST be served over HTTPS. The operator's authoritative
+origin SHOULD be discoverable from the receipt's context (the URL the
+agent called); if it is not, the verifier MUST be supplied with the
+operator key out-of-band.
+
+Verifiers MAY cache the operator's public key for the lifetime of an
+HTTP `Cache-Control` directive on the operator-key response, or up to a
+verifier-chosen ceiling, whichever is shorter. Verifiers SHOULD support
+out-of-band operator-key configuration to avoid a runtime dependency on
+the operator's availability.
+
+## 10. Hash construction
+
+`prompt_hash` and `response_hash` are SHA-256 digests, lowercase hex.
+What goes into the hash depends on the variant.
+
+### 10.1 Prepaid variant
+
+The operator's `/v1/inference` endpoint accepts a single `prompt` string
+in the request body.
+
+- `prompt_hash` = SHA-256(`prompt`)
+- `response_hash` = SHA-256(`result`) where `result` is the response text the operator returned
+
+### 10.2 x402 variant
+
+The operator's `/v1/chat/completions` endpoint accepts an OpenAI-shape
+`messages` array.
+
+- `prompt_hash` = SHA-256(`messages.map(m => "${role}:${content}").join("\n")`)
+- `response_hash` = SHA-256(`choices[0].message.content`)
+
+If a chat-completion response contains multiple choices, the response
+hash MUST be computed over `choices[0].message.content` only.
+Multi-choice and streaming responses are out of scope for v2.
+
+## 11. Transport bindings
+
+A receipt is JSON. Operators MAY transport it in any way that preserves
+its byte content. Two bindings are standardized:
+
+### 11.1 Body field
+
+For request/response endpoints whose response is itself JSON, the
+receipt MAY be returned as a top-level field of the JSON body:
+
+```json
+{ "ok": true, "result": "...", "receipt": { ... } }
+```
+
+This is the Nexus reference operator's binding for `/v1/inference`.
+
+### 11.2 HTTP header
+
+For endpoints that return a non-receipt response body (e.g. the
+OpenAI-shape `chat.completion` body), the receipt MAY be carried in an
+HTTP response header named `X-Nexus-Receipt`. The header value MUST be
+the **base64-encoded UTF-8 JSON** of the receipt.
+
+```
+X-Nexus-Receipt: eyJ2IjoyLCJhZ2VudF9wdWJrZXki...
+```
+
+This is the Nexus reference operator's binding for `/v1/chat/completions`.
+
+### 11.3 Out-of-band transport
+
+A receipt MAY be transported by any other byte-preserving means (Merkle
+inclusion proofs, IPFS, signed envelopes, etc). The spec does not enumerate
+these; the canonicalization (§8) and signature (§9) properties are
+preserved as long as the byte content is preserved.
+
+## 12. Verification algorithm
+
+A conformant verifier MUST perform all of the following checks. The
+overall receipt is valid (`ok = true`) if and only if all five checks
+pass. Vacuously-true checks (described below) count as passing.
+
+| # | Check                 | Description                                                                                                                    |
+| - | --------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| 1 | `prompt_hash_ok`      | Recompute `prompt_hash` (§10) from the original request and compare to the receipt.                                            |
+| 2 | `response_hash_ok`    | Recompute `response_hash` (§10) from the original response and compare to the receipt.                                         |
+| 3 | `nexus_signature_ok`  | Strip `nexus_signature`, canonicalize the remainder (§8), and verify the signature using the operator's published Ed25519 key. |
+| 4 | `payment_on_chain_ok` | Look up `payment.tx_signature` on the chain identified by `payment.network`. Confirm a token-balance delta to `payment.pay_to` of at least `payment.amount_usdc`. Vacuously true on prepaid receipts. |
+| 5 | `payer_matches`       | Confirm the on-chain transaction has the agent's public key (from `agent_pubkey`) among its signers. Vacuously true on prepaid receipts. |
+
+Verifiers SHOULD evaluate checks 1–3 before checks 4–5. Verifiers MAY
+abort on the first failure for efficiency, but conformant tooling intended
+for end-user reporting SHOULD evaluate and report all five checks.
+
+### 12.1 Offline mode
+
+A verifier without RPC access to the chain identified by `payment.network`
+MAY operate in **offline mode**, in which it reports `payment_on_chain_ok =
+false` and `payer_matches = false` for any x402 receipt, while still
+producing valid results for checks 1–3. Offline mode MUST be clearly
+indicated in the verifier's output and MUST NOT be silently substituted
+for full verification.
+
+## 13. Chain bindings
+
+### 13.1 Solana
+
+The reference chain binding is Solana. The CAIP-2 network identifier
+MUST use the genesis-hash form:
+
+- Mainnet: `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` (full hash)
+- Devnet: `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1aFoKMcMZ9YTs` (full hash)
+
+Short forms like `solana:devnet` or `solana:mainnet` are NOT
+spec-compliant. Tolerant verifiers MAY accept them for human-readable
+contexts, but conformant operators MUST emit the genesis-hash form.
+
+The verifier looks up the transaction with `getTransaction({encoding:
+"jsonParsed", commitment: "confirmed"})`, then:
+
+1. Asserts `meta.err === null`.
+2. Asserts the agent's `agent_pubkey` is among the transaction's signers (`message.accountKeys` where `signer === true`). The agent need not be the fee payer — in consolidated x402-svm topologies the facilitator pays SOL fees while the agent signs the SPL transfer.
+3. Finds the post-token-balance entry whose `owner` matches `payment.pay_to` and asserts the delta from the matching pre-token-balance entry is `>= amount_usdc * 10^6` (USDC decimal places).
+
+### 13.2 Future networks (non-normative)
+
+This specification is chain-agnostic at the format level. Future
+revisions MAY add binding sections for Base, Ethereum L2s, Bitcoin,
+or other networks. Such bindings MUST preserve the verifier's ability
+to perform checks 4–5 against the network's authoritative state.
+
+## 14. Trust boundary
+
+Not every field in a receipt is independently verifiable. The verifier
+can independently check, against external state, the contents of:
+
+- `prompt_hash`, `response_hash` (the verifier has the prompt and response).
+- `nexus_signature` (the operator's public key is on the operator's authoritative origin).
+- `payment.tx_signature`, `payment.pay_to`, `payment.amount_usdc`, and `agent_pubkey` (against the blockchain).
+
+Fields the operator asserts but the verifier cannot independently verify:
+
+- `cost_usdc` — what the operator says they paid upstream. The operator's claim, not a cryptographic guarantee.
+- `points_total` — operator-attributed activity. Bound by the signature (cannot be tampered with after issuance) but not anchored to any external record.
+- `model`, `provider`, `upstream`, `inference_id` — operator metadata. Bound by the signature; not independently verifiable.
+- `timestamp` — operator wall-clock. For paid receipts, the on-chain `blockTime` of `payment.tx_signature` is the authoritative settlement time.
+
+A conformant verifier MUST NOT treat `points_total` or `cost_usdc` as
+cryptographic claims about external state. They are the operator's own
+records, signed for tamper-evidence but not for external accuracy.
+
+## 15. Security considerations
+
+**Signature stripping.** A receipt without `nexus_signature` is not a
+v=2 receipt. Verifiers MUST reject any receipt missing the field, even
+if all other checks pass.
+
+**Replay.** A receipt is a record of a past inference, not an
+authorization. Replay protection (preventing the same prompt+response
+from being credited twice) is an operator-side concern outside the
+scope of this spec. Operators SHOULD use unique nonces on requests and
+unique on-chain `tx_signature` indices on the credit ledger.
+
+**Operator key compromise.** If the operator's signing key is
+compromised, an attacker can forge receipts. Operators SHOULD plan for
+key rotation; receipts signed with a known-compromised key MUST be
+rejected post-compromise. A multi-key operator manifest extension is
+under consideration for a future revision.
+
+**Hash truncation attacks.** All hashes in this spec are full SHA-256
+(64 hex chars). Implementations MUST NOT accept truncated hashes.
+
+**Operator-side data exfiltration via receipt.** The receipt commits
+only to hashes of the prompt and response. The plaintext prompt and
+response are NOT in the receipt. An operator that retains plaintext is
+a separate trust issue; the receipt itself leaks at most the *length*
+and *hash* of the conversation.
+
+## 16. Privacy considerations
+
+**Hashes leak structure.** A SHA-256 of a short prompt is a perfect
+fingerprint for that prompt — anyone with a list of candidate prompts
+can rainbow-table the hash. Receipts are NOT private records of a
+conversation. Operators and agents that need privacy SHOULD use either
+private receipts (with the prompt and response hashed under a per-call
+salt agreed out-of-band) or trusted-execution-environment variants
+(future work).
+
+**Timing.** `timestamp` and on-chain `blockTime` reveal when an
+inference happened to second-level precision.
+
+**Operator metadata.** `inference_id` and `model` are operator-asserted
+strings. An operator that emits a stable per-agent identifier in
+`inference_id` would be linking calls across receipts; this spec
+deliberately allows it (`inference_id: integer | null` is permissive),
+but operators SHOULD avoid embedding personally identifiable
+information in any string field.
+
+## 17. IANA considerations
+
+This specification proposes a new media type for SIR-encoded payloads:
+
+- **Type name:** `application`
+- **Subtype name:** `sir+json`
+- **Required parameters:** `v` (the wire format version, e.g. `v=2`)
+- **Optional parameters:** none
+- **Encoding considerations:** UTF-8
+- **Security considerations:** see §15 of this document
+- **Interoperability considerations:** see §6 (canonical examples)
+- **Published specification:** this document, available at https://docs.vdmnexus.com/docs/spec/sir-v2
+- **Applications that use this media type:** AI inference services, agent toolchains, audit and compliance tooling.
+- **Fragment identifier considerations:** none defined
+- **Restrictions on usage:** none
+
+A registration request to IANA following [RFC 6838](https://www.rfc-editor.org/rfc/rfc6838)
+§4.2.5 (structured syntax suffix `+json`) is planned. Until registration
+completes, implementations MAY use `application/sir+json; v=2` as a
+provisional media type; the Content-Type is not required for
+interoperability — the receipt is self-describing via its `v` field.
+
+## 18. Conformance
+
+### 18.1 Operator MUST
+
+- Emit all common fields (§4) on every signed receipt.
+- Emit exactly one variant's fields (§5); never mix.
+- Use the canonicalization algorithm in §8 verbatim.
+- Sign with Ed25519 per §9.
+- Use the genesis-hash CAIP-2 form for `payment.network` on Solana.
+- Publish the operator key at `/api/v1/operator-key` (§9) or an equivalent stable URL.
+- Refuse to construct a receipt containing non-finite numbers or `undefined`.
+
+### 18.2 Verifier MUST
+
+- Perform all five checks in §12, reporting each as a separate boolean.
+- Treat checks 4 and 5 as vacuously true on prepaid receipts (no `payment`).
+- Reject receipts that omit any common field or that mix variant-specific fields.
+- Reject receipts whose `v` is not the integer `2`.
+
+### 18.3 Verifier SHOULD
+
+- Cache the operator's public key, bounded by the operator's `Cache-Control` headers.
+- Support out-of-band operator-key configuration.
+- Indicate offline mode explicitly in output (§12.1).
+
+### 18.4 Verifier MAY
+
+- Accept short-form CAIP-2 identifiers like `solana:devnet` in tolerant contexts (operators MUST NOT emit them).
+- Cache RPC lookups of `payment.tx_signature` for the lifetime of the chain's finalized commitment.
+
+## 19. Extensibility and versioning
+
+### 19.1 Wire format versioning
+
+The `v` field is the **wire format version**. This document specifies
+version 2. Future versions will be numbered 3, 4, ... and MAY introduce
+new fields, new variants, new transports, or new chain bindings, with
+constraints chosen to preserve verifier interoperability where possible.
+
+A v=2 receipt MUST emit `v: 2`. Verifiers MUST reject receipts with
+unrecognized `v` values rather than attempting best-effort parsing.
+
+### 19.2 Spec document versioning
+
+This document is **spec version 1.0**. Subsequent revisions of this
+document that do not change the wire format will increment the minor
+version (1.1, 1.2, ...). A revision that changes the wire format will
+bump both the document version (to 2.0) and the wire format version
+(to 3).
+
+### 19.3 Extension fields
+
+Operators MAY emit additional top-level fields not enumerated in §4 or
+§5. Such fields MUST be included in the canonical payload for signing.
+Verifiers MUST tolerate (preserve in canonical form, include in
+signature verification) unknown fields, but MUST NOT base any
+conformance check on them.
+
+Field names beginning with `x-` are reserved for vendor extensions.
+Field names beginning with `_` are reserved for future use by this
+specification.
+
+### 19.4 Deprecation policy
+
+A field designated for removal in a future wire format version MUST be
+maintained, with documented behavior, for at least six months from the
+publication date of the spec revision introducing the deprecation.
+
+## 20. References
+
+### Normative
+
+- [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) — Key words for use in RFCs to Indicate Requirement Levels
+- [RFC 8032](https://www.rfc-editor.org/rfc/rfc8032) — Edwards-Curve Digital Signature Algorithm (EdDSA)
+- [RFC 6234](https://www.rfc-editor.org/rfc/rfc6234) — US Secure Hash Algorithms (SHA and HMAC-SHA)
+- [RFC 8259](https://www.rfc-editor.org/rfc/rfc8259) — The JavaScript Object Notation (JSON) Data Interchange Format
+- [RFC 6838](https://www.rfc-editor.org/rfc/rfc6838) — Media Type Specifications and Registration Procedures
+- [CAIP-2](https://chainagnostic.org/CAIPs/caip-2) — Blockchain ID Specification
+
+### Informative
+
+- [RFC 7519](https://www.rfc-editor.org/rfc/rfc7519) — JSON Web Token (JWT)
+- [RFC 8785](https://www.rfc-editor.org/rfc/rfc8785) — JSON Canonicalization Scheme (JCS)
+- [x402 specification](https://x402.org) — HTTP 402 Payment Required for machine-to-machine commerce
+- [Solana JSON-RPC `getTransaction`](https://solana.com/docs/rpc/http/gettransaction)
+
+## Appendix A · JSON Schema
+
+The canonical JSON Schema (Draft 2020-12) for this specification is at:
+
+- **[https://docs.vdmnexus.com/spec/sir-v2.schema.json](/spec/sir-v2.schema.json)**
+
+A conformant receipt MUST validate against this schema. Implementations
+SHOULD treat the schema as authoritative for field types, formats, and
+required-set membership; this document as authoritative for everything
+else (canonicalization, signing, verification, semantics).
+
+## Appendix B · Test vectors
+
+Three reference vectors are published alongside this specification:
+
+- **[`prepaid-001/`](/spec/vectors/prepaid-001/receipt.json)** — happy-path prepaid receipt. All five verifier checks pass.
+- **[`x402-001/`](/spec/vectors/x402-001/receipt.json)** — happy-path x402 receipt for hashes + signature. On-chain checks are offline-skipped (the `tx_signature` is synthetic).
+- **[`negative-001/`](/spec/vectors/negative-001/receipt.json)** — tampered x402 receipt (`response_hash` flipped after signing). Conformant verifiers MUST reject.
+
+Each vector directory contains a `request.json`, `response.json`,
+`receipt.json`, `operator-pubkey.txt`, and `expected.json`. See
+[`README.md`](/spec/vectors/README.md) and the
+[generator script](/spec/vectors/generate.mjs) for details.
+
+## Appendix C · Change log
+
+| Spec version | Wire version | Date       | Changes                                                                |
+| ------------ | ------------ | ---------- | ---------------------------------------------------------------------- |
+| 1.0          | 2            | 2026-05-20 | Initial publication. Wire format v=2 as deployed at nexus.vdmnexus.com. |
+
+---
+
+> **Reference implementation.** The reference operator is [VDM Nexus](https://nexus.vdmnexus.com). The reference verifier ships in [`@vdm-nexus/x402`](https://www.npmjs.com/package/@vdm-nexus/x402) as the exported `verifyReceipt` function. Both are MIT-licensed and welcome additional implementations; the canonical record of the format is this document, not any single implementation.
