@@ -1,0 +1,119 @@
+---
+title: Safe-mainnet switches
+description: Three env-var switches operators can flip to bound mainnet exposure — spend cap, allowlist, and kill switch.
+---
+
+VDM Nexus runs without a paid audit. The `/v1/chat/completions` route ships
+with three operator-controlled switches that bound the blast radius on
+mainnet. Together they let an operator flip the rail off in seconds, cap
+the maximum charge per request, and limit which payers can spend.
+
+All three switches live as env vars on the `apps/nexus` deployment. None
+require a code change or redeploy — set them in the Vercel dashboard
+("Environment Variables" → "Production") and trigger a redeploy from the
+deployments tab, or wait for the next push.
+
+## The three switches
+
+| Env var | Effect | Default | When to use |
+|---|---|---|---|
+| `NEXUS_MAINNET_ENABLED` | Set to `false` to fail-closed on every mainnet request with `503 mainnet_disabled`. Testnets stay reachable. | Mainnet enabled | Incident response — flip off when anything looks wrong on-chain. |
+| `NEXUS_MAX_PRICE_USDC` | Hard ceiling on the flat price advertised in 402 challenges. The route refuses to issue a challenge above this cap. | `0.10` USDC | Always-on safety net against a typo in `X402_FLAT_PRICE_USDC`. |
+| `NEXUS_ALLOWED_AGENTS` | Comma-separated payer pubkeys. When set, non-listed payers get `403 agent_not_allowed`. | Unset (allowlist disabled) | First days on mainnet — narrow the rail to known agents before opening up. |
+
+### `NEXUS_MAINNET_ENABLED` — the kill switch
+
+```bash
+NEXUS_MAINNET_ENABLED=false
+```
+
+What happens:
+
+- Every request to `/v1/chat/completions` whose `X402_NETWORK` looks like a
+  mainnet (anything not containing `devnet`, `testnet`, `sepolia`, `goerli`,
+  or `holesky`) returns `503 mainnet_disabled` with a one-line
+  `mainnet.disabled` log event.
+- Devnet, Sepolia, and other testnets are unaffected.
+- Probes (no `X-PAYMENT` header) are blocked too — no challenge is issued
+  while the switch is off, so a paid client can't even start the handshake.
+
+Fail-closed by design: a missing or unrecognised network identifier is
+treated as mainnet, so a typo can't bypass the switch.
+
+Default behaviour: any value other than the literal string `false` (or an
+unset variable) leaves the switch on. This way an accidentally cleared env
+var doesn't take prod offline.
+
+### `NEXUS_MAX_PRICE_USDC` — the spend cap
+
+```bash
+X402_FLAT_PRICE_USDC=0.01
+NEXUS_MAX_PRICE_USDC=0.10
+```
+
+What happens:
+
+- Before the 402 challenge is built, the route compares
+  `X402_FLAT_PRICE_USDC` against `NEXUS_MAX_PRICE_USDC`.
+- If the configured price exceeds the cap, the route returns
+  `500 server_misconfigured` with a `price.over_cap` log event carrying
+  both values. No challenge is advertised.
+- A missing or invalid `NEXUS_MAX_PRICE_USDC` falls back to `0.10` USDC.
+
+Set this in production to whatever your largest *intended* per-call charge
+is. The default of 0.10 USDC is two orders of magnitude above the v1 flat
+fee of 0.01 — tight enough to make a fat-finger to `1.0` or `10.0`
+unable to settle.
+
+### `NEXUS_ALLOWED_AGENTS` — the allowlist
+
+```bash
+NEXUS_ALLOWED_AGENTS=8VK2...,5pCq...,9TwR...
+```
+
+What happens:
+
+- When set, the route extracts the `payer` field from the decoded
+  `X-PAYMENT` payload and checks membership against the allowlist.
+- A non-matching (or missing) payer returns `403 agent_not_allowed` with
+  an `agent.not_allowed` log event including the claimed pubkey.
+- When unset or empty, the allowlist is disabled (the default) — every
+  payer is accepted, subject to the usual rate limits.
+
+The check runs *before* facilitator verify/settle, so a blocked payer
+doesn't get their payment broadcast.
+
+## Logging
+
+Each switch emits a distinct event so Vercel log search tells you
+immediately what's blocking traffic:
+
+| Event | Level | Switch | Carries |
+|---|---|---|---|
+| `mainnet.disabled` | warn | `NEXUS_MAINNET_ENABLED` | `request_id`, `network` |
+| `price.over_cap` | error | `NEXUS_MAX_PRICE_USDC` | `request_id`, `configured_usdc`, `max_usdc` |
+| `agent.not_allowed` | warn | `NEXUS_ALLOWED_AGENTS` | `request_id`, `agent_pubkey` |
+
+See [Observability](/docs/ops/observability) for the full event vocabulary
+and Vercel-log search recipes.
+
+## Recommended mainnet flip
+
+A safe sequence for promoting the rail to mainnet:
+
+1. Set `NEXUS_MAINNET_ENABLED=false` *before* changing the network. The
+   switch fails-closed for unrecognised networks, so flipping it off first
+   means no mainnet request can sneak through during the network change.
+2. Set `NEXUS_ALLOWED_AGENTS` to your own wallet(s). The rail is now
+   reachable only by you.
+3. Tighten `NEXUS_MAX_PRICE_USDC` to whatever you actually intend to
+   charge — `0.02`, not the default `0.10`.
+4. Change `X402_NETWORK` to the mainnet identifier and redeploy.
+5. Set `NEXUS_MAINNET_ENABLED=true` (or clear it — the default is
+   enabled). Run a paid call against your own wallet end-to-end. Verify
+   the receipt at [verify.vdmnexus.com](https://verify.vdmnexus.com).
+6. Once stable, broaden `NEXUS_ALLOWED_AGENTS` or clear it to open the
+   rail to public traffic.
+
+If anything looks off at any point: flip `NEXUS_MAINNET_ENABLED=false`
+and redeploy. You're back to a known-safe state in under a minute.
