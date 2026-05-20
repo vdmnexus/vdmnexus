@@ -12,7 +12,9 @@ import {
 import { Card } from "@/components/card";
 import { FadeIn } from "@/components/fade-in";
 
-const APPLICATION_FORM_URL = "https://tally.so/r/APPLICATION_FORM_ID";
+const APPLICATION_FORM_URL = "https://tally.so/r/EkZ40l";
+const APPLICATION_FORM_EMBED_URL =
+  "https://tally.so/embed/EkZ40l?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1&formEventsForwarding=1";
 const CULTURE_SURVEY_URL = "https://tally.so/r/CULTURE_SURVEY_ID";
 const CONTRIBUTOR_AGREEMENT_URL =
   "https://www.notion.so/vdmnexus/contributor-agreement-placeholder";
@@ -289,16 +291,15 @@ export default function TeamPage() {
               The application form.
             </SectionHeading>
             <p className="mt-4 text-sm leading-relaxed text-text-muted sm:text-base">
-              Short — a few questions about what you have built and what
-              pulls you to this space. If the embed doesn&apos;t load, the
-              form is also at{" "}
+              Ten short answers, ~10–15 minutes for a thoughtful response.
+              If the embed doesn&apos;t load,{" "}
               <a
                 href={APPLICATION_FORM_URL}
                 target="_blank"
                 rel="noreferrer noopener"
                 className="text-accent-indigo underline-offset-4 hover:underline"
               >
-                tally.so
+                open it in Tally directly
               </a>
               .
             </p>
@@ -306,7 +307,7 @@ export default function TeamPage() {
           <FadeIn delay={0.1} className="mt-10">
             <div className="overflow-hidden rounded-2xl border border-soft bg-surface/60 backdrop-blur">
               <iframe
-                src={APPLICATION_FORM_URL}
+                src={APPLICATION_FORM_EMBED_URL}
                 title="VDM Nexus application form"
                 loading="lazy"
                 className="block h-[720px] w-full border-0"
