@@ -12,13 +12,15 @@
     "@supabase/supabase-js": "^2.45.4",
     "@vdm-nexus/sdk": "workspace:*",
     "@vdm-nexus/x402": "workspace:*",
+    "bs58": "^6.0.0",
     "clsx": "^2.1.1",
     "framer-motion": "^11.11.0",
     "lucide-react": "^0.468.0",
     "next": "^15",
     "react": "^19",
     "react-dom": "^19",
-    "tailwind-merge": "^2.6.0"
+    "tailwind-merge": "^2.6.0",
+    "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
     "@types/node": "^22",
