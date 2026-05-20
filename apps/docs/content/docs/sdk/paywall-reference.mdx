@@ -1,0 +1,198 @@
+---
+title: "@vdm-nexus/paywall reference"
+description: Drop-in x402 paywall for Express, Hono, and Next.js — every paid call returns a signed receipt.
+---
+
+**Paywall + Proofs.** One line of code gates your API with
+[x402](https://github.com/coinbase/x402), and every paid call hands the
+caller a signed Ed25519 receipt of exactly what your handler returned.
+
+```bash
+npm install @vdm-nexus/paywall
+```
+
+Three runtime deps — `tweetnacl`, `bs58`, `@x402/core` + `@x402/svm`. All
+already in the VDM Nexus monorepo. Framework adapters are behind
+optional peer deps, so install `express`, `hono`, or `next` only for
+the one you use.
+
+## Quickstart — Express
+
+```ts
+import express from "express";
+import { expressPaywall } from "@vdm-nexus/paywall/express";
+
+const app = express();
+app.use(express.json());
+
+app.post(
+  "/agent",
+  expressPaywall({
+    amount: 0.01,
+    recipient: process.env.WALLET!,
+    network: "solana-devnet",
+    operatorSecretKey: process.env.OPERATOR_KEY!,
+    facilitator: { mode: "http", url: "https://nexus.vdmnexus.com/x402" },
+
+    onPaid: async ({ body, payer }) => {
+      const prompt = (body as { prompt: string }).prompt;
+      const reply = await myLLM(prompt);
+      return {
+        response: { reply },
+        promptForHash: prompt,
+        responseForHash: reply,
+        model: "my-app/v1",
+      };
+    },
+  })
+);
+
+app.listen(8787);
+```
+
+Hono and Next.js work the same way:
+
+```ts
+import { honoPaywall } from "@vdm-nexus/paywall/hono";
+import { nextPaywall } from "@vdm-nexus/paywall/next";
+```
+
+## What you get over a plain x402 paywall
+
+| | `@vdm-nexus/paywall` | Plain x402 middleware |
+|---|---|---|
+| 402 challenge + verify + settle | ✓ | ✓ |
+| Ed25519 receipt of the response | ✓ | — |
+| Loop detection hook (pre-settlement) | ✓ | — |
+| Per-call spend cap (fail-closed) | ✓ | — |
+| $VDM discount / cashback / staking hooks | ✓ (config) | — |
+| Solana + Base | ✓ (Solana today) | varies |
+
+## Config
+
+```ts
+type PaywallConfig = {
+  /** Flat USDC price per call. */
+  amount: number;
+  /** Wallet that receives USDC. */
+  recipient: string;
+  /** CAIP-2 or friendly alias. */
+  network: "solana-devnet" | "solana-mainnet" | "base" | "base-sepolia" | string;
+  /** 64-byte tweetnacl secretKey (base58). Signs every receipt. */
+  operatorSecretKey: string;
+
+  /** Facilitator selection. */
+  facilitator:
+    | { mode: "http"; url: string; apiKey?: string }
+    | { mode: "mock" }                          // dev only
+    | { mode: "custom"; client: FacilitatorClient };
+
+  /** Runs once payment is settled. Returns the response + hash inputs. */
+  onPaid: (ctx: PaidContext) => Promise<PaidResult>;
+
+  /** Per-call ceiling. Constructor throws if `amount > maxCostUsdc`.
+   *  Default 0.10 USDC. */
+  maxCostUsdc?: number;
+
+  /** Pre-settlement hook. Returning `true` short-circuits the payment
+   *  with 429 `loop_detected` — sparing the agent a wasted transfer. */
+  loopDetection?: (payer: string, body: unknown) => boolean | Promise<boolean>;
+
+  /** Allowlist; payers outside the set get 403 `agent_not_allowed`. */
+  allowedPayers?: ReadonlySet<string>;
+
+  /** $VDM hooks — wire today, activate when the token launches. */
+  tokenDiscountBps?: (payer: string | null) => number | Promise<number>;
+  cashbackEnabled?: boolean;
+  cashbackBps?: number;
+  stakingMultiplier?: (payer: string) => number | Promise<number>;
+
+  /** Optional. Default emits structured JSON to stdout / stderr like
+   *  apps/nexus does. Pass your own for pino, bunyan, etc. */
+  logger?: PaywallLogger;
+};
+```
+
+## What's in `PaidContext` / `PaidResult`
+
+`onPaid` receives a `PaidContext`:
+
+```ts
+type PaidContext = {
+  payer: string;                    // base58 wallet (= agent identity)
+  txSignature: string;              // on-chain settlement signature
+  amount_usdc: number;              // post-discount amount actually charged
+  body: unknown;                    // parsed request body
+  headers: Record<string, string>;  // lower-cased request headers
+  staking_multiplier: number;       // from stakingMultiplier hook (default 1)
+};
+```
+
+And returns a `PaidResult`:
+
+```ts
+type PaidResult = {
+  response: unknown;                // arbitrary HTTP response body
+  promptForHash: string;            // hashed into receipt.prompt_hash
+  responseForHash: string;          // hashed into receipt.response_hash
+  model: string;                    // names what produced the response
+  upstream?: string;                // optional provider tag
+  cost_usdc?: number;               // real upstream cost; defaults to amount
+  extra?: Record<string, unknown>;  // merged into the signed receipt
+};
+```
+
+## The receipt
+
+Every successful response carries an `X-Nexus-Receipt` header — a
+base64'd v2 [Signed Inference Receipt](/docs/spec/sir-v2). Callers verify it
+end-to-end with `verifyReceipt` from [`@vdm-nexus/x402`](/docs/sdk/x402-reference):
+
+```ts
+import { verifyReceipt } from "@vdm-nexus/x402";
+
+const v = await verifyReceipt({
+  receipt,
+  prompt: "ping",
+  response: "pong",
+  operatorKey: MY_OPERATOR_PUBKEY,
+});
+// v.ok === true when on-chain payment + signed body all check out
+```
+
+Publish your operator pubkey at a URL of your choosing. The package
+exports `getOperatorPublicKeyBase58(secretKeyBase58)` to derive it:
+
+```ts
+import { getOperatorPublicKeyBase58 } from "@vdm-nexus/paywall";
+
+const pub = getOperatorPublicKeyBase58(process.env.OPERATOR_KEY!);
+// expose pub at /operator-key for verifiers
+```
+
+## Returned errors
+
+| Status | Error | When |
+|---|---|---|
+| 402 | `payment_required` | No `X-Payment` header — challenge issued. |
+| 402 | `payment_malformed` | `X-Payment` is not valid base64 JSON. |
+| 402 | `payment_missing_payer` | Payload didn't carry a payer wallet. |
+| 402 | `payment_invalid` | Facilitator rejected at verify. |
+| 402 | `payment_failed` | Facilitator failed to settle. |
+| 403 | `agent_not_allowed` | Payer not in `allowedPayers`. |
+| 429 | `loop_detected` | `loopDetection` returned true. |
+| 502 | `facilitator_unreachable` | `verify`/`settle` threw. |
+| 502 | `handler_error` | Your `onPaid` threw. |
+
+## Self-hosting the facilitator
+
+For the in-process facilitator pattern (KMS-backed signing, no remote
+HTTP hop), use `facilitator: { mode: "custom", client }` and pass your
+own implementation of `FacilitatorClient` from `@x402/core`. The Nexus
+implementation at `apps/nexus/lib/local-facilitator.ts` is the
+reference — it signs via AWS KMS in production.
+
+## Status
+
+`0.1.x`. Devnet only — see the [safe mainnet rollout](/docs/ops/safe-mainnet)
+plan for the mainnet flip.
