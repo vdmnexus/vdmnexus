@@ -19,6 +19,7 @@
     "---Operations---",
     "ops/self-host-facilitator",
     "ops/observability",
+    "ops/safe-mainnet",
     "---Reference---",
     "faq",
     "---Specifications---",

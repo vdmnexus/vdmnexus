@@ -18,6 +18,10 @@ import {
   decodeHeader,
   encodeHeader,
   extractPayerFromPayload,
+  getAllowedAgents,
+  getMaxPriceUsdc,
+  isMainnetNetwork,
+  mainnetEnabled,
   type Network,
   type PaymentPayload,
   type ResourceInfo,
@@ -73,7 +77,20 @@ function sha256(input: string): string {
 
 function getNetwork(): Network {
   const env = process.env.X402_NETWORK?.trim();
+  if (!env) return X402_NETWORKS.solanaDevnet;
+
+  // Friendly aliases.
+  const lower = env.toLowerCase();
+  if (lower === "solana-mainnet") return X402_NETWORKS.solanaMainnet;
+  if (lower === "solana-devnet") return X402_NETWORKS.solanaDevnet;
+  if (lower === "base" || lower === "base-mainnet") return X402_NETWORKS.baseMainnet;
+  if (lower === "base-sepolia") return X402_NETWORKS.baseSepolia;
+
+  // Full CAIP-2 form pass-through.
   if (env === X402_NETWORKS.solanaMainnet) return X402_NETWORKS.solanaMainnet;
+  if (env === X402_NETWORKS.baseMainnet) return X402_NETWORKS.baseMainnet;
+  if (env === X402_NETWORKS.baseSepolia) return X402_NETWORKS.baseSepolia;
+
   return X402_NETWORKS.solanaDevnet;
 }
 
@@ -144,6 +161,34 @@ export async function POST(req: NextRequest) {
       reset_ms: ipDecision.reset,
     });
     return rateLimited(ipDecision);
+  }
+
+  const rawNetwork = process.env.X402_NETWORK?.trim() ?? "";
+  const isMainnet = isMainnetNetwork(rawNetwork);
+  if (isMainnet && !mainnetEnabled()) {
+    log.warn({
+      event: "mainnet.disabled",
+      request_id,
+      network: rawNetwork || null,
+    });
+    return err("mainnet_disabled", 503, {
+      detail:
+        "Mainnet traffic is temporarily disabled by the operator. Retry later.",
+    });
+  }
+
+  const configuredPrice = getFlatPriceUsdc();
+  const maxPrice = getMaxPriceUsdc();
+  if (configuredPrice > maxPrice) {
+    log.error({
+      event: "price.over_cap",
+      request_id,
+      configured_usdc: configuredPrice,
+      max_usdc: maxPrice,
+    });
+    return err("server_misconfigured", 500, {
+      detail: "configured price exceeds NEXUS_MAX_PRICE_USDC",
+    });
   }
 
   let body: ChatCompletionsBody;
@@ -242,6 +287,20 @@ export async function POST(req: NextRequest) {
         reset_ms: pkDecision.reset,
       });
       return rateLimited(pkDecision);
+    }
+  }
+
+  const allowlist = getAllowedAgents();
+  if (allowlist) {
+    if (!claimedPayer || !allowlist.has(claimedPayer)) {
+      log.warn({
+        event: "agent.not_allowed",
+        request_id,
+        agent_pubkey: claimedPayer ?? undefined,
+      });
+      return err("agent_not_allowed", 403, {
+        detail: "payer is not on the operator allowlist",
+      });
     }
   }
 

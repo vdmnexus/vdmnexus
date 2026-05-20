@@ -36,17 +36,41 @@ export const X402_REQUIRED_HEADER = "x-payment-required";
 export const X402_RESPONSE_HEADER = "x-payment-response";
 
 /**
- * CAIP-2 network identifiers for x402. @x402/svm expects the full form
- * (chain namespace + genesis-hash reference) — the short "solana:devnet"
- * lookalike is silently unsupported by the SVM scheme's RPC lookup.
+ * CAIP-2 network identifiers for x402.
+ *
+ * @x402/svm expects the genesis-hash form for Solana — the short
+ * "solana:devnet" lookalike is silently unsupported. EVM chains use
+ * standard CAIP-2 `eip155:<chainId>` form (Base mainnet = 8453, Base
+ * Sepolia = 84532).
  */
+export const BASE_MAINNET_CAIP2 = "eip155:8453" as Network;
+export const BASE_SEPOLIA_CAIP2 = "eip155:84532" as Network;
+
 export const X402_NETWORKS = {
   solanaDevnet: SOLANA_DEVNET_CAIP2,
   solanaMainnet: SOLANA_MAINNET_CAIP2,
+  baseMainnet: BASE_MAINNET_CAIP2,
+  baseSepolia: BASE_SEPOLIA_CAIP2,
 } as const satisfies Record<string, Network>;
 
 /** Devnet USDC mint (Circle's official Solana devnet token). */
 export const USDC_MINT_DEVNET = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU";
+/** USDC on Base mainnet (Circle, 6 decimals). */
+export const USDC_BASE_MAINNET = "0x833589fCD6eDb6E08f4c7C32A07f04b6dEDD1c2E";
+/** USDC on Base Sepolia testnet (Circle, 6 decimals). */
+export const USDC_BASE_SEPOLIA = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
+
+/** True if the CAIP-2 network identifier is EVM (eip155). */
+export function isEvmNetwork(network: string): boolean {
+  return network.startsWith("eip155:");
+}
+
+/** Default USDC asset address/mint for a given CAIP-2 network. */
+export function defaultUsdcAsset(network: string): string {
+  if (network === BASE_MAINNET_CAIP2) return USDC_BASE_MAINNET;
+  if (network === BASE_SEPOLIA_CAIP2) return USDC_BASE_SEPOLIA;
+  return USDC_MINT_DEVNET;
+}
 
 /** Encode a JSON object to a base64 string suitable for an HTTP header value. */
 export function encodeHeader(obj: unknown): string {
@@ -87,14 +111,21 @@ export function buildChallenge(args: {
   resource: ResourceInfo;
   feePayer?: string;
 }): PaymentRequired {
+  const evm = isEvmNetwork(args.network);
+  // SVM's ExactSvmScheme requires `extra.feePayer` so it knows whose key
+  // co-signs as fee payer at settlement. EVM's ExactEvmScheme has no
+  // equivalent — the facilitator pays gas in ETH directly.
+  const extra: Record<string, unknown> = evm
+    ? {}
+    : { feePayer: args.feePayer ?? args.payTo };
   const requirement: PaymentRequirements = {
     scheme: "exact",
     network: args.network,
-    asset: args.asset ?? USDC_MINT_DEVNET,
+    asset: args.asset ?? defaultUsdcAsset(args.network),
     amount: usdcToAtomicString(args.amountUsdc),
     payTo: args.payTo,
     maxTimeoutSeconds: args.maxTimeoutSeconds ?? 60,
-    extra: { feePayer: args.feePayer ?? args.payTo },
+    extra,
   };
   return {
     x402Version: X402_VERSION,
@@ -120,4 +151,70 @@ export function extractPayerFromPayload(p: PaymentPayload): string | null {
   const inner = p.payload as Partial<SolanaPaymentPayload> | undefined;
   const payer = inner?.payer;
   return typeof payer === "string" && payer.length > 0 ? payer : null;
+}
+
+/**
+ * Mainnet-vs-testnet classifier for the kill switch.
+ *
+ * Inspects the raw `X402_NETWORK` env value. Returns `true` (mainnet) when the
+ * identifier is missing, unknown, or looks like a production chain. Returns
+ * `false` only for clearly-named test networks. Fails closed: anything we
+ * don't recognise is treated as mainnet so the kill switch can't be bypassed
+ * by typos or new chains being added to the route before this list is
+ * updated.
+ */
+const TESTNET_MARKERS = [
+  "devnet",
+  "testnet",
+  "sepolia",
+  "goerli",
+  "holesky",
+] as const;
+
+export function isMainnetNetwork(network: string | undefined | null): boolean {
+  if (!network) return true;
+  const n = network.toLowerCase();
+  return !TESTNET_MARKERS.some((marker) => n.includes(marker));
+}
+
+/**
+ * Hard ceiling on the flat USDC price advertised in 402 challenges. Capped
+ * by `NEXUS_MAX_PRICE_USDC` (default 0.10 USDC). If a misconfiguration sets
+ * `X402_FLAT_PRICE_USDC` above the cap, the route refuses to issue a
+ * challenge — fail-closed so an unbounded charge can't slip through.
+ */
+const DEFAULT_MAX_PRICE_USDC = 0.1;
+
+export function getMaxPriceUsdc(): number {
+  const raw = process.env.NEXUS_MAX_PRICE_USDC;
+  const n = raw ? Number(raw) : NaN;
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_MAX_PRICE_USDC;
+}
+
+/**
+ * Parsed `NEXUS_ALLOWED_AGENTS` allowlist. When unset/empty the allowlist
+ * is disabled (returns `null`); when set, the route rejects any payer not
+ * in the list with 403. Comma-separated, base58 pubkeys, whitespace
+ * tolerant, deduplicated.
+ */
+export function getAllowedAgents(): Set<string> | null {
+  const raw = process.env.NEXUS_ALLOWED_AGENTS?.trim();
+  if (!raw) return null;
+  const entries = raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+  if (entries.length === 0) return null;
+  return new Set(entries);
+}
+
+/**
+ * Mainnet kill switch. When `NEXUS_MAINNET_ENABLED=false`, the route returns
+ * 503 on every mainnet-bound request. Any value other than the literal
+ * string "false" leaves the switch on (default), so a missing env var
+ * doesn't accidentally take prod offline.
+ */
+export function mainnetEnabled(): boolean {
+  const raw = process.env.NEXUS_MAINNET_ENABLED?.trim().toLowerCase();
+  return raw !== "false";
 }
