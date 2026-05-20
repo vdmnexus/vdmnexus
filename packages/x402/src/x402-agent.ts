@@ -22,7 +22,7 @@ import type {
 import { registerExactSvmScheme } from "@x402/svm/exact/client";
 import { toClientSvmSigner } from "@x402/svm";
 import type {
-  NexusReceipt,
+  SirX402,
   X402ChatRequest,
   X402ChatResponse,
   X402PaymentResponse,
@@ -182,7 +182,8 @@ export class X402Agent extends Agent {
     }
 
     const openai = (await paid.json()) as OpenAIChatCompletion;
-    const receipt = decodeHeader<NexusReceipt>(paid.headers.get(RECEIPT_HEADER));
+    // Chat-completion receipts are always the x402 variant.
+    const receipt = decodeHeader<SirX402>(paid.headers.get(RECEIPT_HEADER));
     const payment_response = decodeHeader<X402PaymentResponse>(
       paid.headers.get(PAYMENT_RESPONSE_HEADER)
     );

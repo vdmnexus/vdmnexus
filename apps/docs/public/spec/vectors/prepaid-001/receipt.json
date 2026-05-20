@@ -1,0 +1,14 @@
+{
+  "v": 2,
+  "agent_pubkey": "AKnL4NNf3DGWZJS6cPknBuEGnVsV4A4m5tgebLHaRSZ9",
+  "provider": "openrouter:fast",
+  "model": "llama-3-70b",
+  "cost_usdc": 0.000123,
+  "balance_remaining": 0.999877,
+  "prompt_hash": "115049a298532be2f181edb03f766770c0db84c22aff39003fec340deaec7545",
+  "response_hash": "a1b7eb2ee7a6aded8dda4e6cf30826f5afffb28a5597ee9389e91eb326d4e319",
+  "timestamp": 1700000000123,
+  "inference_id": 42,
+  "points_total": 1,
+  "nexus_signature": "31vFF6snkLB3zcBMxNdFhMKCJgTJSbp3JoE4NHQcGkrrxDVNnG9cSvFartPiCbcnZzY9WSoJjNTDjj7ypbN3YmbF"
+}

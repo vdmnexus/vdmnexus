@@ -3,29 +3,62 @@ title: Receipt structure
 description: Field-by-field walkthrough of what's in a Nexus receipt.
 ---
 
-A signed-inference receipt is JSON, returned in the `X-Nexus-Receipt`
-response header as base64. Here's every field on a `v: 2` receipt:
+> The authoritative specification is at [/docs/spec/sir-v2](/docs/spec/sir-v2). This page is a friendly walkthrough — when prose conflicts with the spec, the spec wins.
+
+A receipt is JSON. Two variants exist, depending on how the call was
+paid for:
+
+- **Prepaid** — returned in the body of `/v1/inference` responses under the `receipt` key. Settlement happens against an operator-credit balance.
+- **x402** — returned in the `X-Nexus-Receipt` response header (base64-encoded) on `/v1/chat/completions`. Settlement happens per-call on-chain.
+
+Both variants share a common core; each adds a few variant-specific
+fields. The discriminator is the presence of the `payment` field.
+
+## Common fields (every v=2 receipt)
 
 ```ts
-type NexusReceipt = {
-  v: 2;                            // receipt schema version
-  agent_pubkey: string;            // base58 Ed25519 pubkey (= Solana pubkey)
-  upstream: "openrouter";          // which inference provider was used
-  model: string;                   // the slug we passed upstream
-  cost_usdc: number;               // actual upstream cost (USD, ~6 decimals)
-  prompt_hash: string;             // sha256(messages.role:content joined by \n)
-  response_hash: string;           // sha256(first choice's message content)
-  timestamp: number;               // server-set wall-clock ms
-  inference_id: string | null;     // UUID of the inference_logs row
-  points_total: number;            // accumulated points across all successful calls
+type SirCommon = {
+  v: 2;                          // wire format version
+  agent_pubkey: string;          // base58 Ed25519 (= Solana wallet address)
+  model: string;                 // model the operator routed to
+  cost_usdc: number;             // upstream USD cost paid by the operator
+  prompt_hash: string;           // sha256 hex of the prompt — see "Hashes" below
+  response_hash: string;         // sha256 hex of the response text
+  timestamp: number;             // server wall-clock ms (Date.now())
+  inference_id: number | null;   // operator-side row id (Postgres bigint)
+  points_total: number;          // cumulative points the operator attributes to this agent
+  nexus_signature: string;       // base58 Ed25519 sig by the operator key
+};
+```
+
+## Prepaid variant — `/v1/inference`
+
+Adds:
+
+```ts
+type SirPrepaid = SirCommon & {
+  provider: string;              // routing tag, e.g. "openrouter:fast"
+  balance_remaining: number;     // operator-credit balance after this debit (USD)
+};
+```
+
+No `payment` field. Verifier checks 4 (payment_on_chain_ok) and 5
+(payer_matches) are vacuously true on prepaid receipts.
+
+## x402 variant — `/v1/chat/completions`
+
+Adds:
+
+```ts
+type SirX402 = SirCommon & {
+  upstream: string;              // inference provider, e.g. "openrouter"
   payment: {
     scheme: "x402";
-    amount_usdc: number;           // what we charged (the flat fee today)
-    tx_signature: string;          // Solana tx signature
-    network: string;               // CAIP-2, e.g. solana:EtWTRABZ…
-    pay_to: string;                // recipient address of the USDC transfer
+    amount_usdc: number;         // what the agent paid (the flat fee today)
+    tx_signature: string;        // Solana tx signature, base58
+    network: string;             // CAIP-2 genesis-hash form
+    pay_to: string;              // recipient address that received the USDC
   };
-  nexus_signature: string;         // base58 Ed25519 signature by Nexus
 };
 ```
 
@@ -33,10 +66,8 @@ type NexusReceipt = {
 
 ### `v`
 
-Receipt schema version. Always `2` on signed receipts. Verifiers should
-branch on this — a missing or different `v` means the operator
-signature check does not apply (and the receipt is treated as
-untrusted).
+Wire format version. Always `2` on signed receipts. Verifiers MUST
+reject any other value (see [spec §19](/docs/spec/sir-v2)).
 
 ### `agent_pubkey`
 
@@ -45,101 +76,109 @@ address — same key format, same encoding. This is the identity Nexus
 attributes the call to, regardless of which IP, region, or client
 library made the request.
 
-### `upstream` + `model`
+### `upstream` (x402) / `provider` (prepaid)
 
-`upstream` is always `"openrouter"` today; future releases may add
-direct connections to specific providers. `model` is the slug we passed
-upstream, not the OpenAI-vs-Anthropic-vs-Llama family name.
+Both fields name "where the inference came from," but at different
+abstraction levels:
+
+- `upstream` on the x402 variant names the provider service (e.g. `"openrouter"`).
+- `provider` on the prepaid variant names the routing decision (e.g. `"openrouter:fast"` — the routing tier the operator picked).
+
+A future revision may unify these; for v=2 they're variant-specific.
+
+### `model`
+
+The model identifier as routed by the operator. For Nexus today this
+is the OpenRouter model slug (e.g. `openai/gpt-4o-mini`,
+`anthropic/claude-3-haiku`).
 
 ### `cost_usdc`
 
-The **actual cost the upstream provider charged us**, NOT the amount
-the agent paid. This is the raw input to whatever pricing model
-overlays it.
+The **actual cost the operator paid upstream**, not what the agent
+paid. For x402 calls the agent paid `payment.amount_usdc` (a flat fee
+today). The difference is the operator's spread.
 
-For the x402 flow today, `payment.amount_usdc` is a flat fee
-(`X402_FLAT_PRICE_USDC=0.01` by default) and `cost_usdc` is whatever
-OpenRouter returned. The difference is the spread we hold; a future
-release will move toward refund-on-overpay to tighten this.
+This field is signed (so an operator can't claim a different cost
+post-hoc), but it is NOT independently verifiable — the verifier has
+no way to check what the operator actually paid OpenRouter. Treat it
+as the operator's own assertion. See [spec §14](/docs/spec/sir-v2).
 
-### `prompt_hash` + `response_hash`
+### `balance_remaining` (prepaid only)
 
-`prompt_hash` is computed server-side over the message list, joined as:
+The agent's operator-credit balance after this debit, in USD. Lets
+clients display a running balance without an extra round-trip.
 
-```
-${role}:${content}\n${role}:${content}\n…
-```
+### `prompt_hash` and `response_hash`
 
-This is hex sha256 (64 chars). The exact join algorithm is in
-[apps/nexus/app/api/v1/chat/completions/route.ts](https://github.com/vdmnexus/vdmnexus/blob/main/apps/nexus/app/api/v1/chat/completions/route.ts).
+Hex SHA-256 digests (64 chars). The input to each hash depends on the
+variant:
 
-`response_hash` is hex sha256 of the first choice's `message.content`
-string. If the model produces multiple choices, only the first is
-hashed — this matches what 99% of callers care about.
+- **Prepaid** — `prompt_hash = sha256(prompt)`, `response_hash = sha256(result)` where both are raw strings.
+- **x402** — `prompt_hash = sha256(messages.map(m => "${role}:${content}").join("\n"))`, `response_hash = sha256(choices[0].message.content)`.
+
+If the model produces multiple choices, only `choices[0]` is hashed.
+Streaming responses are out of scope for v=2.
 
 ### `timestamp`
 
-Server wall-clock `Date.now()` at the moment the receipt object was
-built. Authoritative timestamp for time-window verification is the
-on-chain `blockTime` of `payment.tx_signature`, but `timestamp` is the
-sub-second precision version.
+Server wall-clock `Date.now()` at the moment the receipt was built. For
+paid receipts, the authoritative settlement time is the on-chain
+`blockTime` of `payment.tx_signature` — this field is just the
+sub-second-precision operator timestamp.
 
 ### `inference_id`
 
-UUID of the row in our private `inference_logs` table. Useful for
-support: if you DM us with `inference_id` we can look up exactly what
-happened on our side without you having to reconstruct it.
+Integer row id of the operator-side log entry (Postgres `bigint`). Useful
+for support: DM us with `inference_id` and we can look up what
+happened on our side. May be `null` if the log row failed to write.
 
 ### `points_total`
 
-A running counter of points attributed to this `agent_pubkey` across
-all of its successful inference calls — including the one this receipt
-is for. We currently award one point per successful call; the value
-on the receipt is the sum after that point has been recorded.
-
-The field is included in the canonical body, so the operator signature
-covers it (it can't be silently mutated). `verifyReceipt` does not
-check it against anything, though — it's informational tracking, not
-a cryptographic claim. Also exposed via
-`GET /api/v1/agents/<pubkey>`.
+Cumulative points the operator has attributed to this `agent_pubkey`,
+including this call. Signed (can't be silently mutated) but not
+cryptographically verifiable against any external state. See
+[spec §14](/docs/spec/sir-v2) — verifiers MUST NOT treat this as a
+proof, only as the operator's own record.
 
 ### `payment.tx_signature`
 
 Solana transaction signature (base58). Look it up on
 [Solscan devnet](https://solscan.io/?cluster=devnet) to see the
-on-chain settlement.
-
-The combination of `tx_signature` + `pay_to` + `amount_usdc` is the
-verifier's anchor for *did the payment happen?*
+on-chain settlement. The combination of `tx_signature` + `pay_to` +
+`amount_usdc` is the verifier's anchor for *did the payment happen?*
 
 ### `payment.pay_to`
 
-Recipient address of the USDC transfer. `verifyReceipt` walks the
+Recipient address that received the USDC. `verifyReceipt` walks the
 transaction's `pre/postTokenBalances` and confirms a USDC delta of at
 least `amount_usdc` to this owner.
 
 ### `payment.network`
 
-CAIP-2 network identifier, e.g.
-`solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` (devnet) or
-`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` (mainnet). The genesis-hash
-form is what `@x402/svm` recognizes — short forms like `solana:devnet`
-are not spec-compliant.
+CAIP-2 network identifier. Conformant operators MUST use the
+**genesis-hash form**:
+
+- Mainnet: `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`
+- Devnet: `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1aFoKMcMZ9YTs`
+
+Short forms like `solana:devnet` are NOT spec-compliant — tolerant
+verifiers may accept them, but operators must not emit them.
 
 ### `nexus_signature`
 
-Base58-encoded Ed25519 signature by the Nexus operator key. The
-signature is computed over the **canonical JSON** of the receipt
-object with `nexus_signature` excluded:
+Base58-encoded Ed25519 signature by the operator key, over the
+canonical JSON of the receipt with `nexus_signature` excluded:
 
 - Object keys sorted recursively
 - No whitespace
 - Primitives via standard `JSON.stringify`
 - Arrays preserve order
+- UTF-8 encoded before signing
 
 Verifiers strip `nexus_signature`, canonicalize the rest, and call
 `nacl.sign.detached.verify` against the operator's public key
-(`GET /api/v1/operator-key`).
+(`GET /api/v1/operator-key`). See [spec §8, §9](/docs/spec/sir-v2)
+for the canonical algorithm.
 
 ## Shipped in v0.2
 
@@ -148,6 +187,9 @@ Verifiers strip `nexus_signature`, canonicalize the rest, and call
   agent that delivered them.
 - **Bundled verifier.** `@vdm-nexus/x402` exports `verifyReceipt`; see
   [Verify a receipt](/docs/verify-a-receipt).
+- **Open spec.** The wire format is now a public specification at
+  [/docs/spec/sir-v2](/docs/spec/sir-v2). Nexus is the reference
+  implementation; the format is anyone's to issue.
 
 ## Still tracked
 
