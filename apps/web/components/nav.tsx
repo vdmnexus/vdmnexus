@@ -32,6 +32,9 @@ export function Nav() {
           <NavLink href="/agents" active={pathname === "/agents"}>
             Agents
           </NavLink>
+          <NavLink href="/points" active={pathname === "/points"}>
+            Points
+          </NavLink>
           <NavLink href="/roadmap" active={pathname === "/roadmap"}>
             Roadmap
           </NavLink>
