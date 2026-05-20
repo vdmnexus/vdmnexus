@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
+    "@vdm-nexus/sdk": "workspace:*",
+    "@vdm-nexus/x402": "workspace:*",
     "bs58": "^6.0.0",
     "clsx": "^2.1.1",
     "framer-motion": "^11.11.0",

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { createHash } from "node:crypto";
+import { hashIp, getClientIp } from "@/lib/ip-hash";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -36,20 +36,6 @@ function getServiceClient(): SupabaseClient | null {
 
 function isValidEmail(email: string): boolean {
   return email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function hashIp(ip: string): string {
-  const salt = process.env.IP_HASH_SALT ?? "vdm-fallback-salt";
-  return createHash("sha256").update(`${salt}:${ip}`).digest("hex");
-}
-
-function getClientIp(req: NextRequest): string {
-  const fwd = req.headers.get("x-forwarded-for");
-  if (fwd) {
-    const first = fwd.split(",")[0];
-    if (first) return first.trim();
-  }
-  return req.headers.get("x-real-ip") ?? "unknown";
 }
 
 function clip(s: string | null | undefined, max: number): string | null {
