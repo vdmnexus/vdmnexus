@@ -218,3 +218,53 @@ export function mainnetEnabled(): boolean {
   const raw = process.env.NEXUS_MAINNET_ENABLED?.trim().toLowerCase();
   return raw !== "false";
 }
+
+/**
+ * Resolve a request-supplied network selector to a CAIP-2 Network identifier.
+ * Returns `null` for unknown inputs so the route can reject with 400 instead
+ * of silently routing to a default. Friendly aliases match `getNetwork()`.
+ *
+ * This is the inverse of relying on the `X402_NETWORK` env var alone — the
+ * agent can opt into mainnet (or Base, or Base Sepolia) per call, while the
+ * env var remains the *default* for clients that don't ask.
+ */
+export function resolveNetworkInput(input: string): Network | null {
+  const lower = input.trim().toLowerCase();
+  if (!lower) return null;
+  if (lower === "devnet" || lower === "solana-devnet" || lower === "solana:devnet") {
+    return X402_NETWORKS.solanaDevnet;
+  }
+  if (lower === "mainnet" || lower === "solana-mainnet" || lower === "solana:mainnet") {
+    return X402_NETWORKS.solanaMainnet;
+  }
+  if (lower === "base" || lower === "base-mainnet" || lower === "eip155:8453") {
+    return X402_NETWORKS.baseMainnet;
+  }
+  if (lower === "base-sepolia" || lower === "eip155:84532") {
+    return X402_NETWORKS.baseSepolia;
+  }
+  // Pass-through for exact CAIP-2 forms we know about.
+  if (input === X402_NETWORKS.solanaDevnet) return X402_NETWORKS.solanaDevnet;
+  if (input === X402_NETWORKS.solanaMainnet) return X402_NETWORKS.solanaMainnet;
+  return null;
+}
+
+/**
+ * Resolve the `payTo` recipient address for a given network. Mainnet falls
+ * back through `NEXUS_MAINNET_DEPOSIT_ADDRESS` → `X402_RECIPIENT_ADDRESS` →
+ * `NEXUS_DEPOSIT_ADDRESS`. Devnet/testnets fall through the original
+ * `X402_RECIPIENT_ADDRESS` → `NEXUS_DEPOSIT_ADDRESS` chain. This lets
+ * operators separate mainnet receipts into a different wallet for
+ * accounting without forcing them to.
+ */
+export function getRecipientForNetwork(network: Network): string | null {
+  const devnetOrTestnet =
+    process.env.X402_RECIPIENT_ADDRESS?.trim() ||
+    process.env.NEXUS_DEPOSIT_ADDRESS?.trim() ||
+    null;
+  if (!isMainnetNetwork(network)) return devnetOrTestnet;
+  return (
+    process.env.NEXUS_MAINNET_DEPOSIT_ADDRESS?.trim() ||
+    devnetOrTestnet
+  );
+}
