@@ -68,6 +68,9 @@ inference and ledger events fire on both.
 | `response.sent` | both | terminal event; carries `status`, `total_latency_ms` |
 | `rate_limit.blocked` | both | 429 about to be returned |
 | `rate_limit.unavailable` | both | Upstash env vars missing — fail-open warning, emitted once per process |
+| `mainnet.disabled` | chat | `NEXUS_MAINNET_ENABLED=false` blocked a mainnet request; carries `network` |
+| `price.over_cap` | chat | `X402_FLAT_PRICE_USDC` exceeds `NEXUS_MAX_PRICE_USDC`; carries both values |
+| `agent.not_allowed` | chat | payer not in `NEXUS_ALLOWED_AGENTS`; carries the claimed `agent_pubkey` |
 | `deposit.scan_started` / `deposit.scan_completed` | cron | output of the deposit watcher |
 | `deposit.credit_failed` | cron | non-replay error inserting a deposit credit |
 | `log_insert_failed` | chat, inference | the `inference_logs` row couldn't be written |
