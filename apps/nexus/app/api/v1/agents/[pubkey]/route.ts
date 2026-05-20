@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getServiceClient } from "@/lib/supabase";
 import { isValidPubkey } from "@/lib/solana";
+import { getAgentStats } from "@/lib/points";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,33 +17,24 @@ export async function GET(
 
   const supabase = getServiceClient();
 
-  const [agentRes, statsRes] = await Promise.all([
+  const [agentRes, stats] = await Promise.all([
     supabase
       .from("agents")
       .select("created_at")
       .eq("pubkey", pubkey)
       .maybeSingle(),
-    supabase
-      .from("inference_logs")
-      .select("points.sum(), id.count(), created_at.max()")
-      .eq("agent_pubkey", pubkey)
-      .eq("status", "success")
-      .single(),
+    getAgentStats(supabase, pubkey),
   ]);
 
   if (!agentRes.data) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
-  const stats = statsRes.data as
-    | { sum?: number | null; count?: number | null; max?: string | null }
-    | null;
-
   return NextResponse.json({
     pubkey,
-    points_total: stats?.sum ?? 0,
+    points_total: stats.points_total,
     first_seen_at: agentRes.data.created_at,
-    last_call_at: stats?.max ?? null,
-    total_calls: stats?.count ?? 0,
+    last_call_at: stats.last_call_at,
+    total_calls: stats.total_calls,
   });
 }

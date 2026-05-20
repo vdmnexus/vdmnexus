@@ -7,6 +7,7 @@ import { runInference } from "@/lib/inference";
 import { isTaskType, route, type TaskType } from "@/lib/routing";
 import { recordNonce } from "@/lib/nonces";
 import { signReceipt } from "@/lib/receipts";
+import { getAgentStats } from "@/lib/points";
 import { log, newRequestId } from "@/lib/log";
 import {
   enforcePubkey,
@@ -262,13 +263,7 @@ export async function POST(req: NextRequest) {
     balance_remaining: newBalance,
   });
 
-  const { data: pointsRow } = await supabase
-    .from("inference_logs")
-    .select("points.sum()")
-    .eq("agent_pubkey", pubkey)
-    .eq("status", "success")
-    .single();
-  const pointsTotal = (pointsRow as { sum?: number } | null)?.sum ?? 0;
+  const { points_total: pointsTotal } = await getAgentStats(supabase, pubkey);
 
   const receipt = signReceipt({
     v: 2 as const,
