@@ -10,21 +10,89 @@ export const dynamic = "force-dynamic";
 
 type ReceiptRow = {
   id: string;
-  prompt: string;
-  response: string;
+  /** Source: "playground" rows carry prompt+response text (the user opted
+   * into making them public). "inference" rows are hash-only — the receipt
+   * lives on the row but the prompt body never leaves the agent. */
+  source: "playground" | "inference";
+  prompt: string | null;
+  response: string | null;
   receipt: Record<string, unknown> | null;
+  tx_signature: string | null;
   created_at: string;
 };
 
+// Solana tx signatures are base58-encoded 64-byte blobs → 86-88 chars.
+const TX_SIGNATURE_REGEX = /^[1-9A-HJ-NP-Za-km-z]{80,100}$/;
+
 async function loadReceipt(id: string): Promise<ReceiptRow | null> {
   const supabase = getServiceClient();
-  const { data, error } = await supabase
+
+  // 1. Playground short-id (10-char base58) is the most common path — try it
+  //    first regardless of input shape so the existing /r/<short> URLs keep
+  //    resolving with no extra lookup latency for the hot case.
+  const playgroundRes = await supabase
     .from("playground_receipts")
     .select("id, prompt, response, receipt, created_at")
     .eq("id", id)
     .maybeSingle();
-  if (error || !data) return null;
-  return data as ReceiptRow;
+  if (playgroundRes.data) {
+    const row = playgroundRes.data;
+    return {
+      id: String(row.id),
+      source: "playground",
+      prompt: row.prompt as string,
+      response: row.response as string,
+      receipt: row.receipt as Record<string, unknown> | null,
+      tx_signature: null,
+      created_at: row.created_at as string,
+    };
+  }
+
+  // 2. Numeric inference_id → inference_logs.id. The signed receipt JSON
+  //    is persisted on the row by both /v1/inference and
+  //    /v1/chat/completions, so we don't re-sign on read.
+  if (/^\d+$/.test(id)) {
+    const { data } = await supabase
+      .from("inference_logs")
+      .select("id, receipt_json, tx_signature, created_at")
+      .eq("id", Number(id))
+      .eq("status", "success")
+      .maybeSingle();
+    if (data) {
+      return {
+        id: String(data.id),
+        source: "inference",
+        prompt: null,
+        response: null,
+        receipt: data.receipt_json as Record<string, unknown> | null,
+        tx_signature: (data.tx_signature as string | null) ?? null,
+        created_at: data.created_at as string,
+      };
+    }
+  }
+
+  // 3. Solana tx_signature → inference_logs.tx_signature.
+  if (TX_SIGNATURE_REGEX.test(id)) {
+    const { data } = await supabase
+      .from("inference_logs")
+      .select("id, receipt_json, tx_signature, created_at")
+      .eq("tx_signature", id)
+      .eq("status", "success")
+      .maybeSingle();
+    if (data) {
+      return {
+        id: String(data.id),
+        source: "inference",
+        prompt: null,
+        response: null,
+        receipt: data.receipt_json as Record<string, unknown> | null,
+        tx_signature: (data.tx_signature as string | null) ?? null,
+        created_at: data.created_at as string,
+      };
+    }
+  }
+
+  return null;
 }
 
 function truncate(s: string, n: number): string {
@@ -53,7 +121,9 @@ export async function generateMetadata({
   }
 
   const title = `Signed inference receipt — ${truncateMiddle(row.id, 6, 4)}`;
-  const description = truncate(row.prompt, 160);
+  const description = row.prompt
+    ? truncate(row.prompt, 160)
+    : "A cryptographically signed inference receipt — model, cost, on-chain payment, and operator signature. Independently verifiable.";
   const url = `https://vdmnexus.com/r/${row.id}`;
 
   return {
@@ -143,54 +213,89 @@ export default async function ReceiptPermalinkPage({
         <h1 className="sr-only">Signed inference receipt {row.id}</h1>
       </section>
 
-      <section className="relative mx-auto w-full max-w-4xl px-6 pb-6">
-        <figure className="relative overflow-hidden rounded-2xl border border-soft bg-surface/60 p-6 backdrop-blur sm:p-8">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-radial-fade opacity-50"
-          />
-          <div className="relative">
-            <div className="mb-4 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-text-muted">
-              <span>Response</span>
-              {provider ? (
-                <>
-                  <span className="text-text-muted/40">·</span>
-                  <span className="text-text">{provider}</span>
-                </>
+      {row.response ? (
+        <section className="relative mx-auto w-full max-w-4xl px-6 pb-6">
+          <figure className="relative overflow-hidden rounded-2xl border border-soft bg-surface/60 p-6 backdrop-blur sm:p-8">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-radial-fade opacity-50"
+            />
+            <div className="relative">
+              <div className="mb-4 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-text-muted">
+                <span>Response</span>
+                {provider ? (
+                  <>
+                    <span className="text-text-muted/40">·</span>
+                    <span className="text-text">{provider}</span>
+                  </>
+                ) : null}
+                {model ? (
+                  <>
+                    <span className="text-text-muted/40">·</span>
+                    <code className="font-mono text-text">{model}</code>
+                  </>
+                ) : null}
+              </div>
+              <blockquote className="border-l-2 border-accent-indigo/60 pl-5 text-balance text-lg leading-relaxed text-text sm:text-xl">
+                {row.response}
+              </blockquote>
+              {typeof costUsdc === "number" ? (
+                <figcaption className="mt-5 font-mono text-xs text-text-muted">
+                  cost {costUsdc.toFixed ? costUsdc.toFixed(6) : String(costUsdc)} USDC
+                </figcaption>
               ) : null}
+            </div>
+          </figure>
+        </section>
+      ) : (
+        <section className="relative mx-auto w-full max-w-4xl px-6 pb-6">
+          <div className="rounded-2xl border border-soft bg-surface/60 p-6 backdrop-blur sm:p-8">
+            <div className="mb-3 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-text-muted">
+              <span>Receipt</span>
               {model ? (
                 <>
                   <span className="text-text-muted/40">·</span>
                   <code className="font-mono text-text">{model}</code>
                 </>
               ) : null}
+              <span className="text-text-muted/40">·</span>
+              <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-amber-200">
+                hashes only
+              </span>
             </div>
-            <blockquote className="border-l-2 border-accent-indigo/60 pl-5 text-balance text-lg leading-relaxed text-text sm:text-xl">
-              {row.response}
-            </blockquote>
+            <p className="text-sm text-text-muted">
+              The prompt and response for this receipt were never sent to
+              Nexus — only their <code className="font-mono text-text">sha256</code>{" "}
+              hashes are on the signed payload. To verify, the agent that
+              made the call can replay the prompt &amp; response through{" "}
+              <code className="font-mono text-text">verifyReceipt()</code>{" "}
+              in <code className="font-mono text-text">@vdm-nexus/x402</code>.
+            </p>
             {typeof costUsdc === "number" ? (
-              <figcaption className="mt-5 font-mono text-xs text-text-muted">
+              <div className="mt-5 font-mono text-xs text-text-muted">
                 cost {costUsdc.toFixed ? costUsdc.toFixed(6) : String(costUsdc)} USDC
-              </figcaption>
+              </div>
             ) : null}
           </div>
-        </figure>
-      </section>
+        </section>
+      )}
 
       <section className="relative mx-auto w-full max-w-4xl px-6 pb-6">
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-2xl border border-soft bg-surface/60 p-6 backdrop-blur">
-            <div className="mb-3 text-[11px] font-medium uppercase tracking-[0.16em] text-text-muted">
-              Prompt
+        <div className={`grid gap-4 ${row.prompt ? "md:grid-cols-2" : ""}`}>
+          {row.prompt ? (
+            <div className="rounded-2xl border border-soft bg-surface/60 p-6 backdrop-blur">
+              <div className="mb-3 text-[11px] font-medium uppercase tracking-[0.16em] text-text-muted">
+                Prompt
+              </div>
+              <pre className="max-h-[420px] overflow-auto whitespace-pre-wrap break-words font-mono text-[13px] leading-relaxed text-text">
+                {row.prompt}
+              </pre>
             </div>
-            <pre className="max-h-[420px] overflow-auto whitespace-pre-wrap break-words font-mono text-[13px] leading-relaxed text-text">
-              {row.prompt}
-            </pre>
-          </div>
+          ) : null}
 
           <div className="rounded-2xl border border-soft bg-surface/60 p-6 backdrop-blur">
             <div className="mb-3 text-[11px] font-medium uppercase tracking-[0.16em] text-text-muted">
-              Receipt
+              Signed receipt
             </div>
             <pre className="max-h-[420px] overflow-auto font-mono text-[12px] leading-relaxed text-text">
               {JSON.stringify(receipt, null, 2)}
@@ -199,9 +304,11 @@ export default async function ReceiptPermalinkPage({
         </div>
       </section>
 
-      <section className="relative mx-auto w-full max-w-4xl px-6 pb-12">
-        <VerifyWidget receiptId={row.id} />
-      </section>
+      {row.source === "playground" ? (
+        <section className="relative mx-auto w-full max-w-4xl px-6 pb-12">
+          <VerifyWidget receiptId={row.id} />
+        </section>
+      ) : null}
 
       <section className="relative mx-auto w-full max-w-4xl px-6 pb-16">
         <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-soft bg-surface/60 p-6 backdrop-blur sm:flex-row sm:items-center">

@@ -488,6 +488,7 @@ export async function POST(req: NextRequest) {
     const { error: logError } = await supabase.from("inference_logs").insert({
       agent_pubkey: payerWallet,
       request_nonce: settled.transaction,
+      tx_signature: settled.transaction,
       upstream: "openrouter",
       model: body.model,
       cost_usdc: 0,
@@ -536,6 +537,7 @@ export async function POST(req: NextRequest) {
     .insert({
       agent_pubkey: payerWallet,
       request_nonce: settled.transaction,
+      tx_signature: settled.transaction,
       upstream: result.upstream,
       model: body.model,
       prompt_tokens: result.prompt_tokens,
@@ -586,6 +588,26 @@ export async function POST(req: NextRequest) {
       pay_to: recipient,
     },
   });
+
+  // Persist the signed receipt onto the log row so public lookups at
+  // /api/v1/receipts/<id> (and the /r/<id> permalink) return the same
+  // signed JSON the client got — bit-stable, no re-signing on read.
+  if (logRow?.id) {
+    const { error: updateError } = await supabase
+      .from("inference_logs")
+      .update({ receipt_json: receipt })
+      .eq("id", logRow.id);
+    if (updateError) {
+      log.error({
+        event: "receipt_persist_failed",
+        request_id,
+        agent_pubkey: payerWallet,
+        inference_id: logRow.id,
+        tx_signature: settled.transaction,
+        detail: updateError.message,
+      });
+    }
+  }
 
   log.info({
     event: "response.sent",

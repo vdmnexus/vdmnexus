@@ -279,6 +279,26 @@ export async function POST(req: NextRequest) {
     points_total: pointsTotal,
   });
 
+  // Persist the signed receipt onto the log row so public lookups at
+  // /api/v1/receipts/<id> can return the canonical signed JSON without
+  // re-signing on read. Fire-and-forget: a failure here doesn't roll back
+  // the inference (the receipt is already in the response).
+  if (logRow?.id) {
+    const { error: updateError } = await supabase
+      .from("inference_logs")
+      .update({ receipt_json: receipt })
+      .eq("id", logRow.id);
+    if (updateError) {
+      log.error({
+        event: "receipt_persist_failed",
+        request_id,
+        agent_pubkey: pubkey,
+        inference_id: logRow.id,
+        detail: updateError.message,
+      });
+    }
+  }
+
   log.info({
     event: "response.sent",
     request_id,
