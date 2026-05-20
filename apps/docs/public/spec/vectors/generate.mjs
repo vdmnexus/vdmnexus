@@ -333,4 +333,146 @@ writeFileSync(
   JSON.stringify(negativeExpected, null, 2) + "\n"
 );
 
-console.log("\nGenerated 3 vectors. Operator pubkey:", operatorPubkey);
+// ─── vector 4: x402-evm-001 (happy-path /v1/chat/completions on Base) ─────
+//
+// Mirrors x402-001 but settles on Base Sepolia (`eip155:84532`) via an
+// ERC-20 USDC transfer (EIP-3009 transferWithAuthorization in practice).
+// The tx hash is SYNTHETIC — it will not resolve on Base, so verifiers in
+// offline mode MUST report payment_on_chain_ok=false (vacuously). The
+// non-on-chain checks (prompt_hash, response_hash, nexus_signature) still
+// validate end-to-end.
+//
+// Per spec §13.2:
+//   - network is the decimal chain-id CAIP-2 form (NOT a genesis hash).
+//   - agent_pubkey and pay_to are 0x-prefixed 20-byte EVM addresses (42 chars).
+//   - tx_signature is the 0x-prefixed 32-byte transaction hash (66 chars).
+//   - the canonical Base Sepolia USDC contract is 0x036CbD53842c5426634e7929541eC2318f3dCF7e.
+//
+// The agent's EVM address is derived deterministically by hashing the
+// same fixed-seed Ed25519 pubkey used for the Solana vectors. This is
+// vector-only sleight-of-hand: real-world agents use an EVM keypair
+// (secp256k1) for Base, not Ed25519. The receipt format is identical
+// regardless of how the agent key is derived — what matters is that
+// `agent_pubkey` matches the ERC-20 Transfer `from` topic on-chain.
+
+// Deterministic-seed contrivance: hash arbitrary bytes with SHA-256 to
+// produce synthetic 20-byte EVM addresses and a 32-byte tx hash. The
+// vector is offline-only — what matters is conformance to the spec's
+// 0x-prefixed hex address/hash shapes, not that these particular bytes
+// would be reachable on Base. Real implementations derive addresses via
+// keccak-256 over a secp256k1 public key; not adding a keccak dep here
+// just for offline test fixtures.
+function sha256Bytes(input) {
+  return createHash("sha256")
+    .update(typeof input === "string" ? input : Buffer.from(input))
+    .digest();
+}
+function evmAddressFrom(seed) {
+  return "0x" + sha256Bytes(seed).subarray(0, 20).toString("hex");
+}
+function evmTxHashFrom(seed) {
+  return "0x" + sha256Bytes(seed).toString("hex");
+}
+
+const evmAgentAddress = evmAddressFrom(agentKp.publicKey);
+const evmPayToAddress = evmAddressFrom("sir-v2-vector-payto");
+const evmTxHash = evmTxHashFrom("sir-v2-vector-x402-evm-001-tx");
+
+const x402EvmRequest = {
+  model: "openai/gpt-4o-mini",
+  messages: [
+    { role: "system", content: "You are a helpful assistant." },
+    { role: "user", content: "Say hi in one word." },
+  ],
+};
+
+const x402EvmResponse = {
+  id: "chatcmpl-vector-x402-evm-001",
+  object: "chat.completion",
+  created: 1700000020,
+  model: "openai/gpt-4o-mini",
+  choices: [
+    {
+      index: 0,
+      message: { role: "assistant", content: "Hello!" },
+      finish_reason: "stop",
+    },
+  ],
+  usage: { prompt_tokens: 18, completion_tokens: 2, total_tokens: 20 },
+};
+
+const x402EvmPromptForHash = x402EvmRequest.messages
+  .map((m) => `${m.role}:${m.content}`)
+  .join("\n");
+const x402EvmResponseText = x402EvmResponse.choices[0].message.content;
+
+const x402EvmReceipt = signReceipt(
+  {
+    v: 2,
+    agent_pubkey: evmAgentAddress,
+    upstream: "openrouter",
+    model: "openai/gpt-4o-mini",
+    cost_usdc: 0.000045,
+    prompt_hash: sha256Hex(x402EvmPromptForHash),
+    response_hash: sha256Hex(x402EvmResponseText),
+    timestamp: 1700000020234,
+    inference_id: 1338,
+    points_total: 3,
+    payment: {
+      scheme: "x402",
+      amount_usdc: 0.01,
+      tx_signature: evmTxHash,
+      network: "eip155:84532",
+      pay_to: evmPayToAddress,
+    },
+  },
+  operatorSecretKey
+);
+
+const x402EvmExpected = {
+  prompt_hash_expected: sha256Hex(x402EvmPromptForHash),
+  response_hash_expected: sha256Hex(x402EvmResponseText),
+  canonical_payload_hex: Buffer.from(
+    canonicalize(
+      Object.fromEntries(
+        Object.entries(x402EvmReceipt).filter(
+          ([k]) => k !== "nexus_signature"
+        )
+      )
+    ),
+    "utf8"
+  ).toString("hex"),
+  checks: {
+    prompt_hash_ok: true,
+    response_hash_ok: true,
+    nexus_signature_ok: true,
+    payment_on_chain_ok: "skip-offline",
+    payer_matches: "skip-offline",
+  },
+  ok: "offline-undetermined",
+  notes:
+    "Happy-path x402 receipt on Base Sepolia (eip155:84532). tx_signature is SYNTHETIC and will NOT resolve on Base — conformant verifiers running in offline mode MUST report payment_on_chain_ok=false (vacuously), payer_matches=false (vacuously). On-chain verification per spec §13.2: confirm a USDC Transfer event from 0x036CbD53842c5426634e7929541eC2318f3dCF7e where topics[2]=pay_to, topics[1]=agent_pubkey, and data>=amount_usdc*1e6.",
+};
+
+writeFileSync(
+  join(__dirname, "x402-evm-001", "request.json"),
+  JSON.stringify(x402EvmRequest, null, 2) + "\n"
+);
+writeFileSync(
+  join(__dirname, "x402-evm-001", "response.json"),
+  JSON.stringify(x402EvmResponse, null, 2) + "\n"
+);
+writeFileSync(
+  join(__dirname, "x402-evm-001", "receipt.json"),
+  JSON.stringify(x402EvmReceipt, null, 2) + "\n"
+);
+writeFileSync(
+  join(__dirname, "x402-evm-001", "operator-pubkey.txt"),
+  operatorPubkey + "\n"
+);
+writeFileSync(
+  join(__dirname, "x402-evm-001", "expected.json"),
+  JSON.stringify(x402EvmExpected, null, 2) + "\n"
+);
+
+console.log("\nGenerated 4 vectors. Operator pubkey:", operatorPubkey);
