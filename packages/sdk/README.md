@@ -75,6 +75,9 @@ type InferenceOptions = {
   prompt: string;
   task_type?: "fast" | "reasoning" | "general"; // default "general"
   max_cost_usdc?: number;
+  /** When the prepaid balance is empty, automatically request a sponsored
+   *  grant and retry once. Default `true`. */
+  autoGrant?: boolean;
 };
 
 type InferenceResponse = {
@@ -94,6 +97,21 @@ type InferenceResponse = {
   error?: string;
   detail?: string;
 };
+```
+
+### `agent.grant(endpoint): Promise<GrantResponse>`
+
+Request a sponsored USDC grant for this agent's pubkey. One grant per
+pubkey ever — the server returns `grant_already_issued` on a repeat. You
+rarely need to call this explicitly: `inference()` auto-calls it when the
+balance is zero (set `autoGrant: false` to opt out).
+
+```ts
+const reply = await agent.inference("https://nexus.vdmnexus.com/api/v1", {
+  prompt: "First call with no USDC, no faucet, no signup.",
+});
+// → SDK detects insufficient_credits, calls /grants, retries inference.
+// → reply.receipt is now the signed receipt for that first call.
 ```
 
 ### `agent.signBody(body: string): string`
