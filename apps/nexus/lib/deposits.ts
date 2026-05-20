@@ -1,3 +1,5 @@
+import { findAssociatedTokenPda, TOKEN_PROGRAM_ADDRESS } from "@solana-program/token";
+import { address } from "@solana/kit";
 import {
   getParsedTransaction,
   getSignaturesForAddress,
@@ -9,6 +11,24 @@ export type DepositMatch = {
   tx_signature: string;
   block_time: number | null;
 };
+
+/**
+ * Derive the USDC associated-token-account (ATA) for a wallet.
+ *
+ * Plain SPL `transferInstruction` calls do NOT include the recipient
+ * wallet pubkey in the tx's account keys — only the ATA addresses are
+ * referenced. `getSignaturesForAddress(wallet)` therefore silently
+ * misses every standard SPL Transfer deposit. Querying the ATA address
+ * is the correct surface.
+ */
+async function deriveUsdcAta(walletAddress: string, mintAddress: string): Promise<string> {
+  const [ata] = await findAssociatedTokenPda({
+    mint: address(mintAddress),
+    owner: address(walletAddress),
+    tokenProgram: TOKEN_PROGRAM_ADDRESS,
+  });
+  return ata.toString();
+}
 
 export async function findDepositsInTx(args: {
   signature: string;
@@ -51,7 +71,10 @@ export async function scanDeposits(args: {
   usdcMint: string;
   limit: number;
 }): Promise<DepositMatch[]> {
-  const sigs = await getSignaturesForAddress(args.depositAddress, args.limit);
+  // Query signatures against the deposit address's USDC ATA, not the
+  // wallet — see deriveUsdcAta() comment for why.
+  const depositAta = await deriveUsdcAta(args.depositAddress, args.usdcMint);
+  const sigs = await getSignaturesForAddress(depositAta, args.limit);
   const out: DepositMatch[] = [];
   for (const s of sigs) {
     if (s.err) continue;
