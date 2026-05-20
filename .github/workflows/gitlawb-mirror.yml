@@ -1,0 +1,80 @@
+name: Mirror to gitlawb
+
+# Pushes every commit on main to the gitlawb decentralized git network.
+# The first deploy (which generates the signed-inference receipt) is done
+# locally via `pnpm --filter nexus gitlawb:deploy`; this workflow only
+# keeps the gitlawb mirror in sync afterwards.
+#
+# Required GitHub Actions secrets:
+#   GITLAWB_IDENTITY   base64 of the gitlawb identity file produced by
+#                      `gl identity new` on the machine that did the
+#                      first deploy. On macOS / Linux:
+#                        base64 -w0 ~/.gitlawb/identity
+#                        # (use `base64 -i ~/.gitlawb/identity | tr -d '\n'`
+#                        #  on BSD/macOS without -w)
+#   GITLAWB_REPO_NAME  optional — overrides the default repo name.
+#
+# Failure mode: if the gitlawb network is unreachable the job fails loudly
+# rather than silently dropping a commit. Re-run from the Actions UI once
+# the network is back.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: gitlawb-mirror
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so the gitlawb mirror is a complete copy, not
+          # a shallow clone.
+          fetch-depth: 0
+
+      - name: Install gitlawb CLI
+        run: |
+          curl -fsSL https://gitlawb.com/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          echo "$HOME/.gitlawb/bin" >> "$GITHUB_PATH"
+
+      - name: Restore gitlawb identity
+        env:
+          GITLAWB_IDENTITY: ${{ secrets.GITLAWB_IDENTITY }}
+        run: |
+          if [ -z "$GITLAWB_IDENTITY" ]; then
+            echo "::error::GITLAWB_IDENTITY secret is empty. Run the local deploy script once and store \`base64 -w0 ~/.gitlawb/identity\` as the GITLAWB_IDENTITY secret." >&2
+            exit 1
+          fi
+          mkdir -p "$HOME/.gitlawb"
+          printf '%s' "$GITLAWB_IDENTITY" | base64 -d > "$HOME/.gitlawb/identity"
+          chmod 600 "$HOME/.gitlawb/identity"
+          gl identity show
+
+      - name: Push to gitlawb
+        env:
+          GITLAWB_REPO_NAME: ${{ secrets.GITLAWB_REPO_NAME }}
+        run: |
+          REPO_NAME="${GITLAWB_REPO_NAME:-vdmnexus}"
+          DID="$(gl identity show | grep -oE 'did:key:[A-Za-z0-9]+' | head -n1)"
+          if [ -z "$DID" ]; then
+            echo "::error::Could not parse DID from \`gl identity show\`." >&2
+            exit 1
+          fi
+          # Prefer the CLI's clone URL if it exposes one; fall back to
+          # the documented scheme. `git-remote-gitlawb` is installed
+          # alongside the CLI by install.sh.
+          if URL="$(gl repo clone-url "$REPO_NAME" 2>/dev/null)" && [ -n "$URL" ]; then
+            :
+          else
+            URL="gitlawb://${DID}/${REPO_NAME}"
+          fi
+          echo "Pushing to $URL"
+          git remote remove gitlawb 2>/dev/null || true
+          git remote add gitlawb "$URL"
+          git push gitlawb HEAD:main
