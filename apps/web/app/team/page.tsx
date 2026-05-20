@@ -52,7 +52,7 @@ const SHIPPED = [
 
 const GET = [
   "Meaningful $NEXUS allocation, carved from the contributor pool",
-  "Equity in the Spanish S.L. — 4-year vest, 1-year cliff",
+  "Equity — 4-year vest, 1-year cliff",
   "Public credit — your name on what we ship",
   "Decision autonomy on the work you own",
   "Seat at the table on a three-week-old project",
