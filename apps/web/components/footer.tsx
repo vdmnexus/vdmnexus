@@ -19,6 +19,12 @@ export function Footer() {
           <Link href="/roadmap" className="transition-colors hover:text-text">
             Roadmap
           </Link>
+          <Link href="/token" className="transition-colors hover:text-text">
+            Token
+          </Link>
+          <Link href="/whitepaper" className="transition-colors hover:text-text">
+            Whitepaper
+          </Link>
           <a
             href="https://x.com/vdmnexus"
             target="_blank"

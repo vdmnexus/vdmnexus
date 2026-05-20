@@ -38,6 +38,9 @@ export function Nav() {
           <NavLink href="/roadmap" active={pathname === "/roadmap"}>
             Roadmap
           </NavLink>
+          <NavLink href="/token" active={pathname === "/token"}>
+            Token
+          </NavLink>
         </div>
 
         <div className="flex items-center gap-3">
