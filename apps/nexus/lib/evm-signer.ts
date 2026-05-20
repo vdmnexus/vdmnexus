@@ -1,15 +1,18 @@
 /**
  * EVM facilitator signer.
  *
- * Phase 1: env-based secp256k1 key (NEXUS_EVM_PRIVATE_KEY). Sufficient
- * for Base Sepolia testnet flights. The key signs the on-chain
- * `transferWithAuthorization` call that settles each x402 payment;
- * agents only sign EIP-712 typed data (gasless from their side).
+ * Two signing modes, selected at build time (mirrors `kms-signer.ts`
+ * for SVM):
+ *   - KMS  — preferred. Triggered when NEXUS_EVM_KMS_KEY_ID is set.
+ *            secp256k1 private key lives in AWS KMS; only KMS.Sign
+ *            round-trips touch it. Lives in `kms-signer-evm.ts`.
+ *   - Env  — fallback. Reads NEXUS_EVM_PRIVATE_KEY (0x-prefixed
+ *            32-byte hex). Suitable for local dev / Base Sepolia
+ *            flights; never use in production.
  *
- * Phase 2 (later): swap to AWS KMS with KeySpec ECC_SECG_P256K1 + an
- * ECDSA_SHA256 signing path, same way `kms-signer.ts` does for Solana
- * Ed25519. The KMS key would replace the in-memory account; the rest of
- * the viem client stays the same.
+ * Callers should prefer `getEvmFacilitatorSigner()` (async, picks the
+ * right mode); `buildEnvEvmFacilitatorSigner()` stays exported for
+ * tests that want to exercise the env-key path directly.
  */
 
 import { createWalletClient, http, publicActions, type Hex } from "viem";
@@ -38,7 +41,7 @@ function parsePrivateKey(raw: string): Hex {
   return hex as Hex;
 }
 
-export function buildEvmFacilitatorSigner(): FacilitatorEvmSigner {
+export function buildEnvEvmFacilitatorSigner(): FacilitatorEvmSigner {
   const pkRaw = process.env.NEXUS_EVM_PRIVATE_KEY?.trim();
   if (!pkRaw) {
     throw new Error("NEXUS_EVM_PRIVATE_KEY is required for the EVM facilitator");
@@ -62,4 +65,26 @@ export function buildEvmFacilitatorSigner(): FacilitatorEvmSigner {
     ...(walletClient as unknown as Omit<FacilitatorEvmSigner, "getAddresses">),
     address: account.address,
   });
+}
+
+/**
+ * Returns whichever EVM signer is configured. KMS wins if both env
+ * vars are set — same precedence as the SVM path.
+ */
+export async function getEvmFacilitatorSigner(): Promise<FacilitatorEvmSigner> {
+  if (process.env.NEXUS_EVM_KMS_KEY_ID?.trim()) {
+    // Imported lazily so that pure env-key deployments don't load the
+    // KMS-SDK code path.
+    const { getKmsEvmFacilitatorSigner } = await import("./kms-signer-evm");
+    return getKmsEvmFacilitatorSigner();
+  }
+  return buildEnvEvmFacilitatorSigner();
+}
+
+/** True when any EVM signer (KMS or env key) is configured. */
+export function isEvmConfigured(): boolean {
+  return (
+    !!process.env.NEXUS_EVM_KMS_KEY_ID?.trim() ||
+    !!process.env.NEXUS_EVM_PRIVATE_KEY?.trim()
+  );
 }

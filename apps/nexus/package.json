@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start --port 3001",
     "demo": "tsx scripts/demo-agent.ts",
-    "test:payinfer": "tsx scripts/test-payinfer.ts"
+    "test:payinfer": "tsx scripts/test-payinfer.ts",
+    "test:kms-evm": "tsx --test lib/kms-signer-evm.test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-kms": "^3",
