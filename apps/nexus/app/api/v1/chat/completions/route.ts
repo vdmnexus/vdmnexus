@@ -4,6 +4,7 @@ import { getServiceClient } from "@/lib/supabase";
 import { credit, debit, ensureAgent } from "@/lib/credits";
 import { runChatInference, type ChatMessage } from "@/lib/chat-inference";
 import { signReceipt } from "@/lib/receipts";
+import { getAgentStats } from "@/lib/points";
 import {
   getFacilitator,
   FacilitatorNotConfiguredError,
@@ -463,13 +464,10 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const { data: pointsRow } = await supabase
-    .from("inference_logs")
-    .select("points.sum()")
-    .eq("agent_pubkey", payerWallet)
-    .eq("status", "success")
-    .single();
-  const pointsTotal = (pointsRow as { sum?: number } | null)?.sum ?? 0;
+  const { points_total: pointsTotal } = await getAgentStats(
+    supabase,
+    payerWallet
+  );
 
   const promptForHash = body.messages
     .map((m) => `${m.role}:${m.content}`)
