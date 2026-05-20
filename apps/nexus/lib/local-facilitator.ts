@@ -18,11 +18,15 @@
  *              tweetnacl secret), builds an in-memory @solana/kit
  *              keypair. Convenient for local dev; never use in prod.
  *
- * EVM signing modes (Phase 1):
- *   - Env    — reads NEXUS_EVM_PRIVATE_KEY (0x-prefixed 32-byte hex).
- *              Builds a viem WalletClient and converts via
- *              toFacilitatorEvmSigner. Suitable for Base Sepolia
- *              testnet. KMS variant arrives in a follow-up.
+ * EVM signing modes:
+ *   - KMS    — preferred. Triggered when NEXUS_EVM_KMS_KEY_ID is set.
+ *              The secp256k1 private key lives in AWS KMS; only
+ *              KMS.Sign round-trips touch it. Fee-payer address is
+ *              derived from KMS.GetPublicKey at startup and asserted
+ *              to match NEXUS_EVM_DEPOSIT_ADDRESS.
+ *   - Env    — fallback. Reads NEXUS_EVM_PRIVATE_KEY (0x-prefixed
+ *              32-byte hex). Suitable for Base Sepolia testnet
+ *              flights and local dev; never use in production.
  *
  * Each chain's signer wallet must hold native gas:
  *   - Solana: ~5000 lamports per tx on devnet (faucet at solana.com)
@@ -49,7 +53,7 @@ import type {
 } from "@x402/core/types";
 import type { FacilitatorClient } from "@x402/core/server";
 import { getKmsFacilitatorSigner } from "./kms-signer";
-import { buildEvmFacilitatorSigner } from "./evm-signer";
+import { getEvmFacilitatorSigner, isEvmConfigured } from "./evm-signer";
 import { BASE_MAINNET_CAIP2, BASE_SEPOLIA_CAIP2 } from "./x402";
 import { log } from "./log";
 
@@ -94,12 +98,28 @@ async function build(): Promise<x402Facilitator> {
     new ExactSvmScheme(svmSigner)
   );
 
-  // Base (EVM) — opt-in. Skipped if NEXUS_EVM_PRIVATE_KEY isn't set so
-  // Solana-only deployments don't fail closed.
-  if (process.env.NEXUS_EVM_PRIVATE_KEY?.trim()) {
-    const evmSigner = buildEvmFacilitatorSigner();
+  // Base (EVM) — opt-in. Skipped if neither NEXUS_EVM_KMS_KEY_ID nor
+  // NEXUS_EVM_PRIVATE_KEY is set, so Solana-only deployments don't
+  // fail closed.
+  if (isEvmConfigured()) {
+    const evmSigner = await getEvmFacilitatorSigner();
     const [evmAddress] = evmSigner.getAddresses();
-    log.info({ event: "facilitator.evm.ready", address: evmAddress });
+    const usingKms = !!process.env.NEXUS_EVM_KMS_KEY_ID?.trim();
+    log.info({
+      event: usingKms ? "facilitator.kms_evm.ready" : "facilitator.evm.ready",
+      address: evmAddress,
+    });
+    const expected = process.env.NEXUS_EVM_DEPOSIT_ADDRESS?.trim();
+    if (usingKms && expected && expected.toLowerCase() !== evmAddress.toLowerCase()) {
+      log.error({
+        event: "facilitator.kms_evm.address_mismatch",
+        derived: evmAddress,
+        expected,
+      });
+      throw new Error(
+        `KMS-derived EVM address (${evmAddress}) does not match NEXUS_EVM_DEPOSIT_ADDRESS (${expected})`
+      );
+    }
     facilitator.register(
       [BASE_MAINNET_CAIP2, BASE_SEPOLIA_CAIP2],
       new ExactEvmScheme(evmSigner)
