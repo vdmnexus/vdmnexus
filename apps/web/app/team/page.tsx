@@ -305,11 +305,12 @@ export default function TeamPage() {
             </p>
           </FadeIn>
           <FadeIn delay={0.1} className="mt-10">
-            <div className="overflow-hidden rounded-2xl border border-soft bg-surface/60 backdrop-blur">
+            <div className="overflow-hidden rounded-2xl border border-soft">
               <iframe
                 src={APPLICATION_FORM_EMBED_URL}
                 title="VDM Nexus application form"
                 loading="lazy"
+                style={{ background: "transparent" }}
                 className="block h-[720px] w-full border-0"
               />
             </div>
