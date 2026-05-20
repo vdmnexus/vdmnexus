@@ -73,7 +73,20 @@ function sha256(input: string): string {
 
 function getNetwork(): Network {
   const env = process.env.X402_NETWORK?.trim();
+  if (!env) return X402_NETWORKS.solanaDevnet;
+
+  // Friendly aliases.
+  const lower = env.toLowerCase();
+  if (lower === "solana-mainnet") return X402_NETWORKS.solanaMainnet;
+  if (lower === "solana-devnet") return X402_NETWORKS.solanaDevnet;
+  if (lower === "base" || lower === "base-mainnet") return X402_NETWORKS.baseMainnet;
+  if (lower === "base-sepolia") return X402_NETWORKS.baseSepolia;
+
+  // Full CAIP-2 form pass-through.
   if (env === X402_NETWORKS.solanaMainnet) return X402_NETWORKS.solanaMainnet;
+  if (env === X402_NETWORKS.baseMainnet) return X402_NETWORKS.baseMainnet;
+  if (env === X402_NETWORKS.baseSepolia) return X402_NETWORKS.baseSepolia;
+
   return X402_NETWORKS.solanaDevnet;
 }
 
