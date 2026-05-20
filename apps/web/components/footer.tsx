@@ -25,6 +25,9 @@ export function Footer() {
           <Link href="/whitepaper" className="transition-colors hover:text-text">
             Whitepaper
           </Link>
+          <Link href="/team" className="transition-colors hover:text-text">
+            Team
+          </Link>
           <a
             href="https://x.com/vdmnexus"
             target="_blank"

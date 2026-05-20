@@ -1,27 +1,27 @@
 {
-  "name": "@vdm-nexus/x402",
-  "version": "0.3.0",
-  "description": "x402 client for VDM Nexus — agents pay AI inference per call with a signed Solana USDC transfer.",
+  "name": "@vdm-nexus/mcp",
+  "version": "0.1.0",
+  "description": "Model Context Protocol server for VDM Nexus signed inference. Plug into Claude Desktop, Cursor, or any MCP-aware client.",
   "license": "MIT",
   "author": "VDM Nexus",
   "homepage": "https://vdmnexus.com",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/vdmnexus/vdmnexus.git",
-    "directory": "packages/x402"
+    "directory": "packages/mcp-server"
   },
   "bugs": {
     "url": "https://github.com/vdmnexus/vdmnexus/issues"
   },
   "keywords": [
-    "x402",
-    "solana",
-    "ai",
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "cursor",
     "ai-agents",
-    "autonomous-agents",
-    "llm",
-    "inference",
-    "usdc",
+    "solana",
+    "x402",
+    "signed-inference",
     "vdmnexus"
   ],
   "type": "module",
@@ -31,10 +31,12 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./package.json": "./package.json"
+  },
+  "bin": {
+    "vdm-nexus-mcp": "./dist/index.js"
   },
   "files": [
     "dist",
@@ -45,17 +47,16 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && chmod +x dist/index.js",
     "dev": "tsc --watch",
-    "prepublishOnly": "tsc"
+    "start": "node dist/index.js",
+    "prepublishOnly": "tsc && chmod +x dist/index.js"
   },
   "dependencies": {
-    "@solana/kit": "^5",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@vdm-nexus/sdk": "workspace:*",
-    "@x402/core": "^2.12.0",
-    "@x402/svm": "^2.12.0",
-    "bs58": "^6.0.0",
-    "tweetnacl": "^1.0.3"
+    "@vdm-nexus/x402": "workspace:*",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^22",
