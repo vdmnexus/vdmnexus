@@ -161,6 +161,12 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.45.4
         version: 2.105.4
+      '@vdm-nexus/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
+      '@vdm-nexus/x402':
+        specifier: workspace:*
+        version: link:../../packages/x402
       bs58:
         specifier: ^6.0.0
         version: 6.0.0
