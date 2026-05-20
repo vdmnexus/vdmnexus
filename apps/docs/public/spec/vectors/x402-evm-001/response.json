@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-vector-x402-evm-001",
+  "object": "chat.completion",
+  "created": 1700000020,
+  "model": "openai/gpt-4o-mini",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Hello!"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 18,
+    "completion_tokens": 2,
+    "total_tokens": 20
+  }
+}

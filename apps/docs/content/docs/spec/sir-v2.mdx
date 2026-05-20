@@ -3,7 +3,7 @@ title: Signed Inference Receipt — Wire Format v2
 description: Open specification for a cryptographically verifiable record of an AI inference call. JWT-shaped, payment-aware, chain-agnostic.
 ---
 
-> **Status:** Draft · **Spec version:** 1.0 · **Wire format version:** 2
+> **Status:** Draft · **Spec version:** 1.1 · **Wire format version:** 2
 > **Editor:** VDM Nexus · **Last updated:** 2026-05-20
 
 ## Abstract
@@ -133,9 +133,9 @@ The `payment` object has all of:
 | -------------- | --------------- | --------------------------------------------------------------------------------------------- |
 | `scheme`       | `"x402"`        | Payment scheme identifier. MUST be the string `"x402"`.                                       |
 | `amount_usdc`  | number          | Amount paid by the agent (USD).                                                               |
-| `tx_signature` | string          | Blockchain transaction signature (base58 on Solana).                                          |
-| `network`      | string (CAIP-2) | CAIP-2 network identifier. Conformant operators MUST use the genesis-hash form (see §13).     |
-| `pay_to`       | string          | Recipient address that received the payment.                                                  |
+| `tx_signature` | string          | Blockchain transaction identifier. Base58 signature on Solana; `0x`-prefixed 32-byte tx hash on EVM (see §13).         |
+| `network`      | string (CAIP-2) | CAIP-2 network identifier. Solana operators MUST use the genesis-hash form; EVM operators use the decimal chain id (see §13). |
+| `pay_to`       | string          | Recipient address that received the payment. Base58 on Solana, `0x`-prefixed 20-byte address on EVM.                |
 
 ## 6. Canonical example
 
@@ -187,9 +187,9 @@ x402 (`/v1/chat/completions`) receipt:
 
 In addition to JSON types and presence rules in §4 and §5:
 
-- `agent_pubkey`, `pay_to`, `tx_signature`, and `nexus_signature` MUST be encoded base58 using the Bitcoin alphabet (`123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz`).
-- `agent_pubkey` MUST decode to 32 bytes (Ed25519 public key).
-- `nexus_signature` MUST decode to 64 bytes (Ed25519 detached signature).
+- `nexus_signature` MUST be base58-encoded (Bitcoin alphabet: `123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz`) and MUST decode to 64 bytes (Ed25519 detached signature).
+- `agent_pubkey`, `pay_to`, and `tx_signature` encodings are chain-specific. On Solana they are base58. On EVM they are `0x`-prefixed lowercase hex (`agent_pubkey` and `pay_to` are 20-byte addresses, `tx_signature` is a 32-byte tx hash). See §13 for the per-chain rules.
+- On Solana, `agent_pubkey` MUST decode to 32 bytes (Ed25519 public key).
 - `prompt_hash` and `response_hash` MUST be lowercase hex of exactly 64 characters (SHA-256 output).
 - `timestamp` MUST be a non-negative integer expressing Unix milliseconds.
 - `cost_usdc` and `amount_usdc` MUST be finite numbers ≥ 0.
@@ -362,10 +362,15 @@ for full verification.
 
 ## 13. Chain bindings
 
+This specification defines normative bindings for two networks below.
+Both are first-class — no single chain is "the canonical chain" for
+SIR. Receipts on either network MUST satisfy all five verifier checks
+(§12) against their respective authoritative state.
+
 ### 13.1 Solana
 
-The reference chain binding is Solana. The CAIP-2 network identifier
-MUST use the genesis-hash form:
+The Solana binding settles payments as SPL USDC transfers. The CAIP-2
+network identifier MUST use the genesis-hash form:
 
 - Mainnet: `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` (full hash)
 - Devnet: `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1aFoKMcMZ9YTs` (full hash)
@@ -374,6 +379,9 @@ Short forms like `solana:devnet` or `solana:mainnet` are NOT
 spec-compliant. Tolerant verifiers MAY accept them for human-readable
 contexts, but conformant operators MUST emit the genesis-hash form.
 
+On Solana, `tx_signature` is the base58 transaction signature; `pay_to`
+and `agent_pubkey` are base58 Ed25519 public keys.
+
 The verifier looks up the transaction with `getTransaction({encoding:
 "jsonParsed", commitment: "confirmed"})`, then:
 
@@ -381,12 +389,68 @@ The verifier looks up the transaction with `getTransaction({encoding:
 2. Asserts the agent's `agent_pubkey` is among the transaction's signers (`message.accountKeys` where `signer === true`). The agent need not be the fee payer — in consolidated x402-svm topologies the facilitator pays SOL fees while the agent signs the SPL transfer.
 3. Finds the post-token-balance entry whose `owner` matches `payment.pay_to` and asserts the delta from the matching pre-token-balance entry is `>= amount_usdc * 10^6` (USDC decimal places).
 
-### 13.2 Future networks (non-normative)
+### 13.2 Base (EVM)
+
+The Base binding settles payments as ERC-20 USDC transfers, typically
+authorized via [EIP-3009](https://eips.ethereum.org/EIPS/eip-3009)
+`transferWithAuthorization`. EIP-3009 lets the agent sign an off-chain
+authorization (EIP-712 typed data) that any party — in practice, the
+x402 facilitator — can broadcast on-chain as a gasless ERC-20 transfer
+from the agent's address. The resulting on-chain transaction is an
+ordinary `Transfer(address,address,uint256)` event emitted by the USDC
+contract, which is what the verifier checks; SIR does not require
+EIP-3009 specifically — any mechanism that produces a USDC `Transfer`
+event with the agent as `from` and `pay_to` as `to` is acceptable.
+
+The CAIP-2 network identifier MUST be one of:
+
+- Base mainnet: `eip155:8453`
+- Base Sepolia: `eip155:84532`
+
+Unlike Solana, the EVM CAIP-2 form is a stable decimal chain id rather
+than a genesis hash; the chain ids above are the canonical, normative
+identifiers and MUST be emitted verbatim.
+
+The canonical USDC contract address per network — verifiers MUST anchor
+to these and MUST reject `Transfer` events from any other contract
+address. (The receipt does not carry the asset address; USDC is the
+only asset supported on x402 today.)
+
+| Network         | CAIP-2          | USDC contract                                                                                                            |
+| --------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Base mainnet    | `eip155:8453`   | [`0x833589fCD6eDb6E08f4c7C32A07f04b6dEDD1c2E`](https://basescan.org/address/0x833589fCD6eDb6E08f4c7C32A07f04b6dEDD1c2E)   |
+| Base Sepolia    | `eip155:84532`  | [`0x036CbD53842c5426634e7929541eC2318f3dCF7e`](https://sepolia.basescan.org/address/0x036CbD53842c5426634e7929541eC2318f3dCF7e) |
+
+On Base, `tx_signature` is the `0x`-prefixed 32-byte transaction hash
+(66 chars total); `pay_to` and `agent_pubkey` are `0x`-prefixed 20-byte
+Ethereum addresses (42 chars total). Verifiers SHOULD perform address
+comparisons in a case-insensitive way (EIP-55 mixed-case checksum
+encoding is not required).
+
+The verifier calls `eth_getTransactionReceipt(payment.tx_signature)`
+and asserts all of the following:
+
+1. The receipt's `status` field equals `0x1` (transaction succeeded).
+2. The receipt contains at least one log entry with all of:
+   - `address` equal to the canonical USDC contract for `payment.network` (case-insensitive).
+   - `topics[0]` equal to the `Transfer(address,address,uint256)` event topic, `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef`.
+   - `topics[2]` (the indexed `to`) decoding to an address equal to `payment.pay_to` (case-insensitive). The address is the last 20 bytes of the 32-byte topic.
+   - `data` (the non-indexed `value`, as a `uint256`) `>= amount_usdc * 10^6` (USDC has 6 decimals on Base).
+3. `topics[1]` (the indexed `from`) of the matching log decodes to an address equal to `payment.agent_pubkey` (case-insensitive). This is the `payer_matches` check; unlike Solana, EVM `Transfer` logs identify the sender directly without an explicit signer set.
+
+The verifier MUST NOT use `tx.from` (the transaction origin) for the
+`payer_matches` check, because in an EIP-3009 / meta-transaction flow
+`tx.from` is the relayer (e.g. the facilitator), not the agent. The
+`from` topic of the USDC `Transfer` log is authoritative.
+
+### 13.3 Future networks (non-normative)
 
 This specification is chain-agnostic at the format level. Future
-revisions MAY add binding sections for Base, Ethereum L2s, Bitcoin,
-or other networks. Such bindings MUST preserve the verifier's ability
-to perform checks 4–5 against the network's authoritative state.
+revisions MAY add binding sections for additional networks (Ethereum
+mainnet, other EVM L2s, Bitcoin, Sui, Aptos, etc.). Such bindings MUST
+preserve the verifier's ability to perform checks 4–5 against the
+network's authoritative state, and MUST specify the canonical asset
+contract or program for each chain.
 
 ## 14. Trust boundary
 
@@ -477,6 +541,13 @@ completes, implementations MAY use `application/sir+json; v=2` as a
 provisional media type; the Content-Type is not required for
 interoperability — the receipt is self-describing via its `v` field.
 
+The `payment.network` field uses [CAIP-2](https://chainagnostic.org/CAIPs/caip-2)
+identifiers and is therefore chain-namespace-aware: Solana and EVM
+(`solana:` and `eip155:`) are both first-class normative bindings of
+this spec (see §13). No single chain is privileged at the IANA
+registration layer; tooling that consumes `application/sir+json` MUST
+be prepared to verify against either chain family.
+
 ## 18. Conformance
 
 ### 18.1 Operator MUST
@@ -485,7 +556,7 @@ interoperability — the receipt is self-describing via its `v` field.
 - Emit exactly one variant's fields (§5); never mix.
 - Use the canonicalization algorithm in §8 verbatim.
 - Sign with Ed25519 per §9.
-- Use the genesis-hash CAIP-2 form for `payment.network` on Solana.
+- Emit the spec-compliant CAIP-2 form for `payment.network`: the genesis-hash form on Solana (§13.1), or the decimal chain-id form on EVM (§13.2). Solana and EVM are both first-class — operators MAY emit receipts on either, in either combination, with no chain treated as the canonical default.
 - Publish the operator key at `/api/v1/operator-key` (§9) or an equivalent stable URL.
 - Refuse to construct a receipt containing non-finite numbers or `undefined`.
 
@@ -495,6 +566,7 @@ interoperability — the receipt is self-describing via its `v` field.
 - Treat checks 4 and 5 as vacuously true on prepaid receipts (no `payment`).
 - Reject receipts that omit any common field or that mix variant-specific fields.
 - Reject receipts whose `v` is not the integer `2`.
+- Support the verification rules for every normative chain binding declared in §13 (currently Solana §13.1 and Base/EVM §13.2). A verifier that supports only a subset MUST refuse to claim conformance and MUST clearly indicate which chains it can verify.
 
 ### 18.3 Verifier SHOULD
 
@@ -576,10 +648,11 @@ else (canonicalization, signing, verification, semantics).
 
 ## Appendix B · Test vectors
 
-Three reference vectors are published alongside this specification:
+Four reference vectors are published alongside this specification:
 
 - **[`prepaid-001/`](/spec/vectors/prepaid-001/receipt.json)** — happy-path prepaid receipt. All five verifier checks pass.
-- **[`x402-001/`](/spec/vectors/x402-001/receipt.json)** — happy-path x402 receipt for hashes + signature. On-chain checks are offline-skipped (the `tx_signature` is synthetic).
+- **[`x402-001/`](/spec/vectors/x402-001/receipt.json)** — happy-path x402 receipt on Solana for hashes + signature. On-chain checks are offline-skipped (the `tx_signature` is synthetic).
+- **[`x402-evm-001/`](/spec/vectors/x402-evm-001/receipt.json)** — happy-path x402 receipt on Base Sepolia (`eip155:84532`) for hashes + signature. On-chain checks are offline-skipped (the EVM `tx_signature` is synthetic).
 - **[`negative-001/`](/spec/vectors/negative-001/receipt.json)** — tampered x402 receipt (`response_hash` flipped after signing). Conformant verifiers MUST reject.
 
 Each vector directory contains a `request.json`, `response.json`,
@@ -589,9 +662,10 @@ Each vector directory contains a `request.json`, `response.json`,
 
 ## Appendix C · Change log
 
-| Spec version | Wire version | Date       | Changes                                                                |
-| ------------ | ------------ | ---------- | ---------------------------------------------------------------------- |
-| 1.0          | 2            | 2026-05-20 | Initial publication. Wire format v=2 as deployed at nexus.vdmnexus.com. |
+| Spec version | Wire version | Date       | Changes                                                                                                                |
+| ------------ | ------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 1.0          | 2            | 2026-05-20 | Initial publication. Wire format v=2 as deployed at nexus.vdmnexus.com.                                                |
+| 1.1          | 2            | 2026-05-20 | Added §13.2 Base (EVM) normative binding (`eip155:8453`, `eip155:84532`) and the `x402-evm-001` test vector. No wire-format change. |
 
 ---
 

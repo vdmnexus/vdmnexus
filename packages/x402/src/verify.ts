@@ -64,9 +64,22 @@ function sha256Hex(s: string): string {
 }
 
 function defaultRpc(network: string): string {
-  return network === "solana:devnet"
-    ? "https://api.devnet.solana.com"
-    : "https://api.mainnet-beta.solana.com";
+  // Solana — accept short forms and the genesis-hash forms.
+  if (network === "solana:devnet" || network.includes("EtWTRABZ")) {
+    return "https://api.devnet.solana.com";
+  }
+  if (network.startsWith("solana:")) {
+    return "https://api.mainnet-beta.solana.com";
+  }
+  // Base (EVM).
+  if (network === "eip155:84532") return "https://sepolia.base.org";
+  if (network === "eip155:8453") return "https://mainnet.base.org";
+  // Fallback — Solana mainnet, matching legacy behavior.
+  return "https://api.mainnet-beta.solana.com";
+}
+
+function isEvm(network: string): boolean {
+  return network.startsWith("eip155:");
 }
 
 async function fetchOperatorKey(endpoint: string): Promise<string> {
@@ -180,6 +193,139 @@ async function rpcGetTransaction(
   }
 }
 
+// ─── EVM verification path ────────────────────────────────────────────────
+// ERC-20 Transfer event topic: keccak256("Transfer(address,address,uint256)")
+const ERC20_TRANSFER_TOPIC =
+  "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+
+type EvmLog = {
+  address: string;
+  topics: string[];
+  data: string;
+};
+
+type EvmTxReceipt = {
+  status: string;
+  from: string;
+  logs: EvmLog[];
+};
+
+async function evmGetTransactionReceiptOnce(
+  rpc: string,
+  txHash: string
+): Promise<
+  | { kind: "ok"; receipt: EvmTxReceipt }
+  | { kind: "missing" }
+  | { kind: "transient"; reason: string }
+> {
+  let res: Response;
+  try {
+    res = await fetch(rpc, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "eth_getTransactionReceipt",
+        params: [txHash],
+      }),
+    });
+  } catch (e) {
+    return { kind: "transient", reason: `network: ${(e as Error).message}` };
+  }
+  if (res.status === 429 || res.status >= 500) {
+    return { kind: "transient", reason: `HTTP ${res.status}` };
+  }
+  if (!res.ok) throw new Error(`RPC eth_getTransactionReceipt HTTP ${res.status}`);
+  const data = (await res.json()) as {
+    result?: EvmTxReceipt | null;
+    error?: { code?: number; message: string };
+  };
+  if (data.error) throw new Error(`RPC eth_getTransactionReceipt: ${data.error.message}`);
+  if (!data.result) return { kind: "missing" };
+  return { kind: "ok", receipt: data.result };
+}
+
+async function evmGetTransactionReceipt(
+  rpc: string,
+  txHash: string
+): Promise<EvmTxReceipt | null> {
+  // Same retry envelope as the Solana side. Base RPCs are generally faster
+  // than Solana devnet, but indexing lag still happens on Sepolia.
+  const deadline = Date.now() + 120_000;
+  let attempt = 0;
+  while (true) {
+    const r = await evmGetTransactionReceiptOnce(rpc, txHash);
+    if (r.kind === "ok") return r.receipt;
+    if (Date.now() >= deadline) return null;
+    const delay = Math.min(1_500 * 2 ** attempt, 6_000);
+    attempt++;
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
+}
+
+/** Extract `0x`-prefixed lowercase 20-byte address from a padded 32-byte topic. */
+function addressFromTopic(topic: string): string {
+  // topic = 0x + 64 hex chars. Address = last 40.
+  return ("0x" + topic.slice(-40)).toLowerCase();
+}
+
+/**
+ * Canonical USDC contract for a given EVM CAIP-2 network. The receipt's
+ * `payment` object doesn't carry the asset address (USDC is the only
+ * supported asset on x402 today), so verifiers hardcode the known
+ * contract per chain to prevent log-injection from arbitrary ERC-20s.
+ */
+function knownEvmUsdc(network: string): string | null {
+  if (network === "eip155:8453")
+    return "0x833589fCD6eDb6E08f4c7C32A07f04b6dEDD1c2E".toLowerCase();
+  if (network === "eip155:84532")
+    return "0x036CbD53842c5426634e7929541eC2318f3dCF7e".toLowerCase();
+  return null;
+}
+
+async function verifyOnChainEvm(
+  rpc: string,
+  payment: SirX402["payment"],
+  expectedSigner: string
+): Promise<{ tx_ok: boolean; payer_ok: boolean }> {
+  const receipt = await evmGetTransactionReceipt(rpc, payment.tx_signature);
+  if (!receipt) return { tx_ok: false, payer_ok: false };
+  if (receipt.status !== "0x1") return { tx_ok: false, payer_ok: false };
+
+  const expectedAsset = knownEvmUsdc(payment.network);
+  if (!expectedAsset) return { tx_ok: false, payer_ok: false };
+
+  const expectedRawAmount = BigInt(Math.round(payment.amount_usdc * 1_000_000));
+  const payToLower = payment.pay_to.toLowerCase();
+  const expectedSignerLower = expectedSigner.toLowerCase();
+
+  let tx_ok = false;
+  let payer_ok = false;
+
+  for (const log of receipt.logs) {
+    if (log.topics[0]?.toLowerCase() !== ERC20_TRANSFER_TOPIC) continue;
+    if (log.topics.length < 3) continue;
+    // Reject Transfer logs from any token other than the canonical USDC
+    // contract for this network. Prevents an attacker from spoofing a
+    // payment by emitting Transfer events from a worthless ERC-20.
+    if (log.address.toLowerCase() !== expectedAsset) continue;
+
+    const from = addressFromTopic(log.topics[1]!);
+    const to = addressFromTopic(log.topics[2]!);
+    const value = BigInt(log.data);
+
+    if (to === payToLower && value >= expectedRawAmount) {
+      tx_ok = true;
+      if (from === expectedSignerLower) payer_ok = true;
+    }
+  }
+
+  return { tx_ok, payer_ok };
+}
+
+// ─── Solana verification path ─────────────────────────────────────────────
+
 async function verifyOnChain(
   rpc: string,
   payment: SirX402["payment"],
@@ -270,7 +416,9 @@ export async function verifyReceipt(
   let payer_matches = true;
   if (r.payment) {
     const rpc = params.rpc ?? defaultRpc(r.payment.network);
-    const v = await verifyOnChain(rpc, r.payment, r.agent_pubkey);
+    const v = isEvm(r.payment.network)
+      ? await verifyOnChainEvm(rpc, r.payment, r.agent_pubkey)
+      : await verifyOnChain(rpc, r.payment, r.agent_pubkey);
     payment_on_chain_ok = v.tx_ok;
     payer_matches = v.payer_ok;
   }
