@@ -22,6 +22,19 @@ export type X402ChatRequest = {
   /** OpenRouter model slug (e.g. "openai/gpt-4o-mini"). */
   model: string;
   messages: ChatMessage[];
+  /**
+   * Optional per-call network override.
+   *
+   * Accepted aliases: `"devnet"`, `"mainnet"`, `"solana-devnet"`,
+   * `"solana-mainnet"`, `"solana:devnet"`, `"solana:mainnet"`, `"base"`,
+   * `"base-mainnet"`, `"base-sepolia"`, `"eip155:8453"`, `"eip155:84532"`.
+   *
+   * Omit to use the server's `X402_NETWORK` default. This is how an agent
+   * opts into mainnet from an endpoint whose default is still devnet —
+   * the per-call network selector is the whole point of the multi-chain
+   * rail.
+   */
+  network?: string;
 };
 
 export type OpenAIChatCompletion = {
