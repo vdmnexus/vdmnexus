@@ -46,7 +46,11 @@ jobs:
 
       - name: Install gitlawb CLI
         run: |
-          curl -fsSL https://gitlawb.com/install.sh | sh
+          # Pipe through bash, not sh. Ubuntu runners ship dash as
+          # /bin/sh, and gitlawb's install.sh uses `set -o pipefail`
+          # which dash rejects with "sh: 5: set: Illegal option -o
+          # pipefail" — workflow exits before gl is on PATH.
+          curl -fsSL https://gitlawb.com/install.sh | bash
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           echo "$HOME/.gitlawb/bin" >> "$GITHUB_PATH"
 
