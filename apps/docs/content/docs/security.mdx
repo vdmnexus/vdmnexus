@@ -30,14 +30,47 @@ behavior we model:
   signature by the Nexus operator key proves Nexus issued the receipt. Fetch the public
   key at [`GET /api/v1/operator-key`](https://nexus.vdmnexus.com/api/v1/operator-key)
   and verify with `verifyReceipt` from `@vdm-nexus/x402`.
+- **Rate limiting:** Upstash-backed sliding window — 30 requests/minute per IP on
+  `/v1/chat/completions`, 100 requests/minute per agent pubkey on both inference
+  routes. 429 responses carry `X-RateLimit-{Limit,Remaining,Reset}` headers. Fails
+  open with a one-shot warn log when Upstash env vars are absent. See
+  [Observability](/docs/ops/observability) for the full event vocabulary.
+- **Facilitator signing in HSM:** mainnet-bound Ed25519 fee-payer key lives in
+  AWS KMS via `KMS.Sign` (algorithm `ED25519_SHA_512`). The private key never
+  enters lambda memory. Derived address is asserted to match
+  `NEXUS_DEPOSIT_ADDRESS` at startup; mismatch fails-closed. Devnet-live;
+  mainnet uses the same code path. See
+  [Self-host the facilitator](/docs/ops/self-host-facilitator).
+
+## Mainnet hardening switches
+
+Three operator-controlled env-vars bound real-USDC exposure on
+`/v1/chat/completions`. None require a code change or redeploy — flip in
+the Vercel dashboard and the next request reads the new value.
+
+| Switch | Effect | Default |
+|---|---|---|
+| `NEXUS_MAINNET_ENABLED=false` | Fails-closed on every mainnet request with `503 mainnet_disabled`. Testnets stay reachable. | Mainnet enabled |
+| `NEXUS_MAX_PRICE_USDC` | Hard ceiling on the flat 402 price. Route refuses to issue a challenge above the cap. | `0.10` USDC |
+| `NEXUS_ALLOWED_AGENTS` | Comma-separated payer pubkey allowlist for mainnet only. Non-listed mainnet payers get `403 agent_not_allowed`. | Unset (allowlist disabled) |
+
+These are the incident-response surface. See
+[Safe-mainnet switches](/docs/ops/safe-mainnet) for the recommended flip
+sequence and the structured log events each switch emits.
+
+A SOL fee-payer balance probe runs on Vercel Cron every 5 minutes
+(`/api/v1/ops/sol-balance`) and emits `sol_balance.low` / `.critical` warn
+and error events when the wallet drops below 0.10 / 0.02 SOL. Pair with a
+log drain for push notifications.
 
 ## What's NOT secured yet (and tracked)
 
-- **Per-agent rate limiting.** An attacker can hammer the 402 challenge endpoint without
-  paying. Costs us bandwidth, not money (inference only fires after settled payment).
-  Still a hardening priority. **Roadmap item, Horizon 1.**
-- **Independent security audit.** ~2000 lines of TypeScript handling real USDC. Audit
-  before mainnet announcement. **Roadmap item, Horizon 2.**
+- **Independent security audit.** ~2000 lines of TypeScript handling real USDC.
+  Deferred until first revenue per founder decision (see roadmap).
+  **Roadmap item, Horizon 1.**
+- **Per-region failover for the facilitator.** Single AWS region today — a
+  region outage stalls settlement. Multi-region KMS + fee-payer is a future
+  hardening item. **Roadmap item, Horizon 2.**
 - **Operator economic security.** Today the facilitator's behavior is on the operator's
   honor system. Future operator staking + slashing makes fraud expensive. Token-utility
   item, **Horizon 3.**

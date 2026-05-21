@@ -11,6 +11,11 @@ this package only if you actually need pay-per-call.
 npm install @vdm-nexus/x402
 ```
 
+This package also exports the receipt verifier — `verifyReceipt` and
+`verifySignatureOnly`. The verifier API is documented separately under
+[Verify a receipt](/docs/verify-a-receipt) since it's useful even when
+you don't make calls (auditors, CI, third-party verifiers).
+
 ## `class X402Agent extends Agent`
 
 Inherits everything from the base `Agent` (see [SDK

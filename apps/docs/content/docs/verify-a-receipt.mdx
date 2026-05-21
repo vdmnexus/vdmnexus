@@ -6,6 +6,14 @@ description: How a third party can confirm a Nexus signed-inference receipt is r
 A signed-inference receipt is only useful if downstream actors can
 *verify* it without trusting the agent that received it. Here's how.
 
+<Callout type="info">
+**Don't want to write code?** Paste any receipt JSON into the hosted
+verifier at [verify.vdmnexus.com](https://verify.vdmnexus.com) and get
+a green/red verdict on each of the five checks below. No install, no
+account. This page covers the same checks for the cases where you
+want them running in your own process — CI, a webhook, a middleware.
+</Callout>
+
 ## The five checks
 
 A `v: 2` receipt can be independently verified along five axes:

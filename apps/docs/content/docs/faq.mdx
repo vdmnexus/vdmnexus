@@ -48,6 +48,27 @@ That's a planned upstream integration; see
 
 `X402Agent` extends `Agent`, so the same keypair works for both.
 
+There are two more packages worth knowing about:
+
+- [`@vdm-nexus/paywall`](https://www.npmjs.com/package/@vdm-nexus/paywall) —
+  the *server* side of the same protocol. Drop-in middleware for
+  Express, Hono, and Next.js so your own API can charge per call and
+  return signed receipts.
+- [`@vdm-nexus/mcp`](https://www.npmjs.com/package/@vdm-nexus/mcp) — see
+  the next question.
+
+## What's the `@vdm-nexus/mcp` package for?
+
+It's a Model Context Protocol server that exposes signed inference as
+a tool. Drop the package into a Claude Desktop, Cursor, or any
+MCP-aware client config; the agent picks up paid inference + verifiable
+receipts without you writing a custom integration.
+
+The config block lives in the
+[package README](https://www.npmjs.com/package/@vdm-nexus/mcp). A
+dedicated docs page is on the roadmap (see /roadmap on the marketing
+site).
+
 ## When does mainnet ship?
 
 The blocker is the facilitator's signing key. It currently lives in a

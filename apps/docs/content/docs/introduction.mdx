@@ -21,15 +21,23 @@ the agent.
 | Surface | Description |
 |---|---|
 | **`@vdm-nexus/sdk`** | Lean prepaid flow. Ed25519-signed requests, debited from a credits balance. Two runtime deps. |
-| **`@vdm-nexus/x402`** | Pay-per-call. Every request settles an x402 USDC transfer on Solana before the model runs. |
-| **`nexus.vdmnexus.com/api/v1/chat/completions`** | OpenAI-shape endpoint gated by x402. Self-hosted facilitator. |
+| **`@vdm-nexus/x402`** | Pay-per-call. Every request settles an x402 USDC transfer on Solana (or Base) before the model runs. Includes the 5-check receipt verifier. |
+| **`@vdm-nexus/paywall`** | Drop-in middleware for Express, Hono, and Next.js. Wrap any handler; every paid call returns a signed Ed25519 receipt of what your handler produced. |
+| **`@vdm-nexus/mcp`** | MCP server that exposes signed inference as a tool. Drop into Claude Desktop, Cursor, or any MCP-aware client — your agent inherits paid calls + verifiable receipts with no code change. |
+| **`nexus.vdmnexus.com/api/v1/chat/completions`** | OpenAI-shape endpoint gated by x402. Self-hosted facilitator. Multi-chain via `body.network` (`solana`, `base`, `base-sepolia`). |
 | **`nexus.vdmnexus.com/api/v1/inference`** | Original signed-request endpoint for the prepaid flow. |
+| **`verify.vdmnexus.com`** | Hosted verifier — paste a receipt, get a green/red verdict on each of the five checks. No install, no account. See also [`@vdm-nexus/x402`](/docs/sdk/x402-reference)'s `verifyReceipt` for in-process verification. |
 
-Today: **Solana devnet only**. Mainnet rolls out behind a KMS migration
-for the facilitator's signing key.
+Today: **Solana devnet + Base / Base Sepolia**. Solana mainnet rolls out
+behind a KMS-validated facilitator flip — code shipped, switch pending.
 
 ## Pick a starting point
 
 - New to the concept? → [Why VDM Nexus](/docs/why-vdm-nexus)
 - Want the system overview? → [Architecture](/docs/architecture)
-- Want code? → [Quickstart](/docs/quickstart)
+- Want code? → [Quickstart](/docs/quickstart) — or skip straight to the
+  [hosted playground](https://vdmnexus.com/playground) for a no-install
+  signed-inference call.
+- Plugging into Claude Desktop / Cursor? → the
+  [`@vdm-nexus/mcp` package README](https://www.npmjs.com/package/@vdm-nexus/mcp)
+  has the config block. A dedicated MCP docs page is in the works.
