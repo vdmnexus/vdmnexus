@@ -127,7 +127,7 @@ function Hero() {
           <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
             {/* Copy + CTAs */}
             <div className="text-center lg:text-left">
-              <SectionEyebrow>Verifiable inference for the agent economy</SectionEyebrow>
+              <SectionEyebrow>Signed inference for the agent economy</SectionEyebrow>
               <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-text sm:text-5xl md:text-6xl">
                 AI agents that{" "}
                 <span className="text-gradient">pay for their own compute</span>
