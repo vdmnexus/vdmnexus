@@ -1,0 +1,94 @@
+---
+title: SDK overview
+description: Four MIT-licensed npm packages — sdk, x402, paywall, mcp. Pick the one that matches your role.
+---
+
+VDM Nexus ships **four packages**, each independently published and
+versioned. Most builders use one or two. None of them force a stack.
+
+| Package | Role | Use it when... |
+|---|---|---|
+| [`@vdm-nexus/sdk`](/docs/sdk/sdk-reference) | Identity | Building an agent that calls a Nexus endpoint via the prepaid flow. Same Ed25519 keypair handles signing requests and (optionally) paying via x402. |
+| [`@vdm-nexus/x402`](/docs/sdk/x402-reference) | Payment + verifier | Pay per inference call in USDC, or verify a receipt someone else produced. Includes the five-check `verifyReceipt` used by everyone else. |
+| [`@vdm-nexus/paywall`](/docs/sdk/paywall-reference) | Monetize your own API | You run an Express, Hono, or Next.js handler and want to charge per call with a signed receipt of the output. |
+| [`@vdm-nexus/mcp`](/docs/sdk/mcp-reference) | Claude Desktop / Cursor | Drop signed inference into a Claude Desktop or Cursor workflow without writing a custom agent. |
+
+All four are MIT, all four live in the
+[monorepo](https://github.com/vdmnexus/vdmnexus) under `packages/`.
+
+## How they fit
+
+```
+  Agent (your code)            Nexus / any SIR endpoint
+  ─────────────────            ───────────────────────────
+  @vdm-nexus/sdk               @vdm-nexus/paywall
+      │                              │
+      │   signed request             │   signed receipt
+      └──────────────►───────────────┘
+                                     │
+                                     ▼
+                            @vdm-nexus/x402.verifyReceipt
+                                     │
+                              (5 checks: hashes,
+                               operator signature,
+                               on-chain tx,
+                               payer match,
+                               recipient match)
+
+  Or skip the custom agent and use MCP:
+
+  Claude Desktop / Cursor
+      │
+      │   config: @vdm-nexus/mcp
+      └──────────────►   Nexus
+```
+
+The protocol is the product — `@vdm-nexus/x402`'s `verifyReceipt` and
+the SIR v2 spec are designed so anyone can write their own client or
+verifier and stay interoperable.
+
+## Three promises that don't change
+
+- **MIT-licensed forever.** Every package, every release. Fork it,
+  embed it, ship it.
+- **Tiny runtime dependency surface.** `@vdm-nexus/sdk` has two
+  runtime deps (`tweetnacl`, `bs58`). The whole chain is auditable in
+  an afternoon. Adding a third needs justification.
+- **The spec is public.** SIR v2 is at
+  [docs.vdmnexus.com/docs/spec/sir-v2](/docs/spec/sir-v2). Any package
+  — ours or someone else's — can produce or verify receipts and stay
+  compatible.
+
+## Picking one
+
+If you want a one-liner decision:
+
+- **Just want signed inference from Claude Desktop?** → `@vdm-nexus/mcp`,
+  paste a JSON block, done.
+- **Building an agent in TypeScript / Node?** → `@vdm-nexus/sdk` for
+  prepaid, or `@vdm-nexus/x402` if you want pay-per-call.
+- **You run an AI API and want users to pay per call?** → `@vdm-nexus/paywall`.
+- **You're an auditor, CI bot, or third-party verifier?** → `@vdm-nexus/x402`'s
+  `verifyReceipt`. No agent secret required.
+
+## See it work
+
+Every package above runs a real call in the
+[hosted playground](https://vdmnexus.com/playground). No install, no
+USDC needed — the operator's wallet pays. Useful for verifying that the
+endpoint, the receipt shape, and the verifier all match what you'd see
+from your own code.
+
+## Where to next
+
+Skim the reference for whichever package matches your role. Each one
+has install instructions, an end-to-end snippet, and a "things this
+SDK doesn't do" section so you know the edges:
+
+- [`@vdm-nexus/sdk` reference](/docs/sdk/sdk-reference)
+- [`@vdm-nexus/x402` reference](/docs/sdk/x402-reference)
+- [`@vdm-nexus/paywall` reference](/docs/sdk/paywall-reference)
+- [`@vdm-nexus/mcp` reference](/docs/sdk/mcp-reference)
+- [Verify API (hosted)](/docs/sdk/verify-api) — for the
+  `verify.vdmnexus.com` HTTP service, the alternative to calling the
+  verifier in-process
