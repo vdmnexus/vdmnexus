@@ -13,6 +13,7 @@
     "receipt-structure",
     "security",
     "---SDKs---",
+    "sdk/index",
     "sdk/sdk-reference",
     "sdk/x402-reference",
     "sdk/paywall-reference",
