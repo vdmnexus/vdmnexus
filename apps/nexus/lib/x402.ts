@@ -59,12 +59,31 @@ export type SolanaPaymentPayload = {
 /**
  * Mainnet-vs-testnet classifier for the kill switch.
  *
- * Inspects the raw `X402_NETWORK` env value. Returns `true` (mainnet) when the
- * identifier is missing, unknown, or looks like a production chain. Returns
- * `false` only for clearly-named test networks. Fails closed: anything we
+ * Returns `true` (mainnet) when the identifier is missing, unknown, or looks
+ * like a production chain. Returns `false` only for clearly-named test
+ * networks OR known testnet CAIP-2 identifiers. Fails closed: anything we
  * don't recognise is treated as mainnet so the kill switch can't be bypassed
- * by typos or new chains being added to the route before this list is
- * updated.
+ * by typos or new chains being added before this list is updated.
+ *
+ * Two recognisers, OR'd together:
+ *
+ *   1. **String markers** — the network identifier contains a recognisable
+ *      testnet substring (`devnet`, `sepolia`, …). Catches friendly aliases
+ *      like `"solana-devnet"`, `"base-sepolia"`, env-style values like
+ *      `"solana:devnet"`.
+ *
+ *   2. **Known testnet CAIP-2 identifiers** — for Solana, the canonical
+ *      CAIP-2 identifier is genesis-hash form (`solana:EtWTRABZ…` for
+ *      devnet, `solana:5eykt4Us…` for mainnet). The genesis hash contains
+ *      no `devnet` substring, so string-marker matching MISSES it. We add
+ *      the known testnet hashes explicitly so a devnet request resolved to
+ *      its CAIP-2 form is correctly classified as testnet.
+ *
+ * Before the explicit CAIP-2 check existed, the route classified
+ * `X402_NETWORKS.solanaDevnet` (the CAIP-2 form) as MAINNET and tripped
+ * the kill switch on every devnet call — bricking the playground,
+ * /receipts, and any agent test traffic whenever
+ * `NEXUS_MAINNET_ENABLED=false`.
  */
 const TESTNET_MARKERS = [
   "devnet",
@@ -74,8 +93,14 @@ const TESTNET_MARKERS = [
   "holesky",
 ] as const;
 
+const KNOWN_TESTNET_NETWORKS: ReadonlySet<string> = new Set<string>([
+  X402_NETWORKS.solanaDevnet,
+  X402_NETWORKS.baseSepolia,
+]);
+
 export function isMainnetNetwork(network: string | undefined | null): boolean {
   if (!network) return true;
+  if (KNOWN_TESTNET_NETWORKS.has(network)) return false;
   const n = network.toLowerCase();
   return !TESTNET_MARKERS.some((marker) => n.includes(marker));
 }
