@@ -94,3 +94,12 @@ export async function getParsedTransaction(
     },
   ]);
 }
+
+/** Returns the SOL balance of an address, in lamports (1 SOL = 1e9 lamports). */
+export async function getBalanceLamports(address: string): Promise<number> {
+  const result = await call<{ value: number }>("getBalance", [
+    address,
+    { commitment: "confirmed" },
+  ]);
+  return result.value;
+}
