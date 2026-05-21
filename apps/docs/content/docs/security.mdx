@@ -35,11 +35,11 @@ behavior we model:
   routes. 429 responses carry `X-RateLimit-{Limit,Remaining,Reset}` headers. Fails
   open with a one-shot warn log when Upstash env vars are absent. See
   [Observability](/docs/ops/observability) for the full event vocabulary.
-- **Facilitator signing in HSM:** mainnet-bound Ed25519 fee-payer key lives in
+- **Facilitator signing in HSM:** the Ed25519 fee-payer key lives in
   AWS KMS via `KMS.Sign` (algorithm `ED25519_SHA_512`). The private key never
   enters lambda memory. Derived address is asserted to match
-  `NEXUS_DEPOSIT_ADDRESS` at startup; mismatch fails-closed. Devnet-live;
-  mainnet uses the same code path. See
+  `NEXUS_DEPOSIT_ADDRESS` at startup; mismatch fails-closed. Live on
+  Solana mainnet and devnet with the same code path. See
   [Self-host the facilitator](/docs/ops/self-host-facilitator).
 
 ## Mainnet hardening switches

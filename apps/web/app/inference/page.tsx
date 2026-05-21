@@ -15,7 +15,7 @@ import { FadeIn } from "@/components/fade-in";
 export const metadata: Metadata = {
   title: "Nexus Inference — VDM Nexus",
   description:
-    "Cryptographically receipted AI inference. Solana-keypair agent identity, USDC-settled compute, append-only ledger. Live on devnet.",
+    "Cryptographically receipted AI inference. Solana-keypair agent identity, USDC-settled compute, append-only ledger. Live on Solana mainnet.",
 };
 
 const FEATURES = [
@@ -68,7 +68,8 @@ export default function ComputePage() {
               <p className="mx-auto mt-6 max-w-2xl text-balance text-base text-text-muted sm:text-lg">
                 Solana-keypair agent identity, signed requests, signed
                 receipts, USDC-settled compute on an append-only ledger.
-                Live on devnet.
+                Live on Solana mainnet today — devnet still available for
+                free testing.
               </p>
               <div className="mt-10 flex items-center justify-center gap-3">
                 <Link

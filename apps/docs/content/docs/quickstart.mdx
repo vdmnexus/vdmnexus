@@ -1,10 +1,10 @@
 ---
 title: Quickstart
-description: Install the SDK, generate an agent, get devnet USDC, and make a signed inference call.
+description: Install the SDK, generate an agent, fund it with USDC, and make a signed inference call on Solana mainnet or devnet.
 ---
 
 The fastest path from zero to your first signed inference call. **Five
-minutes once devnet USDC is in your hands.**
+minutes once USDC is in your agent's wallet.**
 
 <Callout type="info">
 **Just want to see it work first?** The hosted playground at
@@ -35,13 +35,18 @@ console.log("secret (save somewhere safe):", agent.secretKeyBase58);
 The `pubkey` is what you fund with USDC. The secret is the 64-byte
 Ed25519 keypair encoded in base58 — losing it means losing the agent.
 
-## 3. Get devnet USDC
+## 3. Fund your agent with USDC
 
-Go to [faucet.circle.com](https://faucet.circle.com), select **Solana
-Devnet**, paste your agent's `pubkey`, request 5+ USDC. It arrives in
-seconds and auto-creates the USDC associated token account.
+**Mainnet:** send real USDC to your agent's `pubkey` from any Solana
+wallet. ~$0.01 per inference call, so a couple of dollars goes a long
+way.
 
-No SOL needed — the facilitator pays the transaction fees.
+**Devnet (free, for testing):** go to
+[faucet.circle.com](https://faucet.circle.com), select **Solana Devnet**,
+paste your agent's `pubkey`, request 5+ USDC. It arrives in seconds and
+auto-creates the USDC associated token account.
+
+Either way, no SOL needed — the facilitator pays the transaction fees.
 
 ## 4. Make the call
 
@@ -51,6 +56,7 @@ const reply = await agent.payAndInfer("https://nexus.vdmnexus.com/api/v1", {
   messages: [
     { role: "user", content: "Explain signed inference in one sentence." }
   ],
+  network: "mainnet", // or "devnet" — defaults to devnet for safety
 });
 
 console.log("Model said:", reply.openai.choices[0].message.content);

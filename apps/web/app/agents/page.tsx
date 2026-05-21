@@ -15,12 +15,12 @@ import { FadeIn } from "@/components/fade-in";
 export const metadata: Metadata = {
   title: "Nexus Agents — VDM Nexus",
   description:
-    "Infrastructure for autonomous AI agents. Ed25519 identity, signed-inference receipts, USDC-settled compute. Live on devnet today. Agent-git workflow primitives — provenance, payment-gated merges, signed release tags — shipping next.",
+    "Infrastructure for autonomous AI agents. Ed25519 identity, signed-inference receipts, USDC-settled compute on Solana mainnet. Agent-git workflow primitives — provenance, payment-gated merges, signed release tags — shipping next.",
   alternates: { canonical: "https://vdmnexus.com/agents" },
   openGraph: {
     title: "Nexus Agents — VDM Nexus",
     description:
-      "Infrastructure for autonomous AI agents — identity, signed receipts, payment per call. Live on devnet, agent-git primitives shipping next.",
+      "Agents that pay for their own compute on mainnet. Ed25519 identity, signed receipts, payment per call. Agent-git primitives shipping next.",
     url: "https://vdmnexus.com/agents",
     siteName: "VDM Nexus",
     type: "website",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     creator: "@vdmnexus",
     title: "Nexus Agents — VDM Nexus",
     description:
-      "Infrastructure for autonomous AI agents — identity, signed receipts, payment per call.",
+      "Agents that pay for their own compute on mainnet — Ed25519 identity, signed receipts, payment per call.",
   },
 };
 
@@ -49,7 +49,7 @@ const LIVE_TODAY = [
   {
     title: "x402 payment per call",
     body:
-      "Per-request USDC settlement via the x402 protocol. ~$0.01 per inference call. Multi-chain — Solana devnet today; mainnet + Base in the pipeline.",
+      "Per-request USDC settlement via the x402 protocol. ~$0.01 per inference call. Multi-chain — Solana mainnet and devnet today, Base support shipped.",
   },
   {
     title: "MCP integration",
@@ -105,13 +105,13 @@ export default function AgentsPage() {
             <FadeIn className="mx-auto max-w-3xl text-center">
               <SectionEyebrow>Nexus Agents</SectionEyebrow>
               <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-text sm:text-5xl md:text-6xl">
-                Infrastructure for{" "}
-                <span className="text-gradient">autonomous agents</span>.
+                Agents that pay for their own{" "}
+                <span className="text-gradient">compute on mainnet</span>.
               </h1>
               <p className="mx-auto mt-6 max-w-2xl text-balance text-base text-text-muted sm:text-lg">
                 Agents authenticate with an Ed25519 keypair, pay per inference
-                call in USDC, and get a signed receipt of every response. Live
-                on devnet today. Agent-git workflow primitives shipping next.
+                call in USDC on Solana mainnet, and get a signed receipt of
+                every response. Agent-git workflow primitives shipping next.
               </p>
               <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
                 <a
@@ -147,15 +147,15 @@ export default function AgentsPage() {
                 <span className="h-1.5 w-1.5 rounded-full bg-accent-indigo" />
                 Live today
               </span>
-              <span className="text-xs text-text-muted">devnet</span>
+              <span className="text-xs text-text-muted">Solana mainnet</span>
             </div>
             <SectionHeading className="mt-4">
               What an agent gets, right now.
             </SectionHeading>
             <p className="mt-4 text-sm leading-relaxed text-text-muted sm:text-base">
-              Shipped, running in production, verifiable on-chain. Use any of
-              the four pieces below independently — they compose without
-              forcing a stack.
+              Shipped, running in production on mainnet, verifiable on-chain.
+              Use any of the four pieces below independently — they compose
+              without forcing a stack.
             </p>
           </FadeIn>
           <div className="mt-12 grid gap-4 sm:grid-cols-2">

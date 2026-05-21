@@ -86,16 +86,33 @@ const PAYWALL_BENEFITS = [
 
 const PAYWALL_VS_VERGE: Array<{ label: string; us: string; them: string }> = [
   { label: "Chains", us: "Solana (today), Base", them: "Base" },
-  { label: "Protocol fee", us: "0% (devnet)", them: "0.5%" },
+  { label: "Protocol fee", us: "0%", them: "0.5%" },
   { label: "Signed receipts", us: "SIR v2 — Ed25519", them: "—" },
   { label: "Self-host facilitator", us: "KMS-backed", them: "Yes" },
   { label: "Token hooks", us: "$VDM (configurable)", them: "$VERGE" },
 ];
 
 const FOR_PLATFORMS = [
-  "x402-native pay-per-call (coming soon)",
+  "x402-native pay-per-call on Solana + Base",
   "Signed receipts for downstream verification",
   "Plug-in identity layer for agent marketplaces",
+];
+
+const BUILT_ON_TOP = [
+  { label: "SDK", href: "/sdk", external: false },
+  {
+    label: "MCP",
+    href: "https://www.npmjs.com/package/@vdm-nexus/mcp",
+    external: true,
+  },
+  {
+    label: "Paywall",
+    href: "https://www.npmjs.com/package/@vdm-nexus/paywall",
+    external: true,
+  },
+  { label: "Verify", href: "https://verify.vdmnexus.com", external: true },
+  { label: "Playground", href: "/playground", external: false },
+  { label: "Docs", href: "https://docs.vdmnexus.com", external: true },
 ];
 
 export default function Home() {
@@ -106,6 +123,7 @@ export default function Home() {
         <Hero />
         <Problem />
         <Products />
+        <BuiltOnTop />
         <Paywall />
         <UseCases />
         <HowItWorks />
@@ -224,7 +242,7 @@ function HeroCode() {
           npm install @vdm-nexus/sdk
         </code>
         <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-emerald-300">
-          devnet
+          live
         </span>
       </div>
     </div>
@@ -282,7 +300,7 @@ function Products() {
               <p className="mt-3 text-sm leading-relaxed text-text-muted">
                 Cryptographically receipted AI inference. Solana-keypair agent
                 identity, USDC-settled compute, append-only ledger. Live on
-                devnet. Mainnet next.
+                Solana mainnet today.
               </p>
             </Card>
           </Link>
@@ -307,6 +325,51 @@ function Products() {
           </Link>
         </FadeIn>
       </div>
+    </Section>
+  );
+}
+
+function BuiltOnTop() {
+  return (
+    <Section>
+      <FadeIn className="max-w-2xl">
+        <SectionEyebrow>Built on top</SectionEyebrow>
+        <SectionHeading className="mt-4">
+          One stack, six entry points.
+        </SectionHeading>
+        <p className="mt-4 text-sm leading-relaxed text-text-muted sm:text-base">
+          Every piece ships independently — pick what fits your role. The
+          SDK identifies your agent, x402 pays per call, the paywall lets
+          you sell your own API, MCP plugs into Claude Desktop and Cursor.
+        </p>
+      </FadeIn>
+      <FadeIn delay={0.06} className="mt-8">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {BUILT_ON_TOP.map((b) =>
+            b.external ? (
+              <a
+                key={b.label}
+                href={b.href}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="inline-flex items-center gap-1.5 rounded-md border border-soft bg-surface/60 px-3 py-1.5 text-xs font-medium text-text-muted transition-colors hover:border-accent-indigo/60 hover:text-text sm:text-sm"
+              >
+                {b.label}
+                <ArrowRight className="h-3 w-3 -rotate-45" />
+              </a>
+            ) : (
+              <Link
+                key={b.label}
+                href={b.href}
+                className="inline-flex items-center gap-1.5 rounded-md border border-soft bg-surface/60 px-3 py-1.5 text-xs font-medium text-text-muted transition-colors hover:border-accent-indigo/60 hover:text-text sm:text-sm"
+              >
+                {b.label}
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+            ),
+          )}
+        </div>
+      </FadeIn>
     </Section>
   );
 }
