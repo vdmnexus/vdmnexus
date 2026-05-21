@@ -32,6 +32,7 @@ export const X402_NETWORKS = {
 } as const satisfies Record<string, Network>;
 
 export const USDC_MINT_DEVNET = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU";
+export const USDC_MINT_MAINNET = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 export const USDC_BASE_MAINNET = "0x833589fCD6eDb6E08f4c7C32A07f04b6dEDD1c2E";
 export const USDC_BASE_SEPOLIA = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
 
@@ -62,6 +63,10 @@ export function isEvmNetwork(network: string): boolean {
 export function defaultUsdcAsset(network: string): string {
   if (network === BASE_MAINNET_CAIP2) return USDC_BASE_MAINNET;
   if (network === BASE_SEPOLIA_CAIP2) return USDC_BASE_SEPOLIA;
+  if (network === SOLANA_MAINNET_CAIP2) return USDC_MINT_MAINNET;
+  // Default: Solana devnet USDC. Catches SOLANA_DEVNET_CAIP2, any unknown
+  // network string, and (defensively) Solana mainnet if the constant has
+  // drifted from @x402/svm's genesis-hash form.
   return USDC_MINT_DEVNET;
 }
 
