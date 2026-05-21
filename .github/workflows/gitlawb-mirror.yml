@@ -103,4 +103,13 @@ jobs:
           echo "Pushing to $URL (via $GITLAWB_NODE)"
           git remote remove gitlawb 2>/dev/null || true
           git remote add gitlawb "$URL"
-          git push gitlawb HEAD:main
+          # --force-with-lease: this workflow is a mirror, so origin/main
+          # is the authoritative ref. The gitlawb tree can diverge when
+          # squash-merges produce different SHAs from the locally-pushed
+          # commits (which is what happened on the first deploy — the
+          # manual Phase A push landed `c98ef44`, then PR #47's squash
+          # produced an equivalent-tree-but-different-SHA commit on
+          # origin/main). Plain push gets rejected as non-fast-forward;
+          # force-with-lease overwrites safely as long as no one else
+          # pushed to gitlawb in the meantime.
+          git push --force-with-lease gitlawb HEAD:main
