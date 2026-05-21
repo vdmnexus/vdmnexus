@@ -185,65 +185,74 @@ export default async function ReceiptsIndexPage({
 function ReceiptRow({ row }: { row: Row }) {
   const network = networkFromReceipt(row.receipt_json);
   const isDevnet = network ? network.includes("devnet") || network.includes("EtWTRABZ") : false;
+  // Structure: outer <div> wraps the row, the main clickable area is a
+  // single <Link>, the tx-signature link is a sibling <a> *outside* the
+  // Link. Two reasons:
+  //   1. Nested <a> inside <Link> is invalid HTML and triggers hydration
+  //      mismatches.
+  //   2. The previous fix used onClick={e.stopPropagation()} on the inner
+  //      anchor to keep the card click from firing — but onClick handlers
+  //      in a React Server Component throw "Event handlers cannot be passed
+  //      to Client Component props" at render time, which is what was
+  //      crashing /receipts in production (digest 2690722458).
   return (
-    <li>
+    <li className="group relative flex flex-col gap-3 rounded-2xl border border-soft bg-surface/60 p-5 backdrop-blur transition-colors hover:border-accent-indigo/40 sm:flex-row sm:items-center sm:justify-between">
       <Link
         href={`/r/${row.id}`}
-        className="group flex flex-col gap-3 rounded-2xl border border-soft bg-surface/60 p-5 backdrop-blur transition-colors hover:border-accent-indigo/40 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <div className="flex min-w-0 flex-col gap-1.5">
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="rounded-full border border-soft bg-bg/60 px-2 py-0.5 font-mono uppercase tracking-[0.12em] text-text-muted">
-              #{row.id}
-            </span>
-            {network ? (
-              <span
-                className={`rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] ${
-                  isDevnet
-                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                    : "border-amber-400/30 bg-amber-400/10 text-amber-200"
-                }`}
-              >
-                {isDevnet ? "devnet" : "mainnet"}
-              </span>
-            ) : null}
-            {row.model ? (
-              <code className="truncate font-mono text-text">{row.model}</code>
-            ) : null}
-          </div>
-          <div className="flex items-center gap-3 text-sm text-text-muted">
-            <span className="font-mono text-text" title={row.agent_pubkey}>
-              {truncateMiddle(row.agent_pubkey, 6, 6)}
-            </span>
-            <span aria-hidden className="text-text-muted/40">
-              ·
-            </span>
-            <span className="font-mono">{formatCost(row.cost_usdc)}</span>
-          </div>
-        </div>
-
-        <div className="flex flex-col items-start gap-1 text-xs text-text-muted sm:items-end">
-          <time
-            dateTime={row.created_at}
-            className="font-mono"
-            suppressHydrationWarning
-          >
-            {formatAgo(row.created_at)}
-          </time>
-          {row.tx_signature ? (
-            <a
-              href={explorerUrl(row.tx_signature, network)}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="font-mono text-text-muted hover:text-text"
-              title={row.tx_signature}
+        aria-label={`Receipt #${row.id}`}
+        className="absolute inset-0 z-0 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-indigo"
+      />
+      <div className="relative z-10 flex min-w-0 flex-col gap-1.5 pointer-events-none">
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="rounded-full border border-soft bg-bg/60 px-2 py-0.5 font-mono uppercase tracking-[0.12em] text-text-muted">
+            #{row.id}
+          </span>
+          {network ? (
+            <span
+              className={`rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] ${
+                isDevnet
+                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                  : "border-amber-400/30 bg-amber-400/10 text-amber-200"
+              }`}
             >
-              tx {truncateMiddle(row.tx_signature, 4, 4)} ↗
-            </a>
+              {isDevnet ? "devnet" : "mainnet"}
+            </span>
+          ) : null}
+          {row.model ? (
+            <code className="truncate font-mono text-text">{row.model}</code>
           ) : null}
         </div>
-      </Link>
+        <div className="flex items-center gap-3 text-sm text-text-muted">
+          <span className="font-mono text-text" title={row.agent_pubkey}>
+            {truncateMiddle(row.agent_pubkey, 6, 6)}
+          </span>
+          <span aria-hidden className="text-text-muted/40">
+            ·
+          </span>
+          <span className="font-mono">{formatCost(row.cost_usdc)}</span>
+        </div>
+      </div>
+
+      <div className="pointer-events-none relative z-10 flex flex-col items-start gap-1 text-xs text-text-muted sm:items-end">
+        <time
+          dateTime={row.created_at}
+          className="font-mono"
+          suppressHydrationWarning
+        >
+          {formatAgo(row.created_at)}
+        </time>
+        {row.tx_signature ? (
+          <a
+            href={explorerUrl(row.tx_signature, network)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pointer-events-auto font-mono text-text-muted hover:text-text"
+            title={row.tx_signature}
+          >
+            tx {truncateMiddle(row.tx_signature, 4, 4)} ↗
+          </a>
+        ) : null}
+      </div>
     </li>
   );
 }
