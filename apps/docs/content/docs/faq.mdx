@@ -70,16 +70,11 @@ config blocks for Claude Desktop and Cursor + a worked example at
 
 ## When does mainnet ship?
 
-The blocker is the facilitator's signing key. It currently lives in a
-Vercel env var — fine for devnet, unacceptable for mainnet. The
-migration is:
-
-1. Move the key to a KMS (AWS / GCP / Vercel secrets vault / HSM)
-2. Replace the inline signer with a KMS-backed one
-3. Validate on mainnet at small volume for ~1 week
-4. Announce
-
-Realistic timeline: weeks, not months.
+Shipped. The Solana mainnet rail is live behind a KMS-signed
+facilitator (`KMS.Sign` with algorithm `ED25519_SHA_512` — the
+fee-payer private key never enters lambda memory). Devnet stays up
+for free testing — pass `network: "mainnet"` to `payAndInfer` to
+land payments on Solana mainnet instead.
 
 ## Do you have a token?
 

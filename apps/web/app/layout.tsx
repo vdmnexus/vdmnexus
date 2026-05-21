@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "VDM Nexus — Signed inference for the agent economy",
     description:
-      "AI agents that pay for their own compute. Signed receipts, USDC settlement, x402-native. Live on devnet.",
+      "AI agents that pay for their own compute. Signed receipts, USDC settlement, x402-native. Live on Solana mainnet.",
     url: "https://vdmnexus.com",
     siteName: "VDM Nexus",
     type: "website",

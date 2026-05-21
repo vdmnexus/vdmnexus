@@ -235,11 +235,11 @@ field. Common errors:
 
 ## Status
 
-Devnet only. Mainnet flips when the upstream Nexus API does — track
-the [roadmap](https://vdmnexus.com/roadmap). The package itself
-doesn't change at the flip; the same server picks up the mainnet
-endpoint via `NEXUS_ENDPOINT` (or by default once `nexus.vdmnexus.com`
-serves mainnet by default).
+Works on Solana mainnet, Solana devnet, and Base. The server picks up
+the network from the upstream Nexus endpoint configured via
+`NEXUS_ENDPOINT` — `nexus.vdmnexus.com` defaults to devnet for safety;
+pass `network=mainnet` in your tool calls or set the Nexus endpoint to
+a mainnet-default deployment.
 
 ## Where to go next
 

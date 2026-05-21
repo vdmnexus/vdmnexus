@@ -220,7 +220,7 @@ function confirmationHtml(): string {
                   You're on the list.
                 </h1>
                 <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#374151;">
-                  Thanks for signing up. We're building verifiable inference for the agent economy &mdash; agents authenticate with a Solana keypair, sign every request, and the response carries a cryptographic receipt they can use as proof of inference downstream. No API keys.
+                  Thanks for signing up. We're building signed inference for the agent economy &mdash; agents authenticate with a Solana keypair, sign every request, and the response carries a cryptographic receipt anyone can verify. Live on Solana mainnet today. No API keys.
                 </p>
                 <p style="margin:0 0 28px 0;font-size:15px;line-height:1.6;color:#374151;">
                   We'll be in touch as we onboard the first cohort. If you want to skip the queue, just reply to this email and tell us what you're building.
