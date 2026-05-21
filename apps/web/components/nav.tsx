@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { launchLive } from "@/lib/launch-flag";
 
 export function Nav() {
   const pathname = usePathname();
   const onHome = pathname === "/";
   const waitlistHref = onHome ? "#waitlist" : "/#waitlist";
+  const showLaunch = launchLive();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-soft bg-bg/70 backdrop-blur">
@@ -47,9 +49,11 @@ export function Nav() {
           <NavLink href="/roadmap" active={pathname === "/roadmap"}>
             Roadmap
           </NavLink>
-          <NavLink href="/token" active={pathname === "/token"}>
-            Token
-          </NavLink>
+          {showLaunch && (
+            <NavLink href="/token" active={pathname === "/token"}>
+              Token
+            </NavLink>
+          )}
         </div>
 
         <div className="flex items-center gap-3">

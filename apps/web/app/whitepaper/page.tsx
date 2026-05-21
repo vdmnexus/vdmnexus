@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 import { GridBg } from "@/components/grid-bg";
 import { FadeIn } from "@/components/fade-in";
+import { launchLive } from "@/lib/launch-flag";
 
 export const metadata: Metadata = {
   title: "Whitepaper — VDM Nexus",
@@ -302,6 +304,7 @@ const SECTIONS: Paper[] = [
 ];
 
 export default function WhitepaperPage() {
+  if (!launchLive()) notFound();
   return (
     <main className="relative min-h-screen">
       <Nav />
