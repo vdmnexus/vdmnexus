@@ -9,10 +9,17 @@ name: Mirror to gitlawb
 #   GITLAWB_IDENTITY   base64 of the gitlawb identity file produced by
 #                      `gl identity new` on the machine that did the
 #                      first deploy. On macOS / Linux:
-#                        base64 -w0 ~/.gitlawb/identity
-#                        # (use `base64 -i ~/.gitlawb/identity | tr -d '\n'`
+#                        base64 -w0 ~/.gitlawb/identity.pem
+#                        # (use `base64 -i ~/.gitlawb/identity.pem | tr -d '\n'`
 #                        #  on BSD/macOS without -w)
 #   GITLAWB_REPO_NAME  optional — overrides the default repo name.
+#
+# Note: gl v0.3.x stores the identity at `~/.gitlawb/identity.pem`, exposes
+# the public node via the `GITLAWB_NODE` env var, and requires a one-time
+# `gl register` per agent + node before pushes are accepted. The workflow
+# does all three on every run — registration is idempotent (re-runs return
+# the existing UCAN, not a new one) and `GITLAWB_NODE` defaults to the
+# public node unless overridden by the `GITLAWB_NODE` repository secret.
 #
 # Failure mode: if the gitlawb network is unreachable the job fails loudly
 # rather than silently dropping a commit. Re-run from the Actions UI once
@@ -48,13 +55,32 @@ jobs:
           GITLAWB_IDENTITY: ${{ secrets.GITLAWB_IDENTITY }}
         run: |
           if [ -z "$GITLAWB_IDENTITY" ]; then
-            echo "::error::GITLAWB_IDENTITY secret is empty. Run the local deploy script once and store \`base64 -w0 ~/.gitlawb/identity\` as the GITLAWB_IDENTITY secret." >&2
+            echo "::error::GITLAWB_IDENTITY secret is empty. Run the local deploy script once and store \`base64 -w0 ~/.gitlawb/identity.pem\` as the GITLAWB_IDENTITY secret." >&2
             exit 1
           fi
           mkdir -p "$HOME/.gitlawb"
-          printf '%s' "$GITLAWB_IDENTITY" | base64 -d > "$HOME/.gitlawb/identity"
-          chmod 600 "$HOME/.gitlawb/identity"
+          # gl v0.3.x reads the identity from ~/.gitlawb/identity.pem
+          # specifically — the older bare `identity` filename is no
+          # longer recognised.
+          printf '%s' "$GITLAWB_IDENTITY" | base64 -d > "$HOME/.gitlawb/identity.pem"
+          chmod 600 "$HOME/.gitlawb/identity.pem"
           gl identity show
+
+      - name: Register with gitlawb node
+        env:
+          # Override with a self-hosted node URL via the GITLAWB_NODE
+          # repository secret if needed.
+          GITLAWB_NODE: ${{ secrets.GITLAWB_NODE || 'https://node.gitlawb.com' }}
+        run: |
+          # Required by gl v0.3.x so git-remote-gitlawb knows which node
+          # to talk to — without it, the helper falls back to a local
+          # daemon at 127.0.0.1:7545 (which won't exist on a fresh
+          # runner). Persist for subsequent steps.
+          echo "GITLAWB_NODE=$GITLAWB_NODE" >> "$GITHUB_ENV"
+          # Registration is idempotent — re-runs return the existing
+          # UCAN, they don't mint new identities. Safe to call on every
+          # workflow run.
+          gl register
 
       - name: Push to gitlawb
         env:
@@ -66,15 +92,11 @@ jobs:
             echo "::error::Could not parse DID from \`gl identity show\`." >&2
             exit 1
           fi
-          # Prefer the CLI's clone URL if it exposes one; fall back to
-          # the documented scheme. `git-remote-gitlawb` is installed
-          # alongside the CLI by install.sh.
-          if URL="$(gl repo clone-url "$REPO_NAME" 2>/dev/null)" && [ -n "$URL" ]; then
-            :
-          else
-            URL="gitlawb://${DID}/${REPO_NAME}"
-          fi
-          echo "Pushing to $URL"
+          # gl v0.3.x removed `gl repo clone-url`; the URL is just the
+          # documented gitlawb:// scheme, routed by git-remote-gitlawb
+          # to $GITLAWB_NODE.
+          URL="gitlawb://${DID}/${REPO_NAME}"
+          echo "Pushing to $URL (via $GITLAWB_NODE)"
           git remote remove gitlawb 2>/dev/null || true
           git remote add gitlawb "$URL"
           git push gitlawb HEAD:main
