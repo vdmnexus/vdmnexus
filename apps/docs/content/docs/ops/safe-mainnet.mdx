@@ -92,7 +92,21 @@ immediately what's blocking traffic:
 |---|---|---|---|
 | `mainnet.disabled` | warn | `NEXUS_MAINNET_ENABLED` | `request_id`, `network` |
 | `price.over_cap` | error | `NEXUS_MAX_PRICE_USDC` | `request_id`, `configured_usdc`, `max_usdc` |
-| `agent.not_allowed` | warn | `NEXUS_ALLOWED_AGENTS` | `request_id`, `agent_pubkey` |
+| `agent.not_allowed` | warn | `NEXUS_ALLOWED_AGENTS` | `request_id`, `network`, `agent_pubkey` |
+| `sol_balance.low` | warn | fee-payer drainage | `request_id`, `address`, `network`, `lamports`, `sol` |
+| `sol_balance.critical` | error | fee-payer drainage | `request_id`, `address`, `network`, `lamports`, `sol` |
+
+The allowlist check is **mainnet-only**. When `NEXUS_ALLOWED_AGENTS` is
+set, devnet/Sepolia payers are unaffected — so the operator can lock
+down the first days of mainnet without breaking the public devnet
+playground.
+
+The SOL-balance probe runs on the Vercel Cron schedule every 5 min
+(`/api/v1/ops/sol-balance`). It queries `getBalance` for
+`NEXUS_DEPOSIT_ADDRESS` and emits `sol_balance.low` at < 0.10 SOL,
+`sol_balance.critical` at < 0.02 SOL. Vercel log search
+(`level:warn event:sol_balance.low`) is the alert surface — pair with
+a log drain if you want push notifications.
 
 See [Observability](/docs/ops/observability) for the full event vocabulary
 and Vercel-log search recipes.

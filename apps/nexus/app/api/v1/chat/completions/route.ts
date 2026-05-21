@@ -324,16 +324,21 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // NEXUS_ALLOWED_AGENTS is a mainnet-only gate. Devnet / Sepolia traffic
+  // stays open even when the list is set — so an operator can lock down
+  // mainnet for the first days post-flip without breaking the public
+  // playground or other testnet demos that run against the same endpoint.
   const allowlist = getAllowedAgents();
-  if (allowlist) {
+  if (allowlist && isMainnetNetwork(network)) {
     if (!claimedPayer || !allowlist.has(claimedPayer)) {
       log.warn({
         event: "agent.not_allowed",
         request_id,
+        network,
         agent_pubkey: claimedPayer ?? undefined,
       });
       return err("agent_not_allowed", 403, {
-        detail: "payer is not on the operator allowlist",
+        detail: "payer is not on the operator mainnet allowlist",
       });
     }
   }
