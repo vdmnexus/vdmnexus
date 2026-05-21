@@ -34,6 +34,9 @@ export function Nav() {
           <NavLink href="/agents" active={pathname === "/agents"}>
             Agents
           </NavLink>
+          <NavLink href="/sdk" active={pathname === "/sdk"}>
+            SDK
+          </NavLink>
           <NavLink href="/playground" active={pathname === "/playground"}>
             Playground
           </NavLink>
