@@ -2,8 +2,55 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { launchLive } from "@/lib/launch-flag";
+
+type NavDropdownItem = {
+  href: string;
+  label: string;
+  /** External link → opens in a new tab with rel="noreferrer noopener". */
+  external?: boolean;
+  /** One-line description shown under the label inside the dropdown panel. */
+  description?: string;
+};
+
+const PRODUCT_ITEMS: NavDropdownItem[] = [
+  {
+    href: "/inference",
+    label: "Inference",
+    description: "Signed receipts per call",
+  },
+  {
+    href: "/agents",
+    label: "Agents",
+    description: "Identity, payment, primitives",
+  },
+  {
+    href: "/playground",
+    label: "Playground",
+    description: "Try a live mainnet call",
+  },
+];
+
+const BUILD_ITEMS: NavDropdownItem[] = [
+  {
+    href: "/sdk",
+    label: "SDK",
+    description: "Four MIT npm packages",
+  },
+  {
+    href: "/verify",
+    label: "Verify",
+    description: "Five-check receipt verifier",
+  },
+  {
+    href: "https://docs.vdmnexus.com",
+    label: "Docs",
+    external: true,
+    description: "Quickstart, spec, ops runbooks",
+  },
+];
 
 export function Nav() {
   const pathname = usePathname();
@@ -28,21 +75,13 @@ export function Nav() {
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
-          <NavLink href="/inference" active={pathname === "/inference"}>
-            Inference
-          </NavLink>
-          <NavLink href="/agents" active={pathname === "/agents"}>
-            Agents
-          </NavLink>
-          <NavLink href="/sdk" active={pathname === "/sdk"}>
-            SDK
-          </NavLink>
-          <NavLink href="/playground" active={pathname === "/playground"}>
-            Playground
-          </NavLink>
+          <NavDropdown label="Product" items={PRODUCT_ITEMS} pathname={pathname} />
+          <NavDropdown label="Build" items={BUILD_ITEMS} pathname={pathname} />
           <NavLink
             href="/receipts"
-            active={pathname.startsWith("/receipts") || pathname.startsWith("/r/")}
+            active={
+              pathname.startsWith("/receipts") || pathname.startsWith("/r/")
+            }
           >
             Receipts
           </NavLink>
@@ -52,14 +91,6 @@ export function Nav() {
           <NavLink href="/roadmap" active={pathname === "/roadmap"}>
             Roadmap
           </NavLink>
-          <a
-            href="https://docs.vdmnexus.com"
-            target="_blank"
-            rel="noreferrer noopener"
-            className="text-sm text-text-muted transition-colors hover:text-text"
-          >
-            Docs
-          </a>
           {showLaunch && (
             <NavLink href="/token" active={pathname === "/token"}>
               Token
@@ -120,6 +151,189 @@ function NavLink({
   );
 }
 
+/**
+ * Hover-to-open nav dropdown with click + keyboard fallbacks.
+ *
+ * Click toggles, mouseEnter opens, mouseLeave closes after a 120ms grace
+ * window (so moving the cursor between the trigger and the panel doesn't
+ * flicker the panel shut while crossing the seam). Escape and
+ * click-outside also close. The trigger reflects "active" when any item
+ * in the dropdown matches the current pathname, so visiting a sub-page
+ * (e.g. `/sdk`) highlights its parent ("Build") in the top nav.
+ *
+ * Marketing-site only — the desktop nav lives inside `hidden md:flex`.
+ * Mobile doesn't render a nav at all today; if/when we add a mobile menu
+ * it should not reuse this component (mobile wants accordion, not popover).
+ */
+function NavDropdown({
+  label,
+  items,
+  pathname,
+}: {
+  label: string;
+  items: NavDropdownItem[];
+  pathname: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const isActive = items.some(
+    (i) =>
+      !i.external &&
+      (pathname === i.href || pathname.startsWith(i.href + "/"))
+  );
+
+  // Click-outside close — covers the case where the user opened the panel
+  // via keyboard/focus and then clicks somewhere else on the page.
+  useEffect(() => {
+    if (!open) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  // Escape closes.
+  useEffect(() => {
+    if (!open) return;
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [open]);
+
+  function onEnter() {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setOpen(true);
+  }
+
+  function onLeave() {
+    // Grace window lets the cursor travel through the pt-2 spacer between
+    // trigger and panel without the panel flickering closed.
+    closeTimeoutRef.current = setTimeout(() => setOpen(false), 120);
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative"
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+    >
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-haspopup="true"
+        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          "flex items-center gap-1 text-sm transition-colors",
+          isActive ? "text-text" : "text-text-muted hover:text-text"
+        )}
+      >
+        {label}
+        <svg
+          aria-hidden
+          viewBox="0 0 12 12"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          className={cn(
+            "h-3 w-3 transition-transform duration-150",
+            open && "rotate-180"
+          )}
+        >
+          <path
+            d="M3 4.5L6 7.5L9 4.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          aria-label={label}
+          className="absolute left-1/2 top-full -translate-x-1/2 pt-2"
+        >
+          <div className="min-w-[220px] rounded-xl border border-soft bg-bg/95 p-1.5 shadow-xl shadow-bg/40 backdrop-blur">
+            {items.map((item) => {
+              const active =
+                !item.external &&
+                (pathname === item.href ||
+                  pathname.startsWith(item.href + "/"));
+              const itemClass = cn(
+                "block rounded-lg px-3 py-2.5 text-sm transition-colors",
+                active
+                  ? "bg-accent-indigo/15 text-text"
+                  : "text-text hover:bg-surface/60"
+              );
+              const labelEl = (
+                <>
+                  <span className="block font-medium">
+                    {item.label}
+                    {item.external && (
+                      <span
+                        aria-hidden
+                        className="ml-1.5 text-[10px] text-text-muted"
+                      >
+                        ↗
+                      </span>
+                    )}
+                  </span>
+                  {item.description && (
+                    <span className="mt-0.5 block text-xs text-text-muted">
+                      {item.description}
+                    </span>
+                  )}
+                </>
+              );
+
+              if (item.external) {
+                return (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    role="menuitem"
+                    className={itemClass}
+                    onClick={() => setOpen(false)}
+                  >
+                    {labelEl}
+                  </a>
+                );
+              }
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  role="menuitem"
+                  className={itemClass}
+                  onClick={() => setOpen(false)}
+                >
+                  {labelEl}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function XIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -145,4 +359,3 @@ function TelegramIcon({ className }: { className?: string }) {
     </svg>
   );
 }
-
