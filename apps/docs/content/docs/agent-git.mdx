@@ -1,0 +1,162 @@
+---
+title: Agent-git primitives
+description: Three discrete products that turn the signed-inference rail into a workflow teams can adopt — provenance, payment-gated merges, and signed release tags. Shipping next, after mainnet.
+---
+
+When an autonomous agent writes code that lands in your repo, three
+questions follow: **who actually wrote it, did they pay for the
+compute, and what's a verifiable release look like?** VDM Nexus is
+shipping three primitives that answer them, built on the same signed-
+receipt rail that powers `/v1/chat/completions` today.
+
+<Callout type="warn">
+**Not yet shipped.** This page describes the design of three
+in-progress products. The marketing site at
+[vdmnexus.com/agents](https://vdmnexus.com/agents) tracks their
+public status. Once each one ships, this page will be replaced by a
+full reference for the surface that landed.
+</Callout>
+
+## The three primitives
+
+### 1. Provenance — `@vdm-nexus/github-app`
+
+A GitHub App that listens for PRs and posts a check whenever the PR
+includes a `.nexus/receipt.json` file. The App verifies the receipt
+end-to-end via [`verifyReceipt`](/docs/verify-a-receipt) and shows the
+five checks as a status on the PR.
+
+Free. No payment required. The use case is **credible attribution for
+agent-authored work** — a reviewer can see, before merging, that an
+agent's claimed model output really happened and was paid for by the
+keypair that opened the PR.
+
+Roughly:
+
+```
+agent opens PR
+  ├─ .nexus/receipt.json committed
+  └─ check posted: ✓ all 5 checks pass
+       (prompt hash, response hash, operator sig,
+        on-chain tx, payer match)
+```
+
+The App will be installable from GitHub Marketplace once it's been
+dogfooded internally for a few weeks (see [agents page](https://vdmnexus.com/agents)
+for status).
+
+### 2. Payment-gated merges — `.nexus/policy.json`
+
+A per-repo opt-in. Repo owners commit a policy file describing what
+payments are required to merge agent PRs:
+
+```jsonc
+{
+  "version": "1",
+  "mode": "preview",          // or "enforce"
+  "agent_pull_requests": {
+    "required_amount_usdc": "0.10",
+    "pay_to": "<maintainer Solana address>",
+    "allowed_agent_pubkeys": ["..."],
+    "expires_at": "2026-12-31T23:59:59Z"
+  }
+}
+```
+
+The GitHub App reads the policy at each PR event. In **preview mode**
+it posts a check saying *"merge would cost $X to `pay_to`"* but
+doesn't block. In **enforce mode**, the App requires a settled x402
+transaction referencing the PR SHA (via memo) before the check goes
+green — and combined with branch-protection rules, the merge is
+blocked until a payment lands.
+
+Why preview vs enforce: real teams need time to verify the data looks
+right before they trust the gate. Preview is the on-ramp; enforce is
+the destination. Both shipped in v1.
+
+### 3. Signed release tags — `nexus release`
+
+CLI wrapper around `git tag` / `gh release create`. When you cut a
+release, the wrapper:
+
+1. Builds a payload from the tag SHA, the author, and the release
+   notes
+2. Asks the Nexus operator to sign the payload (same Ed25519 operator
+   key that signs inference receipts)
+3. Anchors the tag SHA on-chain via an x402 payment with the tag SHA
+   in the memo
+4. Writes the signed receipt to `release-assets/.nexus/release-receipt.json`
+5. Uploads it as a release asset
+
+Result: every release tag becomes itself verifiable — anyone can pull
+the receipt asset, run `verifyReceipt`, and confirm the tag is what
+the named author actually shipped.
+
+## Why VDM Nexus owns these
+
+The infrastructure that makes this work — Ed25519 identity, on-chain
+payment, signed receipts, a verifier library — is already shipped (see
+[Introduction](/docs/introduction)). The three primitives above are
+glue layers over that rail, not new infrastructure categories.
+
+Building them on the VDM Nexus rail means:
+
+- **Same Ed25519 keypair signs PRs and pays for inference.** No
+  separate developer wallet for the agent-git workflow vs the
+  inference workflow.
+- **Receipts compose.** An agent's PR can include the SIR v2 receipt
+  for the inference call that wrote the code. The provenance check
+  verifies *that* receipt, not a separate attestation system.
+- **Chain-agnostic.** The same primitives work on Solana mainnet and
+  Base via the existing multi-chain x402 facilitator. No protocol fork
+  per chain.
+
+## Use cases
+
+- **Bounty payment on merge.** A maintainer publishes a bounty; an
+  agent opens a PR; the merge gate ensures the bounty pays out
+  automatically as part of the merge.
+- **Compliance trail for AI-written code.** A regulated team accepts
+  agent contributions only when every commit carries a SIR v2 receipt
+  proving which model produced it.
+- **Verifiable open-source releases.** A maintainer signs each release
+  with the same operator key their users already trust for inference,
+  so consumers don't need to learn a new attestation format.
+
+## Timeline + status
+
+Order of shipping (lowest friction → highest):
+
+1. **Provenance App** first. Free, read-only, no payment required.
+   Adoption-driven by the use case "show me which PRs are
+   agent-authored with proof."
+2. **Payment-gated merges** once the App has been live long enough to
+   trust the verifier path. Requires mainnet ready for real-USDC
+   payments (devnet preview shipping first).
+3. **Signed release tags** last. Smallest user base, biggest
+   credibility payoff for the maintainers who adopt it.
+
+Real status — including "in design" vs "code shipped" vs "deployed" —
+on the marketing roadmap at
+[vdmnexus.com/roadmap](https://vdmnexus.com/roadmap).
+
+## Stay in the loop
+
+- The waitlist on [vdmnexus.com/agents](https://vdmnexus.com/agents)
+  is where launch announcements go for each primitive.
+- The repo lives at
+  [github.com/vdmnexus/vdmnexus](https://github.com/vdmnexus/vdmnexus);
+  once the GitHub App package lands it'll be under `packages/github-app/`.
+- File-level questions are welcome via GitHub issues.
+
+## Related docs
+
+- [Verify a receipt](/docs/verify-a-receipt) — the five-check
+  verifier that powers the provenance check.
+- [Receipt structure](/docs/receipt-structure) — what a
+  `.nexus/receipt.json` actually contains.
+- [SIR v2 spec](/docs/spec/sir-v2) — the open standard for the
+  receipt format. Anyone can produce verifier-compatible receipts.
+- [`@vdm-nexus/x402` reference](/docs/sdk/x402-reference) — the
+  package that handles paying for the inference calls these primitives
+  attest to.

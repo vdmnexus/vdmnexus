@@ -18,6 +18,12 @@ export function Footer() {
           <Link href="/agents" className="transition-colors hover:text-text">
             Nexus Agents
           </Link>
+          <Link href="/sdk" className="transition-colors hover:text-text">
+            SDK
+          </Link>
+          <Link href="/verify" className="transition-colors hover:text-text">
+            Verify
+          </Link>
           <Link href="/roadmap" className="transition-colors hover:text-text">
             Roadmap
           </Link>
