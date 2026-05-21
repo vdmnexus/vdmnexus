@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
@@ -13,26 +14,8 @@ import { Card } from "@/components/card";
 import { FadeIn } from "@/components/fade-in";
 
 export const metadata: Metadata = {
-  title: "$NEXUS — discount token for signed inference",
-  description:
-    "$NEXUS holders get discounted USDC pricing on cryptographically-signed AI inference calls. Fair launch on Clanker v4 on Base. 15% vault locked 90 days then linear-vested 12 months.",
-  alternates: { canonical: "https://vdmnexus.com/token" },
-  openGraph: {
-    title: "$NEXUS — discount token for signed inference",
-    description:
-      "Fair launch on Clanker v4 on Base. 100B supply, mint authority disabled, LP locked. Holder discount on /v1/chat/completions within 30 days of launch.",
-    url: "https://vdmnexus.com/token",
-    siteName: "VDM Nexus",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    site: "@vdmnexus",
-    creator: "@vdmnexus",
-    title: "$NEXUS — discount token for signed inference",
-    description:
-      "Fair launch on Clanker v4 on Base. 100B supply, mint authority disabled, LP locked. Holder discount within 30 days of launch.",
-  },
+  title: "Not found — VDM Nexus",
+  robots: { index: false, follow: false },
 };
 
 const TODO = "{{TODO}}";
@@ -113,6 +96,8 @@ const UTILITY = [
 ];
 
 export default function TokenPage() {
+  notFound();
+
   return (
     <>
       <Nav />

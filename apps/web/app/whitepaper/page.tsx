@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
@@ -7,26 +8,8 @@ import { GridBg } from "@/components/grid-bg";
 import { FadeIn } from "@/components/fade-in";
 
 export const metadata: Metadata = {
-  title: "Whitepaper — VDM Nexus",
-  description:
-    "The one-pager. Signed inference receipts (SIR v2), $NEXUS as a discount token, fair launch on Clanker v4 on Base.",
-  alternates: { canonical: "https://vdmnexus.com/whitepaper" },
-  openGraph: {
-    title: "VDM Nexus — Whitepaper",
-    description:
-      "Signed inference, $NEXUS discount token, fair launch on Clanker v4 on Base. The one-pager.",
-    url: "https://vdmnexus.com/whitepaper",
-    siteName: "VDM Nexus",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    site: "@vdmnexus",
-    creator: "@vdmnexus",
-    title: "VDM Nexus — Whitepaper",
-    description:
-      "Signed inference, $NEXUS discount token, fair launch on Clanker v4 on Base. The one-pager.",
-  },
+  title: "Not found — VDM Nexus",
+  robots: { index: false, follow: false },
 };
 
 type Paper = {
@@ -302,6 +285,8 @@ const SECTIONS: Paper[] = [
 ];
 
 export default function WhitepaperPage() {
+  notFound();
+
   return (
     <main className="relative min-h-screen">
       <Nav />
