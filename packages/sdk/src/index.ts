@@ -1,5 +1,6 @@
 export { Agent } from "./agent.js";
 export type {
+  GrantResponse,
   InferenceOptions,
   InferenceResponse,
   Receipt,

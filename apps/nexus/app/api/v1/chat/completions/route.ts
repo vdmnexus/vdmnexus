@@ -20,8 +20,10 @@ import {
   extractPayerFromPayload,
   getAllowedAgents,
   getMaxPriceUsdc,
+  getRecipientForNetwork,
   isMainnetNetwork,
   mainnetEnabled,
+  resolveNetworkInput,
   type Network,
   type PaymentPayload,
   type ResourceInfo,
@@ -42,6 +44,17 @@ type ChatCompletionsBody = {
   model?: string;
   messages?: ChatMessage[];
   stream?: boolean;
+  /**
+   * Optional per-request network selector. Accepted values:
+   *   "devnet" | "solana-devnet" | "solana:devnet"
+   *   "mainnet" | "solana-mainnet" | "solana:mainnet"
+   *   "base" | "base-mainnet" | "eip155:8453"
+   *   "base-sepolia" | "eip155:84532"
+   * When omitted the route uses `X402_NETWORK` from env (default devnet).
+   * Letting the agent choose per call means a single deploy can serve
+   * both devnet (playground / demo traffic) and mainnet (real spend).
+   */
+  network?: string;
 };
 
 function err(
@@ -100,13 +113,6 @@ function getFlatPriceUsdc(): number {
   return Number.isFinite(n) && n > 0 ? n : 0.01;
 }
 
-function getRecipient(): string | null {
-  return (
-    process.env.X402_RECIPIENT_ADDRESS?.trim() ||
-    process.env.NEXUS_DEPOSIT_ADDRESS?.trim() ||
-    null
-  );
-}
 
 function getResource(req: NextRequest): ResourceInfo {
   return {
@@ -163,20 +169,6 @@ export async function POST(req: NextRequest) {
     return rateLimited(ipDecision);
   }
 
-  const rawNetwork = process.env.X402_NETWORK?.trim() ?? "";
-  const isMainnet = isMainnetNetwork(rawNetwork);
-  if (isMainnet && !mainnetEnabled()) {
-    log.warn({
-      event: "mainnet.disabled",
-      request_id,
-      network: rawNetwork || null,
-    });
-    return err("mainnet_disabled", 503, {
-      detail:
-        "Mainnet traffic is temporarily disabled by the operator. Retry later.",
-    });
-  }
-
   const configuredPrice = getFlatPriceUsdc();
   const maxPrice = getMaxPriceUsdc();
   if (configuredPrice > maxPrice) {
@@ -213,16 +205,58 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const recipient = getRecipient();
+  // Resolve the effective network: body.network wins if present, else the
+  // env default. This is what lets one deploy serve both devnet traffic
+  // (playground, demos) and mainnet traffic (real agents) from the same
+  // endpoint — the agent picks per call.
+  let network: Network;
+  if (body.network) {
+    const resolved = resolveNetworkInput(body.network);
+    if (!resolved) {
+      log.warn({
+        event: "chat.body_invalid",
+        request_id,
+        reason: "unknown_network",
+        requested: body.network,
+      });
+      return err("invalid_network", 400, {
+        detail:
+          "network must be one of: devnet, mainnet, base, base-sepolia (or full CAIP-2)",
+      });
+    }
+    network = resolved;
+  } else {
+    network = getNetwork();
+  }
+
+  if (isMainnetNetwork(network) && !mainnetEnabled()) {
+    log.warn({
+      event: "mainnet.disabled",
+      request_id,
+      network,
+    });
+    return err("mainnet_disabled", 503, {
+      detail:
+        "Mainnet traffic is temporarily disabled by the operator. Retry later.",
+    });
+  }
+
+  const recipient = getRecipientForNetwork(network);
   if (!recipient) {
-    log.error({ event: "chat.server_misconfigured", request_id, reason: "no_recipient" });
+    log.error({
+      event: "chat.server_misconfigured",
+      request_id,
+      reason: "no_recipient",
+      network,
+    });
     return err("server_misconfigured", 500, {
-      detail: "X402_RECIPIENT_ADDRESS or NEXUS_DEPOSIT_ADDRESS must be set",
+      detail: isMainnetNetwork(network)
+        ? "NEXUS_MAINNET_DEPOSIT_ADDRESS or X402_RECIPIENT_ADDRESS or NEXUS_DEPOSIT_ADDRESS must be set"
+        : "X402_RECIPIENT_ADDRESS or NEXUS_DEPOSIT_ADDRESS must be set",
     });
   }
 
   const amountUsdc = getFlatPriceUsdc();
-  const network = getNetwork();
   const resource = getResource(req);
 
   const challenge = buildChallenge({
@@ -454,6 +488,7 @@ export async function POST(req: NextRequest) {
     const { error: logError } = await supabase.from("inference_logs").insert({
       agent_pubkey: payerWallet,
       request_nonce: settled.transaction,
+      tx_signature: settled.transaction,
       upstream: "openrouter",
       model: body.model,
       cost_usdc: 0,
@@ -502,6 +537,7 @@ export async function POST(req: NextRequest) {
     .insert({
       agent_pubkey: payerWallet,
       request_nonce: settled.transaction,
+      tx_signature: settled.transaction,
       upstream: result.upstream,
       model: body.model,
       prompt_tokens: result.prompt_tokens,
@@ -552,6 +588,26 @@ export async function POST(req: NextRequest) {
       pay_to: recipient,
     },
   });
+
+  // Persist the signed receipt onto the log row so public lookups at
+  // /api/v1/receipts/<id> (and the /r/<id> permalink) return the same
+  // signed JSON the client got — bit-stable, no re-signing on read.
+  if (logRow?.id) {
+    const { error: updateError } = await supabase
+      .from("inference_logs")
+      .update({ receipt_json: receipt })
+      .eq("id", logRow.id);
+    if (updateError) {
+      log.error({
+        event: "receipt_persist_failed",
+        request_id,
+        agent_pubkey: payerWallet,
+        inference_id: logRow.id,
+        tx_signature: settled.transaction,
+        detail: updateError.message,
+      });
+    }
+  }
 
   log.info({
     event: "response.sent",

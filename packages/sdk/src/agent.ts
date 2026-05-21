@@ -28,6 +28,22 @@ export type InferenceOptions = {
   prompt: string;
   task_type?: TaskType;
   max_cost_usdc?: number;
+  /**
+   * When the prepaid balance is empty, automatically request a sponsored
+   * grant from `${endpoint}/grants` and retry once. Default `true` — this
+   * is the zero-friction first-call path for new agents. Set to `false`
+   * to fail fast on insufficient credits without the extra grant probe.
+   */
+  autoGrant?: boolean;
+};
+
+export type GrantResponse = {
+  ok: boolean;
+  agent_pubkey?: string;
+  grant_usdc?: number;
+  balance_usdc?: number;
+  error?: string;
+  detail?: string;
 };
 
 const DEFAULT_TASK_TYPE: TaskType = "general";
@@ -71,6 +87,55 @@ export class Agent {
     endpoint: string,
     opts: InferenceOptions
   ): Promise<InferenceResponse> {
+    const base = endpoint.replace(/\/$/, "");
+    const autoGrant = opts.autoGrant !== false; // default on
+
+    const first = await this._inferenceOnce(base, opts);
+    if (first.ok) return first;
+
+    // The grant endpoint exists to remove the "buy USDC before the first
+    // call" friction. If the agent has zero balance, probe it once. A
+    // grant failure (already issued, IP cap, budget exhausted) is silent —
+    // the user gets the original insufficient_credits error back, which is
+    // the same outcome they would have had without auto-grant.
+    if (autoGrant && first.error === "insufficient_credits") {
+      const grant = await this.grant(base);
+      if (grant.ok) {
+        return await this._inferenceOnce(base, opts);
+      }
+    }
+    return first;
+  }
+
+  /**
+   * Request a sponsored USDC grant for this agent's pubkey from
+   * `${endpoint}/grants`. One grant per pubkey ever, capped per-IP and per
+   * global daily budget by the operator. Safe to call explicitly even if
+   * `inference()` already auto-grants — the server returns 409
+   * `grant_already_issued` with the current balance.
+   */
+  async grant(endpoint: string): Promise<GrantResponse> {
+    const base = endpoint.replace(/\/$/, "");
+    try {
+      const res = await fetch(`${base}/grants`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agent_pubkey: this.pubkey }),
+      });
+      return (await res.json()) as GrantResponse;
+    } catch (e) {
+      return {
+        ok: false,
+        error: "grant_request_failed",
+        detail: e instanceof Error ? e.message : "unknown",
+      };
+    }
+  }
+
+  private async _inferenceOnce(
+    base: string,
+    opts: InferenceOptions
+  ): Promise<InferenceResponse> {
     const body = JSON.stringify({
       prompt: opts.prompt,
       task_type: opts.task_type ?? DEFAULT_TASK_TYPE,
@@ -82,7 +147,7 @@ export class Agent {
     });
     const signature = this.signBody(body);
 
-    const res = await fetch(`${endpoint.replace(/\/$/, "")}/inference`, {
+    const res = await fetch(`${base}/inference`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

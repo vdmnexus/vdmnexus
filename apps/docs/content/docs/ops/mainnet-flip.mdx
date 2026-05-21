@@ -1,0 +1,218 @@
+---
+title: Flipping to mainnet
+description: Step-by-step operator runbook for serving real USDC traffic on /v1/chat/completions, with rollback steps for every change.
+---
+
+This is the operator runbook for taking `/v1/chat/completions` from
+devnet-only to **serving real USDC traffic on Solana mainnet**, with the
+existing endpoint still serving devnet for the playground and demos.
+
+The route accepts a `network` field in the request body
+(`"mainnet" | "devnet" | "base" | "base-sepolia"`), so one deploy serves
+both — agents opt in to mainnet per call. No new endpoint, no DNS change.
+
+**Read this whole page before flipping anything.** Real money is involved.
+
+## Pre-flight (one-time)
+
+You'll do these once, before mainnet ever serves a real call.
+
+### 1. Decide the mainnet deposit address
+
+The mainnet payTo address is the wallet that receives every USDC payment
+from agents. It can be:
+
+- **The same address as devnet** — simplest. The KMS-controlled Ed25519
+  keypair is network-independent, so the existing fee-payer / signer
+  works on mainnet too. Set `NEXUS_MAINNET_DEPOSIT_ADDRESS` to the same
+  value as `NEXUS_DEPOSIT_ADDRESS`.
+
+- **A separate mainnet wallet** — recommended for accounting separation,
+  so devnet test traffic doesn't muddy mainnet receipt history.
+  Provision a second KMS key (`KeySpec=ECC_NIST_EDWARDS25519`,
+  `KeyUsage=SIGN_VERIFY`), derive its Solana address via
+  `KMS.GetPublicKey`, set that as `NEXUS_MAINNET_DEPOSIT_ADDRESS`. The
+  local facilitator currently reads one KMS key id at startup
+  (`NEXUS_KMS_KEY_ID`) — using a separate mainnet key means you'd need
+  to extend `apps/nexus/lib/local-facilitator.ts` to register both;
+  start with the same key/address and split later.
+
+### 2. Fund the SOL fee-payer
+
+The facilitator pays the SOL transaction fee for every settled payment.
+On mainnet, public RPCs charge ~5,000 lamports (~$0.001) per tx — at
+~10 settlements per second peak you burn ~$0.01/s. **Pre-fund the
+facilitator wallet with at least 0.5 SOL.**
+
+```bash
+# Verify mainnet wallet balance
+curl -s https://api.mainnet-beta.solana.com \
+  -X POST -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"getBalance","params":["YOUR_DEPOSIT_ADDRESS"]}' \
+  | jq .result.value
+```
+
+Set a balance-monitoring alert at 0.1 SOL — the existing structured
+logger already emits `facilitator.kms.ready` on boot; add an external
+balance probe (cron-job.org or Better Stack) that hits `getBalance` and
+pages you when it drops below threshold.
+
+### 3. Set Vercel production environment variables
+
+In the Vercel dashboard for the `nexus` project, add:
+
+```
+NEXUS_MAINNET_DEPOSIT_ADDRESS=<base58 Solana address derived from KMS>
+NEXUS_MAINNET_ENABLED=true
+# Keep the existing devnet defaults — these stay in place:
+# X402_NETWORK=solana:devnet     (default network when body.network is absent)
+# X402_FLAT_PRICE_USDC=0.01      (charged on EVERY call, devnet or mainnet)
+# NEXUS_MAX_PRICE_USDC=0.10      (hard ceiling on X402_FLAT_PRICE_USDC)
+```
+
+**Do NOT change `X402_NETWORK`** — that's the default for clients who
+don't pass `body.network`. Leave it on devnet so playground and demo
+traffic keeps working without changes.
+
+If you want to narrow mainnet's blast radius for the first few days, set
+`NEXUS_ALLOWED_AGENTS` to a comma-separated list of base58 pubkeys —
+only those agents can pay on mainnet. Devnet traffic ignores this list.
+
+### 4. Apply the agent_grants migration
+
+```bash
+# from project root
+supabase db push  # or apply 20260520223000_agent_grants.sql via dashboard
+```
+
+Then set the grant config in Vercel:
+
+```
+NEXUS_GRANT_AMOUNT_USDC=0.10
+NEXUS_GRANT_MAX_PER_IP=3
+NEXUS_GRANT_BUDGET_DAILY_USDC=5.00
+IP_HASH_SALT=<re-use the same value as apps/web>
+```
+
+## Verification (before the first real call)
+
+### 1. Confirm the kill switch reads correctly
+
+```bash
+curl -X POST https://nexus.vdmnexus.com/api/v1/chat/completions \
+  -H 'content-type: application/json' \
+  -d '{"model":"openai/gpt-4o-mini","messages":[{"role":"user","content":"hi"}],"network":"mainnet"}'
+```
+
+Expected: `402 payment_required` with a `solana:mainnet` challenge.
+
+If you see `503 mainnet_disabled`: `NEXUS_MAINNET_ENABLED` is not `"true"`.
+If you see `500 server_misconfigured`: `NEXUS_MAINNET_DEPOSIT_ADDRESS` is unset.
+
+### 2. Run the end-to-end test with $0.01 of real USDC
+
+Fund a test agent with $0.01 USDC on Solana mainnet (any wallet — Phantom,
+CLI, Jupiter swap — that transfers to the agent's pubkey-derived ATA).
+
+```bash
+NEXUS_ENDPOINT=https://nexus.vdmnexus.com \
+DEMO_AGENT_SECRET_KEY=<base58 64-byte secret> \
+SOLANA_RPC_URL=<your Helius/Triton mainnet RPC> \
+pnpm --filter nexus test:payinfer
+```
+
+The script logs every step. Expected outcome:
+- `payAndInfer` succeeds in 5–15 seconds.
+- The receipt includes `payment.network = "solana:mainnet"`, a real
+  mainnet tx signature, and your test agent's pubkey as the payer.
+- `verifyReceipt` returns `ok: true` with all 5 checks passing.
+
+Click the explorer link printed by the test — confirm the tx is on
+Solana mainnet, not devnet.
+
+### 3. Sanity-check the budget caps
+
+Set `X402_FLAT_PRICE_USDC=0.001` temporarily and confirm a single call
+debits exactly 1,000 atomic units of USDC from the test agent. Revert.
+
+## Rollout
+
+### Phase 1 — Allowlist (recommended first day)
+
+Set `NEXUS_ALLOWED_AGENTS=<your test agent>,<one or two friends>`.
+Public devnet traffic is unaffected (the allowlist only applies after
+the payer is extracted from the x402 payload, and devnet payers can be
+filtered separately if you ever extend the check).
+
+Watch the structured logs in Vercel for `agent.not_allowed`,
+`chat.verify_failed`, `chat.settle_failed`. Any non-zero rate is a
+red flag — investigate before opening.
+
+### Phase 2 — Public
+
+Remove `NEXUS_ALLOWED_AGENTS` (leave the env var blank or delete it).
+Mainnet is open. Watch:
+
+- `chat.settle_ok` rate (the success metric).
+- SOL balance of the facilitator wallet (top up at 0.1 SOL).
+- `chat.verify_failed` reasons — most will be `insufficient_balance` on
+  the agent side; if you see `payment_invalid`, something is wrong.
+- `mainnet.disabled` should be zero (you didn't trip the kill switch).
+
+## Rolling back
+
+The kill switch is one Vercel env edit:
+
+```
+NEXUS_MAINNET_ENABLED=false
+```
+
+After saving, *the next request* to `/chat/completions` with
+`body.network=mainnet` returns `503 mainnet_disabled`. Devnet traffic is
+unaffected. No deploy required — env vars are read on every request.
+
+For a faster rollback, also set `NEXUS_ALLOWED_AGENTS` to a single
+known-good pubkey while you investigate. That lets you keep testing
+without exposing the route.
+
+## What the receipts look like on mainnet
+
+```jsonc
+{
+  "v": 2,
+  "agent_pubkey": "Hk7v…",
+  "upstream": "openrouter",
+  "model": "openai/gpt-4o-mini",
+  "cost_usdc": 0.0007,                       // OpenRouter's returned usage.cost
+  "prompt_hash": "…",
+  "response_hash": "…",
+  "timestamp": 1716248123456,
+  "inference_id": 42,
+  "points_total": 1,
+  "payment": {
+    "scheme": "x402",
+    "amount_usdc": 0.01,                     // What the agent paid
+    "tx_signature": "5UH…",
+    "network": "solana:<mainnet genesis hash>",
+    "pay_to": "<NEXUS_MAINNET_DEPOSIT_ADDRESS>"
+  },
+  "nexus_signature": "…"                     // Same operator key as devnet
+}
+```
+
+The verifier (`@vdm-nexus/x402`'s `verifyReceipt`) handles mainnet
+exactly the same way as devnet — it routes the on-chain check to
+`api.mainnet-beta.solana.com` based on the genesis-hash form in
+`payment.network`.
+
+## Future hardening (not in scope for the flip)
+
+- Separate mainnet KMS key for full key isolation.
+- Per-agent rolling spend caps (see `apps/nexus/lib/grants.ts` for the
+  pattern — same shape for spend caps, just queried against
+  `credits_ledger` deltas instead).
+- Loop detection (auto-pause on rapid identical prompts).
+- Multi-region fee-payer wallets so a single AWS-region outage doesn't
+  take settlement offline.
+
+These are roadmap items, not flip blockers.

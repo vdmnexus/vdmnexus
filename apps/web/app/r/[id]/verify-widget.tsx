@@ -9,11 +9,13 @@ type VerifyState =
       status: "ok";
       checks?: Record<string, boolean>;
       summary?: string;
+      mode?: "signature_only" | "full";
     }
   | {
       status: "fail";
       checks?: Record<string, boolean>;
       error?: string;
+      mode?: "signature_only" | "full";
     };
 
 export function VerifyWidget({ receiptId }: { receiptId: string }) {
@@ -36,6 +38,7 @@ export function VerifyWidget({ receiptId }: { receiptId: string }) {
           checks?: Record<string, boolean>;
           summary?: string;
           error?: string;
+          mode?: "signature_only" | "full";
         };
 
         if (res.ok && body.ok) {
@@ -43,12 +46,14 @@ export function VerifyWidget({ receiptId }: { receiptId: string }) {
             status: "ok",
             checks: body.checks,
             summary: body.summary,
+            mode: body.mode,
           });
         } else {
           setState({
             status: "fail",
             checks: body.checks,
             error: body.error ?? `verify_failed_${res.status}`,
+            mode: body.mode,
           });
         }
       } catch (err) {
@@ -73,8 +78,10 @@ export function VerifyWidget({ receiptId }: { receiptId: string }) {
             Verification
           </div>
           <p className="mt-2 text-sm text-text-muted">
-            Independently checks the prompt &amp; response hashes and the
-            operator&apos;s Ed25519 signature on this receipt.
+            {(state.status === "ok" || state.status === "fail") &&
+            state.mode === "signature_only"
+              ? "Verifies the operator's Ed25519 signature on this receipt. The prompt + response text aren't stored here — replay them through @vdm-nexus/x402's verifyReceipt() for the full 5-check verification."
+              : "Independently checks the prompt & response hashes and the operator's Ed25519 signature on this receipt."}
           </p>
         </div>
         <StatusBadge state={state} />

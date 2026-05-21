@@ -21,6 +21,7 @@
     "ops/self-host-facilitator",
     "ops/observability",
     "ops/safe-mainnet",
+    "ops/mainnet-flip",
     "---Reference---",
     "faq",
     "---Specifications---",

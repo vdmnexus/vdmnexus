@@ -381,6 +381,69 @@ function responseToString(r: OpenAIChatCompletion | string): string {
   return typeof r === "string" ? r : r.choices?.[0]?.message?.content ?? "";
 }
 
+export type VerifySignatureOnlyParams = {
+  receipt: NexusReceipt;
+  /** Override the operator pubkey directly (base58 Ed25519). If absent, it
+   * is fetched from `${endpoint}/api/v1/operator-key`. */
+  operatorKey?: string;
+  /** Base URL of the Nexus deployment that signed the receipt. Used to
+   * fetch the operator pubkey when `operatorKey` isn't supplied. */
+  endpoint?: string;
+};
+
+export type VerifySignatureOnlyResult = {
+  ok: boolean;
+  checks: {
+    /** True when the receipt's nexus_signature verifies against the
+     * operator public key over the canonical receipt JSON. */
+    nexus_signature_ok: boolean;
+  };
+};
+
+/**
+ * Verify only the operator's Ed25519 signature on a signed receipt — the
+ * subset of `verifyReceipt`'s checks that doesn't require the original
+ * prompt/response text or an on-chain lookup. Useful when only the
+ * receipt JSON is available (e.g. a public receipt permalink at
+ * `/api/v1/receipts/<id>`), where the prompt body intentionally isn't
+ * exposed.
+ *
+ * Returns `ok: true` iff `nexus_signature_ok` is true. The hash checks
+ * (`prompt_hash_ok`, `response_hash_ok`) and on-chain checks
+ * (`payment_on_chain_ok`, `payer_matches`) are NOT performed — call
+ * `verifyReceipt` with the original prompt + response to run those.
+ */
+export async function verifySignatureOnly(
+  params: VerifySignatureOnlyParams
+): Promise<VerifySignatureOnlyResult> {
+  let nexus_signature_ok = false;
+  const r = params.receipt;
+  if (r.v === 2 && r.nexus_signature) {
+    if (!params.operatorKey && !params.endpoint) {
+      throw new Error(
+        "verifySignatureOnly: provide operatorKey or endpoint to verify the Nexus signature"
+      );
+    }
+    const pub =
+      params.operatorKey ?? (await fetchOperatorKey(params.endpoint!));
+    const { nexus_signature, ...rest } = r;
+    const payload = new TextEncoder().encode(canonicalize(rest));
+    try {
+      nexus_signature_ok = nacl.sign.detached.verify(
+        payload,
+        bs58.decode(nexus_signature),
+        bs58.decode(pub)
+      );
+    } catch {
+      nexus_signature_ok = false;
+    }
+  }
+  return {
+    ok: nexus_signature_ok,
+    checks: { nexus_signature_ok },
+  };
+}
+
 export async function verifyReceipt(
   params: VerifyReceiptParams
 ): Promise<VerifyReceiptResult> {

@@ -35,6 +35,12 @@ export function Nav() {
           <NavLink href="/playground" active={pathname === "/playground"}>
             Playground
           </NavLink>
+          <NavLink
+            href="/receipts"
+            active={pathname.startsWith("/receipts") || pathname.startsWith("/r/")}
+          >
+            Receipts
+          </NavLink>
           <NavLink href="/points" active={pathname === "/points"}>
             Points
           </NavLink>

@@ -147,6 +147,11 @@ export async function POST(req: NextRequest) {
     upstream = await agent.inference(endpoint, {
       prompt,
       task_type: taskType,
+      // The playground sponsor agent is operator-funded; never let it
+      // claim a sponsored grant if its balance drops. A zero-balance
+      // sponsor should surface as a real error so we top it up, not
+      // silently absorb the $0.10 grant and keep serving.
+      autoGrant: false,
     });
   } catch (e) {
     const detail = e instanceof Error ? e.message : String(e);
