@@ -1,0 +1,255 @@
+---
+title: "@vdm-nexus/mcp reference"
+description: Model Context Protocol server that exposes signed inference + receipt verification to Claude Desktop, Cursor, and any MCP client.
+---
+
+`@vdm-nexus/mcp` is the bridge between VDM Nexus and any
+[Model Context Protocol](https://modelcontextprotocol.io) client. Drop
+it into a Claude Desktop or Cursor config, set one env var, and the
+agent picks up two tools: `signed_inference` (paid, receipted model
+call) and `verify_receipt` (the 5-check verifier).
+
+Use it when you want signed inference in a workflow you're already
+running, without writing a custom agent. If you're building from
+scratch, [`@vdm-nexus/x402`](/docs/sdk/x402-reference) gives you finer
+control.
+
+## Install
+
+```bash
+npm install -g @vdm-nexus/mcp
+# or run on demand:
+npx @vdm-nexus/mcp
+```
+
+The server speaks the MCP stdio transport. Your client spawns it as a
+subprocess — you don't run it directly.
+
+## Configure
+
+Configuration is entirely env-driven.
+
+| Variable | Required | Default | What it does |
+|---|---|---|---|
+| `NEXUS_AGENT_SECRET_KEY` | yes¹ | — | base58-encoded 64-byte Ed25519 secret. Generate with `Agent.generate().secretKeyBase58`. Treat as a password. |
+| `NEXUS_ENDPOINT` | no | `https://nexus.vdmnexus.com/api/v1` | Nexus API base, up to and including `/api/v1`. |
+| `NEXUS_PAYMENT_MODE` | no | `prepaid` | `prepaid` or `x402`. Per-call `mode` arg overrides. |
+| `NEXUS_DEFAULT_MODEL` | no | `openai/gpt-4o-mini` | Model used in x402 mode when the call omits `model`. |
+| `NEXUS_OPERATOR_KEY` | no | (fetched from endpoint) | Override the operator Ed25519 pubkey used by `verify_receipt`. |
+| `NEXUS_SOLANA_RPC_URL` | no | public devnet / mainnet | Override the Solana RPC for the on-chain check. Use a fast provider (Helius, Triton, QuickNode) to skip retry waits. |
+
+¹ Required only for `signed_inference`. `verify_receipt` works without
+the secret — you can run this server as a pure receipt auditor.
+
+<Callout type="info">
+**Generating a fresh agent secret:**
+
+```ts
+import { Agent } from "@vdm-nexus/sdk";
+const a = Agent.generate();
+console.log(a.pubkey);            // fund this with USDC
+console.log(a.secretKeyBase58);   // store this somewhere safe
+```
+
+The pubkey is the agent's identity on Nexus. Fund it via
+[faucet.circle.com](https://faucet.circle.com) (Solana Devnet) to use
+x402 mode.
+</Callout>
+
+## Wire into Claude Desktop
+
+Edit the Claude Desktop config file:
+
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+Add the server:
+
+```json
+{
+  "mcpServers": {
+    "vdm-nexus": {
+      "command": "npx",
+      "args": ["-y", "@vdm-nexus/mcp"],
+      "env": {
+        "NEXUS_AGENT_SECRET_KEY": "your_base58_secret_here",
+        "NEXUS_PAYMENT_MODE": "prepaid"
+      }
+    }
+  }
+}
+```
+
+Restart Claude Desktop. The `signed_inference` and `verify_receipt`
+tools show up in the tools menu — Claude will pick them when relevant
+or you can ask it to use them explicitly.
+
+## Wire into Cursor
+
+Edit `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "vdm-nexus": {
+      "command": "npx",
+      "args": ["-y", "@vdm-nexus/mcp"],
+      "env": {
+        "NEXUS_AGENT_SECRET_KEY": "your_base58_secret_here",
+        "NEXUS_PAYMENT_MODE": "x402"
+      }
+    }
+  }
+}
+```
+
+Restart Cursor. The tools appear in the agent's tool list.
+
+The difference between the two configs above is the `NEXUS_PAYMENT_MODE`
+default — Claude Desktop example uses `prepaid` (fast, debits a
+credits balance), Cursor uses `x402` (pay-per-call, on-chain settlement).
+Either client can use either mode; pick what matches your workflow.
+
+## Tools
+
+### `signed_inference`
+
+Calls the Nexus API and returns the model output plus the signed
+receipt.
+
+**Input:**
+
+```ts
+{
+  prompt: string;                              // required
+  model?: string;                              // OpenRouter slug, x402 mode
+  max_cost_usdc?: number;                      // prepaid mode hint
+  task_type?: "fast" | "reasoning" | "general";// prepaid routing hint
+  mode?: "prepaid" | "x402";                   // overrides server default
+}
+```
+
+**Output (prepaid mode):**
+
+```ts
+{
+  mode: "prepaid",
+  agent_pubkey: string,
+  result: string,           // the response text
+  receipt: SirPrepaid,      // signed receipt
+}
+```
+
+**Output (x402 mode):**
+
+```ts
+{
+  mode: "x402",
+  agent_pubkey: string,
+  result: string,                       // model text (extracted)
+  openai: OpenAIChatCompletion,         // full OpenAI body
+  receipt: SirX402,                     // signed + on-chain anchored
+  payment: { status: "settled", txSignature, network },
+}
+```
+
+### `verify_receipt`
+
+Runs the [five-check verification](/docs/verify-a-receipt) on any
+SIR v2 receipt. Does not require `NEXUS_AGENT_SECRET_KEY`.
+
+**Input:**
+
+```ts
+{
+  receipt: NexusReceipt,           // the SIR v2 receipt object
+  prompt: string | ChatMessage[],  // string for prepaid; array for x402
+  response: string | OpenAIChatCompletion,
+}
+```
+
+**Output:**
+
+```ts
+{
+  ok: boolean,
+  checks: {
+    prompt_hash_ok: boolean,
+    response_hash_ok: boolean,
+    nexus_signature_ok: boolean,
+    payment_on_chain_ok: boolean,   // vacuously true for prepaid
+    payer_matches: boolean,         // vacuously true for prepaid
+  }
+}
+```
+
+See [Verify a receipt](/docs/verify-a-receipt) for what each check
+actually proves.
+
+## A worked example: "Ask Claude to verify its own work"
+
+The end-to-end test that proves the server is wired up correctly,
+in plain English:
+
+1. Open Claude Desktop with the MCP server configured (see above).
+2. Prompt: *"Use the `signed_inference` tool to ask GPT-4o-mini to
+   summarize the SIR v2 spec in one paragraph. Save the receipt."*
+3. Claude calls `signed_inference`, gets back `result` + `receipt`.
+4. Prompt: *"Now use `verify_receipt` to confirm that receipt is real."*
+5. Claude calls `verify_receipt` with the receipt + the prompt it
+   sent + the response it got. Returns
+   `{ ok: true, checks: { … all true } }`.
+
+Step 5 is the cool part: the entire round-trip — model call, on-chain
+payment, receipt issuance, end-to-end verification — happens inside
+one Claude session. Without the MCP server, you'd need to write code
+to do any of it.
+
+## Debugging
+
+The official [MCP Inspector](https://github.com/modelcontextprotocol/inspector)
+is the fastest way to drive the server by hand without a client:
+
+```bash
+npx @modelcontextprotocol/inspector npx @vdm-nexus/mcp
+```
+
+This opens a web UI where you can call the tools directly with custom
+input and inspect the response. Useful when a config isn't working and
+you want to isolate whether the server runs at all.
+
+The server logs to **stderr** — stdout is reserved for the MCP wire
+protocol. Failures come back with `isError: true` and a JSON detail
+field. Common errors:
+
+- `NEXUS_AGENT_SECRET_KEY is not set` — set the env var; only needed
+  for `signed_inference`.
+- `x402_payment_invalid` — the facilitator rejected the signed
+  transfer. Check your agent has USDC on the network you're paying on
+  (devnet vs mainnet).
+- `x402_payment_replay` — same payment seen before. Should not happen
+  in normal flow; suggests a config or RPC retry issue.
+- `verify_failed` — `verify_receipt` couldn't complete the checks.
+  Detail field has the underlying error (usually missing operator key
+  or unreachable Solana RPC).
+
+## Status
+
+Devnet only. Mainnet flips when the upstream Nexus API does — track
+the [roadmap](https://vdmnexus.com/roadmap). The package itself
+doesn't change at the flip; the same server picks up the mainnet
+endpoint via `NEXUS_ENDPOINT` (or by default once `nexus.vdmnexus.com`
+serves mainnet by default).
+
+## Where to go next
+
+- [Verify a receipt](/docs/verify-a-receipt) — the five checks
+  explained, plus how to verify without the MCP if you'd rather call
+  the library directly.
+- [`@vdm-nexus/x402` reference](/docs/sdk/x402-reference) — what the
+  MCP wraps. Useful if you outgrow the MCP and want code-level
+  control.
+- [SIR v2 spec](/docs/spec/sir-v2) — receipt format reference for
+  anyone implementing verification independently.
+- [Source on GitHub](https://github.com/vdmnexus/vdmnexus/tree/main/packages/mcp-server) —
+  for issue filing and the canonical README.
