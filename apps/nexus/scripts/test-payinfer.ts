@@ -28,12 +28,16 @@ import { X402Agent, verifyReceipt } from "../../../packages/x402/dist/index.js";
 
 const ENDPOINT = process.env.NEXUS_ENDPOINT ?? "http://localhost:3001";
 const SECRET = process.env.DEMO_AGENT_SECRET_KEY;
+// Per-call network override. Omit to use the server's X402_NETWORK
+// default. Pass e.g. NEXUS_NETWORK=mainnet to force a Solana mainnet
+// settlement on an endpoint whose default is still devnet.
+const NETWORK = process.env.NEXUS_NETWORK;
 
 async function main() {
   if (!SECRET) {
     console.error(
       "DEMO_AGENT_SECRET_KEY required — supply a base58 64-byte secret " +
-        "for a USDC-funded devnet agent."
+        "for a USDC-funded agent."
     );
     process.exit(1);
   }
@@ -41,6 +45,7 @@ async function main() {
   const agent = X402Agent.fromBase58(SECRET);
   console.log(`Endpoint:     ${ENDPOINT}`);
   console.log(`Agent pubkey: ${agent.pubkey}`);
+  if (NETWORK) console.log(`Network:      ${NETWORK} (per-call override)`);
   console.log();
 
   const messages = [
@@ -52,6 +57,7 @@ async function main() {
   const res = await agent.payAndInfer(`${ENDPOINT}/api/v1`, {
     model: "openai/gpt-4o-mini",
     messages,
+    ...(NETWORK ? { network: NETWORK } : {}),
   });
   console.log(`  ✓ ${Date.now() - t0}ms`);
   console.log();

@@ -121,6 +121,10 @@ export class X402Agent extends Agent {
     const requestBody = JSON.stringify({
       model: opts.model,
       messages: opts.messages,
+      // Per-call network override. Omitted → server falls back to its
+      // X402_NETWORK default. Set → server uses the named network for
+      // both the 402 challenge and settlement, regardless of default.
+      ...(opts.network ? { network: opts.network } : {}),
     });
 
     // 1. Probe.
