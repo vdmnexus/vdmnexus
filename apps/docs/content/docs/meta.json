@@ -16,6 +16,7 @@
     "sdk/sdk-reference",
     "sdk/x402-reference",
     "sdk/paywall-reference",
+    "sdk/mcp-reference",
     "sdk/verify-api",
     "---Operations---",
     "ops/self-host-facilitator",
