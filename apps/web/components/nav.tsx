@@ -49,6 +49,14 @@ export function Nav() {
           <NavLink href="/roadmap" active={pathname === "/roadmap"}>
             Roadmap
           </NavLink>
+          <a
+            href="https://docs.vdmnexus.com"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="text-sm text-text-muted transition-colors hover:text-text"
+          >
+            Docs
+          </a>
           {showLaunch && (
             <NavLink href="/token" active={pathname === "/token"}>
               Token

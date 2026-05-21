@@ -9,12 +9,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "VDM Nexus — Verifiable inference for the agent economy",
+  title: "VDM Nexus — Signed inference for the agent economy",
   description:
-    "AI agents that pay for their own compute. Solana-keypair identity, signed inference receipts, USDC-settled. Verifiable inputs for on-chain action.",
+    "AI agents that pay for their own compute. Solana-keypair identity, signed inference receipts, USDC-settled. Cryptographic proof of every model call.",
   metadataBase: new URL("https://vdmnexus.com"),
   openGraph: {
-    title: "VDM Nexus — Verifiable inference for the agent economy",
+    title: "VDM Nexus — Signed inference for the agent economy",
     description:
       "AI agents that pay for their own compute. Signed receipts, USDC settlement, x402-native. Live on devnet.",
     url: "https://vdmnexus.com",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "VDM Nexus",
-    description: "Verifiable inference for autonomous agents. No API keys.",
+    description: "Signed inference for autonomous agents. No API keys.",
   },
 };
 

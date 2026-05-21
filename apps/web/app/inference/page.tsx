@@ -79,7 +79,9 @@ export default function ComputePage() {
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
                 <a
-                  href="#"
+                  href="https://github.com/vdmnexus/vdmnexus"
+                  target="_blank"
+                  rel="noreferrer noopener"
                   className="inline-flex items-center gap-2 rounded-md border border-soft bg-surface/60 px-4 py-2.5 text-sm font-medium text-text transition-colors hover:border-accent-indigo/60"
                 >
                   View on GitHub

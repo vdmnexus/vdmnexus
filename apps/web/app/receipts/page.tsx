@@ -274,12 +274,14 @@ function EmptyState() {
         >
           Open the playground
         </Link>
-        <Link
-          href="/docs/quickstart"
+        <a
+          href="https://docs.vdmnexus.com/docs/quickstart"
+          target="_blank"
+          rel="noreferrer noopener"
           className="inline-flex items-center gap-2 rounded-md border border-soft bg-surface/60 px-4 py-2 text-sm font-medium text-text-muted hover:border-accent-indigo/40 hover:text-text"
         >
           Read the quickstart
-        </Link>
+        </a>
       </div>
     </div>
   );

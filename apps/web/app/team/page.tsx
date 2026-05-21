@@ -15,9 +15,9 @@ import { FadeIn } from "@/components/fade-in";
 const APPLICATION_FORM_URL = "https://tally.so/r/EkZ40l";
 const APPLICATION_FORM_EMBED_URL =
   "https://tally.so/embed/EkZ40l?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1&formEventsForwarding=1";
-const CULTURE_SURVEY_URL = "https://tally.so/r/CULTURE_SURVEY_ID";
-const CONTRIBUTOR_AGREEMENT_URL =
-  "https://www.notion.so/vdmnexus/contributor-agreement-placeholder";
+// CTAs for the culture survey + contributor agreement are intentionally
+// hidden until the real URLs are live. The step text in STEPS describes
+// what happens; visitors get the workflow without dead clicks.
 
 export const metadata: Metadata = {
   title: "Build with VDM Nexus",
@@ -80,8 +80,7 @@ const STEPS = [
   },
   {
     title: "Culture survey",
-    body: "Ten questions, ~10 minutes. How you work, how you decide, what you walk away from.",
-    cta: { label: "Open survey", href: CULTURE_SURVEY_URL },
+    body: "Ten questions, ~10 minutes. How you work, how you decide, what you walk away from. Link arrives with the application response.",
   },
   {
     title: "Paid-in-future trial",
@@ -89,8 +88,7 @@ const STEPS = [
   },
   {
     title: "Contributor agreement",
-    body: "Written agreement covering equity, token allocation, vest, and IP.",
-    cta: { label: "Template", href: CONTRIBUTOR_AGREEMENT_URL },
+    body: "Written agreement covering equity, token allocation, vest, and IP. Template shared after the trial week.",
   },
   {
     title: "Welcome aboard",
@@ -344,14 +342,6 @@ export default function TeamPage() {
                   >
                     Start the application
                     <ArrowRight className="h-3.5 w-3.5" />
-                  </a>
-                  <a
-                    href={CULTURE_SURVEY_URL}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="text-xs text-text-muted underline-offset-4 transition-colors hover:text-text hover:underline"
-                  >
-                    Or take the culture survey first →
                   </a>
                 </div>
               </div>
