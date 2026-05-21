@@ -171,6 +171,23 @@ export default async function ReceiptPermalinkPage({
       ? new Date(receipt.timestamp).toISOString()
       : row.created_at;
 
+  // Derive the network badge from the receipt itself rather than hardcoding.
+  // x402 receipts carry `payment.network` (CAIP-2). Prepaid receipts don't —
+  // those are devnet-only today, so fall back to "devnet".
+  const payment = receipt.payment as { network?: unknown } | undefined;
+  const paymentNetwork =
+    payment && typeof payment.network === "string" ? payment.network : null;
+  const networkBadge = (() => {
+    if (!paymentNetwork) return "devnet";
+    const n = paymentNetwork.toLowerCase();
+    if (n.includes("devnet") || n.includes("etwtrabz")) return "devnet";
+    if (n.startsWith("solana:")) return "mainnet";
+    if (n === "eip155:84532") return "base sepolia";
+    if (n === "eip155:8453") return "base";
+    return paymentNetwork;
+  })();
+  const isMainnetBadge = networkBadge === "mainnet" || networkBadge === "base";
+
   return (
     <main className="relative min-h-screen">
       <div
@@ -186,8 +203,14 @@ export default async function ReceiptPermalinkPage({
               <span className="h-1.5 w-1.5 rounded-full bg-accent-indigo" />
               Signed inference receipt
             </span>
-            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-emerald-300">
-              devnet
+            <span
+              className={`rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] ${
+                isMainnetBadge
+                  ? "border-amber-400/30 bg-amber-400/10 text-amber-200"
+                  : "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+              }`}
+            >
+              {networkBadge}
             </span>
           </div>
           <div className="flex flex-col gap-1 text-xs text-text-muted sm:items-end">
