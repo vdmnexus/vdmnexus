@@ -39,6 +39,11 @@ Real wall-clock latency for the full flow on devnet: **~5 seconds**.
 Most of that is Solana confirmation. The verify/settle pair is the
 critical path; OpenRouter inference is parallel-able in future versions.
 
+The diagram is drawn for Solana, but the same flow runs on Base and
+Base Sepolia — agents pick per request via `body.network`
+(`solana`, `base`, `base-sepolia`). The facilitator routes to the
+right chain transparently. SIR v2 §13 covers the chain bindings.
+
 ## What's a "signed receipt"?
 
 Returned in the `X-Nexus-Receipt` header (base64-encoded JSON):
