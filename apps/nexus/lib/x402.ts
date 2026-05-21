@@ -38,6 +38,12 @@ export type {
   ResourceInfo,
 } from "@vdm-nexus/paywall";
 
+// Local imports for use within this module. `export ... from` re-exports
+// don't bring names into local scope, so the helpers below that reference
+// `Network` / `X402_NETWORKS` need an explicit import too.
+import { X402_NETWORKS } from "@vdm-nexus/paywall";
+import type { Network } from "@vdm-nexus/paywall";
+
 /**
  * Solana-flavored payment payload — what the spec calls `payload.payload`
  * for a Solana SPL transfer. The client encodes a partially-signed
