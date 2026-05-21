@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
@@ -11,6 +12,7 @@ import {
 } from "@/components/section";
 import { Card } from "@/components/card";
 import { FadeIn } from "@/components/fade-in";
+import { launchLive } from "@/lib/launch-flag";
 
 export const metadata: Metadata = {
   title: "$NEXUS — discount token for signed inference",
@@ -113,6 +115,7 @@ const UTILITY = [
 ];
 
 export default function TokenPage() {
+  if (!launchLive()) notFound();
   return (
     <>
       <Nav />
