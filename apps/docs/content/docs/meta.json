@@ -12,6 +12,7 @@
     "signed-inference",
     "receipt-structure",
     "security",
+    "agent-git",
     "---SDKs---",
     "sdk/index",
     "sdk/sdk-reference",
