@@ -77,6 +77,21 @@ const FOR_BUILDERS = [
   "Open source SDK, MIT licensed",
 ];
 
+const PAYWALL_BENEFITS = [
+  "Ed25519 receipt of every response — verifiable end-to-end",
+  "Per-call spend cap and loop detection, fail-closed by default",
+  "Express, Hono, Next.js — pick your stack, three lines of glue",
+  "$VDM hooks wired today: discount, cashback, staking multiplier",
+];
+
+const PAYWALL_VS_VERGE: Array<{ label: string; us: string; them: string }> = [
+  { label: "Chains", us: "Solana (today), Base", them: "Base" },
+  { label: "Protocol fee", us: "0% (devnet)", them: "0.5%" },
+  { label: "Signed receipts", us: "SIR v2 — Ed25519", them: "—" },
+  { label: "Self-host facilitator", us: "KMS-backed", them: "Yes" },
+  { label: "Token hooks", us: "$VDM (configurable)", them: "$VERGE" },
+];
+
 const FOR_PLATFORMS = [
   "x402-native pay-per-call (coming soon)",
   "Signed receipts for downstream verification",
@@ -91,6 +106,7 @@ export default function Home() {
         <Hero />
         <Problem />
         <Products />
+        <Paywall />
         <UseCases />
         <HowItWorks />
         <Audiences />
@@ -292,6 +308,158 @@ function Products() {
         </FadeIn>
       </div>
     </Section>
+  );
+}
+
+function Paywall() {
+  return (
+    <Section>
+      <FadeIn className="max-w-2xl">
+        <SectionEyebrow>For API builders</SectionEyebrow>
+        <SectionHeading className="mt-4">
+          <span className="text-gradient">Paywall + Proofs.</span>
+        </SectionHeading>
+        <p className="mt-6 text-base leading-relaxed text-text-muted sm:text-lg">
+          One line of code gates your API with x402 — and every paid call
+          hands the caller a signed receipt of exactly what your handler
+          returned. Verge stops at the payment. We don&apos;t.
+        </p>
+      </FadeIn>
+
+      <div className="mt-12 grid gap-4 lg:grid-cols-[1.05fr_1fr] lg:gap-6">
+        <FadeIn>
+          <PaywallCode />
+        </FadeIn>
+
+        <FadeIn delay={0.08}>
+          <Card className="h-full">
+            <span className="text-xs font-medium uppercase tracking-[0.16em] text-text-muted">
+              @vdm-nexus/paywall
+            </span>
+            <ul className="mt-6 space-y-3 text-sm text-text-muted">
+              {PAYWALL_BENEFITS.map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-accent-indigo" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-8 overflow-hidden rounded-md border border-soft">
+              <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 border-b border-soft bg-surface/40 px-3 py-2 text-[10px] font-medium uppercase tracking-[0.12em] text-text-muted">
+                <span />
+                <span>VDM Nexus</span>
+                <span>Verge</span>
+              </div>
+              {PAYWALL_VS_VERGE.map((row) => (
+                <div
+                  key={row.label}
+                  className="grid grid-cols-[1fr_auto_auto] items-center gap-x-4 border-b border-soft px-3 py-2 text-xs last:border-b-0"
+                >
+                  <span className="text-text-muted">{row.label}</span>
+                  <span className="text-text">{row.us}</span>
+                  <span className="text-text-muted">{row.them}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </FadeIn>
+      </div>
+    </Section>
+  );
+}
+
+function PaywallCode() {
+  return (
+    <div className="relative h-full overflow-hidden rounded-xl border border-soft bg-bg/80 shadow-[0_0_60px_-12px_rgba(99,102,241,0.35)] backdrop-blur">
+      <div className="flex items-center justify-between border-b border-soft px-4 py-2.5">
+        <div className="flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-full bg-[#3a3a4a]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#3a3a4a]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#3a3a4a]" />
+        </div>
+        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-text-muted">
+          server.ts
+        </span>
+        <span className="w-12" />
+      </div>
+
+      <pre className="overflow-x-auto px-4 py-5 font-mono text-[13px] leading-relaxed">
+        <code className="text-text">
+          <span className="text-violet-300">import</span>{" "}
+          <span className="text-text">{`{ expressPaywall }`}</span>{" "}
+          <span className="text-violet-300">from</span>{" "}
+          <span className="text-emerald-300">{`"@vdm-nexus/paywall/express"`}</span>;
+          {"\n\n"}
+          <span className="text-sky-300">app</span>.
+          <span className="text-yellow-200">post</span>(
+          <span className="text-emerald-300">{`"/agent"`}</span>,{"\n"}
+          {"  "}
+          <span className="text-yellow-200">expressPaywall</span>({"{"}
+          {"\n"}
+          {"    "}
+          <span className="text-sky-300">amount</span>:{" "}
+          <span className="text-amber-200">0.01</span>,{"\n"}
+          {"    "}
+          <span className="text-sky-300">recipient</span>:{" "}
+          <span className="text-text">{`process.env.WALLET!`}</span>,{"\n"}
+          {"    "}
+          <span className="text-sky-300">network</span>:{" "}
+          <span className="text-emerald-300">{`"solana-devnet"`}</span>,{"\n"}
+          {"    "}
+          <span className="text-sky-300">operatorSecretKey</span>:{" "}
+          <span className="text-text">{`process.env.OPERATOR_KEY!`}</span>,{"\n"}
+          {"    "}
+          <span className="text-sky-300">facilitator</span>:{" "}
+          <span className="text-text">{`{ mode: "http", url: "…/x402" }`}</span>,
+          {"\n\n"}
+          {"    "}
+          <span className="text-sky-300">onPaid</span>:{" "}
+          <span className="text-violet-300">async</span>{" "}
+          <span className="text-text">{`({ body }) =>`}</span>{" "}
+          {"{"}
+          {"\n"}
+          {"      "}
+          <span className="text-violet-300">const</span>{" "}
+          <span className="text-sky-300">reply</span>{" "}
+          <span className="text-violet-300">=</span>{" "}
+          <span className="text-violet-300">await</span>{" "}
+          <span className="text-yellow-200">myLLM</span>(
+          <span className="text-text">body.prompt</span>);{"\n"}
+          {"      "}
+          <span className="text-violet-300">return</span>{" "}
+          {"{"}{" "}
+          <span className="text-sky-300">response</span>:{" "}
+          {"{"} <span className="text-sky-300">reply</span> {"}"},{"\n"}
+          {"        "}
+          <span className="text-sky-300">promptForHash</span>:{" "}
+          <span className="text-text">body.prompt</span>,{"\n"}
+          {"        "}
+          <span className="text-sky-300">responseForHash</span>:{" "}
+          <span className="text-sky-300">reply</span>,{"\n"}
+          {"        "}
+          <span className="text-sky-300">model</span>:{" "}
+          <span className="text-emerald-300">{`"my-app/v1"`}</span>{" "}
+          {"};"}{"\n"}
+          {"    "}
+          {"}"},{"\n"}
+          {"  "}
+          {"}"})
+          {"\n"}
+          );
+          {"\n\n"}
+          <span className="text-text-muted">{`// Response carries X-Nexus-Receipt — verifiable end-to-end`}</span>
+        </code>
+      </pre>
+
+      <div className="flex items-center justify-between border-t border-soft bg-surface/40 px-4 py-2.5 text-[11px]">
+        <code className="font-mono text-text-muted">
+          npm install @vdm-nexus/paywall
+        </code>
+        <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-emerald-300">
+          new
+        </span>
+      </div>
+    </div>
   );
 }
 
