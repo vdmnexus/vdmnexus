@@ -23,6 +23,8 @@ type ReceiptRow = {
 
 // Solana tx signatures are base58-encoded 64-byte blobs → 86-88 chars.
 const TX_SIGNATURE_REGEX = /^[1-9A-HJ-NP-Za-km-z]{80,100}$/;
+// inference_logs.id is a uuid v4 (8-4-4-4-12 hex with dashes).
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function loadReceipt(id: string): Promise<ReceiptRow | null> {
   const supabase = getServiceClient();
@@ -48,14 +50,14 @@ async function loadReceipt(id: string): Promise<ReceiptRow | null> {
     };
   }
 
-  // 2. Numeric inference_id → inference_logs.id. The signed receipt JSON
+  // 2. UUID inference_id → inference_logs.id. The signed receipt JSON
   //    is persisted on the row by both /v1/inference and
   //    /v1/chat/completions, so we don't re-sign on read.
-  if (/^\d+$/.test(id)) {
+  if (UUID_REGEX.test(id)) {
     const { data } = await supabase
       .from("inference_logs")
       .select("id, receipt_json, tx_signature, created_at")
-      .eq("id", Number(id))
+      .eq("id", id.toLowerCase())
       .eq("status", "success")
       .maybeSingle();
     if (data) {

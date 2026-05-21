@@ -27,9 +27,8 @@ export const dynamic = "force-dynamic";
 // Permissive: 80-100 chars of base58 vocabulary.
 const TX_SIGNATURE_REGEX = /^[1-9A-HJ-NP-Za-km-z]{80,100}$/;
 
-function isPositiveInteger(s: string): boolean {
-  return /^\d+$/.test(s) && Number(s) <= Number.MAX_SAFE_INTEGER;
-}
+// inference_logs.id is a uuid v4. 8-4-4-4-12 hex with dashes.
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function GET(
   _req: NextRequest,
@@ -49,7 +48,7 @@ export async function GET(
 
   const supabase = getServiceClient();
   let row: {
-    id: number;
+    id: string;
     agent_pubkey: string;
     upstream: string | null;
     model: string | null;
@@ -62,13 +61,13 @@ export async function GET(
     created_at: string;
   } | null = null;
 
-  if (isPositiveInteger(lookup)) {
+  if (UUID_REGEX.test(lookup)) {
     const { data, error } = await supabase
       .from("inference_logs")
       .select(
         "id, agent_pubkey, upstream, model, cost_usdc, latency_ms, status, points, receipt_json, tx_signature, created_at"
       )
-      .eq("id", Number(lookup))
+      .eq("id", lookup.toLowerCase())
       .maybeSingle();
     if (error) {
       return NextResponse.json(
@@ -98,7 +97,7 @@ export async function GET(
         ok: false,
         error: "invalid_lookup",
         detail:
-          "lookup must be a numeric inference_id or a Solana tx_signature (base58)",
+          "lookup must be a uuid inference_id or a Solana tx_signature (base58)",
       },
       { status: 400 }
     );

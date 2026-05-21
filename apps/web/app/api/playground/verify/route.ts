@@ -25,6 +25,8 @@ export const dynamic = "force-dynamic";
 
 // Solana tx signatures are base58-encoded 64-byte blobs → ~88 chars.
 const TX_SIGNATURE_REGEX = /^[1-9A-HJ-NP-Za-km-z]{80,100}$/;
+// inference_logs.id is a uuid v4 (8-4-4-4-12 hex with dashes).
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type Body = {
   // id-lookup mode
@@ -93,13 +95,13 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Numeric inference_id → signature-only verify on the persisted receipt.
+    // 2. UUID inference_id → signature-only verify on the persisted receipt.
     let receiptRow: { receipt_json: Record<string, unknown> | null } | null = null;
-    if (/^\d+$/.test(id)) {
+    if (UUID_REGEX.test(id)) {
       const r = await supabase
         .from("inference_logs")
         .select("receipt_json")
-        .eq("id", Number(id))
+        .eq("id", id.toLowerCase())
         .eq("status", "success")
         .maybeSingle();
       receiptRow = r.data as { receipt_json: Record<string, unknown> | null } | null;
