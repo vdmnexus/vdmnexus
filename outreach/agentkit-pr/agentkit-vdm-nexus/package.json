@@ -32,7 +32,7 @@
     "vdm-nexus"
   ],
   "dependencies": {
-    "@vdm-nexus/x402": "^0.3.0",
+    "@vdm-nexus/x402": "^0.4.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {
@@ -42,8 +42,5 @@
   },
   "peerDependencies": {
     "@coinbase/agentkit": ">=0.1.0"
-  },
-  "overrides": {
-    "@vdm-nexus/sdk": "0.1.0"
   }
 }
