@@ -516,15 +516,17 @@ DEMO_SEED_USDC=1.00
   push receipt: `vdmnexus.com/r/749fa37c`. Proves that the paywall
   package works against a non-LLM resource — anything HTTP can be
   receipted.
-- **Six published npm packages + one PyPI package.** As of 2026-05-22:
+- **Six published npm packages + two PyPI packages.** As of 2026-05-22:
   `@vdm-nexus/sdk@0.2.0`, `@vdm-nexus/x402@0.4.0`,
   `@vdm-nexus/paywall@0.1.0`, `@vdm-nexus/mcp@0.1.0`,
   `@vdm-nexus/ai-sdk-provider@0.1.0`,
-  `@vdm-nexus/mastra-provider@0.1.0` on npm; `vdm-nexus@0.1.0` on
-  PyPI. All MIT, all built via `prepublishOnly tsc` (or `hatch` for
-  Python). `@vdm-nexus/x402@0.3.0` is deprecated on npm — it
-  referenced an unpublished sdk version; consumers should pin to
-  `^0.4.0`.
+  `@vdm-nexus/mastra-provider@0.1.0` on npm;
+  `vdm-nexus@0.2.2` and `langchain-vdm-nexus@0.1.0` on PyPI. All
+  MIT, all built via `prepublishOnly tsc` (or `hatch` for Python).
+  `@vdm-nexus/x402@0.3.0` is deprecated on npm — it referenced an
+  unpublished sdk version; consumers should pin to `^0.4.0`.
+  Python SDK first proven live on Solana mainnet at receipt
+  `r/00240cb0-41e1-4adc-a88c-9a11a7ffc959` (2026-05-22).
 - **SIR v2 spec published.** Signed Inference Receipt v2 spec lives
   under `docs.vdmnexus.com/spec/sir-v2`. Defines the canonical JSON
   shape, signing rules (sorted keys, no whitespace, exclude
@@ -532,9 +534,6 @@ DEMO_SEED_USDC=1.00
 
 ### NOT built — explicit gaps
 
-- **Python SDK.** No `vdm-nexus` on PyPI yet. Every Python framework
-  adapter (LangChain, LangGraph, CrewAI, OpenAI Agents SDK, Google ADK,
-  Fetch.ai uAgents) is blocked on this. Roadmap item 1.
 - **ERC-8004 agent card.** Not published. ERC-8004 went live on
   Ethereum mainnet 29 Jan 2026. Roadmap item 3.
 - **x402 discovery listings.** Nexus is not on x402 Bazaar,
