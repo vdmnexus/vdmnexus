@@ -9,6 +9,7 @@ sessions. Every session updates its own row at start and end.
 |---|---|---|---|---|
 | `claude/stats-endpoint` | Live mainnet counter on the homepage — `/api/stats` + `<LiveStats />` | 2026-05-22 | in_review | [#56](https://github.com/vdmnexus/vdmnexus/pull/56) |
 | `claude/mastra-vercel-providers` | Mastra + Vercel AI SDK providers (background agent — prompt 05) | 2026-05-22 | in_review | — |
+| `claude/discovery-listings` | Submission packets for 4 x402 indexes | 2026-05-22 | in_review | — |
 
 ## Conventions
 
