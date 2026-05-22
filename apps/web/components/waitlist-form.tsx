@@ -121,9 +121,10 @@ export function WaitlistForm() {
         <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full border border-accent-indigo/50 bg-accent-indigo/10">
           <Check className="h-5 w-5 text-text" />
         </div>
-        <h3 className="text-xl font-semibold text-text">You&apos;re on the list</h3>
+        <h3 className="text-xl font-semibold text-text">Got it — thanks</h3>
         <p className="mt-2 text-sm text-text-muted">
-          We&apos;ll be in touch as we onboard the first cohort.
+          We&apos;ll send the occasional build-log digest your way and
+          reach out if there&apos;s something specific to share.
         </p>
       </div>
     );
@@ -207,7 +208,7 @@ export function WaitlistForm() {
           "disabled:cursor-not-allowed disabled:opacity-60"
         )}
       >
-        {status === "submitting" ? "Submitting..." : "Join the waitlist"}
+        {status === "submitting" ? "Sending..." : "Send"}
         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
       </button>
     </form>

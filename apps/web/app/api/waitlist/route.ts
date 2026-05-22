@@ -217,13 +217,13 @@ function confirmationHtml(): string {
             <tr>
               <td style="padding:24px 36px 0 36px;">
                 <h1 style="margin:0 0 12px 0;font-size:24px;font-weight:700;color:#0e0e18;line-height:1.25;letter-spacing:-0.01em;">
-                  You're on the list.
+                  Thanks for the note.
                 </h1>
                 <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#374151;">
-                  Thanks for signing up. We're building signed inference for the agent economy &mdash; agents authenticate with a Solana keypair, sign every request, and the response carries a cryptographic receipt anyone can verify. Live on Solana mainnet today. No API keys.
+                  We're building signed inference for the agent economy &mdash; agents authenticate with a Solana keypair, sign every request, and the response carries a cryptographic receipt anyone can verify. Live on Solana mainnet today. No API keys.
                 </p>
                 <p style="margin:0 0 28px 0;font-size:15px;line-height:1.6;color:#374151;">
-                  We'll be in touch as we onboard the first cohort. If you want to skip the queue, just reply to this email and tell us what you're building.
+                  We'll send the occasional build-log digest your way. If there's something specific you're building and want us to know about, just reply to this email &mdash; we read every one.
                 </p>
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 8px 0;">
                   <tr>
