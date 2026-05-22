@@ -169,7 +169,10 @@ export default function Home() {
           </a>
         </span>
         <span>
-          <a href="https://docs.vdmnexus.com/spec/sir-v2" rel="noreferrer">
+          <a
+            href="https://docs.vdmnexus.com/docs/spec/sir-v2"
+            rel="noreferrer"
+          >
             SIR v2 spec
           </a>
           {" · "}

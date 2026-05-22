@@ -167,12 +167,13 @@ function Hero() {
                   View on GitHub
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </a>
-                <a
-                  href="#waitlist"
-                  className="inline-flex items-center justify-center gap-2 rounded-md border border-soft bg-surface/60 px-5 py-3 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
+                <Link
+                  href="/playground"
+                  className="group inline-flex items-center justify-center gap-2 rounded-md border border-soft bg-surface/60 px-5 py-3 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
                 >
-                  Join the waitlist
-                </a>
+                  Try the playground
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                </Link>
               </div>
             </div>
 
@@ -679,11 +680,13 @@ function Waitlist() {
     <Section id="waitlist" className="pb-32">
       <div className="mx-auto max-w-xl text-center">
         <FadeIn>
-          <SectionEyebrow>Early access</SectionEyebrow>
-          <SectionHeading className="mt-4">Join the waitlist</SectionHeading>
+          <SectionEyebrow>Building something?</SectionEyebrow>
+          <SectionHeading className="mt-4">Tell us about it</SectionHeading>
           <p className="mt-4 text-base text-text-muted">
-            We&apos;re onboarding AI businesses and agent builders. Tell us
-            what you&apos;re building.
+            Mainnet is live and the SDK is on npm — no gate. Drop a note
+            if you&apos;re shipping with Nexus; we&apos;d like to know what
+            you&apos;re building and we&apos;ll send the occasional build-log
+            digest your way.
           </p>
         </FadeIn>
         <FadeIn delay={0.1} className="mt-10 text-left">
