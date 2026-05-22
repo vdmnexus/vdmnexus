@@ -12,6 +12,7 @@ catch regressions in the Solana-side code path.
 
 from __future__ import annotations
 
+import base58
 import base64
 import json
 from typing import Any
@@ -435,3 +436,90 @@ async def test_build_payment_payload_constructs_valid_solana_tx() -> None:
     memo_data = bytes(ixs[3].data)
     assert len(memo_data) == 32
     assert all(c in b"0123456789abcdef" for c in memo_data)
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_agent_signature_verifies_against_on_wire_message_bytes() -> None:
+    """Regression guard for the v0 message wire-format signing bug.
+
+    Solana v0 messages start with a 0x80 version-prefix byte. The
+    chain verifies signatures against the WITH-prefix wire bytes.
+    `solders' bytes(MessageV0)` may omit the prefix, so signing the
+    raw bytes produces SignatureFailure on chain — even though
+    structural / shape tests pass.
+
+    This test re-derives the on-wire message bytes from the actual
+    serialized transaction (the source of truth the chain uses) and
+    verifies the agent's signature against them with PyNaCl
+    directly — same library, same algorithm, same bytes the chain
+    would check.
+
+    If this test fails, it means we're signing the wrong bytes. The
+    smoke test would also fail with "SignatureFailure" against
+    devnet/mainnet, which is what the v0.2.2 fix addresses.
+    """
+    import nacl.signing
+    from solders.transaction import VersionedTransaction
+
+    agent = X402Agent.generate()
+
+    respx.post("https://api.mainnet-beta.solana.com").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": {
+                    "context": {"slot": 1},
+                    "value": {
+                        "blockhash": "EkSnNWid2cvwEVnVx9aBqawnmiCNiDgp3gUdkDPTKN1N",
+                        "lastValidBlockHeight": 1000,
+                    },
+                },
+            },
+        )
+    )
+
+    payload = await agent.build_payment_payload(
+        _fake_challenge(),  # type: ignore[arg-type]
+        network="solana:mainnet",
+    )
+    tx_bytes = base64.b64decode(payload["payload"]["transaction"])
+
+    # Solana tx wire format: [compact-u16 sig_count][sig_count * 64-byte sigs][message]
+    # For our partial-sign case num_required_signatures == 2 (fee_payer + agent),
+    # and the count byte is just 0x02 (< 128 → single byte compact-u16).
+    sig_count = tx_bytes[0]
+    assert sig_count == 2
+    sigs_start = 1
+    sigs_end = sigs_start + sig_count * 64
+    on_wire_msg_bytes = tx_bytes[sigs_end:]
+
+    # The first byte of the v0 message MUST be 0x80 — this is what the
+    # chain uses for sig verification. If solders ever stops including
+    # it, this assertion fires (and the next one will too).
+    assert on_wire_msg_bytes[0] == 0x80, (
+        f"on-wire v0 message missing 0x80 prefix; first byte = "
+        f"0x{on_wire_msg_bytes[0]:02x}"
+    )
+
+    # Find the agent's signature slot. It's whichever of the two slots
+    # corresponds to the agent's pubkey in the message's signer prefix.
+    tx = VersionedTransaction.from_bytes(tx_bytes)
+    msg = tx.message
+    signer_keys = list(msg.account_keys)[: msg.header.num_required_signatures]
+    agent_slot = next(
+        i for i, k in enumerate(signer_keys) if str(k) == agent.pubkey
+    )
+    agent_sig_bytes = tx_bytes[sigs_start + agent_slot * 64 : sigs_start + (agent_slot + 1) * 64]
+    # Default signatures are 64 zero bytes — we want the real agent sig.
+    assert agent_sig_bytes != b"\x00" * 64
+
+    # Verify the agent's signature against the on-wire message bytes
+    # using the same Ed25519 primitive the chain uses (PyNaCl wraps
+    # libsodium; Solana validators wrap ed25519-dalek; same algorithm).
+    agent_pub_bytes = base58.b58decode(agent.pubkey)
+    verify_key = nacl.signing.VerifyKey(agent_pub_bytes)
+    # If this raises BadSignatureError, the on-chain verifier will too.
+    verify_key.verify(on_wire_msg_bytes, agent_sig_bytes)

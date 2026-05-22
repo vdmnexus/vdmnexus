@@ -486,7 +486,18 @@ class X402Agent(Agent):
             #   [1] agent     (signer, our identity)
             #   ... non-signers
             # We populate the signatures array in the same order.
-            agent_sig = keypair.sign_message(bytes(msg))
+            #
+            # The Solana v0 message wire format begins with a 0x80
+            # version-prefix byte that solders' `bytes(MessageV0)` may
+            # omit. The chain verifies signatures against the
+            # *with-prefix* wire bytes — signing the raw `bytes(msg)`
+            # produces a "SignatureFailure" when the verifier replays
+            # signatures against the actual on-wire message. Defensive:
+            # only prepend if it isn't already there.
+            msg_bytes = bytes(msg)
+            if not msg_bytes.startswith(b"\x80"):
+                msg_bytes = b"\x80" + msg_bytes
+            agent_sig = keypair.sign_message(msg_bytes)
             sigs = []
             for key in list(msg.account_keys)[: msg.header.num_required_signatures]:
                 if str(key) == self.pubkey:
