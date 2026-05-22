@@ -207,7 +207,7 @@ export function WaitlistForm() {
           "disabled:cursor-not-allowed disabled:opacity-60"
         )}
       >
-        {status === "submitting" ? "Submitting..." : "Join the waitlist"}
+        {status === "submitting" ? "Sending..." : "Send"}
         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
       </button>
     </form>
