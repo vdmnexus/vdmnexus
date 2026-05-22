@@ -12,6 +12,7 @@ import { Card, ComingSoonBadge } from "@/components/card";
 import { WaitlistForm } from "@/components/waitlist-form";
 import { FadeIn } from "@/components/fade-in";
 import { LiveStats } from "@/components/live-stats";
+import { RecentReceipts } from "@/components/recent-receipts";
 import { WaitlistProvider } from "@/components/waitlist-context";
 
 const GITHUB_URL = "https://github.com/vdmnexus/vdmnexus";
@@ -184,6 +185,11 @@ function Hero() {
           {/* Live mainnet counters */}
           <div className="mt-14 sm:mt-16">
             <LiveStats />
+          </div>
+
+          {/* Recent settlements — the receipts behind the counter */}
+          <div className="mt-4">
+            <RecentReceipts />
           </div>
         </FadeIn>
       </div>
