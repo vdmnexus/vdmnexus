@@ -1,0 +1,66 @@
+{
+  "name": "@vdm-nexus/mastra-provider",
+  "version": "0.1.0",
+  "description": "Mastra provider for VDM Nexus. Drop-in nexusModel() helper that returns a Mastra-compatible LanguageModel paying via x402 and exposing the SIR v2 signed-inference receipt.",
+  "license": "MIT",
+  "author": "VDM Nexus",
+  "homepage": "https://vdmnexus.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vdmnexus/vdmnexus.git",
+    "directory": "packages/mastra-provider"
+  },
+  "bugs": {
+    "url": "https://github.com/vdmnexus/vdmnexus/issues"
+  },
+  "keywords": [
+    "mastra",
+    "ai-agents",
+    "x402",
+    "solana",
+    "base",
+    "usdc",
+    "signed-inference",
+    "vdmnexus"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "node --test --import tsx/esm src/__tests__/*.test.ts",
+    "prepublishOnly": "tsc"
+  },
+  "dependencies": {
+    "@vdm-nexus/ai-sdk-provider": "workspace:*",
+    "@vdm-nexus/x402": "workspace:*"
+  },
+  "peerDependencies": {
+    "@mastra/core": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@mastra/core": { "optional": true }
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "tsx": "^4",
+    "typescript": "^5"
+  }
+}

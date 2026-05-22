@@ -1,0 +1,68 @@
+{
+  "name": "@vdm-nexus/ai-sdk-provider",
+  "version": "0.1.0",
+  "description": "Vercel AI SDK provider for VDM Nexus. One-line drop-in that handles the x402 USDC handshake and surfaces the SIR v2 signed-inference receipt via providerMetadata.",
+  "license": "MIT",
+  "author": "VDM Nexus",
+  "homepage": "https://vdmnexus.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vdmnexus/vdmnexus.git",
+    "directory": "packages/ai-sdk-provider"
+  },
+  "bugs": {
+    "url": "https://github.com/vdmnexus/vdmnexus/issues"
+  },
+  "keywords": [
+    "vercel-ai-sdk",
+    "ai-sdk",
+    "ai-sdk-provider",
+    "x402",
+    "solana",
+    "base",
+    "usdc",
+    "ai-agents",
+    "signed-inference",
+    "vdmnexus"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "node --test --import tsx/esm src/__tests__/*.test.ts",
+    "prepublishOnly": "tsc"
+  },
+  "dependencies": {
+    "@ai-sdk/openai-compatible": "^2.0.47",
+    "@vdm-nexus/x402": "workspace:*"
+  },
+  "peerDependencies": {
+    "ai": "^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "ai": { "optional": true }
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "tsx": "^4",
+    "typescript": "^5"
+  }
+}
