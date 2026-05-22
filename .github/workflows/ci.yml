@@ -27,3 +27,27 @@ jobs:
         # this step fails. Catches that bug before merge instead of
         # after the production deploy errors.
         run: pnpm install --frozen-lockfile
+
+  build-packages:
+    name: npm packages build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.9.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build @vdm-nexus/* packages
+        # Apps (web / nexus / verify / docs) build on Vercel with their
+        # own env vars. Here we only build the publishable packages —
+        # pure tsc, no secrets needed. If any package's types break,
+        # the PR fails here instead of breaking a downstream consumer.
+        run: pnpm --filter "@vdm-nexus/*" build
