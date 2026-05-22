@@ -29,11 +29,11 @@ The whole loop is on-chain settled and off-chain executed.
 ## Quickstart
 
 ```bash
-npm install @vdmnexus/sdk
+npm install @vdm-nexus/sdk
 ```
 
 ```ts
-import { Agent } from "@vdmnexus/sdk";
+import { Agent } from "@vdm-nexus/sdk";
 
 // Generate a fresh agent (or load an existing one with Agent.fromBase58)
 const agent = Agent.generate();
@@ -50,9 +50,11 @@ console.log("cost:", reply.receipt?.cost_usdc, "USDC");
 console.log("balance:", reply.receipt?.balance_remaining, "USDC");
 ```
 
-Every reply carries a receipt with the upstream provider, model used, cost,
-sha256 hashes of the prompt and response, and the row id of the
-inference log. Tamper-proof, agent-verifiable.
+Every reply carries an Ed25519-signed receipt (SIR v2) with the upstream
+provider, model used, cost, sha256 hashes of the prompt and response, the
+on-chain settlement tx, and the inference log id. Verify it end-to-end
+with `verifyReceipt` from `@vdm-nexus/x402` or paste it into
+[verify.vdmnexus.com](https://verify.vdmnexus.com).
 
 ## How auth works
 
@@ -78,16 +80,23 @@ This is a Turbo + pnpm monorepo.
 ```
 apps/
   web/         Marketing site at vdmnexus.com
-  nexus/       Agent payment rail + inference API (Next.js, port 3001 in dev)
+  nexus/       Agent payment rail + inference API at nexus.vdmnexus.com
+  verify/      Hosted receipt verifier at verify.vdmnexus.com
+  docs/        Developer docs at docs.vdmnexus.com
 packages/
-  sdk/         @vdmnexus/sdk — open source, MIT
+  sdk/         @vdm-nexus/sdk     — Ed25519 agent identity, signed inference
+  x402/        @vdm-nexus/x402    — x402 client + verifyReceipt
+  paywall/     @vdm-nexus/paywall — Express / Hono / Next.js middleware
+  mcp-server/  @vdm-nexus/mcp     — MCP server for Claude Desktop / Cursor
 ```
+
+All four packages MIT, ESM-only, published on npm.
 
 ## Run the demo locally
 
 ```bash
 pnpm install
-pnpm --filter @vdmnexus/sdk build
+pnpm --filter @vdm-nexus/sdk build
 
 # Set apps/nexus/.env with SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
 # OPENROUTER_API_KEY. See apps/nexus/.env.example for the full list.
@@ -104,10 +113,11 @@ and the balance drop after each one.
 
 ## Status
 
-**Devnet only.** Mainnet is coming once on-chain deposit detection has been
-stress-tested. The agent rail is functional today and handles signed
-inference requests in production, but production-grade payments are still
-seeded manually until the deposit cron is battle-tested.
+**Mainnet live** on Solana and Base. The agent rail handles signed
+inference, x402 v2 per-call payments, deposits via 2-minute cron, and
+issues Ed25519-signed receipts (SIR v2) verifiable end-to-end via
+`verifyReceipt` in `@vdm-nexus/x402` or the hosted verifier at
+[verify.vdmnexus.com](https://verify.vdmnexus.com).
 
 Built in public — every change shows up on
 [vdmnexus.com/roadmap](https://vdmnexus.com/roadmap) within 60 seconds.
