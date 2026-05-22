@@ -52,13 +52,21 @@ Ask the user to approve, edit, or skip per-platform. Accept partial approval —
 ### 5. Schedule
 
 Ask scheduling preference. Default options:
-- **Now** — publish immediately (Postiz `schedule_post` with current timestamp)
-- **+30m / +1h / +4h** — buffer for the user to catch typos after the API call
+- **Now** — publish immediately
+- **+30m / +1h / +4h** — buffer for the user to catch typos after scheduling
 - **Specific time** — user provides ISO 8601 or natural language ("tomorrow 9am CET")
 
-Then invoke the `postiz:postiz` skill once per approved platform. Pass the draft + schedule time. Capture the returned post ID(s) and append them to the draft file footer so we can find them later.
+**Posting mechanism — check what's wired up before promising end-to-end:**
 
-If the user picks "later, I'll do it" — leave the draft file in place and exit. The draft stays reusable.
+1. **Postiz CLI (end-to-end)** — only when `which postiz` returns a path AND `$POSTIZ_API_KEY` is set in the shell. Both conditions. If both true, invoke the `postiz:postiz` skill once per approved platform, capture post IDs into the draft file footer.
+2. **X intent URL (no-setup fallback for X)** — when Postiz isn't wired up, build a `https://x.com/intent/tweet?text=<url-encoded>` link. User clicks once, X compose modal opens with the tweet pre-filled, they hit **Schedule** → set time → done. Surface this as the default no-friction path. Include both the URL and the raw text in the chat output so they can also copy-paste if the link's awkward.
+3. **Manual paste (everything else)** — for Farcaster / Telegram / LinkedIn when Postiz isn't wired up, leave the draft file in place and tell the user to paste into the platform's native composer.
+
+The "Postiz CLI is in the skill registry" check is *not* enough — the skill file being available doesn't mean the runtime is installed. Always verify with `which postiz` + `$POSTIZ_API_KEY` first. Skipping this leads to false-promise behavior the user will rightly be annoyed by.
+
+After scheduling (or handing off), update the draft file footer with the mechanism used and any post IDs / intent URLs.
+
+If the user picks "later, I'll do it" — leave the draft file in place and exit. It's reusable.
 
 ### 6. Confirm
 
