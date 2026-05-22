@@ -522,13 +522,21 @@ DEMO_SEED_USDC=1.00
 
 ### NOT built — explicit gaps
 
-- **`Agent.deposit()` / autonomous top-up.** The SDK can sign and the
-  rail can detect deposits, but the SDK can't yet *send* USDC. The
-  separate `@vdm-nexus/wallet` package will own that — Solana via
-  `@solana/kit` (already a transitive dep through `@vdm-nexus/x402`),
-  Base via `viem`. Keeps the core `@vdm-nexus/sdk` at two runtime deps.
-- **Framework adapters.** LangGraph, Mastra, OpenAI Assistants bindings
-  are not built. Opt-in sub-packages, not platform mandates.
+- **Python SDK.** No `vdm-nexus` on PyPI yet. Every Python framework
+  adapter (LangChain, LangGraph, CrewAI, OpenAI Agents SDK, Google ADK,
+  Fetch.ai uAgents) is blocked on this. Roadmap item 1.
+- **ERC-8004 agent card.** Not published. ERC-8004 went live on
+  Ethereum mainnet 29 Jan 2026. Roadmap item 3.
+- **x402 discovery listings.** Nexus is not on x402 Bazaar,
+  Agentic.Market, x402.direct, or awesome-x402 yet. Roadmap item 2.
+- **Framework adapters.** LangChain, LangGraph, Mastra, Vercel AI SDK,
+  OpenAI Agents SDK, CrewAI, ElizaOS, SendAI Solana Agent Kit, Coinbase
+  AgentKit action provider — all unbuilt. Opt-in sub-packages, not
+  platform mandates.
+- **MiCA legal opinion.** No written memo from a Dutch firm yet. Working
+  position only. Required before any active EU marketing. Roadmap item 7.
+- **`Agent.deposit()` / autonomous top-up.** Deferred until a paying
+  customer asks. Per-call x402 already closes the autonomous loop.
 - **`@vdm-nexus/github-app` (agent-git GitHub App).** Placeholder
   docs page only. Plan: a GitHub App that gates PR comments / writes
   on x402 payment, with the receipt posted into the PR body.
@@ -604,28 +612,118 @@ pnpm --filter nexus demo             # run the demo agent
 - All tables RLS-enabled. Inserts run server-side via the service role,
   never via the anon key.
 
-## Roadmap (rough order)
+## Roadmap (locked 2026-05-22 after competitive-landscape research)
 
-1. **`@vdm-nexus/wallet` + `Agent.deposit()`.** Close the autonomous
-   loop — agent detects low balance, signs and sends USDC, retries the
-   call. Solana via `@solana/kit`, Base via `viem`. End-to-end "agent
-   that tops itself up" demo recorded as a public receipt.
-2. **First 10 paying external agents.** Focus is distribution, not
-   features. Targets: peaq robotic.sh, Virtuals Protocol, ElizaOS plugin
-   ecosystem, Coinbase AgentKit users, Olas / autonolas operators.
-3. **Framework adapters in the SDK.** LangGraph / Mastra / OpenAI
-   Assistants bindings as opt-in sub-packages.
-4. **`@vdm-nexus/github-app`.** Agent-git GitHub App that gates PR
-   comments and pushes on x402, with the receipt posted into the PR
-   body. Generalizes the gitlawb demo.
-5. **Agent management web UI.** Balance dashboard, spend history,
-   receipts feed, key rotation. The first surface a paying human
-   operator hits.
-6. **Real multi-provider routing.** Replace OpenRouter passthrough with
-   per-request decisions on live price + latency + quality. Only after
-   the rail has external traffic to make the routing data meaningful.
-7. **Third-party security audit.** Receipt format, facilitator,
-   verifier. Required before any token / economic-layer work.
+Rough order. **Speed-to-distribution beats feature work** — the
+signed-inference-receipt niche is open today, but Coinbase / AWS / EigenAI
+could close it inside 9–12 months. The Python SDK, public listings, and the
+ERC-8004 card are the highest-leverage moves on the board because they all
+multiply discovery of what's already shipped.
+
+1. **`vdm-nexus` Python SDK.** The single biggest unlock. Every Python
+   framework adapter — LangChain, LangGraph, CrewAI, OpenAI Agents SDK,
+   Google ADK, Fetch.ai uAgents — is blocked on this. Port `Agent` +
+   `signBody` + `inference` + the x402 client + `verifyReceipt` to
+   Python. Two packages, mirror the TS shape. Ship to PyPI as
+   `vdm-nexus` (PyPI doesn't allow scopes).
+2. **Listings on the x402 discovery surfaces.** x402 Bazaar (CDP),
+   Agentic.Market (Coinbase), x402.direct, awesome-x402. Zero-cost
+   distribution. The indexes are where every new x402 dev lands first.
+3. **ERC-8004 agent card.** Publish a card pointing at
+   `/chat/completions` that declares Ed25519 verification + SIR v2 receipt
+   format. ERC-8004 went live on Ethereum mainnet 29 Jan 2026,
+   co-authored by Coinbase / MetaMask / Ethereum Foundation / Google. The
+   cheapest way to ship on the agent-identity standard the rest of the
+   ecosystem is rallying around.
+4. **Coinbase AgentKit `vdm-nexus` action provider.** PR against
+   `coinbase/cdp-agentkit` adding a Nexus action provider. Highest-
+   visibility OSS contribution available — forces a Coinbase team
+   review and puts Nexus in front of every AgentKit user.
+5. **Mastra + Vercel AI SDK providers.** Both speak OpenAI-compat
+   `/chat/completions` natively; a custom-fetch override is enough.
+   Mastra had ~22K stars in March and 300K weekly npm downloads
+   post-1.0 — the most Nexus-shaped TS framework alive.
+6. **LangChain + LangGraph adapters.** Unlocked by item 1. LangGraph is
+   the regulated-industry Python default; the audit-trail buyer's
+   framework of choice.
+7. **Commission Dutch firm MiCA memo.** Engage NautaDutilh, De Brauw,
+   or A&O Shearman Amsterdam for a 5–10 page opinion on the merchant-
+   rail model under MiCA + PSD2 + AMLR. Budget €15–30K. Unlocks the
+   "MiCA-aware signed inference rail" marketing line and protects
+   against AFM enforcement. Required before any active EU marketing.
+8. **SendAI Solana Agent Kit plugin.** PR `@solana-agent-kit/plugin-vdm-nexus`
+   into the SendAI registry. Canonical surface for Solana agent devs.
+9. **AI Act Article 12 / NIST AI Agent Standards / OWASP Top 10 one-pager.**
+   Map SIR v2 fields to the audit-log requirements every observability
+   vendor (Atlan, Galileo, Credo AI, Holistic AI, Langfuse, LangSmith)
+   ships hash-chained logs against. The GRC sales asset. Targets:
+   compliance buyers at EU fintech, healthcare, government RFPs.
+10. **First regulated-industry pilot.** Dutch fintech, German Mittelstand,
+    or EU government RFP. One reference logo unlocks the next ten.
+11. **`@vdm-nexus/wallet` + `Agent.deposit()`.** Demoted from the previous
+    roadmap's #1. The per-call x402 path on `/chat/completions` already
+    settles inline; an agent with a funded wallet pays forever without
+    needing prepaid top-up. Ship only when a paying customer asks for it.
+12. **Framework adapters round 2.** OpenAI Agents SDK, CrewAI (via the
+    LangChain adapter), ElizaOS plugin, Fetch.ai uAgents.
+13. **`@vdm-nexus/github-app`.** Agent-git GitHub App. Generalizes the
+    gitlawb demo. Useful, not the wedge.
+14. **Agent management web UI.** Balance dashboard, spend history,
+    receipts feed, key rotation. Only when a paying customer asks for it.
+15. **Multi-provider routing intelligence.** Replace the OpenRouter
+    passthrough with per-request decisions on price + latency + quality.
+    Needs paying traffic first to produce meaningful routing data.
+16. **Third-party security audit.** Receipt format, facilitator, verifier.
+    Required before any token / economic-layer work.
+
+### Kill criteria — replan if any of these trigger
+
+- **Coinbase ships signed-inference receipts** (watch the x402 spec
+  releases): pivot to MiCA-aware EU sales + compliance/audit-trail SaaS,
+  not protocol-layer competition.
+- **Skyfire raises >$20M and starts EU marketing**: accelerate the Dutch
+  firm memo, publish the MiCA-aware positioning within 30 days.
+- **x402 daily volume passes $1M/day** (Artemis baseline is ~$28K/day in
+  March 2026): aggressive paid distribution — Coinbase Discord
+  sponsorships, x402scan banner, EthCC + Solana Breakpoint presence.
+- **x402 daily volume stays below $100K/day for six months**: assume the
+  agentic-commerce thesis is slower than the VC narrative suggests.
+  Tighten burn and focus on the compliance/audit-trail narrative — that
+  one has independent demand.
+- **AFM publishes guidance specifically on agent-payment merchants**:
+  rerun the legal opinion and update marketing within 30 days.
+
+## MiCA red line — stay a merchant
+
+Operationally critical. The whole "out of MiCA CASP scope" position rests
+on ESMA Q&A 2293 (06 June 2025) + MiCA Recital 87 + EBA No-Action Letter
+EBA/Op/2025/08 (10 June 2025): dealing on own account, where the service
+provider is not acting on behalf of clients, is not a crypto-asset service
+and does not require CASP authorisation. The Dutch transitional period
+closed 30 June 2025; from 1 July 2025 the AFM can take formal enforcement
+action against any unlicensed CASP marketing services in NL.
+
+**The single behaviour that flips Nexus into MiCA + PSD2 scope is operating
+its own x402 facilitator that settles third-party agent→merchant flows.**
+
+Rules:
+
+1. `apps/nexus/lib/local-facilitator.ts` settles Nexus's own merchant
+   flow only. Do not expose it as a service. Do not let third parties
+   point their resources at it.
+2. Do not custody buyer USDC pre-funded balances on Nexus-controlled
+   accounts beyond the existing credits ledger (which is a record of
+   debts owed to Nexus for inference already delivered, not custodied
+   client funds).
+3. Do not pay interest, discounts, or duration-linked rebates on USDC
+   balances. Volume discounts are fine; time-based ones are not (MiCA
+   Art. 50).
+4. When a paid 402 challenge needs an off-Nexus facilitator (other
+   networks, scaling, ops), consume a third-party facilitator (Coinbase
+   CDP, Cloudflare, PayAI). Never run one for others.
+5. Active EU marketing waits for the Dutch firm memo (roadmap item 7).
+   Until then, marketing is reverse-solicitation-safe: founder-led
+   posts, organic discovery, no paid EU campaigns.
 
 ## What older commits looked like
 
