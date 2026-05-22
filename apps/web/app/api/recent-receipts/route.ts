@@ -57,11 +57,31 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
   try {
     const sb = getServiceClient();
+    // Mainnet-only filter for the public homepage widget. Devnet receipts
+    // remain visible at /receipts (the full public ledger) and at any
+    // /r/[id] permalink, but we don't surface them in the marketing
+    // "Recent settlements" feed where a serious buyer might read free
+    // devnet test traffic as inflated activity. Filter logic mirrors the
+    // `public.nexus_stats()` Postgres function — see
+    // apps/nexus/supabase/migrations/20260522220000_nexus_stats_mainnet_only.sql
+    //
+    // Mainnet networks:
+    //   solana:5eykt...  (Solana mainnet genesis-hash CAIP-2 form)
+    //   solana:mainnet   (symbolic alias)
+    //   eip155:8453      (Base mainnet)
     const { data, error } = await sb
       .from("inference_logs")
       .select("id, agent_pubkey, model, cost_usdc, tx_signature, receipt_json, created_at")
       .eq("status", "success")
       .not("receipt_json", "is", null)
+      .not("tx_signature", "is", null)
+      .or(
+        [
+          "receipt_json->payment->>network.like.solana:5eykt%",
+          "receipt_json->payment->>network.eq.solana:mainnet",
+          "receipt_json->payment->>network.eq.eip155:8453",
+        ].join(",")
+      )
       .order("created_at", { ascending: false })
       .limit(limit);
 

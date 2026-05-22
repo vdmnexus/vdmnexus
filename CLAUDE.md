@@ -593,6 +593,52 @@ The agent's wallet is theirs. Nexus never holds private keys. The deposit
 address is Nexus-owned; deposits credit the ledger keyed by the **sender's**
 public key.
 
+## Test wallets
+
+Two test wallets live in `apps/nexus/.env.local`. They are **not
+interchangeable** — running a mainnet smoke test with the devnet key
+fails with `transaction_simulation_failed` (the devnet wallet has no
+USDC ATA on mainnet), and vice versa. Always cross-check the agent
+pubkey printed by the script against the table below before declaring
+a test green.
+
+| Network | Wallet pubkey | Env vars | Funded with |
+|---|---|---|---|
+| **Mainnet** | `BSKq2XtBCXHGZKvP9KStjJdpimTAJbmRP7FqZ1SBTshR` | `TEST_AGENT_PUBKEY` / `TEST_AGENT_SECRET` | Real mainnet USDC at `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` |
+| **Devnet** | `4MGZ2rDwypbVm78SVUpJDbPPxg4WVhYyH2f2TA2WPS26` | `DEMO_AGENT_SECRET_KEY` | Devnet USDC via `faucet.circle.com` at `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU` |
+
+Operator-side addresses (Nexus, not agents):
+
+| Role | Address | Notes |
+|---|---|---|
+| Deposit + facilitator fee payer | `4nTiDhEbCFJtfPsi49rPGam8R5azUQNZHpb49CLYxiSv` | Same address on both networks. KMS-signed in production (`NEXUS_KMS_KEY_ID`), in-memory secret in dev. |
+| Receipt signing operator key | `9KADzhz…` (full key at `GET /api/v1/operator-key`) | Ed25519. Verifiers use this to check `receipt.nexus_signature`. |
+
+Canonical runs for the two paths:
+
+```bash
+# Python SDK end-to-end on mainnet
+export AGENT_SECRET_KEY=$TEST_AGENT_SECRET
+python smoke_test_mainnet.py   # has a 5-sec Ctrl+C abort window
+
+# TS SDK end-to-end on mainnet (the proven path; runs the verifier too)
+source apps/nexus/.env.local && \
+  DEMO_AGENT_SECRET_KEY=$TEST_AGENT_SECRET \
+  NEXUS_ENDPOINT=https://nexus.vdmnexus.com \
+  NEXUS_NETWORK=mainnet \
+  pnpm --filter nexus test:payinfer
+
+# Devnet smoke (Python; free)
+export AGENT_SECRET_KEY=$DEMO_AGENT_SECRET_KEY
+python smoke_test.py
+```
+
+The TS path was first proven live on 2026-05-21 (receipt
+`c9710ea7-9e1f-46ee-aaa9-903a536ae12e`). The latest green run is
+recorded in `vdmnexus.com/r/0d3a5b26-d688-4d93-bfdc-7555b1324ac1`
+— same wallet, fresh on-chain settlement, five-check verification
+passing end-to-end.
+
 ## Dev commands
 
 ```bash
