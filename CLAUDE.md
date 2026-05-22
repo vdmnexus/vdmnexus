@@ -13,13 +13,17 @@ apps/
   verify/      ← Hosted verifier SaaS at verify.vdmnexus.com (live)
   docs/        ← Developer docs at docs.vdmnexus.com (live, 22 pages)
 packages/
-  sdk/         ← @vdm-nexus/sdk — Ed25519 agent identity, signed inference
-  x402/        ← @vdm-nexus/x402 — x402 client + verifyReceipt
-  paywall/     ← @vdm-nexus/paywall — Express/Hono/Next.js middleware
-  mcp-server/  ← @vdm-nexus/mcp — MCP server for Claude Desktop / Cursor
+  sdk/                ← @vdm-nexus/sdk — Ed25519 agent identity, signed inference
+  sdk-python/         ← vdm-nexus (PyPI) — Python equivalent of @vdm-nexus/sdk
+  x402/               ← @vdm-nexus/x402 — x402 client + verifyReceipt
+  paywall/            ← @vdm-nexus/paywall — Express/Hono/Next.js middleware
+  mcp-server/         ← @vdm-nexus/mcp — MCP server for Claude Desktop / Cursor
+  ai-sdk-provider/    ← @vdm-nexus/ai-sdk-provider — Vercel AI SDK drop-in
+  mastra-provider/    ← @vdm-nexus/mastra-provider — Mastra drop-in
 ```
 
-All four packages MIT, ESM-only, published on npm.
+All six TypeScript packages MIT, ESM-only, published on npm. The Python
+SDK ships on PyPI as `vdm-nexus`.
 
 ## Strategic stance
 
@@ -447,7 +451,7 @@ DEMO_SEED_USDC=1.00
   Chat-completion receipts also include `payment.pay_to` so verifiers
   have a trusted recipient anchor for the on-chain check.
   Shared canonicalize + sign helper lives in `apps/nexus/lib/receipts.ts`.
-- **`verifyReceipt` shipped in `@vdm-nexus/x402@0.2.0`.** End-to-end
+- **`verifyReceipt` shipped in `@vdm-nexus/x402` (current `0.4.0`).** End-to-end
   verifier: recomputes `prompt_hash` + `response_hash`, verifies
   `nexus_signature` against the operator pubkey (auto-fetched from
   the endpoint or passed in), and fetches the Solana tx to confirm
@@ -512,9 +516,15 @@ DEMO_SEED_USDC=1.00
   push receipt: `vdmnexus.com/r/749fa37c`. Proves that the paywall
   package works against a non-LLM resource — anything HTTP can be
   receipted.
-- **Four published npm packages.** `@vdm-nexus/sdk`,
-  `@vdm-nexus/x402`, `@vdm-nexus/paywall`, `@vdm-nexus/mcp` all live
-  on npm with semver, changesets, and prepublishOnly tsc build.
+- **Six published npm packages + one PyPI package.** As of 2026-05-22:
+  `@vdm-nexus/sdk@0.2.0`, `@vdm-nexus/x402@0.4.0`,
+  `@vdm-nexus/paywall@0.1.0`, `@vdm-nexus/mcp@0.1.0`,
+  `@vdm-nexus/ai-sdk-provider@0.1.0`,
+  `@vdm-nexus/mastra-provider@0.1.0` on npm; `vdm-nexus@0.1.0` on
+  PyPI. All MIT, all built via `prepublishOnly tsc` (or `hatch` for
+  Python). `@vdm-nexus/x402@0.3.0` is deprecated on npm — it
+  referenced an unpublished sdk version; consumers should pin to
+  `^0.4.0`.
 - **SIR v2 spec published.** Signed Inference Receipt v2 spec lives
   under `docs.vdmnexus.com/spec/sir-v2`. Defines the canonical JSON
   shape, signing rules (sorted keys, no whitespace, exclude
@@ -588,11 +598,13 @@ public key.
 ```bash
 pnpm install
 pnpm --filter web build              # marketing site
-pnpm --filter @vdm-nexus/sdk build   # SDK to dist/
-pnpm --filter @vdm-nexus/x402 build  # x402 client + verifier
+pnpm --filter @vdm-nexus/sdk build              # SDK to dist/
+pnpm --filter @vdm-nexus/x402 build             # x402 client + verifier
 pnpm --filter @vdm-nexus/paywall build
 pnpm --filter @vdm-nexus/mcp build
-pnpm --filter nexus build            # agent rail
+pnpm --filter @vdm-nexus/ai-sdk-provider build  # Vercel AI SDK drop-in
+pnpm --filter @vdm-nexus/mastra-provider build  # Mastra drop-in
+pnpm --filter nexus build                       # agent rail
 pnpm --filter verify build           # verifier app
 pnpm --filter docs build             # docs site
 pnpm --filter web dev                # http://localhost:3000
