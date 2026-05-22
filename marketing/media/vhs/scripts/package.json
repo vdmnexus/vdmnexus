@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "name": "vdm-nexus-vhs-scripts",
+  "description": "Node demo scripts driven by VHS tapes. Not published.",
+  "type": "module",
+  "dependencies": {
+    "@vdm-nexus/x402": "^0.4.0",
+    "bs58": "^6.0.0",
+    "tweetnacl": "^1.0.3"
+  }
+}

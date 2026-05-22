@@ -1,0 +1,22 @@
+{
+  "name": "vdm-nexus-ship-reels",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Remotion compositions for VDM Nexus ship reels (e.g. 'this week we shipped').",
+  "license": "MIT",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "build": "remotion render src/index.ts WeeklyShipsReel ../out/weekly-ships-reel.mp4",
+    "build:reel": "remotion render src/index.ts WeeklyShipsReel ../out/weekly-ships-reel.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.220",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.220"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "typescript": "^5.5.4"
+  }
+}
