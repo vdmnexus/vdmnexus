@@ -533,8 +533,9 @@ DEMO_SEED_USDC=1.00
   OpenAI Agents SDK, CrewAI, ElizaOS, SendAI Solana Agent Kit, Coinbase
   AgentKit action provider — all unbuilt. Opt-in sub-packages, not
   platform mandates.
-- **MiCA legal opinion.** No written memo from a Dutch firm yet. Working
-  position only. Required before any active EU marketing. Roadmap item 7.
+- **MiCA legal opinion.** No written memo from a Spanish firm yet. Working
+  position only. Required before any active EU marketing or token launch.
+  Roadmap item 11 (paired with the token block).
 - **`Agent.deposit()` / autonomous top-up.** Deferred until a paying
   customer asks. Per-call x402 already closes the autonomous loop.
 - **`@vdm-nexus/github-app` (agent-git GitHub App).** Placeholder
@@ -646,42 +647,63 @@ multiply discovery of what's already shipped.
 6. **LangChain + LangGraph adapters.** Unlocked by item 1. LangGraph is
    the regulated-industry Python default; the audit-trail buyer's
    framework of choice.
-7. **Commission Dutch firm MiCA memo.** Engage NautaDutilh, De Brauw,
-   or A&O Shearman Amsterdam for a 5–10 page opinion on the merchant-
-   rail model under MiCA + PSD2 + AMLR. Budget €15–30K. Unlocks the
-   "MiCA-aware signed inference rail" marketing line and protects
-   against AFM enforcement. Required before any active EU marketing.
-8. **SendAI Solana Agent Kit plugin.** PR `@solana-agent-kit/plugin-vdm-nexus`
-   into the SendAI registry. Canonical surface for Solana agent devs.
-9. **AI Act Article 12 / NIST AI Agent Standards / OWASP Top 10 one-pager.**
+7. **AI Act Article 12 / NIST AI Agent Standards / OWASP Top 10 one-pager.**
    Map SIR v2 fields to the audit-log requirements every observability
    vendor (Atlan, Galileo, Credo AI, Holistic AI, Langfuse, LangSmith)
-   ships hash-chained logs against. The GRC sales asset. Targets:
-   compliance buyers at EU fintech, healthcare, government RFPs.
-10. **First regulated-industry pilot.** Dutch fintech, German Mittelstand,
-    or EU government RFP. One reference logo unlocks the next ten.
-11. **`@vdm-nexus/wallet` + `Agent.deposit()`.** Demoted from the previous
+   ships hash-chained logs against. The GRC sales asset. Pulled forward
+   from the old item 9 because it doesn't depend on a MiCA legal opinion
+   (the memo now sits in the Token block — item 11).
+8. **SendAI Solana Agent Kit plugin.** PR `@solana-agent-kit/plugin-vdm-nexus`
+   into the SendAI registry. Canonical surface for Solana agent devs.
+9. **First regulated-industry pilot.** Spanish fintech, EU bank, or EU
+   government RFP. One reference logo unlocks the next ten. Does not
+   require the MiCA memo (item 11) — the pilot is about audit-log
+   evidence, not about whether USDC settlement requires CASP authorisation.
+
+### Phase 2 — token block (only after distribution shows real usage)
+
+10. **Solana Foundation / Colosseum hackathon presence.** Distribution
+    surface inside the Solana ecosystem that doesn't depend on any
+    paid marketing.
+11. **Spanish firm MiCA memo — merchant-rail + token-issuance position.**
+    Engage **Cuatrecasas, Garrigues, or Uría Menéndez** for a 5–10 page
+    opinion covering (a) the merchant-rail position under ESMA Q&A 2293
+    + MiCA Recital 87 + EBA Opinion EBA/Op/2025/08, and (b) the
+    token-issuance analysis under MiCA Title II (white paper / public
+    offer rules). Budget €10–25K. The memo is paired with the token
+    launch — both questions ride together. Required before any active
+    EU marketing of the token.
+12. **Token launch — utility-first.** Solana-native (the product is
+    Solana-native, pump.fun's USDC pair removes the SOL-volatility
+    issue for a utility token). Fair launch, no presale, no team
+    allocation, utility tied to inference (e.g. holder discount on
+    `/chat/completions`). Only fires after items 1–10 are real.
+
+### Phase 3 — platform / maturity (deferred items)
+
+13. **`@vdm-nexus/wallet` + `Agent.deposit()`.** Demoted from the previous
     roadmap's #1. The per-call x402 path on `/chat/completions` already
     settles inline; an agent with a funded wallet pays forever without
     needing prepaid top-up. Ship only when a paying customer asks for it.
-12. **Framework adapters round 2.** OpenAI Agents SDK, CrewAI (via the
+14. **Framework adapters round 2.** OpenAI Agents SDK, CrewAI (via the
     LangChain adapter), ElizaOS plugin, Fetch.ai uAgents.
-13. **`@vdm-nexus/github-app`.** Agent-git GitHub App. Generalizes the
+15. **`@vdm-nexus/github-app`.** Agent-git GitHub App. Generalizes the
     gitlawb demo. Useful, not the wedge.
-14. **Agent management web UI.** Balance dashboard, spend history,
+16. **Agent management web UI.** Balance dashboard, spend history,
     receipts feed, key rotation. Only when a paying customer asks for it.
-15. **Multi-provider routing intelligence.** Replace the OpenRouter
+17. **Multi-provider routing intelligence.** Replace the OpenRouter
     passthrough with per-request decisions on price + latency + quality.
     Needs paying traffic first to produce meaningful routing data.
-16. **Third-party security audit.** Receipt format, facilitator, verifier.
-    Required before any token / economic-layer work.
+18. **Third-party security audit.** Receipt format, facilitator, verifier.
+    Required before any token / economic-layer work — schedule alongside
+    the MiCA memo (item 11), not later.
 
 ### Kill criteria — replan if any of these trigger
 
 - **Coinbase ships signed-inference receipts** (watch the x402 spec
   releases): pivot to MiCA-aware EU sales + compliance/audit-trail SaaS,
   not protocol-layer competition.
-- **Skyfire raises >$20M and starts EU marketing**: accelerate the Dutch
+- **Skyfire raises >$20M and starts EU marketing**: accelerate the Spanish
   firm memo, publish the MiCA-aware positioning within 30 days.
 - **x402 daily volume passes $1M/day** (Artemis baseline is ~$28K/day in
   March 2026): aggressive paid distribution — Coinbase Discord
@@ -690,8 +712,9 @@ multiply discovery of what's already shipped.
   agentic-commerce thesis is slower than the VC narrative suggests.
   Tighten burn and focus on the compliance/audit-trail narrative — that
   one has independent demand.
-- **AFM publishes guidance specifically on agent-payment merchants**:
-  rerun the legal opinion and update marketing within 30 days.
+- **CNMV (or any other major EU supervisor — BaFin, ACPR, AFM) publishes
+  guidance specifically on agent-payment merchants**: rerun the legal
+  opinion and update marketing within 30 days.
 
 ## MiCA red line — stay a merchant
 
@@ -699,9 +722,12 @@ Operationally critical. The whole "out of MiCA CASP scope" position rests
 on ESMA Q&A 2293 (06 June 2025) + MiCA Recital 87 + EBA No-Action Letter
 EBA/Op/2025/08 (10 June 2025): dealing on own account, where the service
 provider is not acting on behalf of clients, is not a crypto-asset service
-and does not require CASP authorisation. The Dutch transitional period
-closed 30 June 2025; from 1 July 2025 the AFM can take formal enforcement
-action against any unlicensed CASP marketing services in NL.
+and does not require CASP authorisation. The founder is Spain-resident,
+so the relevant supervisors are **CNMV** (conduct) and **Banco de España**
+(prudential / EMT issues); AML supervision sits with **SEPBLAC** under
+Ley 10/2010. Spain transposed MiCA via Royal Decree-Law 7/2024 and chose
+a short transitional regime ending 30 December 2025 — from that date the
+CNMV can enforce against unlicensed CASPs marketing services in Spain.
 
 **The single behaviour that flips Nexus into MiCA + PSD2 scope is operating
 its own x402 facilitator that settles third-party agent→merchant flows.**
@@ -721,9 +747,9 @@ Rules:
 4. When a paid 402 challenge needs an off-Nexus facilitator (other
    networks, scaling, ops), consume a third-party facilitator (Coinbase
    CDP, Cloudflare, PayAI). Never run one for others.
-5. Active EU marketing waits for the Dutch firm memo (roadmap item 7).
-   Until then, marketing is reverse-solicitation-safe: founder-led
-   posts, organic discovery, no paid EU campaigns.
+5. Active EU marketing waits for the Spanish firm memo (roadmap item 11,
+   in the Token block). Until then, marketing is reverse-solicitation-safe:
+   founder-led posts, organic discovery, no paid EU campaigns.
 
 ## What older commits looked like
 
