@@ -7,6 +7,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { LogoIntro } from "./LogoIntro.js";
 
 const BRAND = {
   bg: "#080810",
@@ -38,11 +39,14 @@ export type WeeklyShipsReelProps = {
   ships: Ship[];
   headline: string;
   footer: string;
+  /** Duration of the LogoIntro pre-roll, in seconds. Set to 0 to skip. */
+  logoIntroSeconds?: number;
 };
 
 const TITLE_SECONDS = 1.5;
 const SECONDS_PER_CARD = 2;
 const OUTRO_SECONDS = 1.5;
+const DEFAULT_LOGO_INTRO_SECONDS = 1.8;
 
 const Background: React.FC = () => (
   <AbsoluteFill
@@ -193,8 +197,10 @@ export const WeeklyShipsReel: React.FC<WeeklyShipsReelProps> = ({
   ships,
   headline,
   footer,
+  logoIntroSeconds = DEFAULT_LOGO_INTRO_SECONDS,
 }) => {
   const { fps } = useVideoConfig();
+  const introFrames = Math.round(fps * logoIntroSeconds);
   const titleFrames = Math.round(fps * TITLE_SECONDS);
   const cardFrames = Math.round(fps * SECONDS_PER_CARD);
   const outroFrames = Math.round(fps * OUTRO_SECONDS);
@@ -202,20 +208,25 @@ export const WeeklyShipsReel: React.FC<WeeklyShipsReelProps> = ({
   return (
     <AbsoluteFill>
       <Background />
-      <Sequence from={0} durationInFrames={titleFrames}>
+      {introFrames > 0 && (
+        <Sequence from={0} durationInFrames={introFrames}>
+          <LogoIntro durationSeconds={logoIntroSeconds} />
+        </Sequence>
+      )}
+      <Sequence from={introFrames} durationInFrames={titleFrames}>
         <Title headline={headline} />
       </Sequence>
       {ships.map((ship, i) => (
         <Sequence
           key={ship.pr_number}
-          from={titleFrames + i * cardFrames}
+          from={introFrames + titleFrames + i * cardFrames}
           durationInFrames={cardFrames}
         >
           <ShipCard ship={ship} />
         </Sequence>
       ))}
       <Sequence
-        from={titleFrames + ships.length * cardFrames}
+        from={introFrames + titleFrames + ships.length * cardFrames}
         durationInFrames={outroFrames}
       >
         <Outro footer={footer} />
