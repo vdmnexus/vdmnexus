@@ -10,6 +10,7 @@ sessions. Every session updates its own row at start and end.
 | `claude/discovery-listings` | x402 discovery submission packets (`SUBMISSIONS.md`) | 2026-05-22 | in_review | [#63](https://github.com/vdmnexus/vdmnexus/pull/63) |
 | `claude/clarify-npm-status` | CLAUDE.md npm/PyPI publish state update | 2026-05-22 | in_review | [#64](https://github.com/vdmnexus/vdmnexus/pull/64) |
 | `claude/langchain-adapter` | Python SDK v0.2 (x402) + langchain-vdm-nexus | 2026-05-22 | in_review | [#65](https://github.com/vdmnexus/vdmnexus/pull/65) |
+| `claude/sendai-plugin` | Drop-in `@solana-agent-kit/plugin-vdm-nexus` for SendAI upstream submission | 2026-05-22 | in_progress | — |
 
 ## Conventions
 
