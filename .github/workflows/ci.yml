@@ -51,3 +51,29 @@ jobs:
         # pure tsc, no secrets needed. If any package's types break,
         # the PR fails here instead of breaking a downstream consumer.
         run: pnpm --filter "@vdm-nexus/*" build
+
+  python:
+    name: python packages — pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install vdm-nexus (editable, with dev extras)
+        # Editable install ensures langchain-vdm-nexus's
+        # `vdm-nexus>=0.2.0` dep resolves against this checkout rather
+        # than fetching from PyPI (where 0.2.0 won't exist until release).
+        run: pip install -e "packages/sdk-python[dev]"
+
+      - name: Install langchain-vdm-nexus (editable, with dev extras)
+        run: pip install -e "packages/sdk-python-langchain[dev]"
+
+      - name: pytest — vdm-nexus
+        run: python -m pytest -q packages/sdk-python
+
+      - name: pytest — langchain-vdm-nexus
+        run: python -m pytest -q packages/sdk-python-langchain
