@@ -103,6 +103,15 @@ jobs:
           echo "Pushing to $URL (via $GITLAWB_NODE)"
           git remote remove gitlawb 2>/dev/null || true
           git remote add gitlawb "$URL"
+          # Populate refs/remotes/gitlawb/main so --force-with-lease has a
+          # baseline. Fresh checkouts on a runner have no remote-tracking
+          # ref for gitlawb — without this fetch, the next push fails with
+          # "! [rejected] HEAD -> main (stale info)" because the lease
+          # can't verify what the remote *should* look like and bails
+          # safely. Failure-tolerant: on the very first push (no remote
+          # ref yet) or transient node hiccup the fetch returns non-zero,
+          # which is fine — the push step below handles both cases.
+          git fetch gitlawb main:refs/remotes/gitlawb/main || true
           # --force-with-lease: this workflow is a mirror, so origin/main
           # is the authoritative ref. The gitlawb tree can diverge when
           # squash-merges produce different SHAs from the locally-pushed
@@ -111,5 +120,6 @@ jobs:
           # produced an equivalent-tree-but-different-SHA commit on
           # origin/main). Plain push gets rejected as non-fast-forward;
           # force-with-lease overwrites safely as long as no one else
-          # pushed to gitlawb in the meantime.
+          # pushed to gitlawb in the meantime (the concurrency group
+          # at the top of this workflow prevents that on our side).
           git push --force-with-lease gitlawb HEAD:main

@@ -102,6 +102,21 @@ export class X402Agent extends Agent {
   }
 
   /**
+   * Build a signed x402 payment payload from a challenge the caller has
+   * already obtained (e.g. via a custom probe loop).
+   *
+   * Exposed so framework adapters (`@vdm-nexus/ai-sdk-provider`,
+   * `@vdm-nexus/mastra-provider`) can run the handshake against a body
+   * they constructed themselves without `payAndInfer` reissuing the probe.
+   */
+  async buildPaymentPayload(
+    challenge: PaymentRequired
+  ): Promise<PaymentPayload> {
+    const client = await this.getClient();
+    return client.createPaymentPayload(challenge);
+  }
+
+  /**
    * Pay-per-call inference against an x402-gated `/chat/completions`
    * endpoint. Does the two-roundtrip x402 handshake transparently:
    *

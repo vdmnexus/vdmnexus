@@ -7,8 +7,9 @@ sessions. Every session updates its own row at start and end.
 
 | Branch | What | Started | Status | PR |
 |---|---|---|---|---|
-| `claude/stats-endpoint` | Live mainnet counter on the homepage — `/api/stats` + `<LiveStats />` | 2026-05-22 | in_review | [#56](https://github.com/vdmnexus/vdmnexus/pull/56) |
-| `claude/mastra-vercel-providers` | Mastra + Vercel AI SDK providers (background agent — prompt 05) | 2026-05-22 | in_progress | — |
+| `claude/recent-receipts` | Recent settlements widget on the homepage | 2026-05-22 | in_review | [#57](https://github.com/vdmnexus/vdmnexus/pull/57) |
+| `claude/discovery-listings` | x402 discovery submission packets (`SUBMISSIONS.md`) | 2026-05-22 | in_review | [#63](https://github.com/vdmnexus/vdmnexus/pull/63) |
+| `claude/clarify-npm-status` | CLAUDE.md npm/PyPI publish state update | 2026-05-22 | in_review | [#64](https://github.com/vdmnexus/vdmnexus/pull/64) |
 
 ## Conventions
 

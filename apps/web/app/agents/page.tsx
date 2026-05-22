@@ -275,7 +275,7 @@ export default function AgentsPage() {
                   href="/#waitlist"
                   className="mt-8 inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-4 py-2.5 text-sm font-medium text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
                 >
-                  Join the waitlist
+                  Tell us what you&apos;re building
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
