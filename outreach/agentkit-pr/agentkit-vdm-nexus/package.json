@@ -1,0 +1,49 @@
+{
+  "name": "@coinbase/agentkit-vdm-nexus",
+  "version": "0.1.0",
+  "description": "VDM Nexus action provider for AgentKit — signed inference via x402 on Solana + Base.",
+  "repository": "https://github.com/coinbase/agentkit",
+  "author": "VDM Nexus <hello@vdmnexus.com>",
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "check": "tsc --noEmit",
+    "clean": "rm -rf dist/*",
+    "prepack": "tsc",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "coinbase",
+    "cdp",
+    "agentkit",
+    "ai",
+    "ai-agents",
+    "x402",
+    "solana",
+    "base",
+    "inference",
+    "signed-inference",
+    "receipts",
+    "vdm-nexus"
+  ],
+  "dependencies": {
+    "@vdm-nexus/x402": "^0.3.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@coinbase/agentkit": "^0.10.0",
+    "@types/node": "^22",
+    "typescript": "^5"
+  },
+  "peerDependencies": {
+    "@coinbase/agentkit": ">=0.1.0"
+  },
+  "overrides": {
+    "@vdm-nexus/sdk": "0.1.0"
+  }
+}
