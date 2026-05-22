@@ -24,11 +24,28 @@ Each composition is its own React component under
 `src/compositions/`. They are wired to the project from `src/Root.tsx`
 via `<Composition id="..." ... />` declarations.
 
+### `LogoIntro` / `LogoIntroSquare`
+
+1.8s brand intro. The VDM Nexus logo (`public/vdm-logo.svg`) springs
+in, an indigo signature stroke is drawn beneath the wordmark
+(`strokeDasharray` interpolation — the visual cue of a literal
+signature being made), and the "signed inference" tagline fades up.
+Two presets:
+
+- `LogoIntro` — 1920×1080 (horizontal, X / LinkedIn / docs.vdmnexus.com)
+- `LogoIntroSquare` — 1080×1080 (square, Farcaster / Instagram / Telegram)
+
+Render with `make logo-intro` or `make logo-intro-square` (both
+outputs MP4 + GIF). Used as a pre-roll in `WeeklyShipsReel` and
+intended as a standalone clip for social bumpers.
+
 ### `WeeklyShipsReel`
 
-10-15 second reel that opens on a title card, walks through a list of
-recent ships (one card per PR, ~2s each), and ends on a `vdmnexus.com`
-outro. Reads its data from `src/ships.json`:
+10-15 second reel that opens with the `LogoIntro` pre-roll, then a
+title card, then walks through a list of recent ships (one card per
+PR, ~2s each), and ends on a `vdmnexus.com` outro. Pass
+`logoIntroSeconds={0}` to skip the pre-roll if you need a tighter
+edit. Reads its data from `src/ships.json`:
 
 ```json
 [

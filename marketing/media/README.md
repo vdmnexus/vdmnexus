@@ -102,10 +102,18 @@ Width 1280 × 720 is the X-attachment-friendly aspect; bump to 1920 ×
 ## Remotion scaffold
 
 `remotion/` is a self-contained Remotion project (its own
-`package.json`, not in the pnpm workspace). It ships one composition:
-**WeeklyShipsReel** — reads `ships.json`, renders one card per PR
-with the type prefix as a chip, the title as the headline, and the PR
-number as a footer.
+`package.json`, not in the pnpm workspace). It ships three
+compositions:
+
+- **`LogoIntro`** (1920×1080) — 1.8s brand intro. Logo springs in, an
+  indigo signature stroke draws under the wordmark, the "signed
+  inference" tagline fades up. The literal-signature motion is the
+  visual cue tied to the locked vocabulary.
+- **`LogoIntroSquare`** (1080×1080) — same animation, square aspect
+  for Farcaster / Instagram / Telegram bumpers.
+- **`WeeklyShipsReel`** — opens with `LogoIntro`, then a title card,
+  then one card per PR (chip + headline + summary), ends on a
+  `vdmnexus.com` outro. Reads from `ships.json`.
 
 To preview:
 
@@ -113,10 +121,12 @@ To preview:
 cd remotion && npm install && npx remotion studio
 ```
 
-To render the reel to MP4:
+To render:
 
 ```bash
-make reel-weekly
+make logo-intro          # 16:9 logo intro (MP4 + GIF)
+make logo-intro-square   # 1:1 logo intro (MP4 + GIF)
+make reel-weekly         # full weekly reel with logo pre-roll
 ```
 
 See `remotion/README.md` for adding new templates.
