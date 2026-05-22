@@ -44,6 +44,32 @@ loosely but isn't strict.
 - Slack ↔ Claude Code direct integration is NOT installed by design.
   Slack carries *outputs* (PRs, deploys, events), not session chatter.
 
+## Recommended local setup
+
+`.claude/settings.json` is gitignored (per-user local config). On a
+fresh clone, drop in this `SessionStart` hook so every new session
+boots in a working state without spending the first five minutes on
+`pnpm install`:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pnpm install --frozen-lockfile 2>&1 | tail -5",
+            "timeout": 180
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
 ## Weekly review (Sundays)
 
 30 minutes, Sunday evening:

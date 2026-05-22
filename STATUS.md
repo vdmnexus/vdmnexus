@@ -7,7 +7,8 @@ sessions. Every session updates its own row at start and end.
 
 | Branch | What | Started | Status | PR |
 |---|---|---|---|---|
-| `claude/vdm-nexus-cofounder-Caa8N` | Co-founder strategy session — roadmap lock, MiCA Spain pivot, workflow infra | 2026-05-22 | in_progress | — |
+| `claude/vdm-nexus-cofounder-Caa8N` | Co-founder session — roadmap lock, MiCA Spain pivot, workflow infra, CI extension, SessionStart hook | 2026-05-22 | in_progress | — |
+| `claude/python-sdk` | Python SDK scaffold v0.1.0 (background agent — prompt 01) | 2026-05-22 | in_progress | — |
 
 ## Conventions
 
