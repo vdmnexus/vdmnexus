@@ -13,6 +13,7 @@ Wire format (CAIP-2 + x402 v2):
      carrying a `PaymentRequired` body:
          {
              "x402Version": 2,
+             "resource": { "url": ..., "description": ..., ... },
              "accepts": [
                  {
                      "scheme": "exact",
@@ -27,12 +28,22 @@ Wire format (CAIP-2 + x402 v2):
              ]
          }
   3. Client picks the entry matching its desired `network`, builds a
-     partially-signed SPL TransferChecked tx for `amount` from its own
-     USDC ATA → recipient's USDC ATA, signed by the agent (the fee
-     payer is the facilitator, who co-signs server-side).
+     partially-signed Solana tx containing four instructions in this
+     exact order (matches `@x402/svm`'s `ExactSvmScheme.createPaymentPayload`
+     and the facilitator's `verifyComputeLimit/PriceInstruction` checks):
+         [0] SetComputeUnitLimit  (ComputeBudget program, discriminator 2)
+         [1] SetComputeUnitPrice  (ComputeBudget program, discriminator 3)
+         [2] TransferChecked      (SPL Token program)
+         [3] Memo                 (16 random bytes hex-encoded)
+     The agent signs as the source-token authority; the fee payer
+     (facilitator) co-signs server-side before broadcasting.
   4. Client re-POSTs the same body with header
-         X-Payment: <base64 JSON {x402Version, scheme, network, payload}>
-     where `payload = { transaction: <base64 tx>, payer: <base58 agent> }`.
+         X-Payment: <base64 JSON {x402Version, accepted, resource?, payload}>
+     where `payload = { transaction: <base64 tx>, payer: <base58 agent> }`
+     and `accepted` is the full matched `PaymentRequirements` entry from
+     `challenge.accepts[]`. This is the v2 shape — the v1 shape carried
+     `scheme`/`network` at the top level, but `@x402/core@2.x` rejects
+     that ("Cannot read properties of undefined (reading 'scheme')").
   5. Server settles via the facilitator, runs inference, and returns:
        - JSON body: OpenAI `chat.completion`
        - Header `X-Nexus-Receipt: <base64 SIR v2>`
@@ -47,6 +58,7 @@ from __future__ import annotations
 
 import base64
 import json
+import secrets
 from dataclasses import dataclass
 from typing import Any, Optional, TypedDict
 
@@ -155,12 +167,25 @@ class SolanaPaymentPayloadInner(TypedDict):
     payer: str        # base58 of the first signer == the agent
 
 
-class PaymentPayload(TypedDict):
-    """`X-Payment` header value, JSON-then-base64 encoded on the wire."""
+class PaymentPayload(TypedDict, total=False):
+    """`X-Payment` header value, JSON-then-base64 encoded on the wire.
+
+    v2 shape (matches `@x402/core@2.x`'s `PaymentPayloadV2Schema`):
+      - `x402Version`: literal 2
+      - `accepted`: the matched `PaymentRequirements` entry from
+        `challenge.accepts[]` (scheme/network/amount/asset/payTo/...)
+      - `resource`: optional `ResourceInfo` echoed from the challenge
+      - `payload`: scheme-specific (for Solana exact: `{transaction, payer}`)
+
+    The v1 shape carried `scheme`/`network` at the top level. Sending
+    the v1 shape against v2 facilitators fails with
+    "Cannot read properties of undefined (reading 'scheme')" in
+    `@x402/core`'s dispatcher.
+    """
 
     x402Version: int
-    scheme: str
-    network: str
+    accepted: PaymentRequirements
+    resource: dict[str, Any]
     payload: dict[str, Any]
 
 
@@ -204,6 +229,18 @@ def _encode_b64_json(obj: Any) -> str:
 # devnet, so legacy is all we need here.
 SPL_TOKEN_PROGRAM_ID = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
 ASSOCIATED_TOKEN_PROGRAM_ID = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+
+# Memo program (used for the random-nonce memo instruction that the
+# @x402/svm scheme appends after the transfer).
+MEMO_PROGRAM_ID = "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+
+# Compute-budget defaults. These MUST match `@x402/svm@2.x`'s constants
+# (`packages/svm/src/constants.ts`) — the facilitator's verifier checks
+# that `instructions[0]` is a SetComputeUnitLimit (discriminator 2)
+# and `instructions[1]` is a SetComputeUnitPrice (discriminator 3),
+# both on the ComputeBudget program.
+DEFAULT_COMPUTE_UNIT_LIMIT = 20_000
+DEFAULT_COMPUTE_UNIT_PRICE_MICROLAMPORTS = 1
 
 
 def _derive_ata(owner_b58: str, mint_b58: str) -> str:
@@ -380,6 +417,11 @@ class X402Agent(Agent):
         decimals = 6
         amount_atomic = int(amount)
 
+        from solders.compute_budget import (
+            set_compute_unit_limit,
+            set_compute_unit_price,
+        )
+        from solders.instruction import Instruction
         from solders.keypair import Keypair
         from solders.message import MessageV0
         from solders.pubkey import Pubkey
@@ -392,7 +434,7 @@ class X402Agent(Agent):
         source_ata = _derive_ata(self.pubkey, asset)
         dest_ata = _derive_ata(pay_to, asset)
 
-        ix = _build_transfer_checked_ix(
+        transfer_ix = _build_transfer_checked_ix(
             source_ata=source_ata,
             mint=asset,
             dest_ata=dest_ata,
@@ -401,13 +443,37 @@ class X402Agent(Agent):
             decimals=decimals,
         )
 
+        # The four instructions, in the exact order @x402/svm assembles
+        # them. `@x402/svm` builds the message via `pipe()` that:
+        #   1. sets ComputeUnitPrice (becomes the second instruction)
+        #   2. sets fee payer
+        #   3. PREPENDS SetComputeUnitLimit (so it becomes [0])
+        #   4. APPENDS [transferIx, memoIx]
+        # The facilitator's verifier asserts [0]=limit, [1]=price,
+        # [2]=transfer, and accepts memo/lighthouse in [3..].
+        limit_ix = set_compute_unit_limit(DEFAULT_COMPUTE_UNIT_LIMIT)
+        price_ix = set_compute_unit_price(
+            DEFAULT_COMPUTE_UNIT_PRICE_MICROLAMPORTS
+        )
+        # Random 16-byte nonce, hex-encoded to 32 ASCII chars. Mirrors
+        # `Array.from(nonce).map(b => b.toString(16).padStart(2, "0")).join("")`
+        # in `@x402/svm`'s createPaymentPayload.
+        nonce_bytes = secrets.token_bytes(16)
+        memo_data = nonce_bytes.hex().encode("ascii")
+        memo_ix = Instruction(
+            program_id=Pubkey.from_string(MEMO_PROGRAM_ID),
+            accounts=[],
+            data=memo_data,
+        )
+        instructions = [limit_ix, price_ix, transfer_ix, memo_ix]
+
         rpc = rpc_url or _default_rpc_for(normalized)
 
         async def _build_tx(c: httpx.AsyncClient) -> str:
             blockhash = await _get_recent_blockhash(c, rpc)
             msg = MessageV0.try_compile(
                 payer=Pubkey.from_string(fee_payer),
-                instructions=[ix],
+                instructions=instructions,
                 address_lookup_table_accounts=[],
                 recent_blockhash=blockhash,
             )
@@ -436,15 +502,20 @@ class X402Agent(Agent):
         else:
             tx_b64 = await _build_tx(client)
 
-        return {
+        payload: PaymentPayload = {
             "x402Version": X402_VERSION,
-            "scheme": "exact",
-            "network": normalized,
+            "accepted": entry,
             "payload": {
                 "transaction": tx_b64,
                 "payer": self.pubkey,
             },
         }
+        # `resource` is optional on the wire (omit when the challenge
+        # didn't carry one). When present it's a `ResourceInfo` object.
+        resource = challenge.get("resource")
+        if resource is not None:
+            payload["resource"] = resource
+        return payload
 
     async def pay_and_infer(
         self,
