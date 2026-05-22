@@ -12,7 +12,7 @@ Mirror of [`@vdm-nexus/sdk`](https://www.npmjs.com/package/@vdm-nexus/sdk)
 pip install vdm-nexus
 ```
 
-Three runtime deps: `pynacl`, `base58`, `httpx`.
+Four runtime deps: `pynacl`, `base58`, `httpx`, `solders`.
 
 ## Use
 
@@ -41,6 +41,51 @@ async def main() -> None:
 
 asyncio.run(main())
 ```
+
+## x402 — pay per call
+
+`v0.2` adds `X402Agent`, which speaks the [x402 v2 protocol](https://docs.vdmnexus.com)
+against `/v1/chat/completions`. Same Ed25519 identity, settles in USDC
+on Solana per request. Returns the standard OpenAI chat-completion body
+plus a parsed Signed Inference Receipt.
+
+```python
+import asyncio
+import os
+from vdm_nexus import X402Agent
+
+async def main() -> None:
+    agent = X402Agent.from_base58(os.environ["AGENT_SECRET_KEY"])
+
+    result = await agent.pay_and_infer(
+        "https://nexus.vdmnexus.com/api/v1",
+        model="openai/gpt-4o-mini",
+        messages=[{"role": "user", "content": "Why Ed25519?"}],
+        network="solana:mainnet",  # or "solana:devnet"
+    )
+
+    print(result.openai["choices"][0]["message"]["content"])
+    print("tx:", result.receipt["payment"]["tx_signature"])
+    print("paid:", result.receipt["payment"]["amount_usdc"], "USDC")
+
+
+asyncio.run(main())
+```
+
+A real mainnet receipt from this exact flow:
+[`vdmnexus.com/r/c9710ea7-9e1f-46ee-aaa9-903a536ae12e`](https://vdmnexus.com/r/c9710ea7-9e1f-46ee-aaa9-903a536ae12e).
+
+Under the hood, `pay_and_infer` runs the x402 two-roundtrip handshake:
+
+  1. POST the request body — server replies `402` with an
+     `X-Payment-Required` challenge.
+  2. Build a partially-signed SPL USDC `TransferChecked` transaction
+     (via `solders`) for the declared `payTo`, encode as base64.
+  3. POST again with `X-Payment: <base64>` — server settles via its
+     facilitator, runs inference, returns the OpenAI body plus
+     `X-Nexus-Receipt` and `X-Payment-Response` headers.
+
+The agent's wallet is theirs; Nexus never holds private keys.
 
 ## How it works
 
@@ -93,15 +138,24 @@ receives.
 
 ## Scope
 
-- **v0.1** (this release): the `Agent` class. Signed inference against
+- **v0.1**: the `Agent` class. Signed inference against
   `/v1/inference`. Auto-grant on first call.
-- **v0.2**: x402 client — pay-per-call inference against
-  `/v1/chat/completions` with on-chain USDC settlement.
+- **v0.2** (this release): adds `X402Agent` — pay-per-call inference
+  against `/v1/chat/completions` with on-chain USDC settlement on
+  Solana mainnet or devnet.
 - **v0.3**: `verify_receipt` — port of the five-check verifier from
   [`@vdm-nexus/x402`](https://www.npmjs.com/package/@vdm-nexus/x402).
+  Also Base (EVM) support in `pay_and_infer`.
 - **Separate package** (`vdm-nexus-wallet`): on-chain wallet
-  operations (deposits, transfers). Pulls in `solana-py`; kept out of
-  the core SDK so the dependency surface stays small.
+  operations (deposits, transfers). Pulls in heavier Solana
+  dependencies; kept out of the core SDK so the dependency surface
+  stays small.
+
+## Framework integrations
+
+- [`langchain-vdm-nexus`](https://pypi.org/project/langchain-vdm-nexus/) —
+  drop-in `ChatNexus` model for LangChain (and by extension LangGraph,
+  CrewAI, and any framework built on `BaseChatModel`).
 
 ## Repo
 

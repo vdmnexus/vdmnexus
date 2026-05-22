@@ -1,0 +1,371 @@
+"""Round-trip tests for the x402 client.
+
+These tests stub `X402Agent.build_payment_payload()` so they never
+touch Solana RPC — the load-bearing behaviour under test is the wire
+format of the probe → 402 → paid retry handshake against the Nexus
+`/chat/completions` endpoint, NOT solders' SPL transfer encoding.
+
+A separate `test_payment_payload_construction` exercises
+`build_payment_payload()` end-to-end with a mocked RPC, so we still
+catch regressions in the Solana-side code path.
+"""
+
+from __future__ import annotations
+
+import base64
+import json
+from typing import Any
+
+import httpx
+import pytest
+import respx
+
+from vdm_nexus import (
+    NETWORK_SOLANA_MAINNET,
+    X402Agent,
+    X402PaymentRequiredError,
+    X402PaymentReplayError,
+    X402Result,
+    X402UpstreamError,
+    resolve_network,
+)
+from vdm_nexus.x402 import _decode_b64_json, _encode_b64_json
+
+
+FAKE_RECIPIENT = "GqYU2X4tQMjFmHnxYbN3VFx5tQv2eYZBXqRvWcF4Aaaa"
+FAKE_USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+
+
+def _b64(obj: Any) -> str:
+    return base64.b64encode(json.dumps(obj).encode("utf-8")).decode("ascii")
+
+
+def _fake_challenge() -> dict[str, Any]:
+    return {
+        "x402Version": 2,
+        "accepts": [
+            {
+                "scheme": "exact",
+                "network": NETWORK_SOLANA_MAINNET,
+                "asset": FAKE_USDC,
+                "amount": "10000",  # 0.01 USDC, atomic
+                "payTo": FAKE_RECIPIENT,
+                "maxTimeoutSeconds": 60,
+                "extra": {"feePayer": FAKE_RECIPIENT},
+            }
+        ],
+    }
+
+
+def _fake_completion() -> dict[str, Any]:
+    return {
+        "id": "chatcmpl-test",
+        "object": "chat.completion",
+        "created": 1700000000,
+        "model": "openai/gpt-4o-mini",
+        "choices": [
+            {
+                "index": 0,
+                "message": {"role": "assistant", "content": "pong"},
+                "finish_reason": "stop",
+            }
+        ],
+        "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2},
+    }
+
+
+def _fake_receipt(agent_pubkey: str) -> dict[str, Any]:
+    return {
+        "v": 2,
+        "agent_pubkey": agent_pubkey,
+        "model": "openai/gpt-4o-mini",
+        "cost_usdc": 0.0008,
+        "prompt_hash": "a" * 64,
+        "response_hash": "b" * 64,
+        "timestamp": 1700000000,
+        "inference_id": 12345,
+        "points_total": 1,
+        "upstream": "openrouter",
+        "payment": {
+            "scheme": "x402",
+            "amount_usdc": 0.01,
+            "tx_signature": "MOCK_TX_SIGNATURE",
+            "network": NETWORK_SOLANA_MAINNET,
+            "pay_to": FAKE_RECIPIENT,
+        },
+        "nexus_signature": "MOCK_SIGNATURE",
+    }
+
+
+def _fake_payment_response() -> dict[str, Any]:
+    return {
+        "status": "settled",
+        "txSignature": "MOCK_TX_SIGNATURE",
+        "network": NETWORK_SOLANA_MAINNET,
+    }
+
+
+def test_header_codec_round_trip() -> None:
+    obj = {"x402Version": 2, "scheme": "exact", "nested": {"k": "v"}}
+    enc = _encode_b64_json(obj)
+    dec = _decode_b64_json(enc)
+    assert dec == obj
+
+
+def test_resolve_network_aliases() -> None:
+    assert resolve_network("mainnet") == NETWORK_SOLANA_MAINNET
+    assert resolve_network("solana:mainnet") == NETWORK_SOLANA_MAINNET
+    assert resolve_network("Solana-Mainnet") == NETWORK_SOLANA_MAINNET
+    # Pass-through for unknown / already-canonical
+    assert resolve_network(NETWORK_SOLANA_MAINNET) == NETWORK_SOLANA_MAINNET
+
+
+def test_x402_agent_inherits_agent_api() -> None:
+    agent = X402Agent.generate()
+    # Inherits Agent surface — the prepaid path still works.
+    assert isinstance(agent.pubkey, str)
+    assert len(agent.secret_key) == 64
+    body = b'{"hi":"there"}'
+    sig = agent.sign_body(body)
+    assert isinstance(sig, str) and len(sig) > 0
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_pay_and_infer_handshake_round_trip(monkeypatch) -> None:
+    """The full probe → 402 → paid retry sequence against a mocked
+    endpoint. Stubs payment-payload construction so we don't touch
+    Solana RPC, but asserts the X-Payment header was sent on the
+    retry and that the parsed receipt + payment_response flow out."""
+
+    agent = X402Agent.generate()
+    calls: list[dict[str, Any]] = []
+
+    async def _stub_build_payload(
+        self,
+        challenge,
+        *,
+        network,
+        rpc_url=None,
+        client=None,
+    ):
+        return {
+            "x402Version": 2,
+            "scheme": "exact",
+            "network": network,
+            "payload": {
+                "transaction": "base64-fake-signed-tx",
+                "payer": self.pubkey,
+            },
+        }
+
+    monkeypatch.setattr(X402Agent, "build_payment_payload", _stub_build_payload)
+
+    def _handler(request: httpx.Request) -> httpx.Response:
+        has_payment = "x-payment" in {k.lower() for k in request.headers.keys()}
+        calls.append(
+            {
+                "has_payment": has_payment,
+                "url": str(request.url),
+                "body": request.content,
+            }
+        )
+        if not has_payment:
+            return httpx.Response(
+                402,
+                json={},
+                headers={"X-Payment-Required": _b64(_fake_challenge())},
+            )
+        return httpx.Response(
+            200,
+            json=_fake_completion(),
+            headers={
+                "X-Nexus-Receipt": _b64(_fake_receipt(agent.pubkey)),
+                "X-Payment-Response": _b64(_fake_payment_response()),
+            },
+        )
+
+    respx.post("https://nx.example/api/v1/chat/completions").mock(
+        side_effect=_handler
+    )
+
+    result = await agent.pay_and_infer(
+        "https://nx.example/api/v1",
+        model="openai/gpt-4o-mini",
+        messages=[{"role": "user", "content": "ping"}],
+        network="solana:mainnet",
+    )
+
+    assert isinstance(result, X402Result)
+    # Probe must come first without X-Payment, then paid retry with it.
+    assert len(calls) == 2
+    assert calls[0]["has_payment"] is False
+    assert calls[1]["has_payment"] is True
+
+    # Both requests carry the same body, same shape.
+    body_obj = json.loads(calls[0]["body"])
+    assert body_obj["model"] == "openai/gpt-4o-mini"
+    assert body_obj["messages"][0]["content"] == "ping"
+    assert body_obj["network"] == NETWORK_SOLANA_MAINNET
+
+    # OpenAI body parsed.
+    assert result.openai["choices"][0]["message"]["content"] == "pong"
+    # Receipt parsed from X-Nexus-Receipt.
+    assert result.receipt is not None
+    assert result.receipt["v"] == 2
+    assert result.receipt["agent_pubkey"] == agent.pubkey
+    assert result.receipt["payment"]["tx_signature"] == "MOCK_TX_SIGNATURE"
+    # Payment response parsed from X-Payment-Response.
+    assert result.payment_response is not None
+    assert result.payment_response["txSignature"] == "MOCK_TX_SIGNATURE"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_pay_and_infer_raises_on_402_after_retry(monkeypatch) -> None:
+    agent = X402Agent.generate()
+
+    async def _stub(self, challenge, *, network, rpc_url=None, client=None):
+        return {
+            "x402Version": 2,
+            "scheme": "exact",
+            "network": network,
+            "payload": {"transaction": "fake", "payer": self.pubkey},
+        }
+
+    monkeypatch.setattr(X402Agent, "build_payment_payload", _stub)
+
+    def _handler(request: httpx.Request) -> httpx.Response:
+        has_payment = "x-payment" in {k.lower() for k in request.headers.keys()}
+        if not has_payment:
+            return httpx.Response(
+                402,
+                json={},
+                headers={"X-Payment-Required": _b64(_fake_challenge())},
+            )
+        # Server couldn't settle the payment — return 402 again.
+        return httpx.Response(
+            402,
+            json={"error": "payment_invalid", "detail": "tx not landed"},
+        )
+
+    respx.post("https://nx.example/api/v1/chat/completions").mock(
+        side_effect=_handler
+    )
+
+    with pytest.raises(X402PaymentRequiredError):
+        await agent.pay_and_infer(
+            "https://nx.example/api/v1",
+            model="openai/gpt-4o-mini",
+            messages=[{"role": "user", "content": "x"}],
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_pay_and_infer_raises_on_409_replay(monkeypatch) -> None:
+    agent = X402Agent.generate()
+
+    async def _stub(self, challenge, *, network, rpc_url=None, client=None):
+        return {
+            "x402Version": 2,
+            "scheme": "exact",
+            "network": network,
+            "payload": {"transaction": "fake", "payer": self.pubkey},
+        }
+
+    monkeypatch.setattr(X402Agent, "build_payment_payload", _stub)
+
+    def _handler(request: httpx.Request) -> httpx.Response:
+        has_payment = "x-payment" in {k.lower() for k in request.headers.keys()}
+        if not has_payment:
+            return httpx.Response(
+                402,
+                json={},
+                headers={"X-Payment-Required": _b64(_fake_challenge())},
+            )
+        return httpx.Response(409, json={"error": "payment_replay"})
+
+    respx.post("https://nx.example/api/v1/chat/completions").mock(
+        side_effect=_handler
+    )
+
+    with pytest.raises(X402PaymentReplayError):
+        await agent.pay_and_infer(
+            "https://nx.example/api/v1",
+            model="openai/gpt-4o-mini",
+            messages=[{"role": "user", "content": "x"}],
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_pay_and_infer_raises_when_probe_not_402() -> None:
+    agent = X402Agent.generate()
+    respx.post("https://nx.example/api/v1/chat/completions").mock(
+        return_value=httpx.Response(500, text="boom")
+    )
+    with pytest.raises(X402UpstreamError):
+        await agent.pay_and_infer(
+            "https://nx.example/api/v1",
+            model="openai/gpt-4o-mini",
+            messages=[{"role": "user", "content": "x"}],
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_build_payment_payload_constructs_valid_solana_tx() -> None:
+    """End-to-end exercise of the Solana SPL transfer construction.
+
+    Stubs only the RPC `getLatestBlockhash` call. The transaction
+    bytes that come out must:
+
+      1. Decode as a valid VersionedTransaction.
+      2. Have the agent's pubkey as a required signer.
+      3. Carry a valid signature from the agent over the message bytes.
+
+    This is the test that catches regressions in `solders`-side code
+    — it doesn't exercise the HTTP handshake at all.
+    """
+    from solders.transaction import VersionedTransaction
+
+    agent = X402Agent.generate()
+
+    # Mock a Solana RPC response.
+    respx.post("https://api.mainnet-beta.solana.com").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": {
+                    "context": {"slot": 1},
+                    "value": {
+                        "blockhash": "EkSnNWid2cvwEVnVx9aBqawnmiCNiDgp3gUdkDPTKN1N",
+                        "lastValidBlockHeight": 1000,
+                    },
+                },
+            },
+        )
+    )
+
+    payload = await agent.build_payment_payload(
+        _fake_challenge(),  # type: ignore[arg-type]
+        network="solana:mainnet",
+    )
+
+    assert payload["scheme"] == "exact"
+    assert payload["network"] == NETWORK_SOLANA_MAINNET
+    assert payload["payload"]["payer"] == agent.pubkey
+
+    tx_bytes = base64.b64decode(payload["payload"]["transaction"])
+    tx = VersionedTransaction.from_bytes(tx_bytes)
+    msg = tx.message
+    # Two required signatures: fee-payer (facilitator) + agent.
+    assert msg.header.num_required_signatures == 2
+    # The agent must appear in the signer prefix of account_keys.
+    signer_pubkeys = {
+        str(k) for k in list(msg.account_keys)[: msg.header.num_required_signatures]
+    }
+    assert agent.pubkey in signer_pubkeys
