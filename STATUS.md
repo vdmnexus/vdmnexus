@@ -13,7 +13,7 @@ sessions. Every session updates its own row at start and end.
 | `claude/fix-langchain-x402-v2-shape` | Python SDK x402 v2 PaymentPayload shape + compute-budget + memo fix (PR #65 follow-up) | 2026-05-22 | in_review | [#66](https://github.com/vdmnexus/vdmnexus/pull/66) |
 | `claude/sendai-plugin` | Drop-in `@solana-agent-kit/plugin-vdm-nexus` for SendAI upstream submission | 2026-05-22 | in_review | [#67](https://github.com/vdmnexus/vdmnexus/pull/67) |
 | `claude/ship-broadcast-skill` | `/ship-broadcast` workflow — drafts X/Telegram/Farcaster/LinkedIn posts per ship, schedules via Postiz | 2026-05-22 | in_review | [#68](https://github.com/vdmnexus/vdmnexus/pull/68) |
-| `claude/logo-intro-remotion` | Remotion `LogoIntro` composition (1.8s signed-inference logo pre-roll) + WeeklyShipsReel integration | 2026-05-22 | in_review | _PR pending_ |
+| `claude/logo-intro-remotion` | Remotion `LogoIntro` composition (1.8s signed-inference logo pre-roll) + WeeklyShipsReel integration | 2026-05-22 | in_review | [#73](https://github.com/vdmnexus/vdmnexus/pull/73) |
 | `claude/marketing-video-pipeline` | VHS terminal-demo pipeline + Remotion ship-reels scaffold + `/ship-broadcast` visual companion step | 2026-05-22 | in_review | [#71](https://github.com/vdmnexus/vdmnexus/pull/71) |
 
 ## Conventions
