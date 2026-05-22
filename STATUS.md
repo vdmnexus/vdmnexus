@@ -12,6 +12,7 @@ sessions. Every session updates its own row at start and end.
 | `claude/langchain-adapter` | Python SDK v0.2 (x402) + langchain-vdm-nexus | 2026-05-22 | in_review | [#65](https://github.com/vdmnexus/vdmnexus/pull/65) |
 | `claude/fix-langchain-x402-v2-shape` | Python SDK x402 v2 PaymentPayload shape + compute-budget + memo fix (PR #65 follow-up) | 2026-05-22 | in_review | [#66](https://github.com/vdmnexus/vdmnexus/pull/66) |
 | `claude/sendai-plugin` | Drop-in `@solana-agent-kit/plugin-vdm-nexus` for SendAI upstream submission | 2026-05-22 | in_review | [#67](https://github.com/vdmnexus/vdmnexus/pull/67) |
+| `claude/ship-broadcast-skill` | `/ship-broadcast` workflow — drafts X/Telegram/Farcaster/LinkedIn posts per ship, schedules via Postiz | 2026-05-22 | in_progress | _opening_ |
 
 ## Conventions
 

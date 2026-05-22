@@ -625,6 +625,38 @@ pnpm --filter nexus demo             # run the demo agent
 - All tables RLS-enabled. Inserts run server-side via the service role,
   never via the anon key.
 
+## Ship broadcasts
+
+Every ship worth surfacing fans out to four channels — X, Telegram,
+Farcaster, LinkedIn — via Postiz. The convention:
+
+- After a PR merges (or is open with green CI), the user runs
+  `/ship-broadcast <PR#>` (or `/ship-broadcast latest`). When you see
+  that trigger phrase, follow the workflow in
+  [`marketing/ship-broadcast.md`](marketing/ship-broadcast.md): identify
+  the PR, classify by title prefix, draft platform-specific posts,
+  show drafts for review, then schedule via the `postiz:postiz` skill.
+- That playbook is the single source of truth for voice, vocabulary,
+  per-platform templates, character limits, and hard rules (e.g.
+  "always link to a Nexus domain, never the GitHub PR"; "signed
+  inference" is the locked noun, never "verifiable inference").
+- Drafts are written to `marketing/broadcasts/<pr#>-<short-slug>.md`
+  for review. The user approves per-platform before anything is
+  scheduled. Skipping a platform is fine — partial broadcasts are
+  expected.
+- **Never auto-send.** Postiz scheduling always goes through a user
+  approval gate, even for "post now" runs.
+- **Default cadence**: max 1 X post per 4 hours unless materially
+  different. Skip docs typos, silent refactors, most infra chores.
+- **Token / financial-action posts** require explicit double
+  confirmation from the user and surface the MiCA red-line warning
+  from the section below. Never schedule without it.
+
+When in doubt about whether a ship deserves a broadcast, ask the user
+before drafting. Distribution PRs (e.g. AgentKit / SendAI / discovery
+listings) broadcast only after the *upstream* PR merges, not on the
+vdmnexus-side packet PR.
+
 ## Roadmap (locked 2026-05-22 after competitive-landscape research)
 
 Rough order. **Speed-to-distribution beats feature work** — the
