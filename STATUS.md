@@ -7,7 +7,8 @@ sessions. Every session updates its own row at start and end.
 
 | Branch | What | Started | Status | PR |
 |---|---|---|---|---|
-| `claude/python-sdk` | Port @vdm-nexus/sdk Agent to Python (v0.1.0 scaffold) | 2026-05-22 | in_review | [#54](https://github.com/vdmnexus/vdmnexus/pull/54) |
+| `claude/stats-endpoint` | Live mainnet counter on the homepage — `/api/stats` + `<LiveStats />` | 2026-05-22 | in_review | [#56](https://github.com/vdmnexus/vdmnexus/pull/56) |
+| `claude/mastra-vercel-providers` | Mastra + Vercel AI SDK providers (background agent — prompt 05) | 2026-05-22 | in_progress | — |
 
 ## Conventions
 
