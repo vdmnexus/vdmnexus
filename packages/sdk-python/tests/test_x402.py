@@ -29,7 +29,14 @@ from vdm_nexus import (
     X402UpstreamError,
     resolve_network,
 )
-from vdm_nexus.x402 import _decode_b64_json, _encode_b64_json
+from vdm_nexus.x402 import (
+    MEMO_PROGRAM_ID,
+    SPL_TOKEN_PROGRAM_ID,
+    _decode_b64_json,
+    _encode_b64_json,
+)
+
+COMPUTE_BUDGET_PROGRAM_ID = "ComputeBudget111111111111111111111111111111"
 
 
 FAKE_RECIPIENT = "GqYU2X4tQMjFmHnxYbN3VFx5tQv2eYZBXqRvWcF4Aaaa"
@@ -43,6 +50,12 @@ def _b64(obj: Any) -> str:
 def _fake_challenge() -> dict[str, Any]:
     return {
         "x402Version": 2,
+        "resource": {
+            "url": "https://nx.example/api/v1/chat/completions",
+            "description": "OpenAI-compatible chat completions, paid per call in USDC.",
+            "serviceName": "VDM Nexus",
+            "mimeType": "application/json",
+        },
         "accepts": [
             {
                 "scheme": "exact",
@@ -149,10 +162,13 @@ async def test_pay_and_infer_handshake_round_trip(monkeypatch) -> None:
         rpc_url=None,
         client=None,
     ):
+        # Mirror the real v2 shape so the assertions in the handler
+        # validate the wire format we actually produce in prod.
+        entry = challenge["accepts"][0]
         return {
             "x402Version": 2,
-            "scheme": "exact",
-            "network": network,
+            "accepted": entry,
+            "resource": challenge.get("resource"),
             "payload": {
                 "transaction": "base64-fake-signed-tx",
                 "payer": self.pubkey,
@@ -163,9 +179,15 @@ async def test_pay_and_infer_handshake_round_trip(monkeypatch) -> None:
 
     def _handler(request: httpx.Request) -> httpx.Response:
         has_payment = "x-payment" in {k.lower() for k in request.headers.keys()}
+        payment_header = None
+        for k, v in request.headers.items():
+            if k.lower() == "x-payment":
+                payment_header = v
+                break
         calls.append(
             {
                 "has_payment": has_payment,
+                "payment_header": payment_header,
                 "url": str(request.url),
                 "body": request.content,
             }
@@ -208,6 +230,23 @@ async def test_pay_and_infer_handshake_round_trip(monkeypatch) -> None:
     assert body_obj["messages"][0]["content"] == "ping"
     assert body_obj["network"] == NETWORK_SOLANA_MAINNET
 
+    # X-Payment header must carry the v2 shape: `accepted` field
+    # present, `scheme`/`network` NOT at the top level (that's the v1
+    # shape, rejected by @x402/core@2.x with "Cannot read properties
+    # of undefined (reading 'scheme')").
+    decoded_payment = _decode_b64_json(calls[1]["payment_header"])
+    assert decoded_payment is not None
+    assert decoded_payment["x402Version"] == 2
+    assert "accepted" in decoded_payment
+    assert decoded_payment["accepted"]["scheme"] == "exact"
+    assert decoded_payment["accepted"]["network"] == NETWORK_SOLANA_MAINNET
+    assert decoded_payment["accepted"]["amount"] == "10000"
+    assert decoded_payment["accepted"]["payTo"] == FAKE_RECIPIENT
+    # `scheme`/`network` MUST NOT appear at the top level.
+    assert "scheme" not in decoded_payment
+    assert "network" not in decoded_payment
+    assert decoded_payment["payload"]["payer"] == agent.pubkey
+
     # OpenAI body parsed.
     assert result.openai["choices"][0]["message"]["content"] == "pong"
     # Receipt parsed from X-Nexus-Receipt.
@@ -228,8 +267,7 @@ async def test_pay_and_infer_raises_on_402_after_retry(monkeypatch) -> None:
     async def _stub(self, challenge, *, network, rpc_url=None, client=None):
         return {
             "x402Version": 2,
-            "scheme": "exact",
-            "network": network,
+            "accepted": challenge["accepts"][0],
             "payload": {"transaction": "fake", "payer": self.pubkey},
         }
 
@@ -269,8 +307,7 @@ async def test_pay_and_infer_raises_on_409_replay(monkeypatch) -> None:
     async def _stub(self, challenge, *, network, rpc_url=None, client=None):
         return {
             "x402Version": 2,
-            "scheme": "exact",
-            "network": network,
+            "accepted": challenge["accepts"][0],
             "payload": {"transaction": "fake", "payer": self.pubkey},
         }
 
@@ -324,9 +361,14 @@ async def test_build_payment_payload_constructs_valid_solana_tx() -> None:
       1. Decode as a valid VersionedTransaction.
       2. Have the agent's pubkey as a required signer.
       3. Carry a valid signature from the agent over the message bytes.
-
-    This is the test that catches regressions in `solders`-side code
-    — it doesn't exercise the HTTP handshake at all.
+      4. Have the v2 PaymentPayload wire shape (no top-level
+         scheme/network — see Bug #1 in CHANGELOG.md).
+      5. Have the four instructions @x402/svm's verifier expects, in
+         the exact order:
+           [0] SetComputeUnitLimit (ComputeBudget, discriminator 2)
+           [1] SetComputeUnitPrice (ComputeBudget, discriminator 3)
+           [2] TransferChecked     (SPL Token)
+           [3] Memo                (32 ASCII hex chars)
     """
     from solders.transaction import VersionedTransaction
 
@@ -355,8 +397,13 @@ async def test_build_payment_payload_constructs_valid_solana_tx() -> None:
         network="solana:mainnet",
     )
 
-    assert payload["scheme"] == "exact"
-    assert payload["network"] == NETWORK_SOLANA_MAINNET
+    # v2 shape: `accepted` carries scheme/network, NOT top-level.
+    assert payload["x402Version"] == 2
+    assert "accepted" in payload
+    assert payload["accepted"]["scheme"] == "exact"
+    assert payload["accepted"]["network"] == NETWORK_SOLANA_MAINNET
+    assert "scheme" not in payload
+    assert "network" not in payload
     assert payload["payload"]["payer"] == agent.pubkey
 
     tx_bytes = base64.b64decode(payload["payload"]["transaction"])
@@ -369,3 +416,22 @@ async def test_build_payment_payload_constructs_valid_solana_tx() -> None:
         str(k) for k in list(msg.account_keys)[: msg.header.num_required_signatures]
     }
     assert agent.pubkey in signer_pubkeys
+
+    # Instruction layout — verifier checks the first two are
+    # ComputeBudget calls in this exact order, [2] is TransferChecked,
+    # [3] is the random-nonce memo.
+    account_keys = list(msg.account_keys)
+    ixs = list(msg.instructions)
+    assert len(ixs) == 4
+    prog = lambda ix: str(account_keys[ix.program_id_index])  # noqa: E731
+    assert prog(ixs[0]) == COMPUTE_BUDGET_PROGRAM_ID
+    assert prog(ixs[1]) == COMPUTE_BUDGET_PROGRAM_ID
+    assert prog(ixs[2]) == SPL_TOKEN_PROGRAM_ID
+    assert prog(ixs[3]) == MEMO_PROGRAM_ID
+    # Compute-budget discriminators: 2 = SetComputeUnitLimit, 3 = SetComputeUnitPrice.
+    assert bytes(ixs[0].data)[0] == 2
+    assert bytes(ixs[1].data)[0] == 3
+    # Memo data is 32 ASCII hex chars (16 random bytes hex-encoded).
+    memo_data = bytes(ixs[3].data)
+    assert len(memo_data) == 32
+    assert all(c in b"0123456789abcdef" for c in memo_data)
