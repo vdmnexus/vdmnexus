@@ -1,0 +1,32 @@
+[
+  {
+    "pr_number": 65,
+    "type": "feat",
+    "title": "Python SDK + langchain-vdm-nexus on PyPI",
+    "summary": "pip install vdm-nexus. Ed25519 identity, x402 USDC per call, SIR v2 receipts."
+  },
+  {
+    "pr_number": 66,
+    "type": "fix",
+    "title": "Python x402 v2 handshake — PaymentPayload shape",
+    "summary": "Compute-budget + memo instructions, v2 envelope. Mainnet calls land first try."
+  },
+  {
+    "pr_number": 67,
+    "type": "chore",
+    "title": "@solana-agent-kit/plugin-vdm-nexus",
+    "summary": "Drop-in SendAI plugin. Every SendAI agent gets signed inference."
+  },
+  {
+    "pr_number": 68,
+    "type": "chore",
+    "title": "/ship-broadcast workflow",
+    "summary": "X / Telegram / Farcaster / LinkedIn drafts via Postiz. Approval-gated."
+  },
+  {
+    "pr_number": 69,
+    "type": "feat",
+    "title": "Marketing video + visual pipeline",
+    "summary": "VHS terminal demos + Remotion reels. Every ship gets a GIF."
+  }
+]

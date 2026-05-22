@@ -36,6 +36,40 @@ Generate four drafts in this order, respecting platform constraints from the tab
 
 Write the drafts to `marketing/broadcasts/<pr#>-<short-slug>.md` (one file per ship, contains all four channels — see the "Draft file convention" section below). This is the review artifact.
 
+### 3.5. Visual companion
+
+Text-only posts get half the engagement of posts with a visual. Before the review gate, pick the visual that will ride with the broadcast. Three sources, in priority order:
+
+1. **Existing VHS tape** — `marketing/media/vhs/<demo>.tape`. If the ship's surface is one of: Python SDK x402 handshake, receipt verification, ChatNexus / LangGraph node — there's already a tape. Render it locally:
+   ```bash
+   make -C marketing/media <target>      # e.g. python-sdk-x402
+   ```
+   The output GIF lands at `marketing/media/out/<slug>.gif`. Reference it in the draft file footer so the user knows what to attach in the X composer / Telegram channel / LinkedIn post. See [`media/README.md`](media/README.md) for the full menu.
+
+2. **Ad-hoc Screen Studio recording** — when the ship doesn't fit any existing tape (e.g. a new admin UI, a one-off browser demo). Ask the user to drop the file in `marketing/media/out/` (gitignored) and reference it the same way. Don't fake the recording; a missing visual is better than a wrong one.
+
+3. **Remotion ship reel** — for weekly-roundup posts or multi-PR ships, render `WeeklyShipsReel` (`make -C marketing/media reel-weekly`) after editing `marketing/media/remotion/src/ships.json` to include the PRs in scope. Output lands as `marketing/media/out/weekly-ships-reel.mp4`.
+
+4. **Skip** — if the ship is text-shaped (docs spec, a vocabulary lock, an external link) and a visual would feel forced, say so in the draft footer ("no visual; pure text post"). Don't fabricate.
+
+Per-platform notes for attachments:
+
+- **X**: GIF or MP4 ≤512 MB. GIFs autoplay muted; MP4s preferred for >30s. Aspect 16:9 (the tapes are 1280×720) is X-native.
+- **Farcaster**: a single image / GIF / video URL. Receipt permalinks (`vdmnexus.com/r/<id>`) already render as a card; sometimes that's the best visual.
+- **Telegram**: native video, GIF, or animated MPEG-4 — all autoplay in the channel. Long-form (45s+) is fine here.
+- **LinkedIn**: 16:9 or 1:1, MP4 ≤10 min. Native video posts beat YouTube embeds.
+
+After picking the visual, write the path into the draft file footer under a `## Visual` section so review can confirm at a glance:
+
+```markdown
+## Visual
+
+- File: `marketing/media/out/python-sdk-x402.gif`
+- Source: `vhs/python-sdk-x402.tape` rendered 2026-05-22
+- Use for: X, Farcaster, Telegram
+- Skip for: LinkedIn (use ship-reel MP4 instead)
+```
+
 ### 4. Review gate
 
 Show the drafts inline in chat, with character counts:
@@ -262,6 +296,17 @@ Each broadcast lives at `marketing/broadcasts/<pr#>-<short-slug>.md` while in re
 | Farcaster | scheduled | 2026-05-22 20:30 CET | post_def456 |
 | Telegram | skipped | — | — |
 | LinkedIn | skipped | — | — |
+```
+
+Append a `## Visual` section (see Step 3.5) when a render exists:
+
+```markdown
+## Visual
+
+| File | Source | Use for |
+|---|---|---|
+| `marketing/media/out/python-sdk-x402.gif` | `vhs/python-sdk-x402.tape` (2026-05-22) | X, Farcaster, Telegram |
+| `marketing/media/out/weekly-ships-reel.mp4` | Remotion `WeeklyShipsReel` (2026-05-22) | LinkedIn |
 ```
 
 These files are checked in. They're useful for: (a) auditing what was said when, (b) future Claude sessions learning the voice from real examples, (c) reusing language across related ships.
