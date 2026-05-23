@@ -8,6 +8,7 @@ import { getAgentStats } from "@/lib/points";
 import {
   getFacilitator,
   getCdpFacilitator,
+  getCdpFeePayer,
   CdpFacilitatorNotConfiguredError,
   FacilitatorNotConfiguredError,
 } from "@/lib/x402-facilitator";
@@ -266,11 +267,50 @@ export async function POST(req: NextRequest) {
   const amountUsdc = getFlatPriceUsdc();
   const resource = getResource(req);
 
+  // Read the facilitator selector up front. `?via=cdp` forces both the
+  // challenge (which fee-payer to declare in `extra`) and the later
+  // settle path to align on Coinbase's facilitator. Default route still
+  // declares our own deposit as fee-payer (matching the self-hosted
+  // facilitator that signs on our behalf).
+  const facilitatorChoice = new URL(req.url).searchParams
+    .get("via")
+    ?.trim()
+    .toLowerCase();
+  const useCdp = facilitatorChoice === "cdp";
+
+  // When routing through CDP, ask their `/supported` endpoint which
+  // signer they want to manage the fee-payer slot. Declaring our own
+  // address (the self-hosted default) gets the payload rejected with
+  // `feePayer not managed` — CDP co-signs as fee-payer themselves.
+  let feePayer: string | undefined;
+  if (useCdp) {
+    try {
+      feePayer = await getCdpFeePayer(network);
+      log.info({
+        event: "chat.cdp_fee_payer_resolved",
+        request_id,
+        network,
+        fee_payer: feePayer,
+      });
+    } catch (e) {
+      log.error({
+        event: "chat.cdp_fee_payer_lookup_failed",
+        request_id,
+        network,
+        reason: e instanceof Error ? e.message : "unknown",
+      });
+      return err("cdp_fee_payer_lookup_failed", 502, {
+        detail: e instanceof Error ? e.message : "unknown",
+      });
+    }
+  }
+
   const challenge = buildChallenge({
     amountUsdc,
     payTo: recipient,
     network,
     resource,
+    ...(feePayer ? { feePayer } : {}),
   });
   const requirement = challenge.accepts[0];
   if (!requirement) {
@@ -350,17 +390,9 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Facilitator selection. `?via=cdp` forces settlement through Coinbase's
-  // facilitator so the call lands in the x402 Bazaar / Agentic.Market
-  // index (CDP keys indexing off settlements processed by their endpoint).
-  // Default traffic continues to use whatever the operator configured
-  // (`NEXUS_FACILITATOR_LOCAL` or `X402_FACILITATOR_URL`).
-  const facilitatorChoice = new URL(req.url).searchParams
-    .get("via")
-    ?.trim()
-    .toLowerCase();
-  const useCdp = facilitatorChoice === "cdp";
-
+  // Facilitator selection — `useCdp` already resolved above when we
+  // built the challenge, so the verify + settle below align on the
+  // same facilitator as the fee-payer declaration.
   let facilitator;
   try {
     facilitator = useCdp ? await getCdpFacilitator() : await getFacilitator();
