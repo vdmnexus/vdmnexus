@@ -123,7 +123,13 @@ export default function Home() {
       // The id-lookup verify endpoint lives on vdmnexus.com — it can
       // resolve any of the three id formats against inference_logs or the
       // playground receipts table. Same five-check verification underneath.
-      const res = await fetch("https://vdmnexus.com/api/playground/verify", {
+      //
+      // Hit the canonical `www.` host directly. The apex `vdmnexus.com`
+      // 307-redirects to `www.vdmnexus.com`, and browsers refuse to follow
+      // redirects on CORS preflights — the OPTIONS hard-fails and `fetch`
+      // throws "Failed to fetch" regardless of the destination's CORS
+      // headers. Calling `www.` skips the redirect entirely.
+      const res = await fetch("https://www.vdmnexus.com/api/playground/verify", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ id }),
