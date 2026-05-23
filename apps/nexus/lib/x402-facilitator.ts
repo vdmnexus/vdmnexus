@@ -256,8 +256,60 @@ export function getFacilitator(): Promise<FacilitatorClient> {
   return out;
 }
 
+/**
+ * Look up the fee-payer address CDP wants us to declare in the 402
+ * challenge for `network`. CDP rejects any signed payload whose
+ * `extra.feePayer` is not one of their managed signers — they co-sign
+ * as the fee payer themselves when settling. The right address comes
+ * from `/supported`'s `signers` map (CAIP family pattern → signer
+ * addresses, per the x402 facilitator type).
+ *
+ * Caches the supported response in-process for the lambda lifetime
+ * (~minutes). CDP signer addresses rotate infrequently — if we cache
+ * a stale one we'll get a hard error and the next cold start picks
+ * up the new value.
+ */
+let cdpSupportedPromise: Promise<SupportedResponse> | null = null;
+
+async function getCdpSupported(): Promise<SupportedResponse> {
+  if (!cdpSupportedPromise) {
+    cdpSupportedPromise = (async () => {
+      const facilitator = await getCdpFacilitator();
+      return facilitator.getSupported();
+    })();
+  }
+  try {
+    return await cdpSupportedPromise;
+  } catch (e) {
+    // Don't poison the cache on transient failures.
+    cdpSupportedPromise = null;
+    throw e;
+  }
+}
+
+export async function getCdpFeePayer(network: string): Promise<string> {
+  const supported = await getCdpSupported();
+  const signers = supported.signers ?? {};
+  // 1. Exact-match on the CAIP-2 network string.
+  const exact = signers[network];
+  if (Array.isArray(exact) && exact.length > 0) return exact[0];
+  // 2. Family-wildcard match (e.g. `solana:*` covers any solana network).
+  for (const [pattern, list] of Object.entries(signers)) {
+    if (!pattern.endsWith(":*")) continue;
+    const prefix = pattern.slice(0, -1); // keep the trailing colon
+    if (network.startsWith(prefix) && Array.isArray(list) && list.length > 0) {
+      return list[0];
+    }
+  }
+  throw new Error(
+    `CDP facilitator has no managed fee payer for network "${network}". ` +
+      `Supported families: ${Object.keys(signers).join(", ") || "(none)"}`
+  );
+}
+
 /** Test hook — reset the cached facilitator (used by tests). */
 export function _resetFacilitatorCache(): void {
   cached = null;
   cdpCached = null;
+  cdpSupportedPromise = null;
 }
