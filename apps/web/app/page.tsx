@@ -437,7 +437,7 @@ function Products() {
         </FadeIn>
 
         <FadeIn delay={0.08}>
-          <Link href="/agents" className="block h-full">
+          <Link href="/agents/about" className="block h-full">
             <Card className="group h-full">
               <div className="flex items-center justify-between">
                 <ComingSoonBadge />

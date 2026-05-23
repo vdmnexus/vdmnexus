@@ -466,7 +466,7 @@ function EmptyState() {
       </p>
       <div className="mt-6 flex justify-center gap-3">
         <Link
-          href="/agents"
+          href="/agents/about"
           className="rounded-md border border-soft bg-surface/60 px-3.5 py-1.5 text-xs font-medium text-text transition-colors hover:border-accent-indigo/60 hover:bg-accent-indigo/10 sm:text-sm"
         >
           What's an agent?
