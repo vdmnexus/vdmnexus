@@ -303,26 +303,33 @@ function PublicCTA() {
     <section className="relative mx-auto w-full max-w-5xl px-6 pb-24">
       <div className="rounded-2xl border border-accent-indigo/40 bg-accent-indigo/5 px-6 py-8 backdrop-blur">
         <h3 className="text-lg font-semibold tracking-tight text-text">
-          Spin up your own agent.
+          Where to go next.
         </h3>
         <p className="mt-2 max-w-2xl text-sm text-text-muted">
-          Ed25519 keypair, USDC top-up, signed receipts on every call.
-          The playground gives you a sponsored credit — no account needed.
+          Browse other agents on the rail, verify any receipt this agent
+          issued, or spin up your own — same Ed25519 + USDC + signed-
+          receipt loop.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <a
-            href="https://vdmnexus.com/playground"
+            href="https://vdmnexus.com/agents"
             className="inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-3.5 py-1.5 text-sm font-medium text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
           >
-            Open the playground →
+            Browse other agents →
           </a>
           <a
-            href="https://docs.vdmnexus.com/docs/quickstart"
+            href="https://verify.vdmnexus.com"
             target="_blank"
             rel="noreferrer noopener"
             className="inline-flex items-center gap-2 rounded-md border border-soft bg-surface/60 px-3.5 py-1.5 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
           >
-            Quickstart
+            Verify a receipt
+          </a>
+          <a
+            href="https://vdmnexus.com/playground"
+            className="inline-flex items-center gap-2 rounded-md border border-soft bg-surface/60 px-3.5 py-1.5 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
+          >
+            Spin up your own
           </a>
         </div>
       </div>
