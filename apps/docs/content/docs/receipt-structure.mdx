@@ -114,7 +114,7 @@ Hex SHA-256 digests (64 chars). The input to each hash depends on the
 variant:
 
 - **Prepaid** — `prompt_hash = sha256(prompt)`, `response_hash = sha256(result)` where both are raw strings.
-- **x402** — `prompt_hash = sha256(messages.map(m => "${role}:${content}").join("\n"))`, `response_hash = sha256(choices[0].message.content)`.
+- **x402** — `prompt_hash = sha256(canonical-JSON(messages))`, `response_hash = sha256(choices[0].message.content)`. Receipts signed before 2026-05-23 used a delimited-string form; the reference verifier accepts both.
 
 If the model produces multiple choices, only `choices[0]` is hashed.
 Streaming responses are out of scope for v=2.
