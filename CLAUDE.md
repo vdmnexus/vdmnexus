@@ -596,14 +596,18 @@ multiply discovery of what's already shipped.
 10. **Solana Foundation / Colosseum hackathon presence.** Distribution
     surface inside the Solana ecosystem that doesn't depend on any
     paid marketing.
-11. **Spanish firm MiCA memo — merchant-rail + token-issuance position.**
-    Engage **Cuatrecasas, Garrigues, or Uría Menéndez** for a 5–10 page
-    opinion covering (a) the merchant-rail position under ESMA Q&A 2293
-    + MiCA Recital 87 + EBA Opinion EBA/Op/2025/08, and (b) the
-    token-issuance analysis under MiCA Title II (white paper / public
-    offer rules). Budget €10–25K. The memo is paired with the token
-    launch — both questions ride together. Required before any active
-    EU marketing of the token.
+11. **Spanish firm MiCA scoping memo — merchant-rail + token-issuance
+    position.** Commission a 5–10 page scoping memo from a Spanish firm
+    covering (a) the merchant-rail position under ESMA Q&A 2293 + MiCA
+    Recital 87 + EBA Opinion EBA/Op/2025/08, (b) per-wire classification
+    of the $NEXUS token mechanics under MiCA Art. 4(2) + ESMA March 2025
+    Guidelines (utility vs. MiFID II Annex I instrument), and (c) whether
+    a Spain-resident autónomo can issue under MiCA Art. 4 or must
+    incorporate a Spanish SL first under Recital 22. Budget cap €15K;
+    scoping memo first, binding opinion only if needed. Firm shortlist
+    and full brief live in memory at
+    [[project_mica_legal_scoping]]. Required before any active EU
+    marketing of the token.
 12. **Token launch — utility-first.** Solana-native (the product is
     Solana-native, pump.fun's USDC pair removes the SOL-volatility
     issue for a utility token). Fair launch, no presale, no team
