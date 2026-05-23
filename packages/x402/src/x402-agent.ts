@@ -132,7 +132,8 @@ export class X402Agent extends Agent {
     opts: X402ChatRequest
   ): Promise<X402ChatResponse> {
     const base = endpoint.replace(/\/$/, "");
-    const url = `${base}/chat/completions`;
+    const query = opts.via ? `?via=${encodeURIComponent(opts.via)}` : "";
+    const url = `${base}/chat/completions${query}`;
     const requestBody = JSON.stringify({
       model: opts.model,
       messages: opts.messages,

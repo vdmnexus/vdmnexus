@@ -35,6 +35,14 @@ export type X402ChatRequest = {
    * rail.
    */
   network?: string;
+  /**
+   * Optional facilitator selector — appended as `?via=<value>` to the
+   * `/chat/completions` URL. The Nexus server uses this to switch
+   * between facilitators (e.g. `via=cdp` routes settlement through
+   * Coinbase's facilitator so the call shows up in the x402 Bazaar
+   * index). Server-specific; omit unless the endpoint documents one.
+   */
+  via?: string;
 };
 
 export type OpenAIChatCompletion = {

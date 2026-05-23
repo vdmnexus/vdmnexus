@@ -32,6 +32,10 @@ const SECRET = process.env.DEMO_AGENT_SECRET_KEY;
 // default. Pass e.g. NEXUS_NETWORK=mainnet to force a Solana mainnet
 // settlement on an endpoint whose default is still devnet.
 const NETWORK = process.env.NEXUS_NETWORK;
+// Optional facilitator selector. NEXUS_VIA=cdp routes settlement
+// through Coinbase's facilitator so the call lands in the x402
+// Bazaar / Agentic.Market index.
+const VIA = process.env.NEXUS_VIA;
 
 async function main() {
   if (!SECRET) {
@@ -46,6 +50,7 @@ async function main() {
   console.log(`Endpoint:     ${ENDPOINT}`);
   console.log(`Agent pubkey: ${agent.pubkey}`);
   if (NETWORK) console.log(`Network:      ${NETWORK} (per-call override)`);
+  if (VIA) console.log(`Facilitator:  via=${VIA}`);
   console.log();
 
   const messages = [
@@ -58,6 +63,7 @@ async function main() {
     model: "openai/gpt-4o-mini",
     messages,
     ...(NETWORK ? { network: NETWORK } : {}),
+    ...(VIA ? { via: VIA } : {}),
   });
   console.log(`  ✓ ${Date.now() - t0}ms`);
   console.log();
