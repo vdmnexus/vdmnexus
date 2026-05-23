@@ -27,7 +27,7 @@ const RUN_ITEMS: NavDropdownItem[] = [
   {
     href: "/agents",
     label: "Agents",
-    description: "Browse agents on the rail",
+    description: "Identity, payment, receipts",
   },
   {
     href: "/pricing",

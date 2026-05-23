@@ -126,13 +126,13 @@ export default function Home() {
         <Hero />
         <LiveProof />
         {launchLive() ? <NexusToken /> : null}
+        <Audiences />
         <Problem />
         <Products />
         <BuiltOnTop />
         <Paywall />
         <UseCases />
         <HowItWorks />
-        <Audiences />
         <OpenSource />
         <Waitlist />
       </main>
@@ -717,43 +717,119 @@ function HowItWorks() {
 function Audiences() {
   return (
     <Section>
-      <div className="grid gap-4 md:grid-cols-2">
+      <FadeIn className="max-w-2xl">
+        <SectionEyebrow>For you</SectionEyebrow>
+        <SectionHeading className="mt-4">
+          Two ways to use Nexus. Same rail underneath.
+        </SectionHeading>
+        <p className="mt-5 text-base leading-relaxed text-text-muted">
+          Run an agent that pays its own way. Or add signed inference to your
+          product with one install. Both produce verifiable receipts; both
+          settle in USDC on Solana or Base.
+        </p>
+      </FadeIn>
+
+      <div className="mt-10 grid gap-5 lg:grid-cols-2">
+        {/* For Operators — left panel */}
         <FadeIn>
-          <Card className="h-full">
-            <span className="text-xs font-medium uppercase tracking-[0.16em] text-text-muted">
-              For agent builders
+          <div className="flex h-full flex-col rounded-2xl border border-soft bg-surface/60 p-7 backdrop-blur sm:p-8">
+            <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-indigo">
+              For operators
             </span>
-            <h3 className="mt-4 text-xl font-semibold text-text">
-              Spawn an agent, fund it, let it pay its own way.
+            <h3 className="mt-4 text-2xl font-semibold tracking-tight text-text">
+              Fund an agent. Watch it earn. Every decision provable.
             </h3>
-            <ul className="mt-6 space-y-3 text-sm text-text-muted">
-              {FOR_BUILDERS.map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-accent-indigo" />
-                  <span>{item}</span>
-                </li>
-              ))}
+            <p className="mt-4 text-sm leading-relaxed text-text-muted">
+              Spin up an Ed25519 agent in 60 seconds, fund with USDC, let it
+              run trading strategies, prediction-market bets, or research
+              workflows. Every call generates a signed receipt. Your bankroll
+              is bounded; your audit trail is permanent.
+            </p>
+            <ul className="mt-6 space-y-2.5 text-sm text-text-muted">
+              <li className="flex items-start gap-3">
+                <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-accent-indigo" />
+                <span>Non-custodial wallet — your keys, your funds</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-accent-indigo" />
+                <span>Per-call USDC settlement, no subscriptions, no minimum</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-accent-indigo" />
+                <span>Public agent profile with verified track record</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-accent-indigo" />
+                <span>$NEXUS holder discount + reputation bond (Wires 2-3)</span>
+              </li>
             </ul>
-          </Card>
+            <div className="mt-auto flex flex-wrap gap-3 pt-8">
+              <Link
+                href="/playground"
+                className="inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-4 py-2 text-sm font-medium text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
+              >
+                Try the playground
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+              <Link
+                href="/agents"
+                className="inline-flex items-center gap-2 rounded-md border border-soft bg-bg/40 px-4 py-2 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
+              >
+                Browse agents
+              </Link>
+              <Link
+                href="/points"
+                className="inline-flex items-center gap-2 rounded-md border border-soft bg-bg/40 px-4 py-2 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
+              >
+                Points / airdrop
+              </Link>
+            </div>
+          </div>
         </FadeIn>
 
-        <FadeIn delay={0.08}>
-          <Card className="h-full">
-            <span className="text-xs font-medium uppercase tracking-[0.16em] text-text-muted">
-              For agent platforms
+        {/* For Builders — right panel, includes HeroCode */}
+        <FadeIn delay={0.06}>
+          <div className="flex h-full flex-col rounded-2xl border border-soft bg-surface/60 p-7 backdrop-blur sm:p-8">
+            <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-indigo">
+              For builders
             </span>
-            <h3 className="mt-4 text-xl font-semibold text-text">
-              Drop-in identity + payment for any agent.
+            <h3 className="mt-4 text-2xl font-semibold tracking-tight text-text">
+              Add signed inference to your product. One install.
             </h3>
-            <ul className="mt-6 space-y-3 text-sm text-text-muted">
-              {FOR_PLATFORMS.map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-accent-blue" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </Card>
+            <p className="mt-4 text-sm leading-relaxed text-text-muted">
+              OpenAI-compatible <code className="rounded bg-bg/60 px-1.5 py-0.5 font-mono text-[12px] text-text">/chat/completions</code> endpoint. Drop-in providers for Vercel AI
+              SDK and Mastra, MCP server for Claude Desktop and Cursor, Python
+              SDK with LangChain integration. Every call returns a verifiable
+              receipt — your users prove what your AI told them, you prove
+              what it cost.
+            </p>
+            <div className="mt-6">
+              <HeroCode />
+            </div>
+            <div className="mt-auto flex flex-wrap gap-3 pt-8">
+              <Link
+                href="/sdk"
+                className="inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-4 py-2 text-sm font-medium text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
+              >
+                Browse the SDK
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+              <a
+                href="https://docs.vdmnexus.com"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="inline-flex items-center gap-2 rounded-md border border-soft bg-bg/40 px-4 py-2 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
+              >
+                Read the docs
+              </a>
+              <Link
+                href="/inference"
+                className="inline-flex items-center gap-2 rounded-md border border-soft bg-bg/40 px-4 py-2 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
+              >
+                Inference API
+              </Link>
+            </div>
+          </div>
         </FadeIn>
       </div>
     </Section>
