@@ -6,7 +6,7 @@ import { Footer } from "@/components/footer";
 import { AgentProfileView } from "@/components/agent-profile-view";
 import { SignOutButton } from "@/components/sign-out-button";
 import { loadAgentProfile } from "@/lib/agent";
-import { getSessionPubkey } from "@/lib/session";
+import { getSessionPubkey, isSessionConfigured } from "@/lib/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,6 +18,11 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardPage() {
+  // If the HMAC key isn't set we can't honour any session cookie —
+  // punt to /sign-in, which renders its own "being configured" notice
+  // in that case.
+  if (!isSessionConfigured()) redirect("/sign-in");
+
   const pubkey = await getSessionPubkey();
   if (!pubkey) redirect("/sign-in");
 

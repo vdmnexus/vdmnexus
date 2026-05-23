@@ -4,6 +4,7 @@ import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 import { FadeIn } from "@/components/fade-in";
 import { Card } from "@/components/card";
+import { isSessionConfigured } from "@/lib/session";
 
 export const metadata: Metadata = {
   title: "Mission Control — VDM Nexus",
@@ -13,6 +14,12 @@ export const metadata: Metadata = {
 };
 
 export default function ConsoleHomePage() {
+  // Server component — env reads happen at render time. When the HMAC
+  // key isn't set, the sign-in flow is unavailable, so we hide the
+  // primary CTA rather than send visitors into a "being configured"
+  // page from the home screen.
+  const signInAvailable = isSessionConfigured();
+
   return (
     <main className="relative min-h-screen">
       <div
@@ -35,15 +42,21 @@ export default function ConsoleHomePage() {
             Receipts, balance, reputation, ERC-8004 card — in one place.
           </p>
           <div className="mt-7 flex flex-wrap gap-3 text-sm">
-            <Link
-              href="/sign-in"
-              className="inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-4 py-2 font-medium text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
-            >
-              Sign in to your dashboard →
-            </Link>
+            {signInAvailable ? (
+              <Link
+                href="/sign-in"
+                className="inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-4 py-2 font-medium text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
+              >
+                Sign in to your dashboard →
+              </Link>
+            ) : null}
             <a
               href="https://vdmnexus.com/agents"
-              className="inline-flex items-center gap-2 rounded-md border border-soft bg-surface/60 px-4 py-2 font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
+              className={
+                signInAvailable
+                  ? "inline-flex items-center gap-2 rounded-md border border-soft bg-surface/60 px-4 py-2 font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
+                  : "inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-4 py-2 font-medium text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
+              }
             >
               Browse agents directory
             </a>
