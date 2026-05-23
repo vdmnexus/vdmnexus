@@ -19,7 +19,7 @@ import type {
   PaymentPayload,
   PaymentRequired,
 } from "@x402/core/types";
-import { registerExactSvmScheme } from "@x402/svm/exact/client";
+import { ExactSvmScheme } from "@x402/svm/exact/client";
 import { toClientSvmSigner } from "@x402/svm";
 import type {
   SirX402,
@@ -77,18 +77,43 @@ function encodeHeader(obj: unknown): string {
   return Buffer.from(JSON.stringify(obj), "utf8").toString("base64");
 }
 
+export type X402AgentOptions = {
+  /**
+   * Custom Solana RPC URL used when building SPL transfer payloads.
+   * Defaults to whichever endpoint `@x402/svm` falls back to per network
+   * (the public `api.mainnet-beta.solana.com`, which is aggressively
+   * rate-limited). Pass a Helius / Triton / QuickNode URL when running
+   * mainnet flows from a public network, otherwise `payAndInfer` may
+   * fail with a `429 Too Many Requests` on the mint lookup.
+   *
+   * If unset, also reads the `SOLANA_RPC_URL` env var so server-side
+   * callers can configure it without touching the agent constructor.
+   */
+  rpcUrl?: string;
+};
+
 export class X402Agent extends Agent {
   private _x402: x402Client | null = null;
+  private readonly _rpcUrl: string | undefined;
+
+  constructor(secretKey: Uint8Array, options: X402AgentOptions = {}) {
+    super(secretKey);
+    this._rpcUrl =
+      options.rpcUrl?.trim() || process.env.SOLANA_RPC_URL?.trim() || undefined;
+  }
 
   /** Create a fresh agent with a new Ed25519 keypair. */
-  static override generate(): X402Agent {
+  static override generate(options?: X402AgentOptions): X402Agent {
     const base = Agent.generate();
-    return new X402Agent(base.secretKey);
+    return new X402Agent(base.secretKey, options);
   }
 
   /** Restore an agent from its base58-encoded 64-byte secret. */
-  static override fromBase58(secretKeyBase58: string): X402Agent {
-    return new X402Agent(bs58.decode(secretKeyBase58));
+  static override fromBase58(
+    secretKeyBase58: string,
+    options?: X402AgentOptions
+  ): X402Agent {
+    return new X402Agent(bs58.decode(secretKeyBase58), options);
   }
 
   private async getClient(): Promise<x402Client> {
@@ -96,7 +121,12 @@ export class X402Agent extends Agent {
     const kitSigner = await createKeyPairSignerFromBytes(this.secretKey);
     const signer = toClientSvmSigner(kitSigner);
     const client = new x402Client();
-    registerExactSvmScheme(client, { signer });
+    // Register the scheme directly (bypassing `registerExactSvmScheme`
+    // which doesn't expose the rpcUrl). When `_rpcUrl` is unset the
+    // scheme falls back to @x402/svm's per-network defaults, matching
+    // the previous behaviour.
+    const config = this._rpcUrl ? { rpcUrl: this._rpcUrl } : undefined;
+    client.register("solana:*", new ExactSvmScheme(signer, config));
     this._x402 = client;
     return client;
   }
@@ -132,7 +162,8 @@ export class X402Agent extends Agent {
     opts: X402ChatRequest
   ): Promise<X402ChatResponse> {
     const base = endpoint.replace(/\/$/, "");
-    const url = `${base}/chat/completions`;
+    const query = opts.via ? `?via=${encodeURIComponent(opts.via)}` : "";
+    const url = `${base}/chat/completions${query}`;
     const requestBody = JSON.stringify({
       model: opts.model,
       messages: opts.messages,

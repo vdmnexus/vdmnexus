@@ -7,6 +7,9 @@ import { canonicalize, signReceipt } from "@/lib/receipts";
 import { getAgentStats } from "@/lib/points";
 import {
   getFacilitator,
+  getCdpFacilitator,
+  getCdpFeePayer,
+  CdpFacilitatorNotConfiguredError,
   FacilitatorNotConfiguredError,
 } from "@/lib/x402-facilitator";
 import {
@@ -264,11 +267,50 @@ export async function POST(req: NextRequest) {
   const amountUsdc = getFlatPriceUsdc();
   const resource = getResource(req);
 
+  // Read the facilitator selector up front. `?via=cdp` forces both the
+  // challenge (which fee-payer to declare in `extra`) and the later
+  // settle path to align on Coinbase's facilitator. Default route still
+  // declares our own deposit as fee-payer (matching the self-hosted
+  // facilitator that signs on our behalf).
+  const facilitatorChoice = new URL(req.url).searchParams
+    .get("via")
+    ?.trim()
+    .toLowerCase();
+  const useCdp = facilitatorChoice === "cdp";
+
+  // When routing through CDP, ask their `/supported` endpoint which
+  // signer they want to manage the fee-payer slot. Declaring our own
+  // address (the self-hosted default) gets the payload rejected with
+  // `feePayer not managed` — CDP co-signs as fee-payer themselves.
+  let feePayer: string | undefined;
+  if (useCdp) {
+    try {
+      feePayer = await getCdpFeePayer(network);
+      log.info({
+        event: "chat.cdp_fee_payer_resolved",
+        request_id,
+        network,
+        fee_payer: feePayer,
+      });
+    } catch (e) {
+      log.error({
+        event: "chat.cdp_fee_payer_lookup_failed",
+        request_id,
+        network,
+        reason: e instanceof Error ? e.message : "unknown",
+      });
+      return err("cdp_fee_payer_lookup_failed", 502, {
+        detail: e instanceof Error ? e.message : "unknown",
+      });
+    }
+  }
+
   const challenge = buildChallenge({
     amountUsdc,
     payTo: recipient,
     network,
     resource,
+    ...(feePayer ? { feePayer } : {}),
   });
   const requirement = challenge.accepts[0];
   if (!requirement) {
@@ -348,15 +390,23 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Facilitator selection — `useCdp` already resolved above when we
+  // built the challenge, so the verify + settle below align on the
+  // same facilitator as the fee-payer declaration.
   let facilitator;
   try {
-    facilitator = await getFacilitator();
+    facilitator = useCdp ? await getCdpFacilitator() : await getFacilitator();
   } catch (e) {
-    if (e instanceof FacilitatorNotConfiguredError) {
+    if (
+      e instanceof FacilitatorNotConfiguredError ||
+      e instanceof CdpFacilitatorNotConfiguredError
+    ) {
       log.error({
         event: "chat.server_misconfigured",
         request_id,
-        reason: "facilitator_unconfigured",
+        reason: useCdp
+          ? "cdp_facilitator_unconfigured"
+          : "facilitator_unconfigured",
         detail: e.message,
       });
       return err("server_misconfigured", 500, { detail: e.message });
@@ -364,12 +414,18 @@ export async function POST(req: NextRequest) {
     log.error({
       event: "chat.facilitator_init_failed",
       request_id,
+      via: useCdp ? "cdp" : "default",
       reason: e instanceof Error ? e.message : "unknown",
     });
     return err("facilitator_init_failed", 500, {
       detail: e instanceof Error ? e.message : "unknown",
     });
   }
+  log.info({
+    event: "chat.facilitator_selected",
+    request_id,
+    via: useCdp ? "cdp" : "default",
+  });
   let verified;
   try {
     verified = await facilitator.verify(payload, requirement);

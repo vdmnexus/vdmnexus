@@ -324,259 +324,75 @@ only the service role touches them, server-side from `apps/nexus`.
 
 ## Environment variables
 
-### `apps/web/.env.local`
+Full schemas with inline comments live in `apps/web/.env.example` and `apps/nexus/.env.example`. Sketch below.
 
-```
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-IP_HASH_SALT=
-ADMIN_PASSWORD=          # protects /admin/* and admin write endpoints
-RESEND_API_KEY=          # optional
-RESEND_FROM=             # optional, e.g. hello@vdmnexus.com
-SLACK_WEBHOOK_URL=       # optional
-```
+**`apps/web`** — `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `IP_HASH_SALT`, `ADMIN_PASSWORD` (gates `/admin/*` + admin write endpoints). Optional: `RESEND_API_KEY`, `RESEND_FROM`, `SLACK_WEBHOOK_URL`.
 
-### `apps/nexus/.env`
+**`apps/nexus`** — grouped:
 
-```
-SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=
-OPENROUTER_API_KEY=
-NEXUS_DEPOSIT_ADDRESS=               # Solana pubkey agents send USDC to.
-                                     # When NEXUS_KMS_KEY_ID is set, MUST
-                                     # match the KMS-derived address — the
-                                     # facilitator fails closed on mismatch.
-NEXUS_DEPOSIT_SECRET_KEY=            # Fallback signing key — used only when
-                                     # NEXUS_KMS_KEY_ID is unset. Dev only.
-CRON_SECRET=                         # required by /api/v1/deposits/scan
-SOLANA_NETWORK=mainnet-beta          # mainnet-beta in production, devnet for local
-SOLANA_RPC_URL=                      # optional; defaults to public RPC
-NEXUS_USDC_MINT=                     # optional override (test mints)
-NEXUS_DEPOSIT_SCAN_LIMIT=50          # optional
-NEXUS_REQUEST_MAX_AGE_SECONDS=60     # optional
-
-# Base (EVM) support
-BASE_NETWORK=mainnet                 # mainnet | sepolia
-BASE_RPC_URL=                        # required when BASE_NETWORK is set
-BASE_DEPOSIT_ADDRESS=                # 0x… address agents send USDC to on Base
-BASE_FACILITATOR_PRIVATE_KEY=        # fee payer for ERC-3009 settlements
-BASE_USDC_ADDRESS=                   # optional override; sensible defaults per network
-
-# Mainnet-ready controls
-NEXUS_KILL_SWITCH=                   # "true" → all paid routes return 503
-NEXUS_ALLOWLIST_ONLY=                # "true" → only agents.allowlisted=true can pay
-NEXUS_DAILY_SPEND_CAP_USDC=          # per-agent USDC ceiling per UTC day
-
-# x402-gated /chat/completions
-X402_FLAT_PRICE_USDC=0.01            # flat fee declared in the 402 challenge
-X402_NETWORK=solana:devnet           # CAIP-2 — solana:devnet | solana:mainnet
-X402_RECIPIENT_ADDRESS=              # falls back to NEXUS_DEPOSIT_ADDRESS
-NEXUS_FACILITATOR_LOCAL=             # "true" → self-hosted facilitator (preferred)
-X402_FACILITATOR_URL=                # OR remote facilitator URL (CDP, etc.)
-                                     # Public x402.org has no Solana handler yet
-X402_FACILITATOR_API_KEY=            # Bearer token for remote facilitator
-NEXUS_ALLOW_MOCK_FACILITATOR=        # dev-only escape hatch; "true" + no URL/LOCAL → mock
-
-# Facilitator signing — KMS path (preferred for production).
-# When NEXUS_KMS_KEY_ID is set AND NEXUS_FACILITATOR_LOCAL=true, the
-# local facilitator signs via AWS KMS instead of reading
-# NEXUS_DEPOSIT_SECRET_KEY. The KMS key MUST be an Ed25519 asymmetric
-# key (KeySpec=ECC_NIST_EDWARDS25519). IAM principal needs kms:Sign +
-# kms:GetPublicKey + kms:DescribeKey scoped to the key.
-NEXUS_KMS_KEY_ID=                    # full ARN of the Ed25519 KMS key
-NEXUS_KMS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-
-# Receipt signing (required — routes fail-closed if missing)
-NEXUS_OPERATOR_SECRET_KEY=           # base58 64-byte tweetnacl secretKey; generate
-                                     # via nacl.sign.keyPair(). Pubkey is exposed
-                                     # at GET /api/v1/operator-key for verifiers.
-
-# Rate limiting (Upstash Redis; missing both → limiter fails open + warn log once)
-# Code reads UPSTASH_REDIS_REST_URL first, then KV_REST_API_URL — the Vercel
-# Marketplace Upstash integration writes the KV_* names.
-UPSTASH_REDIS_REST_URL=
-UPSTASH_REDIS_REST_TOKEN=
-# KV_REST_API_URL=                   # set automatically by Vercel Marketplace
-# KV_REST_API_TOKEN=                 # set automatically by Vercel Marketplace
-```
-
-Demo script also reads:
-
-```
-NEXUS_ENDPOINT=http://localhost:3001/api/v1
-DEMO_AGENT_SECRET_KEY=               # base58 64 bytes; generated if blank
-DEMO_SEED_USDC=1.00
-```
+- *Core:* `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `OPENROUTER_API_KEY`, `CRON_SECRET`.
+- *Solana:* `SOLANA_NETWORK` (`mainnet-beta` in prod), `SOLANA_RPC_URL`, `NEXUS_DEPOSIT_ADDRESS`, `NEXUS_MAINNET_DEPOSIT_ADDRESS` (override for mainnet), `NEXUS_DEPOSIT_SECRET_KEY` (dev fallback when `NEXUS_KMS_KEY_ID` unset), `NEXUS_USDC_MINT`, `NEXUS_DEPOSIT_SCAN_LIMIT`, `NEXUS_REQUEST_MAX_AGE_SECONDS`, `NEXUS_NETWORK` (default network for `/chat/completions`).
+- *EVM (Base):* `NEXUS_EVM_NETWORK`, `NEXUS_EVM_RPC_URL`, `NEXUS_EVM_PRIVATE_KEY` (fee payer for ERC-3009 settlement).
+- *Mainnet controls:* `NEXUS_MAINNET_ENABLED` (set to `"false"` → all mainnet paid routes 503 with `mainnet.disabled` log), `NEXUS_ALLOWED_AGENTS` (comma-separated payer pubkeys; route 403s non-listed), `NEXUS_MAX_PRICE_USDC` (hard cap on `X402_FLAT_PRICE_USDC` — challenge issuer fails closed if exceeded).
+- *x402 challenge:* `X402_FLAT_PRICE_USDC` (default `0.01`), `X402_NETWORK` (CAIP-2), `X402_RECIPIENT_ADDRESS`. **Pick exactly one facilitator** or the endpoint fails-closed: `NEXUS_FACILITATOR_LOCAL=true` (self-hosted, preferred) | `X402_FACILITATOR_URL` + `X402_FACILITATOR_API_KEY` (remote) | `NEXUS_ALLOW_MOCK_FACILITATOR=true` (dev).
+- *CDP facilitator* (opt-in per-request via `?via=cdp` → indexes settlements in x402 Bazaar / Agentic.Market): `CDP_FACILITATOR_URL`. Auth — pick one: JWT mode with `CDP_FACILITATOR_KEY_NAME` + `CDP_FACILITATOR_PRIVATE_KEY` (PKCS#8 PEM; `\n` escapes accepted), or legacy bearer `CDP_FACILITATOR_API_KEY`.
+- *KMS signing (prod):* `NEXUS_KMS_KEY_ID` (Ed25519 ARN, `ECC_NIST_EDWARDS25519`), `NEXUS_KMS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`. IAM needs `kms:Sign + kms:GetPublicKey + kms:DescribeKey`. Asserts KMS-derived pubkey == `NEXUS_DEPOSIT_ADDRESS` or fails closed.
+- *Receipt signing (required):* `NEXUS_OPERATOR_SECRET_KEY` (base58 64-byte tweetnacl secretKey). Pubkey exposed at `GET /api/v1/operator-key`.
+- *Rate limiting:* `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` (or Vercel Marketplace's `KV_REST_API_URL` / `KV_REST_API_TOKEN`). Missing both → limiter fails open with one-shot warn log.
+- *Demo script:* `NEXUS_ENDPOINT`, `DEMO_AGENT_SECRET_KEY`, `DEMO_SEED_USDC`.
 
 ## Built vs. not built
 
 ### Built
 
-- Ed25519 agent identity (Solana-compatible)
-- Signed-request auth with timestamp window + nonce replay protection
-- Off-chain credits ledger (append-only deltas, balance view)
-- OpenRouter passthrough, cost reconciled from upstream `usage`
-- `@vdm-nexus/sdk` — `Agent.generate()`, `Agent.fromBase58()`, `.inference()`
-- Demo script: `pnpm --filter nexus demo` seeds credits, runs three
-  prompts, prints the dropping balance
-- **On-chain deposit detection.** Polls Solana RPC every 2 minutes (Vercel
-  Cron), parses USDC transfers to `NEXUS_DEPOSIT_ADDRESS`, credits the
-  ledger keyed by sender pubkey. Idempotent via unique `tx_signature` index.
-- Public roadmap page (`/roadmap`) on apps/web with live build log + admin
-  editor at `/admin/roadmap`.
-- **x402-gated `/chat/completions` endpoint (spec v2) with self-hosted
-  facilitator.** OpenAI-shape request/response, gated by an x402 v2
-  challenge that uses the canonical types from `@x402/core`. Unpaid POST
-  → 402 with `X-Payment-Required` (`scheme=exact`, CAIP-2
-  `solana:devnet`, USDC, flat 0.01 USDC, includes `resource` info).
-  Paid retry carries `X-Payment` (base64 JSON
-  `{ x402Version, accepted, payload }`); facilitator verifies the SPL
-  transfer, co-signs as fee payer, and broadcasts to Solana; route
-  credits the ledger with the returned `tx_signature` (idempotent via
-  the existing unique index) and runs inference. Response is OpenAI
-  body + `X-Nexus-Receipt` + `X-Payment-Response`. Facilitator is
-  env-driven (`NEXUS_FACILITATOR_LOCAL=true` for in-process self-hosted,
-  `X402_FACILITATOR_URL` for remote, `NEXUS_ALLOW_MOCK_FACILITATOR=true`
-  + nothing else for dev mock). If none is set the endpoint fails-closed
-  with 500 server_misconfigured — no silent acceptance.
-- **Ed25519-signed receipts (`v: 2`).** Both `/v1/inference` and
-  `/v1/chat/completions` emit receipts carrying `nexus_signature` —
-  base58 Ed25519 over the canonical JSON of the receipt (sorted keys,
-  no whitespace, `nexus_signature` field excluded). Operator key is
-  loaded from `NEXUS_OPERATOR_SECRET_KEY` (64-byte tweetnacl
-  secretKey, base58). Pubkey published at `GET /api/v1/operator-key`.
-  Chat-completion receipts also include `payment.pay_to` so verifiers
-  have a trusted recipient anchor for the on-chain check.
-  Shared canonicalize + sign helper lives in `apps/nexus/lib/receipts.ts`.
-- **`verifyReceipt` shipped in `@vdm-nexus/x402` (current `0.4.0`).** End-to-end
-  verifier: recomputes `prompt_hash` + `response_hash`, verifies
-  `nexus_signature` against the operator pubkey (auto-fetched from
-  the endpoint or passed in), and fetches the Solana tx to confirm
-  the USDC transfer landed at `payment.pay_to` and that the first
-  signer matches `agent_pubkey`. Returns `{ ok, checks: { … } }` with
-  five boolean checks (`payment_on_chain_ok` + `payer_matches` are
-  vacuously true on prepaid receipts that have no `payment` field).
-- **Structured JSON logging + per-IP / per-agent rate limiting.** Both
-  inference routes emit `{ ts, level, event, request_id, agent_pubkey?, … }`
-  lines at every meaningful state transition (probe, verify, settle, ledger,
-  inference start/end, response). Shared event vocabulary across
-  `/v1/inference` and `/v1/chat/completions` so Vercel log search spans both.
-  Upstash sliding-window rate limit: 30/min per IP on chat-completions,
-  100/min per agent pubkey on both routes. 429 responses include
-  `X-RateLimit-{Limit,Remaining,Reset}` headers. Fails open with a one-shot
-  `rate_limit.unavailable` warn log when Upstash env vars are absent.
-  Operator docs at `/docs/ops/observability`.
-- **AWS KMS-backed facilitator signing (mainnet + devnet).** When
-  `NEXUS_KMS_KEY_ID` is set, the in-process facilitator signs every
-  Solana tx via `KMS.Sign` (algorithm `ED25519_SHA_512`) instead of an
-  in-memory keypair — the Ed25519 private key never enters lambda
-  memory. Public key derived from `KMS.GetPublicKey` at startup,
-  base58-encoded from the trailing 32 bytes of the SPKI DER; asserts
-  it matches `NEXUS_DEPOSIT_ADDRESS` or fails closed. Code lives in
-  `apps/nexus/lib/kms-signer.ts`; selection happens in
-  `apps/nexus/lib/local-facilitator.ts`.
-- **Mainnet live.** `SOLANA_NETWORK=mainnet-beta` in production. KMS-signed
-  facilitator runs on both Solana mainnet and devnet; deposit cron polls
-  both. Mainnet fee-payer top-up is monitored via a Vercel Cron health
-  check — paged when SOL balance drops below 0.1.
-- **Base (EVM) support.** Mainnet Base (`eip155:8453`) and Base Sepolia
-  (`eip155:84532`) are first-class networks alongside Solana. EVM payments
-  use ERC-3009 `transferWithAuthorization` against USDC; the local
-  facilitator settles via `viem` and a Base fee-payer wallet. Receipts
-  carry the chain id in `payment.network`; `verifyReceipt` switches
-  between Solana RPC and an EVM provider based on that field.
-- **Mainnet-ready API surface.** Per-agent **spend cap** (daily ceiling
-  enforced in the chat-completions route), per-pubkey **allowlist** (opt-in
-  via `agents.allowlisted` column; route 403s when the table is in
-  allowlist-only mode), **kill switch** (`NEXUS_KILL_SWITCH=true` env →
-  all paid routes return 503 with `Retry-After`), and **network selector**
-  (`X-Nexus-Network` request header / `network` body field).
-- **`verify.vdmnexus.com` — hosted verifier SaaS.** Pasted receipt or
-  `/r/[id]` URL → five-check card. Embeddable as iframe at
-  `verify.vdmnexus.com/embed?receipt=<base64>`. Same `verifyReceipt`
-  code path as the `@vdm-nexus/x402` package, no duplication.
-- **`/playground` — live signed-inference console.** Generates an
-  ephemeral agent in-browser (key never leaves the tab), sponsored
-  one-shot credit, hits `/chat/completions` with the resulting key,
-  renders the response + the live receipt card. Zero-signup
-  "see-what-this-is" surface for top-of-funnel.
-- **`/points` — per-agent leaderboard.** Aggregates inferences,
-  cumulative USDC spent, and a verification rate (% of calls whose
-  receipts were verified by a third party) per `agent_pubkey`. Public
-  read; ranks update on each inference write via a Supabase trigger.
-- **`/r/[id]` — receipt permalinks.** Every receipt the agent rail
-  emits is addressable at `vdmnexus.com/r/<short-id>`. OG image
-  rendered on the fly via `@vercel/og` showing prompt hash, model,
-  cost, and the on-chain link. Twitter cards configured.
-- **Gitlawb mirror with agent-paid push.** `gitlawb.com` (sister repo)
-  proxies a git remote, requiring an x402 payment per push. Demo
-  push receipt: `vdmnexus.com/r/749fa37c`. Proves that the paywall
-  package works against a non-LLM resource — anything HTTP can be
-  receipted.
-- **Six published npm packages + two PyPI packages.** As of 2026-05-22:
-  `@vdm-nexus/sdk@0.2.0`, `@vdm-nexus/x402@0.4.0`,
-  `@vdm-nexus/paywall@0.1.0`, `@vdm-nexus/mcp@0.1.0`,
-  `@vdm-nexus/ai-sdk-provider@0.1.0`,
-  `@vdm-nexus/mastra-provider@0.1.0` on npm;
-  `vdm-nexus@0.2.2` and `langchain-vdm-nexus@0.1.0` on PyPI. All
-  MIT, all built via `prepublishOnly tsc` (or `hatch` for Python).
-  `@vdm-nexus/x402@0.3.0` is deprecated on npm — it referenced an
-  unpublished sdk version; consumers should pin to `^0.4.0`.
-  Python SDK first proven live on Solana mainnet at receipt
-  `r/00240cb0-41e1-4adc-a88c-9a11a7ffc959` (2026-05-22).
-- **SIR v2 spec published.** Signed Inference Receipt v2 spec lives
-  under `docs.vdmnexus.com/spec/sir-v2`. Defines the canonical JSON
-  shape, signing rules (sorted keys, no whitespace, exclude
-  `nexus_signature`), and the five verification checks.
-- **Ship-broadcast agent — first agent on Nexus paying its own way
-  per call.** Phase 1 shipped 2026-05-23. `pnpm broadcast-agent <PR#>`
-  drafts X / Farcaster / Telegram / LinkedIn posts via
-  `X402Agent.pay_and_infer` on Solana mainnet — every broadcast draft
-  carries the receipt ID of the LLM call that produced it. The agent
-  reads `agents/ship-broadcast/prompt.md` (locked vocabulary, ten
-  guardrails, output JSON schema), refreshes the "currently shipped"
-  list from npm + PyPI before each run so it can only reference real
-  surfaces, picks a visual (existing VHS tape, silicon code-snippet
-  PNG, or skip), and writes the draft to
-  `marketing/broadcasts/<pr#>-<slug>.md`. Never schedules, never
-  sends — the human approval gate in `marketing/ship-broadcast.md`
-  still owns posting. Acceptance receipts:
-  [`r/2639c835`](https://vdmnexus.com/r/2639c835-1dd3-47a1-84aa-4cb2e3c6ef11)
-  (PR #65), [`r/895d38a9`](https://vdmnexus.com/r/895d38a9-19e3-4d7d-9adc-0f352e3f0769)
-  (PR #66), [`r/c21e59a3`](https://vdmnexus.com/r/c21e59a3-878c-452d-81da-b620d589544d)
-  (docs-skip case). Phase 2 (cron / webhook auto-trigger) deferred.
+**Agent rail.**
+- Ed25519 agent identity (Solana-compatible). Signed-request auth, 30-sec timestamp window, nonce replay protection.
+- Off-chain credits ledger (append-only deltas, balance view).
+- OpenRouter passthrough, cost passed 1:1 from upstream `usage`.
+- On-chain deposit detection — 2-min Vercel Cron polls Solana RPC, parses USDC transfers, credits the ledger by sender. Idempotent via unique `tx_signature` index.
+- x402 v2-gated `/chat/completions` (OpenAI-shape, self-hosted facilitator preferred). Unpaid POST → 402 with `X-Payment-Required`; paid retry's `X-Payment` is verified, co-signed, broadcast; ledger credited with returned `tx_signature` (idempotent). Fails closed if no facilitator configured.
+- Ed25519-signed receipts (`v: 2`). `nexus_signature` is base58 over canonical JSON (sorted keys, no whitespace, signature field excluded). Shared canonicalize+sign in `apps/nexus/lib/receipts.ts`. Operator pubkey at `GET /api/v1/operator-key`.
+- AWS KMS-backed facilitator signing — `KMS.Sign` (`ED25519_SHA_512`); key never enters lambda memory. Code in `apps/nexus/lib/kms-signer.ts`.
+- Structured JSON logging + Upstash sliding-window rate limit (30/min per IP on chat-completions, 100/min per agent pubkey on both routes). 429 responses include `X-RateLimit-*` headers.
+- **Mainnet live** since 2026-05-21 (`SOLANA_NETWORK=mainnet-beta`). KMS-signed facilitator on Solana mainnet + devnet. Fee-payer SOL balance monitored via cron (page < 0.1 SOL).
+- Base (EVM) — Base mainnet (`eip155:8453`) and Sepolia (`eip155:84532`) as first-class networks. ERC-3009 `transferWithAuthorization` against USDC, settled via `viem`. `verifyReceipt` branches on `payment.network`.
+- Mainnet-ready controls: price cap (`NEXUS_MAX_PRICE_USDC` — challenge issuer 500s if `X402_FLAT_PRICE_USDC` exceeds it), payer allowlist (`NEXUS_ALLOWED_AGENTS` comma-list → 403 + `agent.not_allowed` log), mainnet kill switch (`NEXUS_MAINNET_ENABLED="false"` → 503 + `mainnet.disabled` log; testnets stay reachable), per-network deposit override (`NEXUS_MAINNET_DEPOSIT_ADDRESS`), `X-Nexus-Network` selector.
+
+**Verifier + permalinks.**
+- `verifyReceipt` in `@vdm-nexus/x402@0.4.0` — five-check: recompute prompt+response hashes, verify `nexus_signature`, fetch on-chain tx to confirm USDC transfer + payer match. `payment_on_chain_ok` + `payer_matches` are vacuously true on prepaid receipts.
+- `verify.vdmnexus.com` — hosted verifier SaaS, embeddable iframe at `/embed?receipt=<base64>`. Shares the `verifyReceipt` code path.
+- `/r/[id]` receipt permalinks — `@vercel/og` cards with prompt hash, model, cost, on-chain link. Twitter cards configured.
+
+**Marketing/discovery surfaces.**
+- `/playground` — ephemeral in-browser agent, sponsored one-shot credit, live receipt card.
+- `/points` — per-agent leaderboard (inferences, USDC spent, verification rate). Updated via Supabase trigger on inference write.
+- `/roadmap` + admin editor at `/admin/roadmap`.
+- Gitlawb mirror (`gitlawb.com`) — agent-paid `git push` via the paywall package. Demo receipt: `vdmnexus.com/r/749fa37c`. Proves the paywall works against non-LLM resources.
+
+**Agents on the rail.**
+- **Ship-broadcast agent** (Phase 1, 2026-05-23) — first agent that lives on Nexus and pays its own way per call. `pnpm broadcast-agent <PR#>` drafts X / Farcaster / Telegram / LinkedIn posts via `X402Agent.pay_and_infer` on Solana mainnet; every draft footer carries the LLM-call receipt ID. Contract in `agents/ship-broadcast/prompt.md` (locked vocabulary, ten guardrails, JSON schema); orchestrator in `scripts/broadcast-agent.py`. Refreshes the "currently shipped" list from npm + PyPI per call so it can't reference unshipped surfaces. Picks a visual (VHS tape, silicon PNG, or skip). Writes drafts to `marketing/broadcasts/`; never schedules — `marketing/ship-broadcast.md` still owns posting. Acceptance receipts: [`r/2639c835`](https://vdmnexus.com/r/2639c835-1dd3-47a1-84aa-4cb2e3c6ef11) (PR #65 ship), [`r/895d38a9`](https://vdmnexus.com/r/895d38a9-19e3-4d7d-9adc-0f352e3f0769) (PR #66 fix), [`r/c21e59a3`](https://vdmnexus.com/r/c21e59a3-878c-452d-81da-b620d589544d) (docs-skip case). Phase 2 (cron / webhook auto-trigger) deferred.
+
+**Packages (as of 2026-05-22).**
+- npm: `@vdm-nexus/sdk@0.2.0`, `x402@0.4.0`, `paywall@0.1.0`, `mcp@0.1.0`, `ai-sdk-provider@0.1.0`, `mastra-provider@0.1.0`. All MIT, `prepublishOnly tsc`.
+- PyPI: `vdm-nexus@0.2.2`, `langchain-vdm-nexus@0.1.0`. Python SDK first mainnet-live receipt: `r/00240cb0-41e1-4adc-a88c-9a11a7ffc959`.
+- `@vdm-nexus/x402@0.3.0` is **deprecated** — pin `^0.4.0`.
+
+**Spec + demo.**
+- SIR v2 spec at `docs.vdmnexus.com/spec/sir-v2` — canonical JSON shape, signing rules, five verification checks.
+- `pnpm --filter nexus demo` — seeds credits, runs three prompts, prints dropping balance.
 
 ### NOT built — explicit gaps
 
-- **ERC-8004 agent card.** Not published. ERC-8004 went live on
-  Ethereum mainnet 29 Jan 2026. Roadmap item 3.
-- **x402 discovery listings.** Nexus is not on x402 Bazaar,
-  Agentic.Market, x402.direct, or awesome-x402 yet. Roadmap item 2.
-- **Framework adapters.** LangChain, LangGraph, Mastra, Vercel AI SDK,
-  OpenAI Agents SDK, CrewAI, ElizaOS, SendAI Solana Agent Kit, Coinbase
-  AgentKit action provider — all unbuilt. Opt-in sub-packages, not
-  platform mandates.
-- **MiCA legal opinion.** No written memo from a Spanish firm yet. Working
-  position only. Required before any active EU marketing or token launch.
-  Roadmap item 11 (paired with the token block).
-- **`Agent.deposit()` / autonomous top-up.** Deferred until a paying
-  customer asks. Per-call x402 already closes the autonomous loop.
-- **`@vdm-nexus/github-app` (agent-git GitHub App).** Placeholder
-  docs page only. Plan: a GitHub App that gates PR comments / writes
-  on x402 payment, with the receipt posted into the PR body.
-- **Web UI for agent management.** No balance dashboard, no spend
-  history view, no key rotation UI. Operators read the ledger
-  directly from Supabase today.
-- **Third-party security audit.** None scheduled. Receipt format and
-  facilitator code have only been reviewed in-house.
-- **Multi-provider routing intelligence.** OpenRouter is still the
-  only upstream. Per-request decisions on live price + latency + quality
-  come after the agent rail has paying customers.
-- **Markup / pricing strategy.** OpenRouter cost is passed through 1:1.
-  The economic model (subscription, markup, token) is undecided.
+- **ERC-8004 agent card** — roadmap item 3. (Live on Ethereum mainnet 29 Jan 2026.)
+- **x402 discovery listings** — Bazaar, Agentic.Market, x402.direct, awesome-x402. Roadmap item 2.
+- **Framework adapters** — LangChain, LangGraph, Mastra, Vercel AI SDK, OpenAI Agents SDK, CrewAI, ElizaOS, SendAI, Coinbase AgentKit. Opt-in sub-packages.
+- **MiCA legal opinion** — roadmap item 11. Required before active EU marketing or token launch.
+- **`Agent.deposit()` / autonomous top-up** — deferred. Per-call x402 already closes the loop.
+- **`@vdm-nexus/github-app`** — placeholder docs only. Plan: gates PR writes on x402 payment, posts receipt in PR body.
+- **Web UI for agent management** — no balance/spend/key-rotation dashboard. Operators query Supabase directly.
+- **Third-party security audit** — none scheduled.
+- **Multi-provider routing intelligence** — OpenRouter is still the only upstream.
+- **Markup / pricing strategy** — passed through 1:1. Economic model TBD.
 
 ## On-chain payment flow
 
@@ -857,10 +673,3 @@ Rules:
    in the Token block). Until then, marketing is reverse-solicitation-safe:
    founder-led posts, organic discovery, no paid EU campaigns.
 
-## What older commits looked like
-
-Commits `33cd01f..185f30d` contained an Express prototype API, a
-Sophie/RushFiles chat product under `apps/vdmvastgoed`, a shared
-`packages/ui`, and a Docker Compose stack with Postgres/Redis/Caddy. All
-removed in the cleanup commit. Anything from that era is still recoverable
-via `git checkout 185f30d -- <path>`.
