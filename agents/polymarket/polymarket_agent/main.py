@@ -23,6 +23,7 @@ from fastapi import BackgroundTasks, FastAPI, Header, HTTPException
 from fastapi.responses import JSONResponse
 
 from .config import Settings, load_settings
+from .polymarket import check_geoblock
 from .resolver import run_resolve_cycle
 from .scanner import run_scan_cycle
 
@@ -63,6 +64,38 @@ async def health() -> dict:
         "version": "0.1.0",
         "time": datetime.now(timezone.utc).isoformat(),
     }
+
+
+@app.get("/geoblock")
+async def geoblock() -> dict:
+    """Returns the Polymarket geoblock verdict for the bot's egress IP.
+    Useful for verifying Railway deploy region before going live."""
+    status = await check_geoblock()
+    return {
+        "ok": not status.blocked,
+        "blocked": status.blocked,
+        "country": status.country,
+        "region": status.region,
+    }
+
+
+@app.on_event("startup")
+async def _startup_geoblock_preflight() -> None:
+    """Fail loudly at boot if Polymarket would reject our orders."""
+    try:
+        status = await check_geoblock()
+    except Exception as e:
+        log.warning("geoblock pre-flight failed: %s — continuing", e)
+        return
+    if status.blocked:
+        log.error(
+            "GEOBLOCK: country=%s region=%s — Polymarket will reject orders. "
+            "Move the deploy to eu-west-1 (Ireland) or another non-restricted region.",
+            status.country,
+            status.region,
+        )
+    else:
+        log.info("geoblock pre-flight ok: country=%s region=%s", status.country, status.region)
 
 
 @app.post("/scan")

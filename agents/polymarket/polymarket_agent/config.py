@@ -60,6 +60,7 @@ class Settings:
     # secrets
     polymarket_agent_secret_key: str
     polygon_private_key: str | None
+    polymarket_deposit_wallet: str | None
     supabase_url: str
     supabase_service_role_key: str
     webhook_secret: str
@@ -120,6 +121,7 @@ def load_settings(env_path: Path | None = None) -> Settings:
     return Settings(
         polymarket_agent_secret_key=_env_required("POLYMARKET_AGENT_SECRET_KEY"),
         polygon_private_key=_env("POLYGON_PRIVATE_KEY"),
+        polymarket_deposit_wallet=_env("POLYMARKET_DEPOSIT_WALLET"),
         supabase_url=_env_required("SUPABASE_URL"),
         supabase_service_role_key=_env_required("SUPABASE_SERVICE_ROLE_KEY"),
         webhook_secret=_env_required("WEBHOOK_SECRET"),

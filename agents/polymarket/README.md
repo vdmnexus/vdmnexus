@@ -161,6 +161,22 @@ brief, and ship the public dashboard once it comes back blessed.
 
 ---
 
+# Polymarket API surface (May 2026)
+
+The bot integrates against three Polymarket APIs:
+
+| API | URL | Used for | Auth |
+|---|---|---|---|
+| **Gamma** | `gamma-api.polymarket.com` | market discovery + resolution lookup | none |
+| **CLOB** | `clob.polymarket.com` | order placement | EOA signature + L2 HMAC (derived via `create_or_derive_api_key`) |
+| **Geoblock** | `polymarket.com/api/geoblock` | startup pre-flight | none |
+
+Order placement runs the **POLY_1271 deposit-wallet flow**
+(`signature_type=3` in `py-clob-client-v2`). The EOA signs orders;
+the deposit wallet is the funder of record on the ERC-1271 path. The
+older v1 `py-clob-client` (archived 2026-05-11, EOA-as-funder
+pattern) is **not** what this bot uses.
+
 # Phase A — what's built (private agent, no public surface)
 
 The agent itself ships end-to-end. The public dashboard is gated until
@@ -226,32 +242,51 @@ Before the agent can place a single live bet, the operator owes the
 following manual steps. The compliance review above MUST be
 acknowledged first.
 
-## 1. KYC the Polygon wallet on Polymarket
+## 1. KYC the Polygon EOA on Polymarket
 
-The wallet that will hold the betting USDC needs to complete
-Polymarket's KYC flow at https://polymarket.com — this is a
-one-time, manual, identity-verification step. The agent code cannot
-do this for you.
+Polymarket's new-API-user flow (POLY_1271) splits the wallet in two:
 
-Use a wallet that is:
+| Role | What it is | Where it lives |
+|---|---|---|
+| **Signer (EOA)** | Plain Polygon EOA. Signs L1 EIP-712 auth and order payloads. Holds **no** USDC. | `POLYGON_PRIVATE_KEY` |
+| **Funder (Deposit wallet)** | ERC-1271 contract wallet deployed by Polymarket's relayer the first time you log in. Actually holds the USDC. Gasless transactions via the relayer. | `POLYMARKET_DEPOSIT_WALLET` |
+
+Setup:
+
+1. Import the generated EOA private key into MetaMask as a new account
+   named `polymarket-bot`. Switch to Polygon (chain ID 137).
+2. Log in to **https://polymarket.com** with that account — this
+   triggers the relayer to deploy your POLY_1271 deposit wallet.
+3. Complete KYC: email + government ID (passport recommended) +
+   liveness selfie. Approval is usually within minutes.
+4. Find your **deposit wallet address** at
+   **https://polymarket.com/settings**. Copy it into
+   `POLYMARKET_DEPOSIT_WALLET` in your `.env`.
+
+Use an EOA that is:
 
 - **Not** the Nexus deposit address.
 - **Not** the Nexus operator key.
 - **Not** the agent identity key (which only signs Nexus calls).
+- **Not** your personal main account.
 
-This is a dedicated **betting wallet** — its private key goes into
-`POLYGON_PRIVATE_KEY`. Treat it like a hot wallet: minimal funds,
-no other use.
-
-## 2. Fund the betting wallet
+## 2. Fund the **deposit wallet** (not the EOA)
 
 Send $500 USDC (Polygon mainnet, USDC at
-`0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174`) to the betting wallet.
+`0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174`) to the **deposit
+wallet** address from `polymarket.com/settings`, **not** the EOA
+address.
+
+This is the most common pitfall: sending USDC to the EOA means
+Polymarket's CLOB can't see it. The deposit wallet is what's
+funded; the EOA only signs.
+
 The agent's `initial_bankroll_usdc` defaults to 500 in the Supabase
 state row — adjust both if you fund a different amount.
 
-You can verify on Polygonscan; the wallet's USDC balance must be
-≥ stake + Polymarket fees before each bet.
+You can verify on Polygonscan: open the deposit wallet address and
+look at its USDC token balance. The deposit wallet's USDC balance
+must be ≥ stake + Polymarket fees before each bet.
 
 ## 3. Generate a Nexus agent identity for the reasoning calls
 
@@ -287,7 +322,12 @@ the full loop before risking a single USDC.
 When ready, flip `POLYMARKET_DRY_RUN=0` and run again with
 `--max-decisions 1` for a single live bet.
 
-## 5. Deploy to Railway
+## 5. Deploy to Railway in `eu-west-1`
+
+Polymarket's primary CLOB servers are in `eu-west-2` (London), but
+the United Kingdom is **geo-blocked**. The documented closest
+non-restricted region is **`eu-west-1` (Ireland)** — pick that
+region when you create the Railway service.
 
 ```bash
 cd agents/polymarket
@@ -303,7 +343,14 @@ service settings. Verify the deploy with:
 
 ```bash
 curl https://<railway-host>/health
+curl https://<railway-host>/geoblock
 ```
+
+`/geoblock` must return `{ "ok": true, "blocked": false }`. If
+`blocked: true`, the deploy landed in a Polymarket-restricted region
+— move the Railway service to `eu-west-1` before going live. The bot
+also runs this check at startup and logs an error if the egress IP
+is blocked.
 
 ## 6. Wire Vercel Cron
 

@@ -14,9 +14,9 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "supabase>=2.9.0",
     "pydantic>=2.9.0",
-    # Pinned to v1 — v2 (PyPI: py-clob-client-v2 / package name TBD on PyPI)
-    # ships an incompatible API; migrate intentionally when stable.
-    "py-clob-client>=0.21.0,<1.0.0",
+    # Official v2 client — POLY_1271 deposit-wallet flow, gasless via relayer.
+    # v1 (py-clob-client) is on borrowed time (archived 2026-05-11).
+    "py-clob-client-v2>=1.0.0",
 ]
 
 [project.scripts]

@@ -1,18 +1,20 @@
 """Polymarket Gamma + CLOB clients.
 
-Two surfaces are used:
+Three surfaces are used:
   - Gamma API (gamma-api.polymarket.com) — unauthenticated public
     market discovery + metadata. The scanner uses this to find
     candidates.
-  - CLOB API (clob.polymarket.com) — authenticated order placement.
-    Wraps py-clob-client. KYC and L1/L2 credentials must be set up
-    on the configured Polygon wallet before this works for real
-    orders.
+  - CLOB API (clob.polymarket.com) — authenticated order placement
+    via py-clob-client-v2. Uses POLY_1271 (deposit-wallet flow,
+    recommended for new API users): the EOA is the signer, a separate
+    deposit wallet is the funder that actually holds USDC.
+  - Geoblock check (polymarket.com/api/geoblock) — startup pre-flight
+    so the bot fails fast if it ever lands in a blocked region.
 
-Order placement is intentionally feature-gated behind dry_run. The
-default deployment flips dry_run=true so we can prove the scan +
-reason + record-to-Supabase loop without touching real funds. When
-the founder is ready to flip live, set POLYMARKET_DRY_RUN=0.
+Order placement is feature-gated behind dry_run. The default
+deployment flips dry_run=true so we can prove the scan + reason +
+record-to-Supabase loop without touching real funds. When the
+founder is ready to flip live, set POLYMARKET_DRY_RUN=0.
 """
 
 from __future__ import annotations
@@ -209,20 +211,31 @@ async def place_order(
             shares=None,
             failure_reason="POLYGON_PRIVATE_KEY not set — cannot place live order",
         )
+    if not settings.polymarket_deposit_wallet:
+        return OrderResult(
+            success=False,
+            order_id=None,
+            tx_hash=None,
+            shares=None,
+            failure_reason=(
+                "POLYMARKET_DEPOSIT_WALLET not set — deploy the deposit "
+                "wallet by logging into polymarket.com once, then copy the "
+                "address from polymarket.com/settings"
+            ),
+        )
 
     try:
         # Imported lazily — only needed for live orders. Keeps the
         # scan-only / dry-run path importable without the SDK.
-        from py_clob_client.client import ClobClient
-        from py_clob_client.clob_types import OrderArgs, OrderType
-        from py_clob_client.order_builder.constants import BUY
+        from py_clob_client_v2 import ClobClient, OrderArgs, PartialCreateOrderOptions
+        from py_clob_client_v2.order_builder.constants import BUY
     except ImportError as e:
         return OrderResult(
             success=False,
             order_id=None,
             tx_hash=None,
             shares=None,
-            failure_reason=f"py-clob-client not installed: {e}",
+            failure_reason=f"py-clob-client-v2 not installed: {e}",
         )
 
     token_id = _pick_token_id(market, side)
@@ -238,24 +251,30 @@ async def place_order(
     shares = stake_usdc / price if price > 0 else 0.0
 
     try:
-        client = ClobClient(
-            settings.clob_url,
-            key=settings.polygon_private_key,
+        # First instantiate without creds to derive the L2 API key, then
+        # re-instantiate with creds + funder + signature_type=3 (POLY_1271).
+        bootstrap = ClobClient(
+            host=settings.clob_url,
             chain_id=137,  # Polygon mainnet
+            key=settings.polygon_private_key,
         )
-        # Derive + cache API credentials (L2 HMAC) if not already present.
-        # py-clob-client persists these via set_api_creds(create_or_derive_api_creds()).
-        creds = client.create_or_derive_api_creds()
-        client.set_api_creds(creds)
+        creds = bootstrap.create_or_derive_api_key()
 
-        order_args = OrderArgs(
-            price=price,
-            size=shares,
-            side=BUY,
-            token_id=token_id,
+        client = ClobClient(
+            host=settings.clob_url,
+            chain_id=137,
+            key=settings.polygon_private_key,
+            creds=creds,
+            signature_type=3,  # POLY_1271 deposit-wallet flow
+            funder=settings.polymarket_deposit_wallet,
         )
-        signed = client.create_order(order_args)
-        resp = client.post_order(signed, OrderType.GTC)
+
+        tick_size = _market_tick_size(market)
+        neg_risk = bool(market.raw.get("negRisk") or market.raw.get("neg_risk"))
+        resp = client.create_and_post_order(
+            OrderArgs(token_id=token_id, price=price, size=shares, side=BUY),
+            options=PartialCreateOrderOptions(tick_size=tick_size, neg_risk=neg_risk),
+        )
     except Exception as e:
         return OrderResult(
             success=False,
@@ -265,7 +284,7 @@ async def place_order(
             failure_reason=f"clob error: {type(e).__name__}: {e}",
         )
 
-    if not isinstance(resp, dict) or not resp.get("success"):
+    if not isinstance(resp, dict) or not resp.get("success", True):
         return OrderResult(
             success=False,
             order_id=None,
@@ -275,11 +294,19 @@ async def place_order(
         )
     return OrderResult(
         success=True,
-        order_id=resp.get("orderID") or resp.get("orderId"),
+        order_id=resp.get("orderID") or resp.get("orderId") or resp.get("id"),
         tx_hash=resp.get("transactionHash") or resp.get("txHash"),
         shares=shares,
         failure_reason=None,
     )
+
+
+def _market_tick_size(market: Market) -> str:
+    """Tick size from the market metadata, defaulting to 0.01."""
+    raw = market.raw.get("orderPriceMinTickSize") or market.raw.get("tickSize")
+    if raw is None:
+        return "0.01"
+    return str(raw)
 
 
 def _pick_token_id(market: Market, side: str) -> str | None:
@@ -304,6 +331,34 @@ def _pick_token_id(market: Market, side: str) -> str | None:
     if isinstance(raw_ids, list) and len(raw_ids) >= 2:
         return str(raw_ids[0]) if target == "YES" else str(raw_ids[1])
     return None
+
+
+# ---------- Geoblock pre-flight ----------
+
+
+@dataclass
+class GeoblockStatus:
+    blocked: bool
+    country: str
+    region: str
+    raw: dict[str, Any]
+
+
+async def check_geoblock(_settings: Settings | None = None) -> GeoblockStatus:
+    """Hit polymarket.com/api/geoblock from the bot's egress IP.
+    Blocked statuses fail the bot startup so we never silently send
+    orders that the CLOB will reject."""
+    url = "https://polymarket.com/api/geoblock"
+    async with httpx.AsyncClient(timeout=15.0) as client:
+        r = await client.get(url)
+        r.raise_for_status()
+        payload = r.json()
+    return GeoblockStatus(
+        blocked=bool(payload.get("blocked")),
+        country=str(payload.get("country") or ""),
+        region=str(payload.get("region") or ""),
+        raw=payload,
+    )
 
 
 # ---------- Resolution lookup ----------
