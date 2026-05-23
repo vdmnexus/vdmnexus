@@ -22,28 +22,90 @@ function truncateMiddle(s: string, head = 6, tail = 6): string {
   return `${s.slice(0, head)}…${s.slice(-tail)}`;
 }
 
-async function loadPromptAndId(id: string): Promise<{
-  prompt: string;
+type Loaded = {
   id: string;
-} | null> {
+  prompt: string;
+  model: string | null;
+  cost_usdc: number | null;
+  network: string | null;
+  agent_pubkey: string | null;
+};
+
+async function loadReceipt(id: string): Promise<Loaded | null> {
   try {
     const supabase = getServiceClient();
-    const { data } = await supabase
+    // Try the playground table first (10-char short ids; prompt + response
+    // are public there).
+    const { data: pg } = await supabase
       .from("playground_receipts")
-      .select("id, prompt")
+      .select("id, prompt, receipt")
       .eq("id", id)
       .maybeSingle();
-    if (!data) return null;
-    return { prompt: String(data.prompt ?? ""), id: String(data.id) };
+    if (pg) {
+      const receipt = (pg.receipt ?? {}) as Record<string, unknown>;
+      const payment = receipt.payment as { network?: unknown } | undefined;
+      return {
+        id: String(pg.id),
+        prompt: String(pg.prompt ?? ""),
+        model: typeof receipt.model === "string" ? receipt.model : null,
+        cost_usdc:
+          typeof receipt.cost_usdc === "number" ? receipt.cost_usdc : null,
+        network:
+          payment && typeof payment.network === "string"
+            ? payment.network
+            : null,
+        agent_pubkey:
+          typeof receipt.agent_pubkey === "string"
+            ? receipt.agent_pubkey
+            : null,
+      };
+    }
+    // Fall back to inference_logs (UUID ids; hashes-only — no prompt body).
+    const { data: log } = await supabase
+      .from("inference_logs")
+      .select("id, model, cost_usdc, receipt_json, agent_pubkey")
+      .eq("id", id)
+      .eq("status", "success")
+      .maybeSingle();
+    if (log) {
+      const receipt = (log.receipt_json ?? {}) as Record<string, unknown>;
+      const payment = receipt.payment as { network?: unknown } | undefined;
+      return {
+        id: String(log.id),
+        prompt: "",
+        model: (log.model as string | null) ?? null,
+        cost_usdc: log.cost_usdc != null ? Number(log.cost_usdc) : null,
+        network:
+          payment && typeof payment.network === "string"
+            ? payment.network
+            : null,
+        agent_pubkey: (log.agent_pubkey as string | null) ?? null,
+      };
+    }
+    return null;
   } catch {
     return null;
   }
 }
 
+function networkBadge(network: string | null): string {
+  if (!network) return "devnet";
+  const lower = network.toLowerCase();
+  if (lower.includes("devnet") || lower.includes("etwtrabz")) return "devnet";
+  if (lower.startsWith("solana:")) return "mainnet";
+  if (lower === "eip155:84532") return "base sepolia";
+  if (lower === "eip155:8453") return "base";
+  return network;
+}
+
 export async function generateReceiptOgImage(id: string): Promise<ImageResponse> {
-  const row = await loadPromptAndId(id);
+  const row = await loadReceipt(id);
   const prompt = row?.prompt ?? "";
   const displayId = row?.id ?? id;
+  const model = row?.model ?? null;
+  const cost = row?.cost_usdc ?? null;
+  const network = networkBadge(row?.network ?? null);
+  const isMainnetCard = network === "mainnet" || network === "base";
 
   return new ImageResponse(
     (
@@ -54,14 +116,14 @@ export async function generateReceiptOgImage(id: string): Promise<ImageResponse>
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: "72px 80px",
+          padding: "60px 72px",
           backgroundColor: BG,
-          backgroundImage: `radial-gradient(ellipse at top left, ${INDIGO}22 0%, ${BG}00 55%), radial-gradient(ellipse at bottom right, #3b82f622 0%, ${BG}00 55%)`,
+          backgroundImage: `radial-gradient(ellipse at top left, ${INDIGO}30 0%, ${BG}00 55%), radial-gradient(ellipse at bottom right, #3b82f628 0%, ${BG}00 55%)`,
           fontFamily: "Inter, system-ui, sans-serif",
           color: TEXT,
         }}
       >
-        {/* Top row: brand */}
+        {/* Top: brand + network badge */}
         <div
           style={{
             display: "flex",
@@ -71,15 +133,27 @@ export async function generateReceiptOgImage(id: string): Promise<ImageResponse>
         >
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <BrandMark />
-            <div
-              style={{
-                fontSize: 28,
-                fontWeight: 600,
-                letterSpacing: -0.4,
-                color: TEXT,
-              }}
-            >
-              VDM Nexus
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <div
+                style={{
+                  fontSize: 26,
+                  fontWeight: 600,
+                  letterSpacing: -0.4,
+                  color: TEXT,
+                }}
+              >
+                VDM Nexus
+              </div>
+              <div
+                style={{
+                  fontSize: 14,
+                  letterSpacing: 3,
+                  textTransform: "uppercase",
+                  color: MUTED,
+                }}
+              >
+                Signed inference receipt
+              </div>
             </div>
           </div>
           <div
@@ -88,14 +162,16 @@ export async function generateReceiptOgImage(id: string): Promise<ImageResponse>
               alignItems: "center",
               gap: 10,
               padding: "8px 14px",
-              border: `1px solid ${INDIGO}66`,
+              border: `1px solid ${
+                isMainnetCard ? "#fbbf2466" : "#34d39966"
+              }`,
               borderRadius: 999,
-              backgroundColor: `${INDIGO}1a`,
-              color: TEXT,
-              fontSize: 18,
-              letterSpacing: 2,
+              backgroundColor: isMainnetCard ? "#fbbf241a" : "#34d3991a",
+              color: isMainnetCard ? "#fcd34d" : "#6ee7b7",
+              fontSize: 16,
+              letterSpacing: 2.5,
               textTransform: "uppercase",
-              fontWeight: 500,
+              fontWeight: 600,
             }}
           >
             <span
@@ -103,48 +179,87 @@ export async function generateReceiptOgImage(id: string): Promise<ImageResponse>
                 width: 8,
                 height: 8,
                 borderRadius: 999,
-                backgroundColor: INDIGO,
+                backgroundColor: isMainnetCard ? "#fcd34d" : "#34d399",
                 display: "block",
               }}
             />
-            Signed inference receipt
+            {network}
           </div>
         </div>
 
-        {/* Middle: prompt */}
+        {/* Middle: model headline + cost */}
         <div
           style={{
             display: "flex",
             flexDirection: "column",
-            gap: 18,
+            gap: 20,
           }}
         >
-          <div
-            style={{
-              fontSize: 16,
-              letterSpacing: 3,
-              textTransform: "uppercase",
-              color: MUTED,
-              fontWeight: 500,
-            }}
-          >
-            Prompt
-          </div>
-          <div
-            style={{
-              fontSize: 44,
-              lineHeight: 1.18,
-              fontWeight: 600,
-              letterSpacing: -0.8,
-              color: TEXT,
-              display: "flex",
-            }}
-          >
-            {`"${truncate(prompt, 110)}"`}
-          </div>
+          {model ? (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                gap: 24,
+                flexWrap: "wrap",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 56,
+                  fontWeight: 700,
+                  letterSpacing: -1,
+                  color: TEXT,
+                  fontFamily:
+                    "ui-monospace, SFMono-Regular, Menlo, monospace",
+                  display: "flex",
+                }}
+              >
+                {truncate(model, 28)}
+              </div>
+              {cost != null ? (
+                <div
+                  style={{
+                    fontSize: 36,
+                    fontWeight: 600,
+                    color: INDIGO,
+                    fontFamily:
+                      "ui-monospace, SFMono-Regular, Menlo, monospace",
+                    display: "flex",
+                  }}
+                >
+                  ${cost.toFixed(6)} USDC
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+          {prompt ? (
+            <div
+              style={{
+                fontSize: 28,
+                lineHeight: 1.3,
+                fontStyle: "italic",
+                color: MUTED,
+                display: "flex",
+              }}
+            >
+              {`"${truncate(prompt, 130)}"`}
+            </div>
+          ) : (
+            <div
+              style={{
+                fontSize: 26,
+                lineHeight: 1.3,
+                color: MUTED,
+                display: "flex",
+              }}
+            >
+              Hash-only receipt — prompt and response never leave the agent.
+            </div>
+          )}
         </div>
 
-        {/* Bottom: id + footer card */}
+        {/* Bottom: id + verify CTA */}
         <div
           style={{
             display: "flex",
@@ -153,7 +268,7 @@ export async function generateReceiptOgImage(id: string): Promise<ImageResponse>
             padding: "20px 28px",
             border: `1px solid ${BORDER}`,
             borderRadius: 16,
-            backgroundColor: `${SURFACE}cc`,
+            backgroundColor: `${SURFACE}e0`,
           }}
         >
           <div
@@ -165,7 +280,7 @@ export async function generateReceiptOgImage(id: string): Promise<ImageResponse>
           >
             <div
               style={{
-                fontSize: 14,
+                fontSize: 13,
                 letterSpacing: 3,
                 textTransform: "uppercase",
                 color: MUTED,
@@ -176,7 +291,7 @@ export async function generateReceiptOgImage(id: string): Promise<ImageResponse>
             <div
               style={{
                 fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-                fontSize: 24,
+                fontSize: 22,
                 color: TEXT,
               }}
             >
@@ -185,22 +300,22 @@ export async function generateReceiptOgImage(id: string): Promise<ImageResponse>
           </div>
           <div
             style={{
-              fontSize: 20,
-              color: MUTED,
               display: "flex",
               alignItems: "center",
               gap: 10,
+              fontSize: 20,
+              color: MUTED,
             }}
           >
             <span>verify at</span>
-            <span style={{ color: TEXT, fontWeight: 600 }}>vdmnexus.com</span>
+            <span style={{ color: TEXT, fontWeight: 600 }}>
+              verify.vdmnexus.com
+            </span>
           </div>
         </div>
       </div>
     ),
-    {
-      ...size,
-    }
+    { ...size }
   );
 }
 

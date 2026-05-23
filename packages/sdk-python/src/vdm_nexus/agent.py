@@ -17,9 +17,23 @@ TaskType = Literal["fast", "reasoning", "general"]
 _DEFAULT_TASK_TYPE: TaskType = "general"
 
 
+class Payment(TypedDict, total=False):
+    scheme: str
+    network: str
+    pay_to: str
+    amount_usdc: float
+    tx_signature: str
+
+
 class Receipt(TypedDict, total=False):
+    # SIR v2 fields — `v`, `nexus_signature`, and (for x402 receipts)
+    # `payment` were missing before 2026-05-23. They've always been on
+    # the wire; the type just didn't reflect them. See the SIR v2 spec
+    # at docs.vdmnexus.com/docs/spec/sir-v2 for the canonical shape.
+    v: int
     agent_pubkey: str
     provider: str
+    upstream: str
     model: str
     cost_usdc: float
     balance_remaining: float
@@ -28,6 +42,8 @@ class Receipt(TypedDict, total=False):
     timestamp: int
     inference_id: Optional[str]
     points_total: int
+    payment: Payment
+    nexus_signature: str
 
 
 class InferenceResponse(TypedDict, total=False):

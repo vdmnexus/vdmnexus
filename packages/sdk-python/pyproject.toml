@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "vdm-nexus"
-version = "0.2.2"
+version = "0.2.3"
 description = "Python SDK for VDM Nexus — autonomous AI agents that authenticate and pay for compute with a Solana keypair. No API keys."
 readme = "README.md"
 license = { text = "MIT" }

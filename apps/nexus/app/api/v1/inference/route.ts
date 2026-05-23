@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createHash } from "node:crypto";
 import { getServiceClient } from "@/lib/supabase";
 import { verifyRequestSignature, isValidPubkey } from "@/lib/solana";
-import { debit, ensureAgent, getBalance } from "@/lib/credits";
+import { ensureAgent, getBalance, tryDebit } from "@/lib/credits";
 import { runInference } from "@/lib/inference";
 import { isTaskType, route, type TaskType } from "@/lib/routing";
 import { recordNonce } from "@/lib/nonces";
@@ -229,12 +229,43 @@ export async function POST(req: NextRequest) {
     completion_tokens: result.completion_tokens,
   });
 
-  await debit(supabase, {
+  // Atomic balance check + debit. Concurrent requests for the same
+  // agent serialize at the database level — no overdraft window.
+  // Returns null when the upstream cost exceeded the live balance
+  // (rare; only happens if the agent burned credits between the
+  // probe and this point, e.g. another in-flight call).
+  const newBalance = await tryDebit(supabase, {
     pubkey,
     usdc: result.cost_usdc,
     reason: "inference",
     nonce,
   });
+
+  if (newBalance === null) {
+    log.warn({
+      event: "inference.debit_insufficient_post_inference",
+      request_id,
+      agent_pubkey: pubkey,
+      cost_usdc: result.cost_usdc,
+    });
+    // The inference already ran (we paid OpenRouter upstream), but the
+    // agent can't cover it. Log the row at status=error so the loss is
+    // visible, but don't sign a receipt that promises the call succeeded.
+    await supabase.from("inference_logs").insert({
+      agent_pubkey: pubkey,
+      request_nonce: nonce,
+      upstream: result.upstream,
+      model: decision.upstreamModel,
+      prompt_tokens: result.prompt_tokens,
+      completion_tokens: result.completion_tokens,
+      cost_usdc: result.cost_usdc,
+      latency_ms: result.latency_ms,
+      status: "error",
+      error: "insufficient_credits_post_debit",
+      points: 0,
+    });
+    return err("insufficient_credits", 402);
+  }
 
   const { data: logRow } = await supabase
     .from("inference_logs")
@@ -252,8 +283,6 @@ export async function POST(req: NextRequest) {
     })
     .select("id")
     .single();
-
-  const newBalance = await getBalance(supabase, pubkey);
 
   log.info({
     event: "ledger.debited",

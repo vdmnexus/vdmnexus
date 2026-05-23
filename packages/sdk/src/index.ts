@@ -6,3 +6,4 @@ export type {
   Receipt,
   TaskType,
 } from "./agent.js";
+export { canonicalize } from "./canonicalize.js";

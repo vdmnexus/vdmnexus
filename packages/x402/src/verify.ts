@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import nacl from "tweetnacl";
 import bs58 from "bs58";
+import { canonicalize } from "@vdm-nexus/sdk";
 import type {
   ChatMessage,
   NexusReceipt,
@@ -42,22 +43,6 @@ export type VerifyReceiptResult = {
     payer_matches: boolean;
   };
 };
-
-function canonicalize(value: unknown): string {
-  if (value === null || typeof value !== "object") return JSON.stringify(value);
-  if (Array.isArray(value)) {
-    return "[" + value.map(canonicalize).join(",") + "]";
-  }
-  const obj = value as Record<string, unknown>;
-  const keys = Object.keys(obj).sort();
-  return (
-    "{" +
-    keys
-      .map((k) => JSON.stringify(k) + ":" + canonicalize(obj[k]))
-      .join(",") +
-    "}"
-  );
-}
 
 function sha256Hex(s: string): string {
   return createHash("sha256").update(s).digest("hex");

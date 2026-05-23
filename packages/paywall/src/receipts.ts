@@ -15,22 +15,15 @@
 
 import bs58 from "bs58";
 import nacl from "tweetnacl";
+import { canonicalize as canonicalizeShared } from "@vdm-nexus/sdk";
 
 const OPERATOR_SECRET_KEY_BYTES = 64;
 
-export function canonicalize(value: unknown): string {
-  if (value === null || typeof value !== "object") return JSON.stringify(value);
-  if (Array.isArray(value)) {
-    return "[" + value.map(canonicalize).join(",") + "]";
-  }
-  const obj = value as Record<string, unknown>;
-  const keys = Object.keys(obj).sort();
-  return (
-    "{" +
-    keys.map((k) => JSON.stringify(k) + ":" + canonicalize(obj[k])).join(",") +
-    "}"
-  );
-}
+// Re-export so paywall consumers keep their existing
+// `import { canonicalize } from "@vdm-nexus/paywall"` lines working.
+// The implementation lives in `@vdm-nexus/sdk` so paywall and x402 can't
+// drift from each other — both packages reference the same bytes.
+export const canonicalize = canonicalizeShared;
 
 const keypairCache = new Map<string, nacl.SignKeyPair>();
 

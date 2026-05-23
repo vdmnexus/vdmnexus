@@ -458,19 +458,18 @@ button:disabled {
   background: var(--text-muted);
 }
 
+/* Green only when mainnet is actively live (receipt in the last 5 min).
+   Quiet / degraded states share the muted dot — the textual label still
+   distinguishes them, and a red dot for "no traffic in the last hour"
+   reads like an outage when it's just an idle window. */
 .status-dot-live {
   background: #34d399;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
 }
 
-.status-dot-degraded {
-  background: #fbbf24;
-  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.16);
-}
-
+.status-dot-degraded,
 .status-dot-down {
-  background: #f43f5e;
-  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.16);
+  background: rgba(148, 163, 184, 0.5);
 }
 
 @media (max-width: 540px) {
