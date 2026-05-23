@@ -371,10 +371,15 @@ async function verifyOnChain(
   return { tx_ok, payer_ok };
 }
 
-function promptToString(p: ChatMessage[] | string): string {
-  return typeof p === "string"
-    ? p
-    : p.map((m) => `${m.role}:${m.content}`).join("\n");
+function promptHashCandidates(p: ChatMessage[] | string): string[] {
+  if (typeof p === "string") return [p];
+  // Canonical JSON is the only safe representation for an array of
+  // {role, content} pairs — a delimited string can collide if content
+  // contains the delimiter. The legacy form is kept as a fallback so
+  // receipts signed before the 2026-05-23 fix still verify.
+  const canonical = canonicalize(p);
+  const legacy = p.map((m) => `${m.role}:${m.content}`).join("\n");
+  return [canonical, legacy];
 }
 
 function responseToString(r: OpenAIChatCompletion | string): string {
@@ -447,9 +452,10 @@ export async function verifySignatureOnly(
 export async function verifyReceipt(
   params: VerifyReceiptParams
 ): Promise<VerifyReceiptResult> {
-  const promptStr = promptToString(params.prompt);
   const respText = responseToString(params.response);
-  const prompt_hash_ok = sha256Hex(promptStr) === params.receipt.prompt_hash;
+  const prompt_hash_ok = promptHashCandidates(params.prompt).some(
+    (s) => sha256Hex(s) === params.receipt.prompt_hash
+  );
   const response_hash_ok = sha256Hex(respText) === params.receipt.response_hash;
 
   let nexus_signature_ok = false;

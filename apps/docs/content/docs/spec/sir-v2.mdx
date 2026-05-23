@@ -290,8 +290,19 @@ in the request body.
 The operator's `/v1/chat/completions` endpoint accepts an OpenAI-shape
 `messages` array.
 
-- `prompt_hash` = SHA-256(`messages.map(m => "${role}:${content}").join("\n")`)
+- `prompt_hash` = SHA-256(canonical JSON of `messages`)
 - `response_hash` = SHA-256(`choices[0].message.content`)
+
+The canonical JSON encoding is the same one used for the
+`nexus_signature` payload (§9): keys sorted lexicographically, no
+whitespace, UTF-8. Hashing a delimited string of `${role}:${content}`
+would let user content containing a `:` or newline collide with a
+structurally different message log; canonical JSON makes the
+representation unambiguous.
+
+Verifiers SHOULD also accept receipts whose `prompt_hash` matches the
+legacy delimited form (`messages.map(m => "${role}:${content}").join("\n")`)
+to remain compatible with receipts signed before 2026-05-23.
 
 If a chat-completion response contains multiple choices, the response
 hash MUST be computed over `choices[0].message.content` only.

@@ -111,8 +111,11 @@ import { createHash } from "node:crypto";
 import nacl from "tweetnacl";
 import bs58 from "bs58";
 
-// 1 + 2: hashes
-const promptStr = messages.map((m) => `${m.role}:${m.content}`).join("\n");
+// 1 + 2: hashes. The x402 variant hashes canonical JSON of `messages` —
+// a delimited string would let user content with a `:` or `\n` collide
+// with a structurally different log. (Receipts signed before 2026-05-23
+// used the legacy delimited form; verifiers should accept both.)
+const promptStr = canonicalize(messages);
 const promptOk =
   createHash("sha256").update(promptStr).digest("hex") === receipt.prompt_hash;
 const respOk =

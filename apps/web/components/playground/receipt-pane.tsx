@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Check, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Receipt = Record<string, unknown> & {
@@ -22,15 +23,18 @@ const HIGHLIGHTED = new Set(Object.keys(TOOLTIPS));
 export function ReceiptPane({ receipt }: { receipt: Receipt | null }) {
   return (
     <div className="flex-1 rounded-2xl border border-soft bg-surface/60 p-5 backdrop-blur sm:p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-medium uppercase tracking-[0.18em] text-text-muted">
           Receipt
         </span>
-        {receipt && (
-          <span className="font-mono text-[11px] text-text-muted">
-            v{String(receipt.v ?? "?")} · signed
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {receipt && (
+            <span className="font-mono text-[11px] text-text-muted">
+              v{String(receipt.v ?? "?")} · signed
+            </span>
+          )}
+          {receipt && <CopyReceiptButton receipt={receipt} />}
+        </div>
       </div>
 
       <div className="mt-3 overflow-x-auto rounded-lg border border-soft bg-bg/60 p-4 font-mono text-[12px] leading-relaxed">
@@ -43,6 +47,42 @@ export function ReceiptPane({ receipt }: { receipt: Receipt | null }) {
         )}
       </div>
     </div>
+  );
+}
+
+function CopyReceiptButton({ receipt }: { receipt: Receipt }) {
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    const text = JSON.stringify(receipt, null, 2);
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      window.prompt("Copy receipt JSON:", text);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      aria-label={copied ? "Receipt JSON copied" : "Copy receipt JSON"}
+      className="inline-flex items-center gap-1 rounded border border-soft bg-bg/60 px-1.5 py-0.5 text-[11px] font-mono text-text-muted transition-colors hover:border-accent-indigo/60 hover:text-text"
+    >
+      {copied ? (
+        <>
+          <Check className="h-3 w-3 text-emerald-300" />
+          copied
+        </>
+      ) : (
+        <>
+          <Copy className="h-3 w-3" />
+          copy
+        </>
+      )}
+    </button>
   );
 }
 

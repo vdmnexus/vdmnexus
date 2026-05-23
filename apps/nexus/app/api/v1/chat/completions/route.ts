@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { getServiceClient } from "@/lib/supabase";
 import { credit, debit, ensureAgent } from "@/lib/credits";
 import { runChatInference, type ChatMessage } from "@/lib/chat-inference";
-import { signReceipt } from "@/lib/receipts";
+import { canonicalize, signReceipt } from "@/lib/receipts";
 import { getAgentStats } from "@/lib/points";
 import {
   getFacilitator,
@@ -205,19 +205,24 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Resolve the effective network: body.network wins if present, else the
-  // env default. This is what lets one deploy serve both devnet traffic
-  // (playground, demos) and mainnet traffic (real agents) from the same
-  // endpoint — the agent picks per call.
+  // Resolve the effective network: `X-Nexus-Network` header wins, then
+  // `network` body field, then the env default. This is what lets one
+  // deploy serve both devnet traffic (playground, demos) and mainnet
+  // traffic (real agents) from the same endpoint — the agent picks per
+  // call, either via a header (handy for OpenAI-client-compat shims that
+  // can't easily edit the body) or via the body field.
+  const networkHeader = req.headers.get("x-nexus-network");
+  const networkInput = networkHeader?.trim() || body.network;
   let network: Network;
-  if (body.network) {
-    const resolved = resolveNetworkInput(body.network);
+  if (networkInput) {
+    const resolved = resolveNetworkInput(networkInput);
     if (!resolved) {
       log.warn({
         event: "chat.body_invalid",
         request_id,
         reason: "unknown_network",
-        requested: body.network,
+        requested: networkInput,
+        source: networkHeader ? "header" : "body",
       });
       return err("invalid_network", 400, {
         detail:
@@ -569,9 +574,10 @@ export async function POST(req: NextRequest) {
     payerWallet
   );
 
-  const promptForHash = body.messages
-    .map((m) => `${m.role}:${m.content}`)
-    .join("\n");
+  // Hash the canonical JSON of the messages array, NOT a delimited string.
+  // A `:` or `\n` inside content can otherwise produce the same hash as a
+  // structurally different message log — a verifier-bypass risk.
+  const promptForHash = canonicalize(body.messages);
   const responseText = result.openaiResponse.choices[0]?.message.content ?? "";
 
   const receipt = signReceipt({

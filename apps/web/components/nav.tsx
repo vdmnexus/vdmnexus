@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { launchLive } from "@/lib/launch-flag";
+import { StatusStrip } from "@/components/status-strip";
 
 type NavDropdownItem = {
   href: string;
@@ -54,10 +55,26 @@ const BUILD_ITEMS: NavDropdownItem[] = [
 
 export function Nav() {
   const pathname = usePathname();
-  const onHome = pathname === "/";
-  const waitlistHref = onHome ? "#waitlist" : "/#waitlist";
+  const waitlistHref = pathname === "/" ? "#waitlist" : "/#waitlist";
   const showLaunch = launchLive();
 
+  return (
+    <>
+      <StatusStrip />
+      <NavHeader pathname={pathname} waitlistHref={waitlistHref} showLaunch={showLaunch} />
+    </>
+  );
+}
+
+function NavHeader({
+  pathname,
+  waitlistHref,
+  showLaunch,
+}: {
+  pathname: string;
+  waitlistHref: string;
+  showLaunch: boolean;
+}) {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-soft bg-bg/70 backdrop-blur">
       <nav className="mx-auto flex h-20 w-full max-w-6xl items-center justify-between px-6">

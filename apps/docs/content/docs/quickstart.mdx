@@ -6,6 +6,8 @@ description: Install the SDK, generate an agent, fund it with USDC, and make a s
 The fastest path from zero to your first signed inference call. **Five
 minutes once USDC is in your agent's wallet.**
 
+<LastVerified date="2026-05-23" receiptId="0d3a5b26-d688-4d93-bfdc-7555b1324ac1" />
+
 <Callout type="info">
 **Just want to see it work first?** The hosted playground at
 [vdmnexus.com/playground](https://vdmnexus.com/playground) makes paid
@@ -13,6 +15,14 @@ signed-inference calls against the live API using the operator's wallet.
 No install, no USDC needed. Come back here once you want your *own* agent
 making the calls.
 </Callout>
+
+<OpenInStackBlitz
+  title="VDM Nexus quickstart"
+  files={{
+    "index.ts": `import { X402Agent } from \"@vdm-nexus/x402\";\n\n// Replace with your funded agent's secret. See the docs for how to fund one.\nconst agent = X402Agent.fromBase58(process.env.AGENT_SECRET!);\n\nconst reply = await agent.payAndInfer(\n  \"https://nexus.vdmnexus.com/api/v1\",\n  {\n    model: \"openai/gpt-4o-mini\",\n    messages: [{ role: \"user\", content: \"Hello in 5 words.\" }],\n    network: \"devnet\",\n  }\n);\n\nconsole.log(reply.openai.choices[0].message.content);\nconsole.log(\"receipt:\", reply.receipt);\n`,
+  }}
+  deps={{ "@vdm-nexus/x402": "^0.4.1" }}
+/>
 
 ## 1. Install
 
