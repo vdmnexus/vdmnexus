@@ -9,7 +9,17 @@ spending real USDC). Mainnet works identically — pass
 `network: "mainnet"` to `payAndInfer` and the payment lands on Solana
 mainnet instead.
 
+<LastVerified date="2026-05-23" receiptId="0d3a5b26-d688-4d93-bfdc-7555b1324ac1" />
+
 ## The full script
+
+<OpenInStackBlitz
+  title="VDM Nexus first payment"
+  files={{
+    "index.ts": `import { X402Agent } from \"@vdm-nexus/x402\";\n\nconst agent = X402Agent.fromBase58(process.env.AGENT_SECRET!);\n\nconst reply = await agent.payAndInfer(\n  \"https://nexus.vdmnexus.com/api/v1\",\n  {\n    model: \"openai/gpt-4o-mini\",\n    messages: [\n      {\n        role: \"user\",\n        content:\n          \"In one sentence, what's the point of a cryptographic receipt on an LLM call?\",\n      },\n    ],\n    network: \"devnet\",\n  }\n);\n\nconsole.log(\"Response:\", reply.openai.choices[0].message.content);\nconsole.log(\"Receipt:\", reply.receipt);\nconsole.log(\"Payment:\", reply.payment);\nconsole.log(\n  \"Solscan:\",\n  \`https://solscan.io/tx/\${reply.payment?.txSignature}?cluster=devnet\`\n);\n`,
+  }}
+  deps={{ "@vdm-nexus/x402": "^0.4.1" }}
+/>
 
 ```ts
 import { X402Agent } from "@vdm-nexus/x402";
