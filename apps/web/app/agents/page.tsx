@@ -301,6 +301,12 @@ export default async function AgentsPage({
             value={`$${formatUsdc(totals.spent_usdc)}`}
           />
         </div>
+        <p className="mt-3 text-xs text-text-muted">
+          Beta — mainnet live since{" "}
+          <span className="text-text">2026-05-21</span>. Numbers grow per
+          call. Filter to <span className="text-text">Mainnet</span> for
+          real-money activity only.
+        </p>
       </section>
 
       <section className="relative mx-auto w-full max-w-6xl px-6 pb-6">
@@ -316,16 +322,25 @@ export default async function AgentsPage({
           <code className="rounded bg-bg/60 px-1.5 py-0.5 font-mono text-[12px] text-text">
             inference_logs
           </code>{" "}
-          table and reflect only successful calls. Click any agent to see
-          their points on{" "}
+          table and reflect only successful calls. Click any agent for
+          their full profile on Mission Control —{" "}
+          <a
+            href="https://console.vdmnexus.com"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="underline decoration-text-muted/40 underline-offset-4 transition-colors hover:text-text hover:decoration-text"
+          >
+            console.vdmnexus.com
+          </a>{" "}
+          — with receipt history, stats, and the ERC-8004 agent card.
+          Per-agent points live at{" "}
           <Link
             href="/points"
             className="underline decoration-text-muted/40 underline-offset-4 transition-colors hover:text-text hover:decoration-text"
           >
             /points
           </Link>
-          . Per-agent profile pages with full receipt history land with{" "}
-          <span className="text-text-muted">Mission Control v0</span>.
+          .
         </p>
       </section>
 
@@ -536,11 +551,15 @@ function RankBadge({ rank, highlight }: { rank: number; highlight: boolean }) {
 }
 
 function AgentIdentity({ row }: { row: AgentRow }) {
+  // Mission Control is the canonical per-agent profile surface now.
+  // Cross-domain link (apps/web → console.vdmnexus.com), so use <a>
+  // rather than Next's <Link>.
   return (
-    <Link
-      href={`/points/${row.pubkey}`}
+    <a
+      href={`https://console.vdmnexus.com/a/${row.pubkey}`}
+      target="_blank"
+      rel="noreferrer noopener"
       className="block min-w-0 transition-colors hover:[&_.pubkey]:text-accent-indigo"
-      prefetch={false}
     >
       <div
         className="pubkey truncate font-mono text-sm text-text transition-colors"
@@ -551,7 +570,7 @@ function AgentIdentity({ row }: { row: AgentRow }) {
       {row.label ? (
         <div className="truncate text-xs text-text-muted">{row.label}</div>
       ) : null}
-    </Link>
+    </a>
   );
 }
 
