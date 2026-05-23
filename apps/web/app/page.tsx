@@ -124,7 +124,6 @@ export default function Home() {
       <Nav />
       <main>
         <Hero />
-        <LiveProof />
         {launchLive() ? <NexusToken /> : null}
         <Audiences />
         <Problem />
