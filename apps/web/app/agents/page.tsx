@@ -49,7 +49,7 @@ const LIVE_TODAY = [
   {
     title: "x402 payment per call",
     body:
-      "Per-request USDC settlement via the x402 protocol. ~$0.01 per inference call. Multi-chain — Solana mainnet and devnet today, Base support shipped.",
+      "Per-request USDC settlement via the x402 protocol. ~$0.01 per inference call plus the receipt fee. Solana mainnet, Base mainnet, and both testnets — all first-class. The CDP facilitator opt-in indexes settlements into x402 Bazaar / Agentic.Market.",
   },
   {
     title: "MCP integration",

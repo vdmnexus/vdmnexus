@@ -15,12 +15,12 @@ import { FadeIn } from "@/components/fade-in";
 export const metadata: Metadata = {
   title: "SDK — VDM Nexus",
   description:
-    "Four MIT-licensed npm packages that power signed inference: @vdm-nexus/sdk for agent identity, @vdm-nexus/x402 for paid calls + receipt verification, @vdm-nexus/paywall for monetizing your own API, and @vdm-nexus/mcp for Claude Desktop / Cursor integration.",
+    "Eight MIT-licensed packages that power signed inference: six on npm (sdk, x402, paywall, mcp, ai-sdk-provider, mastra-provider) and two on PyPI (vdm-nexus, langchain-vdm-nexus). Build agents that sign their own requests, pay per call in USDC, verify receipts, and serve signed inference from any framework.",
   alternates: { canonical: "https://vdmnexus.com/sdk" },
   openGraph: {
     title: "SDK — VDM Nexus",
     description:
-      "Four MIT-licensed npm packages for building, paying for, verifying, and serving signed AI inference.",
+      "Eight MIT-licensed packages — six on npm, two on PyPI — for building, paying for, verifying, and serving signed AI inference.",
     url: "https://vdmnexus.com/sdk",
     siteName: "VDM Nexus",
     type: "website",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     creator: "@vdmnexus",
     title: "SDK — VDM Nexus",
     description:
-      "Four MIT-licensed npm packages for building, paying for, verifying, and serving signed AI inference.",
+      "Eight MIT-licensed packages — six on npm, two on PyPI — for signed AI inference.",
   },
 };
 
@@ -92,6 +92,50 @@ const PACKAGES: Package[] = [
     docs: "https://docs.vdmnexus.com/docs/mcp",
     github: "https://github.com/vdmnexus/vdmnexus/tree/main/packages/mcp-server",
   },
+  {
+    name: "@vdm-nexus/ai-sdk-provider",
+    version: "0.1.0",
+    role: "Vercel AI SDK",
+    body: "Drop-in provider for the Vercel AI SDK. Use Nexus inference inside generateText, streamText, and tool calls without changing your codebase. Every response carries a signed receipt accessible via the provider's metadata.",
+    install: "pnpm add @vdm-nexus/ai-sdk-provider",
+    audience: "Already on the Vercel AI SDK and want signed-inference receipts under the hood.",
+    npm: "https://www.npmjs.com/package/@vdm-nexus/ai-sdk-provider",
+    docs: "https://docs.vdmnexus.com/docs/integrations/vercel-ai-sdk",
+    github: "https://github.com/vdmnexus/vdmnexus/tree/main/packages/ai-sdk-provider",
+  },
+  {
+    name: "@vdm-nexus/mastra-provider",
+    version: "0.1.0",
+    role: "Mastra",
+    body: "Drop-in provider for Mastra. Wire signed inference into Mastra workflows and agents with a single import; receipts thread through each response for downstream verification.",
+    install: "pnpm add @vdm-nexus/mastra-provider",
+    audience: "Running Mastra and want signed-inference receipts on every model call.",
+    npm: "https://www.npmjs.com/package/@vdm-nexus/mastra-provider",
+    docs: "https://docs.vdmnexus.com/docs/integrations/mastra",
+    github: "https://github.com/vdmnexus/vdmnexus/tree/main/packages/mastra-provider",
+  },
+  {
+    name: "vdm-nexus",
+    version: "0.2.2",
+    role: "Python — identity + x402",
+    body: "Python equivalent of @vdm-nexus/sdk + @vdm-nexus/x402. Generate Ed25519 agents, sign requests, pay per call in USDC on Solana or Base, verify any receipt end-to-end. Same SIR v2 format as the TypeScript stack — mix languages freely.",
+    install: "uv add vdm-nexus  # or: pip install vdm-nexus",
+    audience: "Building Python agents that pay per call and verify receipts.",
+    npm: "https://pypi.org/project/vdm-nexus/",
+    docs: "https://docs.vdmnexus.com/docs/python",
+    github: "https://github.com/vdmnexus/vdmnexus/tree/main/packages/sdk-python",
+  },
+  {
+    name: "langchain-vdm-nexus",
+    version: "0.1.0",
+    role: "Python — LangChain",
+    body: "LangChain adapter for Python. Use Nexus signed inference inside LangChain chains, agents, and LCEL pipelines. Receipt metadata is preserved through the LangChain runnable interface so downstream tools can verify what each model call returned.",
+    install: "uv add langchain-vdm-nexus  # or: pip install langchain-vdm-nexus",
+    audience: "Building LangChain agents in Python and want signed-inference receipts on every model call.",
+    npm: "https://pypi.org/project/langchain-vdm-nexus/",
+    docs: "https://docs.vdmnexus.com/docs/integrations/langchain",
+    github: "https://github.com/vdmnexus/vdmnexus/tree/main/packages/sdk-python-langchain",
+  },
 ];
 
 const PRINCIPLES = [
@@ -120,13 +164,15 @@ export default function SdkPage() {
             <FadeIn className="mx-auto max-w-3xl text-center">
               <SectionEyebrow>SDK</SectionEyebrow>
               <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-text sm:text-5xl md:text-6xl">
-                Four packages.{" "}
+                Eight packages.{" "}
                 <span className="text-gradient">One signed-inference stack.</span>
               </h1>
               <p className="mx-auto mt-6 max-w-2xl text-balance text-base text-text-muted sm:text-lg">
-                MIT-licensed npm packages for building agents that sign their
-                own requests, paying per call in USDC, verifying any receipt,
-                and serving signed inference from your own API.
+                Six MIT-licensed packages on npm, two on PyPI. Build agents
+                that sign their own requests, pay per call in USDC on Solana
+                or Base, verify any receipt end-to-end, and serve signed
+                inference from any framework — Vercel AI SDK, Mastra,
+                LangChain, MCP, Express, Hono, Next.js.
               </p>
               <div className="mt-10 flex items-center justify-center gap-3">
                 <a
@@ -158,8 +204,10 @@ export default function SdkPage() {
               Pick the one that matches your role.
             </SectionHeading>
             <p className="mt-4 text-sm leading-relaxed text-text-muted sm:text-base">
-              Use one, use four — they compose without forcing a stack on you.
-              Each is independently published and versioned.
+              Use one, use all eight — they compose without forcing a stack on
+              you. Each is independently published and versioned. Mix
+              TypeScript and Python freely; they speak the same SIR v2
+              receipt format.
             </p>
           </FadeIn>
           <div className="mt-12 grid gap-4 lg:grid-cols-2">
@@ -196,7 +244,7 @@ export default function SdkPage() {
                       rel="noreferrer noopener"
                       className="text-accent-indigo transition-colors hover:text-text"
                     >
-                      npm ↗
+                      {p.npm.includes("pypi.org") ? "pypi" : "npm"} ↗
                     </a>
                     <a
                       href={p.docs}
@@ -225,8 +273,15 @@ export default function SdkPage() {
           <FadeIn className="max-w-2xl">
             <SectionEyebrow>How they fit</SectionEyebrow>
             <SectionHeading className="mt-4">
-              One protocol, four entry points.
+              One protocol, many entry points.
             </SectionHeading>
+            <p className="mt-4 text-sm leading-relaxed text-text-muted sm:text-base">
+              Same SIR v2 receipt format across all eight packages.
+              TypeScript or Python, OpenAI-compatible endpoint or paywall
+              middleware, Vercel AI SDK or Mastra or LangChain or MCP — pick
+              the surface that fits your stack. Receipts are portable across
+              all of them.
+            </p>
           </FadeIn>
           <div className="mt-10">
             <Card className="overflow-hidden p-0">
