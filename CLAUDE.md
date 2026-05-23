@@ -386,7 +386,17 @@ NEXUS_ALLOW_MOCK_FACILITATOR=        # dev-only escape hatch; "true" + no URL/LO
 # MiCA-safe: CDP is the third-party settler, not Nexus — same role as
 # any other remote facilitator.
 CDP_FACILITATOR_URL=                 # default https://api.cdp.coinbase.com/platform/v2/x402
-CDP_FACILITATOR_API_KEY=             # required to enable ?via=cdp
+
+# Auth — pick ONE of the two modes.
+#
+# JWT mode (CDP Secret API Keys, recommended):
+CDP_FACILITATOR_KEY_NAME=            # "organizations/<org>/apiKeys/<key>"
+CDP_FACILITATOR_PRIVATE_KEY=         # PKCS#8 PEM contents (-----BEGIN PRIVATE KEY-----).
+                                     # Vercel collapses newlines; the code accepts both
+                                     # real newlines and `\n` escapes.
+#
+# Legacy bearer mode (single-string token — older CDP API keys):
+CDP_FACILITATOR_API_KEY=             # single bearer string
 
 # Facilitator signing — KMS path (preferred for production).
 # When NEXUS_KMS_KEY_ID is set AND NEXUS_FACILITATOR_LOCAL=true, the
