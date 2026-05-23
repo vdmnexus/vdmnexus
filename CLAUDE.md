@@ -378,6 +378,16 @@ X402_FACILITATOR_URL=                # OR remote facilitator URL (CDP, etc.)
 X402_FACILITATOR_API_KEY=            # Bearer token for remote facilitator
 NEXUS_ALLOW_MOCK_FACILITATOR=        # dev-only escape hatch; "true" + no URL/LOCAL → mock
 
+# CDP facilitator — opt-in per-request via `?via=cdp` on /chat/completions.
+# Routes paid calls through Coinbase's facilitator so they land in the
+# x402 Bazaar / Agentic.Market index (CDP keys indexing off settlements
+# processed by their endpoint, not via a submission form). Default
+# traffic still uses NEXUS_FACILITATOR_LOCAL / X402_FACILITATOR_URL.
+# MiCA-safe: CDP is the third-party settler, not Nexus — same role as
+# any other remote facilitator.
+CDP_FACILITATOR_URL=                 # default https://api.cdp.coinbase.com/platform/v2/x402
+CDP_FACILITATOR_API_KEY=             # required to enable ?via=cdp
+
 # Facilitator signing — KMS path (preferred for production).
 # When NEXUS_KMS_KEY_ID is set AND NEXUS_FACILITATOR_LOCAL=true, the
 # local facilitator signs via AWS KMS instead of reading

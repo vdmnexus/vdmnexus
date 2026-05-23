@@ -82,6 +82,67 @@ export class FacilitatorNotConfiguredError extends Error {
 }
 
 let cached: Promise<FacilitatorClient> | null = null;
+let cdpCached: Promise<FacilitatorClient> | null = null;
+
+/**
+ * CDP facilitator — used for the Bazaar-indexed route variant.
+ *
+ * Distinct from `getFacilitator()` because the route picks per-request:
+ * default traffic goes through whatever the operator configured
+ * (`NEXUS_FACILITATOR_LOCAL` or `X402_FACILITATOR_URL`), while
+ * `?via=cdp` traffic is forced through Coinbase's facilitator so it
+ * shows up in the x402 Bazaar / Agentic.Market index. CDP indexing is
+ * keyed off settlements processed by their facilitator — not via a
+ * submission form — so the only way to land on those surfaces is to
+ * route at least some real paid calls through `api.cdp.coinbase.com`.
+ *
+ * MiCA note: settling through CDP keeps Nexus in the merchant role —
+ * CDP is the third-party settler, not us. Same role we'd be in with
+ * any other remote facilitator. This is materially safer than running
+ * our own facilitator for third-party flows.
+ *
+ * Env:
+ *   - `CDP_FACILITATOR_URL`  (defaults to https://api.cdp.coinbase.com/platform/v2/x402)
+ *   - `CDP_FACILITATOR_API_KEY` (required — CDP rejects unauthenticated
+ *     callers)
+ */
+export class CdpFacilitatorNotConfiguredError extends Error {
+  constructor() {
+    super(
+      "CDP facilitator not configured. Set CDP_FACILITATOR_API_KEY " +
+        "(and optionally CDP_FACILITATOR_URL) to enable the ?via=cdp route."
+    );
+    this.name = "CdpFacilitatorNotConfiguredError";
+  }
+}
+
+const CDP_DEFAULT_URL = "https://api.cdp.coinbase.com/platform/v2/x402";
+
+export function getCdpFacilitator(): Promise<FacilitatorClient> {
+  if (cdpCached) return cdpCached;
+  const apiKey = process.env.CDP_FACILITATOR_API_KEY?.trim();
+  if (!apiKey) {
+    const rejected = Promise.reject(new CdpFacilitatorNotConfiguredError());
+    // Don't cache the rejection — let the next call retry if env changed.
+    return rejected;
+  }
+  const url = process.env.CDP_FACILITATOR_URL?.trim() || CDP_DEFAULT_URL;
+  const createAuthHeaders = async () => {
+    const headers = { Authorization: `Bearer ${apiKey}` };
+    return {
+      verify: headers,
+      settle: headers,
+      supported: headers,
+    };
+  };
+  cdpCached = Promise.resolve(
+    new HTTPFacilitatorClient({
+      url,
+      createAuthHeaders,
+    })
+  );
+  return cdpCached;
+}
 
 export function getFacilitator(): Promise<FacilitatorClient> {
   if (cached) return cached;
@@ -128,4 +189,5 @@ export function getFacilitator(): Promise<FacilitatorClient> {
 /** Test hook — reset the cached facilitator (used by tests). */
 export function _resetFacilitatorCache(): void {
   cached = null;
+  cdpCached = null;
 }

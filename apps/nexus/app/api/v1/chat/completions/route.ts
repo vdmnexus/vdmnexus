@@ -7,6 +7,8 @@ import { canonicalize, signReceipt } from "@/lib/receipts";
 import { getAgentStats } from "@/lib/points";
 import {
   getFacilitator,
+  getCdpFacilitator,
+  CdpFacilitatorNotConfiguredError,
   FacilitatorNotConfiguredError,
 } from "@/lib/x402-facilitator";
 import {
@@ -348,15 +350,31 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Facilitator selection. `?via=cdp` forces settlement through Coinbase's
+  // facilitator so the call lands in the x402 Bazaar / Agentic.Market
+  // index (CDP keys indexing off settlements processed by their endpoint).
+  // Default traffic continues to use whatever the operator configured
+  // (`NEXUS_FACILITATOR_LOCAL` or `X402_FACILITATOR_URL`).
+  const facilitatorChoice = new URL(req.url).searchParams
+    .get("via")
+    ?.trim()
+    .toLowerCase();
+  const useCdp = facilitatorChoice === "cdp";
+
   let facilitator;
   try {
-    facilitator = await getFacilitator();
+    facilitator = useCdp ? await getCdpFacilitator() : await getFacilitator();
   } catch (e) {
-    if (e instanceof FacilitatorNotConfiguredError) {
+    if (
+      e instanceof FacilitatorNotConfiguredError ||
+      e instanceof CdpFacilitatorNotConfiguredError
+    ) {
       log.error({
         event: "chat.server_misconfigured",
         request_id,
-        reason: "facilitator_unconfigured",
+        reason: useCdp
+          ? "cdp_facilitator_unconfigured"
+          : "facilitator_unconfigured",
         detail: e.message,
       });
       return err("server_misconfigured", 500, { detail: e.message });
@@ -364,12 +382,18 @@ export async function POST(req: NextRequest) {
     log.error({
       event: "chat.facilitator_init_failed",
       request_id,
+      via: useCdp ? "cdp" : "default",
       reason: e instanceof Error ? e.message : "unknown",
     });
     return err("facilitator_init_failed", 500, {
       detail: e instanceof Error ? e.message : "unknown",
     });
   }
+  log.info({
+    event: "chat.facilitator_selected",
+    request_id,
+    via: useCdp ? "cdp" : "default",
+  });
   let verified;
   try {
     verified = await facilitator.verify(payload, requirement);
