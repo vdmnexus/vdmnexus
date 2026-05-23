@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { launchLive } from "@/lib/launch-flag";
+import { launchLive, polymarketPublic } from "@/lib/launch-flag";
 import { BetaPill } from "@/components/beta-pill";
 
 type NavDropdownItem = {
@@ -17,7 +17,9 @@ type NavDropdownItem = {
 };
 
 // "Run" — for operators / consumers spending or earning on the rail.
-const RUN_ITEMS: NavDropdownItem[] = [
+// Note: /agents/predictions is appended conditionally inside NavHeader
+// when NEXT_PUBLIC_POLYMARKET_PUBLIC is "true".
+const RUN_ITEMS_BASE: NavDropdownItem[] = [
   {
     href: "/playground",
     label: "Playground",
@@ -39,6 +41,12 @@ const RUN_ITEMS: NavDropdownItem[] = [
     description: "Per-call USDC + receipt fee",
   },
 ];
+
+const PREDICTIONS_NAV_ITEM: NavDropdownItem = {
+  href: "/agents/predictions",
+  label: "Predictions",
+  description: "Live autonomous Polymarket agent",
+};
 
 // "Build" — for developers integrating signed inference into their products.
 const BUILD_ITEMS: NavDropdownItem[] = [
@@ -69,19 +77,32 @@ export function Nav() {
   const pathname = usePathname();
   const waitlistHref = pathname === "/" ? "#waitlist" : "/#waitlist";
   const showLaunch = launchLive();
+  const showPredictions = polymarketPublic();
 
-  return <NavHeader pathname={pathname} waitlistHref={waitlistHref} showLaunch={showLaunch} />;
+  return (
+    <NavHeader
+      pathname={pathname}
+      waitlistHref={waitlistHref}
+      showLaunch={showLaunch}
+      showPredictions={showPredictions}
+    />
+  );
 }
 
 function NavHeader({
   pathname,
   waitlistHref,
   showLaunch,
+  showPredictions,
 }: {
   pathname: string;
   waitlistHref: string;
   showLaunch: boolean;
+  showPredictions: boolean;
 }) {
+  const runItems = showPredictions
+    ? [...RUN_ITEMS_BASE, PREDICTIONS_NAV_ITEM]
+    : RUN_ITEMS_BASE;
   return (
     <header className="sticky top-0 z-50 w-full border-b border-soft bg-bg/70 backdrop-blur">
       <nav className="mx-auto flex h-24 w-full max-w-6xl items-center justify-between px-6">
@@ -102,7 +123,7 @@ function NavHeader({
         </div>
 
         <div className="hidden items-center gap-7 md:flex">
-          <NavDropdown label="Run" items={RUN_ITEMS} pathname={pathname} />
+          <NavDropdown label="Run" items={runItems} pathname={pathname} />
           <NavDropdown label="Build" items={BUILD_ITEMS} pathname={pathname} />
           <NavLink
             href="/receipts"
