@@ -23,6 +23,30 @@ import { getServiceClient } from "@/lib/server-supabase";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// CORS — verify.vdmnexus.com (and any other cross-origin caller) needs
+// to be able to fetch this endpoint. Open to `*` because the data is
+// public read-only verification of receipts that are already public.
+const CORS_HEADERS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "content-type",
+  "Access-Control-Max-Age": "86400",
+};
+
+function corsJson(
+  body: unknown,
+  init?: { status?: number }
+): NextResponse {
+  return NextResponse.json(body, {
+    status: init?.status,
+    headers: CORS_HEADERS,
+  });
+}
+
+export async function OPTIONS(): Promise<NextResponse> {
+  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+}
+
 // Solana tx signatures are base58-encoded 64-byte blobs → ~88 chars.
 const TX_SIGNATURE_REGEX = /^[1-9A-HJ-NP-Za-km-z]{80,100}$/;
 // inference_logs.id is a uuid v4 (8-4-4-4-12 hex with dashes).
@@ -64,7 +88,7 @@ export async function POST(req: NextRequest) {
     body = (await req.json()) as Body;
   } catch {
     log("invalid_json", { request_id: requestId });
-    return NextResponse.json({ error: "invalid_body" }, { status: 400 });
+    return corsJson({ error: "invalid_body" }, { status: 400 });
   }
 
   // --- id-lookup mode ---
@@ -87,11 +111,11 @@ export async function POST(req: NextRequest) {
           endpoint: nexusEndpoint(),
         });
         log("verify.complete", { request_id: requestId, mode: "playground", ok: result.ok });
-        return NextResponse.json(result);
+        return corsJson(result);
       } catch (e) {
         const detail = e instanceof Error ? e.message : String(e);
         log("verify.error", { request_id: requestId, mode: "playground", detail });
-        return NextResponse.json({ error: "verify_error", detail }, { status: 500 });
+        return corsJson({ error: "verify_error", detail }, { status: 500 });
       }
     }
 
@@ -118,7 +142,7 @@ export async function POST(req: NextRequest) {
 
     if (!receiptRow?.receipt_json) {
       log("verify.not_found", { request_id: requestId, id });
-      return NextResponse.json({ error: "not_found" }, { status: 404 });
+      return corsJson({ error: "not_found" }, { status: 404 });
     }
 
     try {
@@ -127,11 +151,11 @@ export async function POST(req: NextRequest) {
         endpoint: nexusEndpoint(),
       });
       log("verify.complete", { request_id: requestId, mode: "sig_only", ok: result.ok });
-      return NextResponse.json({ ...result, mode: "signature_only" });
+      return corsJson({ ...result, mode: "signature_only" });
     } catch (e) {
       const detail = e instanceof Error ? e.message : String(e);
       log("verify.error", { request_id: requestId, mode: "sig_only", detail });
-      return NextResponse.json({ error: "verify_error", detail }, { status: 500 });
+      return corsJson({ error: "verify_error", detail }, { status: 500 });
     }
   }
 
@@ -150,7 +174,7 @@ export async function POST(req: NextRequest) {
       has_prompt: body.prompt !== undefined,
       has_response: body.response !== undefined,
     });
-    return NextResponse.json({ error: "invalid_body" }, { status: 400 });
+    return corsJson({ error: "invalid_body" }, { status: 400 });
   }
 
   try {
@@ -162,10 +186,10 @@ export async function POST(req: NextRequest) {
     } as Parameters<typeof verifyReceipt>[0]);
 
     log("verify.complete", { request_id: requestId, mode: "direct", ok: result.ok });
-    return NextResponse.json(result);
+    return corsJson(result);
   } catch (e) {
     const detail = e instanceof Error ? e.message : String(e);
     log("verify.error", { request_id: requestId, mode: "direct", detail });
-    return NextResponse.json({ error: "verify_error", detail }, { status: 500 });
+    return corsJson({ error: "verify_error", detail }, { status: 500 });
   }
 }
