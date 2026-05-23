@@ -12,6 +12,7 @@ import {
 } from "@/components/section";
 import { Card } from "@/components/card";
 import { FadeIn } from "@/components/fade-in";
+import { BurnPoolCounter } from "@/components/burn-pool-counter";
 import { launchLive } from "@/lib/launch-flag";
 
 export const metadata: Metadata = {
@@ -456,6 +457,9 @@ export default function TokenPage() {
               </FadeIn>
             ))}
           </div>
+          <FadeIn className="mt-12">
+            <BurnPoolCounter />
+          </FadeIn>
         </Section>
 
         <Section>
