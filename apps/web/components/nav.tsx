@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { launchLive } from "@/lib/launch-flag";
-import { StatusStrip } from "@/components/status-strip";
 import { BetaPill } from "@/components/beta-pill";
 
 type NavDropdownItem = {
@@ -66,12 +65,7 @@ export function Nav() {
   const waitlistHref = pathname === "/" ? "#waitlist" : "/#waitlist";
   const showLaunch = launchLive();
 
-  return (
-    <>
-      <StatusStrip />
-      <NavHeader pathname={pathname} waitlistHref={waitlistHref} showLaunch={showLaunch} />
-    </>
-  );
+  return <NavHeader pathname={pathname} waitlistHref={waitlistHref} showLaunch={showLaunch} />;
 }
 
 function NavHeader({
