@@ -1,0 +1,32 @@
+{
+  "name": "console",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3004",
+    "build": "next build",
+    "start": "next start --port 3004",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "bs58": "^6.0.0",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.11.0",
+    "lucide-react": "^0.468.0",
+    "next": "^15",
+    "react": "^19",
+    "react-dom": "^19",
+    "tailwind-merge": "^2.6.0",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10",
+    "postcss": "^8",
+    "tailwindcss": "^3.4",
+    "typescript": "^5"
+  }
+}
