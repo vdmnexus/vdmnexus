@@ -46,8 +46,12 @@ async function main() {
     process.exit(1);
   }
 
-  const agent = X402Agent.fromBase58(SECRET);
+  // SOLANA_RPC_URL is auto-picked up by the constructor (via env) but
+  // we pass it explicitly so the log line below reflects what's in use.
+  const rpcUrl = process.env.SOLANA_RPC_URL?.trim() || undefined;
+  const agent = X402Agent.fromBase58(SECRET, { rpcUrl });
   console.log(`Endpoint:     ${ENDPOINT}`);
+  if (rpcUrl) console.log(`Solana RPC:   ${rpcUrl}`);
   console.log(`Agent pubkey: ${agent.pubkey}`);
   if (NETWORK) console.log(`Network:      ${NETWORK} (per-call override)`);
   if (VIA) console.log(`Facilitator:  via=${VIA}`);
