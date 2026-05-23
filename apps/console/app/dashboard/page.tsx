@@ -7,6 +7,7 @@ import { AgentProfileView } from "@/components/agent-profile-view";
 import { SignOutButton } from "@/components/sign-out-button";
 import { loadAgentProfile } from "@/lib/agent";
 import { getSessionPubkey, isSessionConfigured } from "@/lib/session";
+import { consoleAuthEnabled } from "@/lib/feature-flags";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,6 +19,10 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardPage() {
+  // Product-level soft-gate. While Mission Control sign-in is deferred,
+  // /dashboard punts to /sign-in (which renders the Coming Soon notice).
+  if (!consoleAuthEnabled()) redirect("/sign-in");
+
   // If the HMAC key isn't set we can't honour any session cookie —
   // punt to /sign-in, which renders its own "being configured" notice
   // in that case.

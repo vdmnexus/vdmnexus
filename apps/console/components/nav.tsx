@@ -5,8 +5,23 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { BetaPill } from "@/components/beta-pill";
 
+/**
+ * Whether to render the Sign-in / Dashboard nav items.
+ *
+ * Reads the same `NEXT_PUBLIC_CONSOLE_AUTH_ENABLED` flag the server-side
+ * `consoleAuthEnabled()` reads. Public env vars are inlined into the
+ * client bundle at build time, so this is safe to read here without a
+ * server prop. When the flag is false the Coming Soon home page stands
+ * on its own — there's no benefit to a nav item that just routes to
+ * the same "Coming soon" notice.
+ */
+function authEnabledClient(): boolean {
+  return process.env.NEXT_PUBLIC_CONSOLE_AUTH_ENABLED === "true";
+}
+
 export function Nav() {
   const pathname = usePathname();
+  const showAuthItems = authEnabledClient();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-soft bg-bg/70 backdrop-blur">
@@ -41,9 +56,11 @@ export function Nav() {
           >
             Docs
           </a>
-          <NavLink href="/sign-in" active={pathname === "/sign-in"}>
-            Sign in
-          </NavLink>
+          {showAuthItems ? (
+            <NavLink href="/sign-in" active={pathname === "/sign-in"}>
+              Sign in
+            </NavLink>
+          ) : null}
         </div>
 
         <div className="flex items-center gap-3">
@@ -56,12 +73,21 @@ export function Nav() {
           >
             <XIcon className="h-4 w-4" />
           </a>
-          <Link
-            href="/dashboard"
-            className="rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-3.5 py-1.5 text-xs font-semibold text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30 sm:text-sm"
-          >
-            Dashboard
-          </Link>
+          {showAuthItems ? (
+            <Link
+              href="/dashboard"
+              className="rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-3.5 py-1.5 text-xs font-semibold text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30 sm:text-sm"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <a
+              href="https://vdmnexus.com/agents"
+              className="rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-3.5 py-1.5 text-xs font-semibold text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30 sm:text-sm"
+            >
+              Browse agents
+            </a>
+          )}
         </div>
       </nav>
     </header>
