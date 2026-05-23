@@ -4,6 +4,7 @@ import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 import { getServiceClient } from "@/lib/server-supabase";
 import { VerifyWidget } from "./verify-widget";
+import { TweetReceiptButton } from "./tweet-receipt-button";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -331,6 +332,21 @@ export default async function ReceiptPermalinkPage({
 
       <section className="relative mx-auto w-full max-w-4xl px-6 pb-12">
         <VerifyWidget receiptId={row.id} />
+      </section>
+
+      <section className="relative mx-auto w-full max-w-4xl px-6 pb-12">
+        <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-soft bg-surface/60 p-4 backdrop-blur sm:flex-row sm:items-center sm:p-5">
+          <div className="text-sm text-text-muted">
+            Receipts are the unit of work on Nexus. Share this one.
+          </div>
+          <TweetReceiptButton
+            receiptId={row.id}
+            model={model}
+            costUsdc={typeof costUsdc === "number" ? costUsdc : null}
+            network={paymentNetwork}
+            agentPubkey={agentPubkey || null}
+          />
+        </div>
       </section>
 
       <section className="relative mx-auto w-full max-w-4xl px-6 pb-16">

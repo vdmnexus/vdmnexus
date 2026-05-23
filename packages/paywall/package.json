@@ -67,6 +67,7 @@
     "prepublishOnly": "tsc"
   },
   "dependencies": {
+    "@vdm-nexus/sdk": "workspace:*",
     "@x402/core": "^2.12.0",
     "@x402/svm": "^2.12.0",
     "bs58": "^6.0.0",

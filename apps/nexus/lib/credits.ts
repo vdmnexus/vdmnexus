@@ -42,6 +42,37 @@ export async function debit(
   if (error) throw error;
 }
 
+/**
+ * Atomic balance-check-and-debit for `/v1/inference`. Returns the
+ * post-debit balance, or `null` if the agent doesn't have enough
+ * credits. Calls the `public.try_debit_inference` SECURITY DEFINER
+ * Postgres function, which locks the agents row so concurrent requests
+ * for the same agent serialize — two simultaneous calls can no longer
+ * both pass a balance check and both debit.
+ *
+ * Use this instead of the non-atomic `getBalance()` + `debit()` pattern
+ * for any path that must enforce a hard ceiling.
+ */
+export async function tryDebit(
+  supabase: SupabaseClient,
+  args: {
+    pubkey: string;
+    usdc: number;
+    reason: string;
+    nonce?: string;
+  }
+): Promise<number | null> {
+  const { data, error } = await supabase.rpc("try_debit_inference", {
+    p_agent_pubkey: args.pubkey,
+    p_amount_usdc: args.usdc,
+    p_reason: args.reason,
+    p_nonce: args.nonce ?? null,
+  });
+  if (error) throw error;
+  if (data === null || data === undefined) return null;
+  return Number(data);
+}
+
 export async function credit(
   supabase: SupabaseClient,
   args: {

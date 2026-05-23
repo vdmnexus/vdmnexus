@@ -48,6 +48,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
+    "test": "node --test --import tsx/esm src/__tests__/*.test.ts",
     "prepublishOnly": "tsc"
   },
   "dependencies": {
@@ -56,6 +57,7 @@
   },
   "devDependencies": {
     "@types/node": "^22",
+    "tsx": "^4",
     "typescript": "^5"
   }
 }

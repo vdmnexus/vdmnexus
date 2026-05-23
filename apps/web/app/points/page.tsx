@@ -46,6 +46,49 @@ type Totals = {
   points: number;
 };
 
+type TimeRange = "24h" | "7d" | "30d" | "all";
+type NetworkFilter = "all" | "mainnet";
+
+type Filters = {
+  range: TimeRange;
+  network: NetworkFilter;
+};
+
+const TIME_RANGE_LABELS: Record<TimeRange, string> = {
+  "24h": "24h",
+  "7d": "7 days",
+  "30d": "30 days",
+  all: "All-time",
+};
+
+const TIME_RANGE_MS: Record<Exclude<TimeRange, "all">, number> = {
+  "24h": 24 * 60 * 60 * 1000,
+  "7d": 7 * 24 * 60 * 60 * 1000,
+  "30d": 30 * 24 * 60 * 60 * 1000,
+};
+
+// Same mainnet network filter as /api/recent-receipts and
+// /api/pulse — keeps the "mainnet only" semantics consistent.
+const MAINNET_NETWORK_FILTER = [
+  "receipt_json->payment->>network.like.solana:5eykt%",
+  "receipt_json->payment->>network.eq.solana:mainnet",
+  "receipt_json->payment->>network.eq.eip155:8453",
+].join(",");
+
+function parseFilters(raw: {
+  since?: string | string[];
+  network?: string | string[];
+}): Filters {
+  const sinceVal = Array.isArray(raw.since) ? raw.since[0] : raw.since;
+  const netVal = Array.isArray(raw.network) ? raw.network[0] : raw.network;
+  const range: TimeRange =
+    sinceVal === "24h" || sinceVal === "7d" || sinceVal === "30d"
+      ? sinceVal
+      : "all";
+  const network: NetworkFilter = netVal === "mainnet" ? "mainnet" : "all";
+  return { range, network };
+}
+
 // Cap on raw rows pulled per render. Aggregation happens in JS rather than
 // in PostgREST because the project has `db-aggregates-enabled=false`, which
 // is the Supabase default. Plenty of headroom at current usage; if this
@@ -54,19 +97,33 @@ const RAW_ROW_CAP = 10_000;
 // Top-N shown in the table. The full population still drives the stat row.
 const LEADERBOARD_LIMIT = 100;
 
-async function fetchLeaderboard(): Promise<{
+async function fetchLeaderboard(filters: Filters): Promise<{
   rows: LeaderRow[];
   totals: Totals;
 }> {
   const supabase = getServiceClient();
 
+  let logsQuery = supabase
+    .from("inference_logs")
+    .select("agent_pubkey, points, created_at")
+    .eq("status", "success")
+    .order("created_at", { ascending: false })
+    .limit(RAW_ROW_CAP);
+
+  if (filters.range !== "all") {
+    const cutoff = new Date(Date.now() - TIME_RANGE_MS[filters.range]).toISOString();
+    logsQuery = logsQuery.gte("created_at", cutoff);
+  }
+
+  if (filters.network === "mainnet") {
+    logsQuery = logsQuery
+      .not("receipt_json", "is", null)
+      .not("tx_signature", "is", null)
+      .or(MAINNET_NETWORK_FILTER);
+  }
+
   const [logsRes, agentsRes] = await Promise.all([
-    supabase
-      .from("inference_logs")
-      .select("agent_pubkey, points, created_at")
-      .eq("status", "success")
-      .order("created_at", { ascending: false })
-      .limit(RAW_ROW_CAP),
+    logsQuery,
     supabase.from("agents").select("pubkey, label"),
   ]);
 
@@ -123,8 +180,13 @@ async function fetchLeaderboard(): Promise<{
   return { rows, totals };
 }
 
-export default async function PointsPage() {
-  const { rows, totals } = await fetchLeaderboard();
+export default async function PointsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ since?: string; network?: string }>;
+}) {
+  const filters = parseFilters(await searchParams);
+  const { rows, totals } = await fetchLeaderboard(filters);
 
   return (
     <main className="relative min-h-screen">
@@ -156,6 +218,10 @@ export default async function PointsPage() {
         </div>
       </section>
 
+      <section className="relative mx-auto w-full max-w-6xl px-6 pb-6">
+        <FilterBar filters={filters} />
+      </section>
+
       <section className="relative mx-auto w-full max-w-6xl px-6 pb-24">
         {rows.length === 0 ? (
           <EmptyState />
@@ -185,6 +251,77 @@ export default async function PointsPage() {
 
       <Footer />
     </main>
+  );
+}
+
+function FilterBar({ filters }: { filters: Filters }) {
+  // Filters are URL-driven so they survive a hard reload and can be
+  // linked to. Each pill is a regular <Link>; toggling network preserves
+  // the time range and vice versa.
+  function withFilter(next: Partial<Filters>): string {
+    const merged: Filters = { ...filters, ...next };
+    const params = new URLSearchParams();
+    if (merged.range !== "all") params.set("since", merged.range);
+    if (merged.network !== "all") params.set("network", merged.network);
+    const qs = params.toString();
+    return qs ? `/points?${qs}` : "/points";
+  }
+  const ranges: TimeRange[] = ["24h", "7d", "30d", "all"];
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-soft bg-surface/60 px-4 py-3 backdrop-blur">
+      <div className="flex flex-wrap items-center gap-1">
+        <span className="mr-1 text-[11px] font-medium uppercase tracking-[0.18em] text-text-muted">
+          Range
+        </span>
+        {ranges.map((r) => {
+          const active = filters.range === r;
+          return (
+            <Link
+              key={r}
+              href={withFilter({ range: r })}
+              className={cn(
+                "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+                active
+                  ? "bg-accent-indigo/20 text-text"
+                  : "text-text-muted hover:bg-bg/60 hover:text-text"
+              )}
+              prefetch={false}
+            >
+              {TIME_RANGE_LABELS[r]}
+            </Link>
+          );
+        })}
+      </div>
+      <div className="flex flex-wrap items-center gap-1">
+        <span className="mr-1 text-[11px] font-medium uppercase tracking-[0.18em] text-text-muted">
+          Network
+        </span>
+        <Link
+          href={withFilter({ network: "all" })}
+          className={cn(
+            "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+            filters.network === "all"
+              ? "bg-accent-indigo/20 text-text"
+              : "text-text-muted hover:bg-bg/60 hover:text-text"
+          )}
+          prefetch={false}
+        >
+          All
+        </Link>
+        <Link
+          href={withFilter({ network: "mainnet" })}
+          className={cn(
+            "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+            filters.network === "mainnet"
+              ? "bg-accent-indigo/20 text-text"
+              : "text-text-muted hover:bg-bg/60 hover:text-text"
+          )}
+          prefetch={false}
+        >
+          Mainnet
+        </Link>
+      </div>
+    </div>
   );
 }
 
@@ -296,9 +433,13 @@ function RankBadge({ rank, highlight }: { rank: number; highlight: boolean }) {
 
 function AgentIdentity({ row }: { row: LeaderRow }) {
   return (
-    <div className="min-w-0">
+    <Link
+      href={`/points/${row.agent_pubkey}`}
+      className="block min-w-0 transition-colors hover:[&_.pubkey]:text-accent-indigo"
+      prefetch={false}
+    >
       <div
-        className="truncate font-mono text-sm text-text"
+        className="pubkey truncate font-mono text-sm text-text transition-colors"
         title={row.agent_pubkey}
       >
         {truncatePubkey(row.agent_pubkey)}
@@ -306,7 +447,7 @@ function AgentIdentity({ row }: { row: LeaderRow }) {
       {row.label ? (
         <div className="truncate text-xs text-text-muted">{row.label}</div>
       ) : null}
-    </div>
+    </Link>
   );
 }
 
