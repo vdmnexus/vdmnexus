@@ -1,5 +1,7 @@
 # @vdm-nexus/x402
 
+> **Beta** — API stable, mainnet live. v1 ships at $NEXUS launch.
+
 **Signed inference** for AI agents. An x402 client + receipt verifier for
 [VDM Nexus](https://vdmnexus.com) and any other
 [x402-spec-v2](https://github.com/coinbase/x402) endpoint that accepts

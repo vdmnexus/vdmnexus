@@ -1,5 +1,7 @@
 # @vdm-nexus/paywall
 
+> **Beta** — API stable, mainnet live. v1 ships at $NEXUS launch.
+
 **Paywall + Proofs.** One line of code gates your API with
 [x402](https://github.com/coinbase/x402) — and every paid call hands the
 caller a signed Ed25519 receipt of exactly what your handler returned.

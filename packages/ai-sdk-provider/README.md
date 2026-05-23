@@ -1,5 +1,7 @@
 # @vdm-nexus/ai-sdk-provider
 
+> **Beta** — API stable, mainnet live. v1 ships at $NEXUS launch.
+
 [Vercel AI SDK](https://sdk.vercel.ai) provider for
 [VDM Nexus](https://vdmnexus.com) — **signed inference** with one import.
 

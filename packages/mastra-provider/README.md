@@ -1,5 +1,7 @@
 # @vdm-nexus/mastra-provider
 
+> **Beta** — API stable, mainnet live. v1 ships at $NEXUS launch.
+
 [Mastra](https://mastra.ai) provider for [VDM Nexus](https://vdmnexus.com)
 — **signed inference** in a one-import Mastra `Agent` constructor.
 

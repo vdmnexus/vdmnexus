@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { launchLive } from "@/lib/launch-flag";
 import { StatusStrip } from "@/components/status-strip";
+import { BetaPill } from "@/components/beta-pill";
 
 type NavDropdownItem = {
   href: string;
@@ -31,6 +32,11 @@ const PRODUCT_ITEMS: NavDropdownItem[] = [
     href: "/playground",
     label: "Playground",
     description: "Try a live mainnet call",
+  },
+  {
+    href: "/pricing",
+    label: "Pricing",
+    description: "Per-call USDC, receipt fee, burn split",
   },
 ];
 
@@ -78,18 +84,21 @@ function NavHeader({
   return (
     <header className="sticky top-0 z-50 w-full border-b border-soft bg-bg/70 backdrop-blur">
       <nav className="mx-auto flex h-20 w-full max-w-6xl items-center justify-between px-6">
-        <Link
-          href="/"
-          aria-label="VDM Nexus"
-          className="group flex items-center"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/logo.svg"
-            alt="VDM Nexus"
-            className="h-14 w-auto md:h-16"
-          />
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/"
+            aria-label="VDM Nexus"
+            className="group flex items-center"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.svg"
+              alt="VDM Nexus"
+              className="h-14 w-auto md:h-16"
+            />
+          </Link>
+          <BetaPill />
+        </div>
 
         <div className="hidden items-center gap-8 md:flex">
           <NavDropdown label="Product" items={PRODUCT_ITEMS} pathname={pathname} />

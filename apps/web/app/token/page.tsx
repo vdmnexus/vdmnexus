@@ -15,14 +15,14 @@ import { FadeIn } from "@/components/fade-in";
 import { launchLive } from "@/lib/launch-flag";
 
 export const metadata: Metadata = {
-  title: "$NEXUS — discount token for signed inference",
+  title: "$NEXUS — utility token for the signed-inference rail",
   description:
-    "$NEXUS holders get discounted USDC pricing on cryptographically-signed AI inference calls. Fair launch on Clanker v4 on Base. 15% vault locked 90 days then linear-vested 12 months.",
+    "$NEXUS is the utility token of the VDM Nexus signed-inference rail. Four wires on a 0/30/60/90 calendar: receipt-fee burn, holder discount, agent reputation bond, verifier staking. Fair launch on pump.fun with USDC pair on Solana.",
   alternates: { canonical: "https://vdmnexus.com/token" },
   openGraph: {
-    title: "$NEXUS — discount token for signed inference",
+    title: "$NEXUS — utility token for the signed-inference rail",
     description:
-      "Fair launch on Clanker v4 on Base. 100B supply, mint authority disabled, LP locked. Holder discount on /v1/chat/completions within 30 days of launch.",
+      "Fair launch on pump.fun with USDC pair on Solana. 100B supply, mint authority disabled, LP burned at bonding. Four utility wires on a dated 0/30/60/90 calendar.",
     url: "https://vdmnexus.com/token",
     siteName: "VDM Nexus",
     type: "website",
@@ -31,9 +31,9 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@vdmnexus",
     creator: "@vdmnexus",
-    title: "$NEXUS — discount token for signed inference",
+    title: "$NEXUS — utility token for the signed-inference rail",
     description:
-      "Fair launch on Clanker v4 on Base. 100B supply, mint authority disabled, LP locked. Holder discount within 30 days of launch.",
+      "pump.fun with USDC pair on Solana. 100B supply, four wires on 0/30/60/90 calendar. Receipt-fee burn live at launch.",
   },
 };
 
@@ -52,12 +52,12 @@ const STATS: Array<{ label: string; value: string; sub?: string; mono?: boolean 
   },
   {
     label: "LP",
-    value: "Locked",
-    sub: "Clanker v4. Access keys burned.",
+    value: "Burned",
+    sub: "pump.fun USDC pair. Burned at bonding.",
   },
   {
     label: "Token contract",
-    value: `${TODO}: Basescan link`,
+    value: `${TODO}: Solscan link`,
     mono: true,
   },
 ];
@@ -67,50 +67,56 @@ const ALLOCATION = [
     pct: "70%",
     name: "Liquidity pool",
     detail:
-      "Seeded into the Clanker v4 pool on Base at deploy. LP tokens not held by the team — access keys burned at deploy. Liquidity cannot be withdrawn.",
-    badge: "LP locked",
+      "Seeded into the pump.fun USDC pool on Solana at deploy. LP burned at pump.fun bonding completion — liquidity cannot be withdrawn by the team. USDC pair means dollar-denominated MCAP, no SOL beta.",
+    badge: "LP burned at bonding",
   },
   {
     pct: "15%",
     name: "Treasury vault",
     detail:
-      "Vault-locked 90 days from deploy, then linear-vested over 12 months. Vesting schedule is immutable and enforced by the Clanker v4 vault contract. No cliff unlocks at the end of the lockup — vesting begins smoothly on day 91.",
+      "Held by a Squads multisig vesting program on Solana. Vault-locked 90 days from deploy, then linear-vested over 12 months. Vesting schedule is immutable and enforced by the on-chain vesting contract. No cliff unlocks at the end of the lockup — vesting begins smoothly on day 91.",
     badge: "Locked 90d + 12mo vest",
   },
   {
     pct: "10%",
     name: "Retroactive airdrop",
     detail:
-      "Held in a non-spendable account until criteria are published within 90 days of launch. Recipients vest over 6 months from the distribution date. Targets early agents on the signed-inference rail and early signed-receipt verifiers.",
+      "Held in a non-spendable Squads multisig until criteria are published within 90 days of launch. Recipients vest over 6 months from the distribution date. Targets early agents on the signed-inference rail and early signed-receipt verifiers.",
     badge: "Criteria within 90d",
   },
   {
     pct: "5%",
     name: "Community pool",
     detail:
-      "No lockup. Publicly tracked Safe multisig. Used for ecosystem incentives, partner integrations, and event sponsorships. Every outflow is on-chain and signed by multiple keys.",
+      "No lockup. Publicly tracked Squads multisig on Solana. Used for ecosystem incentives, pattern-library bounties (Layer 5), and partner integrations. Every outflow is on-chain and signed by multiple keys.",
     badge: "Publicly tracked",
   },
 ];
 
 const UTILITY = [
   {
-    stage: "Live at launch",
-    title: "Tradeable on Base",
+    stage: "Wire 1 — Day 0 (launch)",
+    title: "Receipt fee + buy-and-burn",
     body:
-      "Token live on Clanker v4 pool. Allocations verifiable on Basescan and Bubblemaps within minutes of the deploy transaction.",
+      "Every paid call adds a $0.01 USDC receipt fee. 50% routes to a public buy-and-burn bot — USDC → $NEXUS swap on the pump.fun pool → burn to a public address. Live counter below. Burn pressure scales with rail usage.",
   },
   {
-    stage: "Within 30 days",
+    stage: "Wire 2 — Day 30",
     title: "Holder discount on inference",
     body:
-      "Holders of a threshold balance receive an approximately 20% discount on /v1/chat/completions. Exact threshold and discount percentage finalize before the wire goes live.",
+      "Holders of a threshold balance receive an approximately 20% discount on /v1/chat/completions. Exact threshold and discount percentage finalize 7 days before the wire goes live.",
   },
   {
-    stage: "Later",
-    title: "Fee burn from inference revenue",
+    stage: "Wire 3 — Day 60",
+    title: "Agent reputation bond",
     body:
-      "A slice of the protocol's settled USDC inference revenue routes to on-chain buybacks of $NEXUS that are burned. Tied to real settled call volume, on-chain provable.",
+      "Agents stake $NEXUS into a non-custodial bond. Unlocks trust badge on /agents, additional per-call discount, 2× rate limit. Slashable for misbehavior; 14-day unbonding.",
+  },
+  {
+    stage: "Wire 4 — Day 90",
+    title: "Verifier staking + revenue share",
+    body:
+      "Stake $NEXUS to run a verifier node. 40% of verify.vdmnexus.com paid-tier revenue distributes pro-rata to staked verifiers, weighted by stake × uptime. Slashable for false attestations. Subject to legal scoping memo confirming utility classification.",
   },
 ];
 
@@ -129,16 +135,17 @@ export default function TokenPage() {
                 <span className="text-gradient">$NEXUS</span>
               </h1>
               <p className="mx-auto mt-6 max-w-2xl text-balance text-base leading-relaxed text-text sm:text-lg">
-                $NEXUS holders will get discounted USDC pricing on
-                cryptographically-signed AI inference calls — discount
-                wire live within 30 days of launch. Fair launch on
-                Clanker v4 on Base. 15% vault locked 90 days then
-                linear-vested 12 months.
+                $NEXUS is the utility token of the VDM Nexus
+                signed-inference rail. Four wires on a 0/30/60/90
+                calendar — receipt-fee burn live at launch, holder
+                discount Day 30, agent reputation bond Day 60, verifier
+                staking Day 90. Fair launch on pump.fun with USDC pair
+                on Solana.
               </p>
               <p className="mx-auto mt-4 max-w-2xl text-sm text-text-muted">
-                100B supply. Mint authority disabled at deploy. LP locked.
-                MEV protection enabled. No presale. No team allocation. No
-                insider rounds.
+                100B supply. Mint authority disabled at deploy. LP
+                burned at pump.fun bonding. USDC-denominated pricing.
+                No presale. No team allocation. No insider rounds.
               </p>
               <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
                 <Link
@@ -236,7 +243,7 @@ export default function TokenPage() {
           <FadeIn className="max-w-2xl">
             <SectionEyebrow>Mechanism</SectionEyebrow>
             <SectionHeading className="mt-4">
-              Clanker v4 fair launch. MEV-protected at deploy.
+              pump.fun USDC pair fair launch on Solana.
             </SectionHeading>
           </FadeIn>
           <FadeIn className="mt-10 grid gap-4 sm:grid-cols-3">
@@ -246,33 +253,32 @@ export default function TokenPage() {
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-text-muted">
                 Mint authority is revoked at deploy. Supply is fixed at
-                100,000,000,000 $NEXUS forever. Verifiable on Basescan at{" "}
-                <Placeholder text="{{TODO}}: Basescan link to token contract" />
+                100,000,000,000 $NEXUS forever. Verifiable on Solscan at{" "}
+                <Placeholder text="{{TODO}}: Solscan link to token contract" />
                 .
               </p>
             </Card>
             <Card>
               <h3 className="text-base font-semibold text-text">
-                Liquidity pool locked
+                Liquidity pool burned
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-text-muted">
-                LP locked via Clanker v4. LP tokens are not held by the
-                team — access keys burned at deploy. Liquidity cannot be
-                withdrawn. Verifiable on Basescan at{" "}
-                <Placeholder text="{{TODO}}: Basescan link to LP contract" />
+                LP tokens burned at pump.fun bonding completion.
+                Liquidity cannot be withdrawn by the team. Verifiable on
+                Solscan at{" "}
+                <Placeholder text="{{TODO}}: Solscan link to LP burn tx" />
                 .
               </p>
             </Card>
             <Card>
               <h3 className="text-base font-semibold text-text">
-                MEV protection enabled
+                USDC-denominated pricing
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-text-muted">
-                Clanker v4's native first-swap auction / block-delay
-                module is enabled at launch. The first 30 seconds of
-                trading are not a sniper free-for-all — the auction
-                routes the priority bid back to the LP, not to a private
-                bundler.
+                Pair is $NEXUS/USDC, not $NEXUS/SOL. MCAP is reported in
+                dollars — no SOL volatility riding under the token's
+                chart. Serious-buyer profile, higher MCAP ceiling at
+                pump.fun's ~$58K bonding threshold.
               </p>
             </Card>
           </FadeIn>
@@ -282,15 +288,14 @@ export default function TokenPage() {
           <FadeIn className="max-w-2xl">
             <SectionEyebrow>Treasury</SectionEyebrow>
             <SectionHeading className="mt-4">
-              Three separate Safe multisigs. Not bundled, not clustered.
+              Three separate Squads multisigs. Not bundled, not clustered.
             </SectionHeading>
             <p className="mt-5 text-base leading-relaxed text-text-muted">
-              Three Safe multisigs on Base, each separately deployed,
-              each with its own published address. Bundling tools
-              (Bubblemaps and Base-equivalents) will show these as
-              distinct allocations, not as a clustered wallet. Each Safe
-              is funded only from the deployer wallet — no farmed-wallet
-              origin chains.
+              Three Squads multisigs on Solana, each separately
+              deployed, each with its own published address. Bubblemaps
+              Solana will render these as three distinct allocations,
+              not as a clustered wallet. Each multisig is funded only
+              from the deployer wallet — no farmed-wallet origin chains.
             </p>
           </FadeIn>
           <div className="mt-10 grid gap-4 lg:grid-cols-3">
@@ -310,14 +315,15 @@ export default function TokenPage() {
                 <p className="mt-3 text-sm leading-relaxed text-text-muted">
                   15% of supply, locked 90 days from launch, then
                   linear-vested over 12 months. Vesting schedule
-                  immutable, enforced by the Clanker v4 vault contract.
-                  The treasury cannot sell during the 90-day lockup.
-                  After the lockup ends, the maximum daily unlock is
-                  approximately 41M $NEXUS (about 0.04% of supply per
-                  day) on a smooth linear curve. No cliff unlocks.
+                  immutable, enforced by the on-chain Squads vesting
+                  program on Solana. The treasury cannot sell during
+                  the 90-day lockup. After the lockup ends, the maximum
+                  daily unlock is approximately 41M $NEXUS (about 0.04%
+                  of supply per day) on a smooth linear curve. No cliff
+                  unlocks.
                 </p>
                 <p className="mt-4 font-mono text-xs text-text-muted">
-                  Recipient: <Placeholder text="{{TODO}}: Safe address" />
+                  Recipient: <Placeholder text="{{TODO}}: Squads address (Solana)" />
                 </p>
               </Card>
             </FadeIn>
@@ -343,7 +349,7 @@ export default function TokenPage() {
                 </p>
                 <p className="mt-4 font-mono text-xs text-text-muted">
                   Holding account:{" "}
-                  <Placeholder text="{{TODO}}: Safe address" />
+                  <Placeholder text="{{TODO}}: Squads address (Solana)" />
                 </p>
               </Card>
             </FadeIn>
@@ -361,13 +367,14 @@ export default function TokenPage() {
                   Community pool
                 </h3>
                 <p className="mt-3 text-sm leading-relaxed text-text-muted">
-                  5% of supply, no lockup, publicly tracked Safe
-                  multisig. Funds ecosystem incentives, partner
-                  integrations, and sponsorships. Every outflow is
-                  on-chain and signed by multiple keys.
+                  5% of supply, no lockup, publicly tracked Squads
+                  multisig on Solana. Funds ecosystem incentives,
+                  pattern-library bounties (Layer 5), and partner
+                  integrations. Every outflow is on-chain and signed by
+                  multiple keys.
                 </p>
                 <p className="mt-4 font-mono text-xs text-text-muted">
-                  Recipient: <Placeholder text="{{TODO}}: Safe address" />
+                  Recipient: <Placeholder text="{{TODO}}: Squads address (Solana)" />
                 </p>
               </Card>
             </FadeIn>
@@ -385,31 +392,32 @@ export default function TokenPage() {
             <div className="rounded-2xl border border-soft bg-surface/60 p-8 backdrop-blur sm:p-10">
               <dl className="grid gap-6 sm:grid-cols-2">
                 <VerifyRow label="Deployer wallet">
-                  <Placeholder text="{{TODO}}: deployer wallet address" />
+                  <Placeholder text="{{TODO}}: deployer wallet address (Solana)" />
                   <p className="mt-2 text-xs text-text-muted">
                     Built and deployed from this address, public on
-                    Basescan. The deployer wallet does not hold a team
+                    Solscan. The deployer wallet does not hold a team
                     allocation — all 30% non-LP supply sits in the three
-                    Safe multisigs above.
+                    Squads multisigs above.
                   </p>
                 </VerifyRow>
                 <VerifyRow label="Token contract">
-                  <Placeholder text="{{TODO}}: Basescan link" />
+                  <Placeholder text="{{TODO}}: Solscan link" />
                   <p className="mt-2 text-xs text-text-muted">
                     Mint authority disabled at deploy. Supply is 100B,
                     fixed forever.
                   </p>
                 </VerifyRow>
-                <VerifyRow label="LP contract">
-                  <Placeholder text="{{TODO}}: Basescan link" />
+                <VerifyRow label="LP burn tx">
+                  <Placeholder text="{{TODO}}: Solscan link" />
                   <p className="mt-2 text-xs text-text-muted">
-                    Locked via Clanker v4. Access keys burned at deploy.
+                    LP tokens burned at pump.fun bonding completion.
+                    Liquidity cannot be withdrawn by the team.
                   </p>
                 </VerifyRow>
                 <VerifyRow label="Wallet clustering">
-                  <Placeholder text="{{TODO}}: Bubblemaps link" />
+                  <Placeholder text="{{TODO}}: Bubblemaps Solana link" />
                   <p className="mt-2 text-xs text-text-muted">
-                    Three Safe multisigs render as three distinct
+                    Three Squads multisigs render as three distinct
                     allocations, not as a clustered wallet.
                   </p>
                 </VerifyRow>
@@ -466,18 +474,28 @@ export default function TokenPage() {
                   </h3>
                   <ul className="mt-4 space-y-3 text-sm leading-relaxed text-text-muted">
                     <li>
-                      An ERC-20 token on Base, fair-launched via Clanker
-                      v4. No presale, no team allocation, no insider
-                      rounds.
+                      An SPL token on Solana, fair-launched via
+                      pump.fun with USDC pair. No presale, no team
+                      allocation, no insider rounds.
                     </li>
                     <li>
-                      A discount mechanism: holders of a threshold
-                      balance pay less USDC per signed inference call.
+                      A utility token for the signed-inference rail
+                      with four mechanical on-chain wires on a
+                      0/30/60/90 calendar (receipt-fee burn, holder
+                      discount, agent reputation bond, verifier
+                      staking). See{" "}
+                      <Link
+                        href="/whitepaper"
+                        className="underline decoration-text-muted/40 underline-offset-4 transition-colors hover:text-text hover:decoration-text"
+                      >
+                        /whitepaper
+                      </Link>{" "}
+                      Section 03.
                     </li>
                     <li>
-                      Receiver of on-chain fee-burn pressure tied to
-                      real settled inference revenue, on a later
-                      timeline.
+                      Receiver of on-chain buy-and-burn pressure tied
+                      to real settled inference revenue, live at
+                      launch via Wire 1.
                     </li>
                   </ul>
                 </div>
@@ -533,9 +551,9 @@ export default function TokenPage() {
                     Charts and contracts go live post-deploy.
                   </p>
                   <p className="mt-3 text-sm text-text-muted">
-                    Links resolve the moment the Clanker v4 launch
-                    transaction confirms. Safe addresses are published
-                    24–48 hours before launch.
+                    Links resolve the moment the pump.fun deploy
+                    transaction confirms. Squads addresses are
+                    published 24–48 hours before launch.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3">
@@ -543,13 +561,19 @@ export default function TokenPage() {
                     aria-disabled="true"
                     className="inline-flex items-center gap-2 rounded-md border border-soft bg-surface/60 px-4 py-2.5 text-sm font-medium text-text-muted"
                   >
-                    DexScreener <Placeholder text="{{TODO}}" />
+                    pump.fun <Placeholder text="{{TODO}}" />
                   </span>
                   <span
                     aria-disabled="true"
                     className="inline-flex items-center gap-2 rounded-md border border-soft bg-surface/60 px-4 py-2.5 text-sm font-medium text-text-muted"
                   >
-                    Geckoterminal <Placeholder text="{{TODO}}" />
+                    DexScreener Solana <Placeholder text="{{TODO}}" />
+                  </span>
+                  <span
+                    aria-disabled="true"
+                    className="inline-flex items-center gap-2 rounded-md border border-soft bg-surface/60 px-4 py-2.5 text-sm font-medium text-text-muted"
+                  >
+                    Solscan <Placeholder text="{{TODO}}" />
                   </span>
                   <Link
                     href="/whitepaper"

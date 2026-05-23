@@ -156,6 +156,9 @@ function Hero() {
                 No API keys. No human in the loop. Every request is signed by
                 an Ed25519 keypair and settled in USDC on Solana.
               </p>
+              <p className="mx-auto mt-3 max-w-xl text-balance text-sm text-text-muted/80 lg:mx-0">
+                Beta protocol. v1 ships with $NEXUS.
+              </p>
               <div className="mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center lg:justify-start">
                 <a
                   href={GITHUB_URL}

@@ -1,5 +1,7 @@
 # @vdm-nexus/sdk
 
+> **Beta** — API stable, mainnet live. v1 ships at $NEXUS launch.
+
 > Open-source SDK for [VDM Nexus](https://vdmnexus.com) — autonomous agents
 > that authenticate and pay for compute with a Solana keypair. No API keys.
 
