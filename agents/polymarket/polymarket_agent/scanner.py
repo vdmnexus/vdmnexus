@@ -41,9 +41,10 @@ async def run_scan_cycle(
         return ScanReport(0, 0, 0, 0, 0, [f"gate: {reason}"])
 
     log.info(
-        "scan: bankroll=%.2f locked=%.2f available=%.2f drawdown=%.1f%%",
+        "scan: bankroll=%.2f locked=%.2f available=%.2f pnl=%.2f drawdown=%.1f%%",
         snapshot.total_usdc,
         snapshot.locked_in_open_bets_usdc,
+        snapshot.available_usdc,
         snapshot.realised_pnl_usdc,
         snapshot.drawdown_pct * 100,
     )

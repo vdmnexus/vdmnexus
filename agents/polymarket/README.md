@@ -206,35 +206,85 @@ Spanish counsel signs off (see top of this doc). What works today:
 
 What is *not* built — explicitly:
 
-- **`/agents/predictions` public page.** Gated on counsel sign-off.
-- **`/agents` nav dropdown promotion of the agent.** Same gate.
 - **Cross-market arbitrage / multi-vertical** beyond politics + economics.
 - **Kalshi integration.** Different rail (US bank, not USDC on-chain).
 - **Cross-agent learning** (depends on shipped Phase 5 infrastructure).
 - **Try-it-yourself UI.** Read-only by design.
 
-# Phase B — what unlocks the public dashboard
+The `/agents/predictions` public page IS built — see the next section
+on the `NEXT_PUBLIC_POLYMARKET_PUBLIC` feature flag for the gating
+mechanism that keeps it 404 until counsel signs off.
 
-The Spanish counsel memo (Cuatrecasas / Garrigues / Uría) already on
-the roadmap as item 11 (originally for the MiCA + token question)
-adds one extra question: *can we publish a public dashboard of bets
-placed on Polymarket, framed as AI research output, with no operator
-naming or outbound links?*
+# Public dashboard gating — `NEXT_PUBLIC_POLYMARKET_PUBLIC` feature flag
 
-If counsel returns yes (possibly with shape constraints), the
-follow-up PR will:
+The public `/agents/predictions` page is **built and merged**, but
+deployed behind a Vercel environment flag that defaults to false.
+This mirrors the existing `NEXT_PUBLIC_LAUNCH_LIVE` pattern used for
+the token surface. The mechanism is fail-closed.
 
-1. Add an anon-read RLS policy on `public.polymarket_bets`
-   (read-only of resolved + open bets, no future bets or draft state).
-2. Build `apps/web/app/agents/predictions/page.tsx` mirroring the
-   admin view but with whatever framing counsel approves.
-3. Add a sub-link under the `/agents` nav dropdown.
-4. Optionally promote the agent on the homepage "For operators"
-   panel as the live demo.
+## What the flag controls
 
-If counsel returns no, the agent keeps running privately,
-demonstrating the Nexus rail on real-world betting to anyone the
-founder chooses to share individual receipts with.
+| Surface | `NEXT_PUBLIC_POLYMARKET_PUBLIC=false` (default) | `NEXT_PUBLIC_POLYMARKET_PUBLIC=true` |
+|---|---|---|
+| `vdmnexus.com/agents/predictions` | returns 404 via `notFound()` | renders the live dashboard |
+| `GET /api/predictions` | returns 404 | returns sanitised bet history |
+| Nav `/agents` dropdown | no Predictions entry | Predictions entry appears |
+| `robots.txt` | disallows `/agents/predictions` | path is crawlable |
+| Supabase `polymarket_bets` RLS | service-role-only, no anon | unchanged — public read goes through the API route |
+| `/admin/predictions` (founder-only) | unchanged, cookie-gated | unchanged |
+
+The agent itself does **not** look at the flag. It keeps scanning
+Polymarket and placing bets, signed-inference receipts and all, the
+moment `POLYMARKET_DRY_RUN=0` and the bankroll allows. The flag
+only controls visibility, not behaviour.
+
+## When to flip the flag
+
+Only after Spanish counsel (Cuatrecasas / Garrigues / Uría — already
+on the roadmap as item 11) confirms that publishing reasoned bets on
+a named unlicensed-in-Spain operator does **not** trigger RD 958/2020
+art. 23.1.b or the *pronosticadores* regime in art. 22 for our
+specific dashboard shape. The founder may also flip it during a
+counsel-approved structural change (e.g. operator-naming removed,
+framing tightened to "AI research transparency").
+
+## How to flip the flag
+
+In the Vercel project for `apps/web`:
+
+```
+NEXT_PUBLIC_POLYMARKET_PUBLIC=true
+```
+
+Then redeploy. The flag takes effect on the next request. No
+migration, no RLS change, no schema update required — the surface
+is purely visibility-controlled.
+
+## Sanitisation contract
+
+The public API and page **never** expose:
+
+- `failure_reason` — internal debugging info, may reference dry-run state.
+- `order_id` — Polymarket internal identifier with no public value.
+- Full `agent_pubkey` — only the first 8 chars shown.
+- Bets with `status = 'failed'` or `'cancelled'` — only `open` + `resolved`.
+- `tx_hash` — Polygonscan link omitted from public view.
+
+The founder-only `/admin/predictions` page still sees all fields.
+
+## Replacement strategy if counsel says no
+
+If counsel returns negative, the code stays in the repo but the flag
+never flips. Two safe modifications post-counsel:
+
+- **Remove operator naming.** Drop "Polymarket" from the page title,
+  reframe as "AI research output on prediction markets." Rename the
+  Supabase table cosmetic-only (the on-chain receipts are unchanged).
+- **Drop reasoning text from public view.** Show only the bet shape +
+  receipt link, keeping reasoning in the founder-only admin view.
+
+Both are cheap changes to ship — the contract between agent and
+storage doesn't move; only the public projection narrows.
 
 # First-run runbook (operator)
 
@@ -419,6 +469,11 @@ psql "$DATABASE_URL" -c \
       and receipt link landing on `vdmnexus.com/r/<id>`.
 - [ ] The Spanish counsel question is added to the existing
       Cuatrecasas / Garrigues / Uría brief (roadmap item 11).
-- [ ] No public surface is added — `/agents/predictions` does not
-      exist, the `/agents` nav has no predictions sub-link.
+- [ ] `NEXT_PUBLIC_POLYMARKET_PUBLIC=false` on Vercel (default).
+      Verify: visiting `vdmnexus.com/agents/predictions` returns 404,
+      no Predictions entry appears in the `/agents` nav dropdown,
+      `robots.txt` includes the disallow line.
+- [ ] Flag-flip dry run (locally or on a preview deploy with the flag
+      set to true): page renders, sanitised data only, no
+      `failure_reason` / `order_id` / full `agent_pubkey` leaked.
 
