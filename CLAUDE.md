@@ -318,6 +318,14 @@ One project: `vdmnexus-web` (ref `wuxorxtniyfwjaqurwoe`, EU-West-3).
 - `inference_logs` — every call, including failures, with token counts and
   latency. The successful row's id is returned in the receipt as
   `inference_id`.
+- `burn_pool_ledger` — Wire 1 Phase A accrual table. One row per fee
+  charged (`fee_usdc`, `burn_pool_share_usdc`, `treasury_share_usdc`,
+  `network`, `source: chat-completions | inference`). Unique partial
+  index on `tx_signature` mirrors `credits_ledger_tx_idx`, so a
+  replayed x402 settlement never double-credits the pool. Prepaid
+  inference rows use `inference_id` in place of `tx_signature`.
+  `/api/burn-pool` aggregates `burn_pool_share_usdc` for the public
+  counter on `/token`.
 
 All tables have RLS enabled. The agent rail tables have **no policies** —
 only the service role touches them, server-side from `apps/nexus`.
@@ -335,6 +343,7 @@ Full schemas with inline comments live in `apps/web/.env.example` and `apps/nexu
 - *EVM (Base):* `NEXUS_EVM_NETWORK`, `NEXUS_EVM_RPC_URL`, `NEXUS_EVM_PRIVATE_KEY` (fee payer for ERC-3009 settlement).
 - *Mainnet controls:* `NEXUS_MAINNET_ENABLED` (set to `"false"` → all mainnet paid routes 503 with `mainnet.disabled` log), `NEXUS_ALLOWED_AGENTS` (comma-separated payer pubkeys; route 403s non-listed), `NEXUS_MAX_PRICE_USDC` (hard cap on `X402_FLAT_PRICE_USDC` — challenge issuer fails closed if exceeded).
 - *x402 challenge:* `X402_FLAT_PRICE_USDC` (default `0.01`), `X402_NETWORK` (CAIP-2), `X402_RECIPIENT_ADDRESS`. **Pick exactly one facilitator** or the endpoint fails-closed: `NEXUS_FACILITATOR_LOCAL=true` (self-hosted, preferred) | `X402_FACILITATOR_URL` + `X402_FACILITATOR_API_KEY` (remote) | `NEXUS_ALLOW_MOCK_FACILITATOR=true` (dev).
+- *Wire 1 receipt fee:* `NEXUS_RECEIPT_FEE_USDC` (default `0.01`, added on top of `X402_FLAT_PRICE_USDC` on every paid call), `NEXUS_BURN_POOL_SHARE` (default `0.5`, fraction of the fee earmarked for the burn pool), `NEXUS_FEE_EXEMPT_PUBKEYS` (comma-separated, skips fee on the prepaid `/v1/inference` path — used for the playground sponsor agent).
 - *CDP facilitator* (opt-in per-request via `?via=cdp` → indexes settlements in x402 Bazaar / Agentic.Market): `CDP_FACILITATOR_URL`. Auth — pick one: JWT mode with `CDP_FACILITATOR_KEY_NAME` + `CDP_FACILITATOR_PRIVATE_KEY` (PKCS#8 PEM; `\n` escapes accepted), or legacy bearer `CDP_FACILITATOR_API_KEY`.
 - *KMS signing (prod):* `NEXUS_KMS_KEY_ID` (Ed25519 ARN, `ECC_NIST_EDWARDS25519`), `NEXUS_KMS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`. IAM needs `kms:Sign + kms:GetPublicKey + kms:DescribeKey`. Asserts KMS-derived pubkey == `NEXUS_DEPOSIT_ADDRESS` or fails closed.
 - *Receipt signing (required):* `NEXUS_OPERATOR_SECRET_KEY` (base58 64-byte tweetnacl secretKey). Pubkey exposed at `GET /api/v1/operator-key`.

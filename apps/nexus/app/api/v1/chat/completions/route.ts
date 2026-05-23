@@ -5,6 +5,8 @@ import { credit, debit, ensureAgent } from "@/lib/credits";
 import { runChatInference, type ChatMessage } from "@/lib/chat-inference";
 import { canonicalize, signReceipt } from "@/lib/receipts";
 import { getAgentStats } from "@/lib/points";
+import { computeFeeBreakdown } from "@/lib/pricing";
+import { recordBurnPoolFee } from "@/lib/burn-pool";
 import {
   getFacilitator,
   getCdpFacilitator,
@@ -186,6 +188,27 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  // Wire 1 Phase A — every paid call bundles the inference component
+  // (X402_FLAT_PRICE_USDC) with a flat USDC receipt fee. The agent
+  // sees one line item; the ledger splits the fee into burn-pool and
+  // treasury shares. The max-price cap also covers the total, so a
+  // misconfigured fee can't slip past NEXUS_MAX_PRICE_USDC either.
+  const feeBreakdown = computeFeeBreakdown(configuredPrice);
+  if (feeBreakdown.totalUsdc > maxPrice) {
+    log.error({
+      event: "price.over_cap",
+      request_id,
+      configured_usdc: configuredPrice,
+      fee_usdc: feeBreakdown.receiptFeeUsdc,
+      total_usdc: feeBreakdown.totalUsdc,
+      max_usdc: maxPrice,
+    });
+    return err("server_misconfigured", 500, {
+      detail:
+        "configured price + receipt fee exceeds NEXUS_MAX_PRICE_USDC",
+    });
+  }
+
   let body: ChatCompletionsBody;
   try {
     body = (await req.json()) as ChatCompletionsBody;
@@ -264,7 +287,10 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const amountUsdc = getFlatPriceUsdc();
+  // The x402 challenge advertises the total the agent must pay —
+  // inference component + receipt fee. The breakdown is recorded in
+  // the burn_pool_ledger and shown on the receipt as separate fields.
+  const amountUsdc = feeBreakdown.totalUsdc;
   const resource = getResource(req);
 
   // Read the facilitator selector up front. `?via=cdp` forces both the
@@ -598,6 +624,29 @@ export async function POST(req: NextRequest) {
     cost_usdc: result.cost_usdc,
   });
 
+  // Debit the receipt fee from the agent's credit balance so the
+  // burn-pool/treasury accrual is matched by a real ledger movement
+  // (otherwise the agent ends up with the unburned fee as credit).
+  // Best-effort: a failure here is logged but doesn't block the user
+  // response — the call already settled on-chain.
+  if (feeBreakdown.receiptFeeUsdc > 0) {
+    try {
+      await debit(supabase, {
+        pubkey: payerWallet,
+        usdc: feeBreakdown.receiptFeeUsdc,
+        reason: "receipt_fee",
+      });
+    } catch (e) {
+      log.error({
+        event: "chat.fee_debit_failed",
+        request_id,
+        agent_pubkey: payerWallet,
+        fee_usdc: feeBreakdown.receiptFeeUsdc,
+        detail: e instanceof Error ? e.message : "unknown",
+      });
+    }
+  }
+
   const { data: logRow, error: logError } = await supabase
     .from("inference_logs")
     .insert({
@@ -625,6 +674,47 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  // Wire 1 Phase A — accrue the receipt fee to the burn pool. Idempotent
+  // by tx_signature so a replayed settlement can't inflate the counter.
+  // Best-effort: if the insert fails the user still gets their receipt.
+  if (feeBreakdown.receiptFeeUsdc > 0) {
+    const burnResult = await recordBurnPoolFee(supabase, {
+      agentPubkey: payerWallet,
+      breakdown: feeBreakdown,
+      network,
+      source: "chat-completions",
+      txSignature: settled.transaction,
+      inferenceId: logRow?.id ?? null,
+    });
+    if (burnResult.ok) {
+      log.info({
+        event: "burn_pool.recorded",
+        request_id,
+        agent_pubkey: payerWallet,
+        source: "chat-completions",
+        fee_usdc: feeBreakdown.receiptFeeUsdc,
+        burn_pool_share_usdc: feeBreakdown.burnPoolShareUsdc,
+        treasury_share_usdc: feeBreakdown.treasuryShareUsdc,
+        tx_signature: settled.transaction,
+      });
+    } else if (burnResult.replay) {
+      log.warn({
+        event: "burn_pool.replay",
+        request_id,
+        agent_pubkey: payerWallet,
+        tx_signature: settled.transaction,
+      });
+    } else {
+      log.error({
+        event: "burn_pool.write_failed",
+        request_id,
+        agent_pubkey: payerWallet,
+        tx_signature: settled.transaction,
+        detail: burnResult.error.message,
+      });
+    }
+  }
+
   const { points_total: pointsTotal } = await getAgentStats(
     supabase,
     payerWallet
@@ -650,6 +740,14 @@ export async function POST(req: NextRequest) {
     payment: {
       scheme: "x402",
       amount_usdc: amountUsdc,
+      // Wire 1 Phase A — surface the fee breakdown so verifiers
+      // (and the public receipt page) can show inference + fee as
+      // two line items. amount_usdc remains the total settled
+      // on-chain; the new fields are additive and non-breaking.
+      inference_usdc: feeBreakdown.inferenceUsdc,
+      receipt_fee_usdc: feeBreakdown.receiptFeeUsdc,
+      burn_pool_share_usdc: feeBreakdown.burnPoolShareUsdc,
+      treasury_share_usdc: feeBreakdown.treasuryShareUsdc,
       tx_signature: settled.transaction,
       network,
       pay_to: recipient,

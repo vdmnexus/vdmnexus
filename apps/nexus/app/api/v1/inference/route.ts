@@ -2,13 +2,16 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createHash } from "node:crypto";
 import { getServiceClient } from "@/lib/supabase";
 import { verifyRequestSignature, isValidPubkey } from "@/lib/solana";
-import { ensureAgent, getBalance, tryDebit } from "@/lib/credits";
+import { debit, ensureAgent, getBalance, tryDebit } from "@/lib/credits";
 import { runInference } from "@/lib/inference";
 import { isTaskType, route, type TaskType } from "@/lib/routing";
 import { recordNonce } from "@/lib/nonces";
 import { signReceipt } from "@/lib/receipts";
 import { getAgentStats } from "@/lib/points";
 import { log, newRequestId } from "@/lib/log";
+import { computeFeeBreakdown } from "@/lib/pricing";
+import { getFeeExemptPubkeys, recordBurnPoolFee } from "@/lib/burn-pool";
+import { X402_NETWORKS } from "@/lib/x402";
 import {
   enforcePubkey,
   rateLimitHeaders,
@@ -23,6 +26,31 @@ const SIG_HEADER = "x-nexus-signature";
 
 const TIMESTAMP_SKEW_MS = 30_000;
 const MIN_BALANCE_USDC = 0.001;
+
+/**
+ * The network the prepaid credit balance was originally funded on. The
+ * burn_pool_ledger row needs a network value but the prepaid path
+ * doesn't settle inline, so we use the env-configured x402 default
+ * (the network deposits arrive on). Falls back to devnet.
+ */
+function getPrepaidNetwork(): string {
+  const env = process.env.X402_NETWORK?.trim();
+  if (!env) return X402_NETWORKS.solanaDevnet;
+  const lower = env.toLowerCase();
+  if (lower === "solana-mainnet" || lower === "solana:mainnet") {
+    return X402_NETWORKS.solanaMainnet;
+  }
+  if (lower === "solana-devnet" || lower === "solana:devnet") {
+    return X402_NETWORKS.solanaDevnet;
+  }
+  if (lower === "base" || lower === "base-mainnet" || lower === "eip155:8453") {
+    return X402_NETWORKS.baseMainnet;
+  }
+  if (lower === "base-sepolia" || lower === "eip155:84532") {
+    return X402_NETWORKS.baseSepolia;
+  }
+  return env;
+}
 
 type Body = {
   prompt?: string;
@@ -158,13 +186,25 @@ export async function POST(req: NextRequest) {
     throw e;
   }
 
+  // Wire 1 Phase A — the prepaid path also accrues a receipt fee on
+  // top of the upstream cost. Compute the breakdown up front so the
+  // balance gate covers the fee too. The "inference component" is
+  // zero here because actual cost is unknown pre-call — the fee is
+  // the only deterministic charge we can pre-check.
+  const feeBreakdown = computeFeeBreakdown(0);
+  const feeExempt = getFeeExemptPubkeys().has(pubkey);
+  const minBalance = feeExempt
+    ? MIN_BALANCE_USDC
+    : MIN_BALANCE_USDC + feeBreakdown.receiptFeeUsdc;
+
   const balance = await getBalance(supabase, pubkey);
-  if (balance < MIN_BALANCE_USDC) {
+  if (balance < minBalance) {
     log.warn({
       event: "inference.balance_insufficient",
       request_id,
       agent_pubkey: pubkey,
       balance,
+      required_usdc: minBalance,
     });
     return err("insufficient_credits", 402, { balance_usdc: balance });
   }
@@ -291,6 +331,67 @@ export async function POST(req: NextRequest) {
     cost_usdc: result.cost_usdc,
     balance_remaining: newBalance,
   });
+
+  // Wire 1 Phase A — debit the receipt fee and accrue it to the burn
+  // pool. Skipped for fee-exempt agents (e.g. the playground sponsor)
+  // so operator-funded probe traffic doesn't inflate the public burn
+  // counter. Both writes are best-effort: a failure here is logged
+  // but doesn't fail the user response, since the inference itself
+  // has already run and been debited.
+  if (!feeExempt && feeBreakdown.receiptFeeUsdc > 0) {
+    try {
+      await debit(supabase, {
+        pubkey,
+        usdc: feeBreakdown.receiptFeeUsdc,
+        reason: "receipt_fee",
+        nonce,
+      });
+    } catch (e) {
+      log.error({
+        event: "inference.fee_debit_failed",
+        request_id,
+        agent_pubkey: pubkey,
+        fee_usdc: feeBreakdown.receiptFeeUsdc,
+        detail: e instanceof Error ? e.message : "unknown",
+      });
+    }
+
+    const burnResult = await recordBurnPoolFee(supabase, {
+      agentPubkey: pubkey,
+      breakdown: feeBreakdown,
+      network: getPrepaidNetwork(),
+      source: "inference",
+      txSignature: null,
+      inferenceId: logRow?.id ?? null,
+    });
+    if (burnResult.ok) {
+      log.info({
+        event: "burn_pool.recorded",
+        request_id,
+        agent_pubkey: pubkey,
+        source: "inference",
+        fee_usdc: feeBreakdown.receiptFeeUsdc,
+        burn_pool_share_usdc: feeBreakdown.burnPoolShareUsdc,
+        treasury_share_usdc: feeBreakdown.treasuryShareUsdc,
+        inference_id: logRow?.id ?? null,
+      });
+    } else if (burnResult.replay) {
+      log.warn({
+        event: "burn_pool.replay",
+        request_id,
+        agent_pubkey: pubkey,
+        inference_id: logRow?.id ?? null,
+      });
+    } else {
+      log.error({
+        event: "burn_pool.write_failed",
+        request_id,
+        agent_pubkey: pubkey,
+        inference_id: logRow?.id ?? null,
+        detail: burnResult.error.message,
+      });
+    }
+  }
 
   const { points_total: pointsTotal } = await getAgentStats(supabase, pubkey);
 
