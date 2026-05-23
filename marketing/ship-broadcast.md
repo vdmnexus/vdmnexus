@@ -50,14 +50,38 @@ Text-only posts get half the engagement of posts with a visual. Before the revie
 
 3. **Remotion ship reel** — for weekly-roundup posts or multi-PR ships, render `WeeklyShipsReel` (`make -C marketing/media reel-weekly`) after editing `marketing/media/remotion/src/ships.json` to include the PRs in scope. Output lands as `marketing/media/out/weekly-ships-reel.mp4`.
 
-4. **Skip** — if the ship is text-shaped (docs spec, a vocabulary lock, an external link) and a visual would feel forced, say so in the draft footer ("no visual; pure text post"). Don't fabricate.
+4. **Code snippet via `silicon` CLI (preferred) or [ray.so](https://ray.so)** — when the ship's news *is* a code shape: a new SDK function, a one-liner install + call, an API signature, a config snippet. Single static PNG; ships fast. Best for X/Farcaster when a 6-12 line snippet tells the whole story.
+
+   **Preferred — CLI (no browser, ≤30s):**
+
+   ```bash
+   # From a file
+   make -C marketing/media code-snippet FILE=path/to/snippet.py SLUG=python-quickstart
+
+   # From clipboard (paste a 6-12 line snippet to clipboard first)
+   make -C marketing/media code-snippet-paste SLUG=pay-and-infer LANG=ts
+   ```
+
+   The Makefile target pins the brand preset (theme `OneHalfDark`, font `JetBrains Mono` 20pt, bg `#080810`, padding 80, soft shadow). Requires `brew install silicon` one-time. Output: `marketing/media/out/<slug>-code.png`.
+
+   **Fallback — ray.so browser flow** (when you want to nudge layout live, or you're on a phone). Apply this preset every time so renders stay on-palette:
+
+   - **Theme**: `Midnight` (closest to `#080810` bg). For pixel-perfect, switch to `Custom` and set background `#080810`, accent `#6366f1`.
+   - **Background**: on, padding `64`, no window controls (we're not faking a Mac terminal — that's what VHS is for).
+   - **Language**: auto-detect, but verify before exporting.
+   - **Font size**: 14-16 depending on snippet length; the snippet should fill the frame without horizontal scroll.
+   - **Aspect**: let it auto-size. ray.so PNGs come out around 1600-1920px wide, plenty for X/Farcaster cards.
+
+   Either path saves to `marketing/media/out/<slug>-code.png` (gitignored). Reference in the draft footer the same way as GIFs.
+
+5. **Skip** — if the ship is text-shaped (docs spec, a vocabulary lock, an external link) and a visual would feel forced, say so in the draft footer ("no visual; pure text post"). Don't fabricate.
 
 Per-platform notes for attachments:
 
-- **X**: GIF or MP4 ≤512 MB. GIFs autoplay muted; MP4s preferred for >30s. Aspect 16:9 (the tapes are 1280×720) is X-native.
-- **Farcaster**: a single image / GIF / video URL. Receipt permalinks (`vdmnexus.com/r/<id>`) already render as a card; sometimes that's the best visual.
-- **Telegram**: native video, GIF, or animated MPEG-4 — all autoplay in the channel. Long-form (45s+) is fine here.
-- **LinkedIn**: 16:9 or 1:1, MP4 ≤10 min. Native video posts beat YouTube embeds.
+- **X**: GIF or MP4 ≤512 MB; PNG ≤5 MB. GIFs autoplay muted; MP4s preferred for >30s. Aspect 16:9 (the tapes are 1280×720) is X-native. Code-snippet PNGs (silicon or ray.so) post as native image cards.
+- **Farcaster**: a single image / GIF / video URL. Receipt permalinks (`vdmnexus.com/r/<id>`) already render as a card; sometimes that's the best visual. Code-snippet PNGs render well as embedded images.
+- **Telegram**: native video, GIF, or animated MPEG-4 — all autoplay in the channel. PNG attachments work too. Long-form (45s+) is fine here.
+- **LinkedIn**: 16:9 or 1:1, MP4 ≤10 min. Native video posts beat YouTube embeds. PNGs work but get less reach than video — prefer Remotion reel here when possible.
 
 After picking the visual, write the path into the draft file footer under a `## Visual` section so review can confirm at a glance:
 
@@ -68,6 +92,17 @@ After picking the visual, write the path into the draft file footer under a `## 
 - Source: `vhs/python-sdk-x402.tape` rendered 2026-05-22
 - Use for: X, Farcaster, Telegram
 - Skip for: LinkedIn (use ship-reel MP4 instead)
+```
+
+For code-snippet PNGs, use the same shape (note the rendered-by tool):
+
+```markdown
+## Visual
+
+- File: `marketing/media/out/pay-and-infer-code.png`
+- Source: silicon (`make code-snippet-paste SLUG=pay-and-infer LANG=ts`) — snippet from `examples/python-quickstart.py:1-12`
+- Use for: X, Farcaster, Telegram
+- Skip for: LinkedIn (text-only post; snippet inline in body)
 ```
 
 ### 4. Review gate

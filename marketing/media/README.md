@@ -1,15 +1,26 @@
 # marketing/media
 
 Visual companions for `/ship-broadcast`. Terminal demos for every
-shipped surface, plus a Remotion scaffold for "this week we shipped"
-reels.
+shipped surface, a Remotion scaffold for "this week we shipped"
+reels, and code-snippet PNGs via ray.so for code-shape ships.
 
 ```
 vhs/         — .tape scripts (charmbracelet/vhs) + the demo source they drive
 remotion/    — Remotion project with one WeeklyShipsReel template
-out/         — rendered GIFs / MP4s / WebMs (gitignored)
+out/         — rendered GIFs / MP4s / WebMs / PNGs (gitignored)
 Makefile     — `make help` for the menu
 ```
+
+## Visual source picker
+
+Pick the right tool for the ship:
+
+| Ship shape | Tool | Output |
+|---|---|---|
+| Terminal demo (SDK install → call → receipt) | VHS tape | animated GIF |
+| UI / browser demo (admin page, playground, verifier) | Screen Studio | MP4 |
+| Weekly summary / multi-PR roundup | Remotion `WeeklyShipsReel` | MP4 |
+| Code shape *is* the news (new fn, install one-liner, API signature) | [ray.so](https://ray.so) | PNG |
 
 ## Why this exists
 
@@ -26,6 +37,8 @@ review, and free from "looks-real-but-isn't" screenshot rot.
 |---|---|---|
 | [`vhs`](https://github.com/charmbracelet/vhs) | renders the terminal demos | `brew install vhs` (macOS) |
 | `ffmpeg` | mp4/webm encoding for vhs | `brew install ffmpeg` |
+| [`silicon`](https://github.com/Aloxaf/silicon) | renders code-snippet PNGs | `brew install silicon` (macOS) |
+| JetBrains Mono font | brand font for code-snippet PNGs | `brew install --cask font-jetbrains-mono` |
 | `node` 20+ | Remotion + verify-receipt demo | already required for the monorepo |
 | `python` 3.11+ | Python SDK demos | already required for the Python packages |
 
@@ -137,5 +150,97 @@ When `/ship-broadcast <PR#>` runs, Step 3.5 of the workflow looks for
 `marketing/media/out/<slug>.gif` for the matching ship and references
 it in the draft footer. If the GIF isn't there, the user is prompted
 to either (a) render it now (`make <target>`), (b) provide a Screen
-Studio recording, or (c) skip the visual. See
-[`../ship-broadcast.md`](../ship-broadcast.md) for the full flow.
+Studio recording, (c) export a code-snippet PNG via ray.so, or (d)
+skip the visual. See [`../ship-broadcast.md`](../ship-broadcast.md)
+for the full flow.
+
+## Code snippets via ray.so
+
+For ships whose news is a code shape — a new SDK function, an install
+one-liner, an API signature — a single PNG from
+[ray.so](https://ray.so) lands faster than a VHS render and reads
+better than a wall of monospace inside the tweet body.
+
+**Brand preset (use every time, so renders look like one product):**
+
+| Setting | Value | Why |
+|---|---|---|
+| Theme | `Midnight` | Closest to our `#080810` bg. Switch to `Custom` and set bg `#080810` + accent `#6366f1` if you want pixel-perfect. |
+| Background | on | The colored card frame is what makes ray.so look ray.so. |
+| Padding | 64 | Default. Don't shrink — the breathing room is the brand. |
+| Window controls | off | We're not faking a Mac terminal — VHS is for that. |
+| Line numbers | off (default) | On only when the snippet references specific line numbers in the post. |
+| Font size | 14-16 | Snippet should fill the frame without horizontal scroll. Trim the snippet, don't trim the font. |
+| Language | auto, then verify | Auto-detect mis-tags `.ts` as `.tsx` occasionally. |
+
+**Two workflows — pick whichever fits the moment:**
+
+### A. CLI via `silicon` (fastest — preferred)
+
+`silicon` is a Rust CLI that renders a syntax-highlighted PNG offline,
+no browser, with a brand-aligned preset baked into the Makefile.
+Install once: `brew install silicon`.
+
+```bash
+cd marketing/media
+
+# From a file in the repo
+make code-snippet FILE=../../examples/python-quickstart.py SLUG=python-quickstart
+
+# From the clipboard (after copying a 6-12 line snippet)
+make code-snippet-paste SLUG=pay-and-infer LANG=ts
+```
+
+Output lands at `out/<slug>-code.png`, gitignored, ready to attach
+to the broadcast. The Makefile pins theme (`OneHalfDark`), font
+(`JetBrains Mono` 20pt), background (`#080810`), padding (80), and
+the soft shadow — override via env if needed (`SILICON_THEME=...`).
+
+**Theme variants — when to override the default:**
+
+The default `OneHalfDark` is the right choice 95% of the time —
+balanced pink/cyan/green palette, clean readability, holds up at X
+thumbnail size. Two situations worth overriding:
+
+- **`SILICON_THEME=Dracula`** — for premium-feel launch posts (token,
+  big-name partnership, founder-led narrative). Dracula renders
+  `const` and other keywords as **italics**, which adds a designed,
+  distinctive look. Slightly less crisp at small render sizes; reserve
+  for hero moments.
+
+  ```bash
+  make code-snippet FILE=../../examples/token-announcement.ts \
+    SLUG=token-launch LANG=ts SILICON_THEME=Dracula
+  ```
+
+- **`SILICON_THEME=Coldark-Dark`** — for the rare "this is enterprise
+  audit-log infra" framing on LinkedIn. Muted palette, deeper blue
+  card, less attention-grabbing — which is exactly the point for
+  GRC-buyer-audience posts.
+
+List the full bundled set with `silicon --list-themes` if you want to
+experiment, but `OneHalfDark` / `Dracula` / `Coldark-Dark` are the
+three brand-sanctioned options. Don't reach for `Monokai`, `Nord`,
+or anything Solarized — they pull the eye away from our `#080810`
+frame.
+
+### B. ray.so browser flow (when you want to nudge layout)
+
+When the snippet has unusual line lengths, when you want to tweak the
+font live, or when you're working from a phone — use [ray.so](https://ray.so)
+in the browser. Same brand preset (Midnight theme, padding 64, no
+window controls, font 14-16). Export → PNG, save to
+`marketing/media/out/<slug>-code.png`.
+
+Both paths produce the same shape of artifact and reference it the
+same way in the draft footer per the `## Visual` convention in
+[`../ship-broadcast.md`](../ship-broadcast.md).
+
+**Snippet hygiene:** the snippet in the PNG must be runnable. If the
+post copies a different version of the same call into the body text,
+they must match character-for-character. Diverging "marketing code"
+from "real code" is how SDK docs rot.
+
+**Don't use ray.so for:** terminal output (VHS), UI flows (Screen
+Studio), or anything that needs motion. If the visual would benefit
+from a cursor moving or a value updating, it's a tape, not a PNG.
