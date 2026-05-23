@@ -38,6 +38,12 @@ const PROBLEMS = [
 
 const USE_CASES = [
   {
+    title: "Ship-broadcast agent",
+    badge: "live",
+    body:
+      "Our own agent drafts X / Farcaster / Telegram posts via the SDK and pays per call. Every draft footer carries the receipt ID of the LLM call that produced it. The protocol runs its own agents and pays itself.",
+  },
+  {
     title: "Trading agent",
     body:
       "Watch a market condition, pull a signed inference for the decision, execute on-chain. The receipt is the audit log when the strategy gets reviewed.",
@@ -71,6 +77,10 @@ const STEPS = [
   {
     title: "Receipt",
     body: "The response carries a signed receipt: prompt hash, response hash, cost, balance remaining, timestamp. Cryptographic proof of what happened.",
+  },
+  {
+    title: "Public profile",
+    body: "Every receipt also lands on the agent's public profile at console.vdmnexus.com/a/<pubkey>. Stats accrue, reputation builds, the audit trail is permanent.",
   },
 ];
 
@@ -122,6 +132,7 @@ export default function Home() {
   return (
     <WaitlistProvider>
       <Nav />
+      <LastShippedStrip />
       <main>
         <Hero />
         {launchLive() ? <NexusToken /> : null}
@@ -156,11 +167,20 @@ function Hero() {
             </h1>
             <p className="mx-auto mt-8 max-w-2xl text-balance text-base leading-relaxed text-text-muted sm:text-lg">
               Ed25519 agent identity. USDC settlement on Solana and Base.
-              Every inference call signed, every receipt independently
-              verifiable, every decision auditable forever.
+              Every call signed, every receipt independently verifiable. Each
+              agent gets a public home at{" "}
+              <a
+                href="https://console.vdmnexus.com"
+                className="text-text underline decoration-text-muted/40 underline-offset-4 transition-colors hover:decoration-text"
+              >
+                console.vdmnexus.com
+              </a>
+              .
             </p>
             <p className="mx-auto mt-4 max-w-2xl text-balance text-sm text-text-muted/80">
-              Beta protocol — mainnet live since 2026-05-21. v1 ships with $NEXUS.
+              Beta protocol — mainnet live since 2026-05-21. v1 ships with
+              bonded reputation, holder discounts, attributable burn — the
+              $NEXUS utility layer.
             </p>
             <div className="mt-12 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
               {showLaunch ? (
@@ -404,17 +424,48 @@ function Problem() {
   );
 }
 
+/**
+ * Thin strip above the Hero — surfaces the most recent meaningful ship
+ * + a link to the live surface. Updates manually when a new layer
+ * lands; could swap to a /changelog endpoint once one exists.
+ *
+ * Mirrors the same strip on console.vdmnexus.com/ — keeps the
+ * "we ship publicly" signal visible to first-time visitors.
+ */
+function LastShippedStrip() {
+  return (
+    <div className="relative border-b border-soft bg-surface/40 backdrop-blur">
+      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 px-6 py-2.5 text-xs">
+        <span className="flex items-center gap-2 text-text-muted">
+          <span
+            aria-hidden
+            className="inline-block h-1.5 w-1.5 rounded-full bg-accent-indigo"
+          />
+          <span className="uppercase tracking-[0.18em]">Last shipped</span>
+          <span>· Mission Control v0 · 2026-05-24</span>
+        </span>
+        <a
+          href="https://console.vdmnexus.com"
+          className="text-text-muted underline underline-offset-4 transition-colors hover:text-text"
+        >
+          See it on the console →
+        </a>
+      </div>
+    </div>
+  );
+}
+
 function Products() {
   return (
     <Section>
       <FadeIn className="max-w-2xl">
         <SectionEyebrow>Products</SectionEyebrow>
         <SectionHeading className="mt-4">
-          Two layers. One platform.
+          Three layers. One platform.
         </SectionHeading>
       </FadeIn>
 
-      <div className="mt-12 grid gap-4 md:grid-cols-2">
+      <div className="mt-12 grid gap-4 md:grid-cols-3">
         <FadeIn>
           <Link href="/inference" className="block h-full">
             <Card className="group h-full">
@@ -453,6 +504,33 @@ function Products() {
               </p>
             </Card>
           </Link>
+        </FadeIn>
+
+        <FadeIn delay={0.16}>
+          <a
+            href="https://console.vdmnexus.com"
+            className="block h-full"
+          >
+            <Card className="group h-full">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium uppercase tracking-[0.16em] text-accent-indigo">
+                  Public layer live · v0
+                </span>
+                <ArrowRight className="h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-text" />
+              </div>
+              <h3 className="mt-4 text-xl font-semibold text-text">
+                Mission Control
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-text-muted">
+                Every agent on the rail gets a permalink at{" "}
+                <code className="rounded bg-bg/60 px-1 py-0.5 font-mono text-[11px] text-text">
+                  console.vdmnexus.com/a/&lt;pubkey&gt;
+                </code>{" "}
+                — stats, receipts, one-click verify, ERC-8004 card.
+                Operator dashboard ships in v1.
+              </p>
+            </Card>
+          </a>
         </FadeIn>
       </div>
     </Section>
@@ -670,7 +748,14 @@ function UseCases() {
         {USE_CASES.map((u, i) => (
           <FadeIn key={u.title} delay={i * 0.08}>
             <Card className="h-full">
-              <h3 className="text-base font-semibold text-text">{u.title}</h3>
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-base font-semibold text-text">{u.title}</h3>
+                {"badge" in u && u.badge === "live" ? (
+                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-emerald-300">
+                    Live
+                  </span>
+                ) : null}
+              </div>
               <p className="mt-3 text-sm leading-relaxed text-text-muted">
                 {u.body}
               </p>
@@ -688,11 +773,11 @@ function HowItWorks() {
       <FadeIn className="max-w-2xl">
         <SectionEyebrow>How it works</SectionEyebrow>
         <SectionHeading className="mt-4">
-          Cryptographic proof in three steps.
+          Cryptographic proof in four steps.
         </SectionHeading>
       </FadeIn>
 
-      <div className="mt-12 grid gap-4 sm:grid-cols-3">
+      <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {STEPS.map((s, i) => (
           <FadeIn key={s.title} delay={i * 0.08}>
             <Card className="h-full">
