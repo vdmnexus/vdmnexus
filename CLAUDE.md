@@ -531,6 +531,23 @@ DEMO_SEED_USDC=1.00
   under `docs.vdmnexus.com/spec/sir-v2`. Defines the canonical JSON
   shape, signing rules (sorted keys, no whitespace, exclude
   `nexus_signature`), and the five verification checks.
+- **Ship-broadcast agent — first agent on Nexus paying its own way
+  per call.** Phase 1 shipped 2026-05-23. `pnpm broadcast-agent <PR#>`
+  drafts X / Farcaster / Telegram / LinkedIn posts via
+  `X402Agent.pay_and_infer` on Solana mainnet — every broadcast draft
+  carries the receipt ID of the LLM call that produced it. The agent
+  reads `agents/ship-broadcast/prompt.md` (locked vocabulary, ten
+  guardrails, output JSON schema), refreshes the "currently shipped"
+  list from npm + PyPI before each run so it can only reference real
+  surfaces, picks a visual (existing VHS tape, silicon code-snippet
+  PNG, or skip), and writes the draft to
+  `marketing/broadcasts/<pr#>-<slug>.md`. Never schedules, never
+  sends — the human approval gate in `marketing/ship-broadcast.md`
+  still owns posting. Acceptance receipts:
+  [`r/2639c835`](https://vdmnexus.com/r/2639c835-1dd3-47a1-84aa-4cb2e3c6ef11)
+  (PR #65), [`r/895d38a9`](https://vdmnexus.com/r/895d38a9-19e3-4d7d-9adc-0f352e3f0769)
+  (PR #66), [`r/c21e59a3`](https://vdmnexus.com/r/c21e59a3-878c-452d-81da-b620d589544d)
+  (docs-skip case). Phase 2 (cron / webhook auto-trigger) deferred.
 
 ### NOT built — explicit gaps
 
