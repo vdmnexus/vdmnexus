@@ -150,14 +150,32 @@ structured three-pass:
 
 Receipt shows the structured reasoning, not vibes.
 
-### 4. Kelly-fractional sizing
+### 4. Kelly-fractional sizing — **honest framing matters**
 
 Current `$50 flat cap on $12 bankroll` is aspirational, not active.
 
-- **25% Kelly on stated `edge_bps`**, floor $1, **cap $5** until
+- **25% Kelly on stated `edge_bps`**, floor $1, cap $5 until
   bankroll crosses $100, then progressively widen.
-- The receipt then shows responsible sizing — audit-trail buyers
-  care about that.
+
+**One important framing note**: at $12 bankroll, a "true" 25% Kelly
+bet on a 5% edge is roughly $0.15 — well below the $1 floor. **The
+floor will bind almost every time at this bankroll size; Kelly is
+effectively just the ceiling.** That's fine, the floor is doing the
+real work, but the receipt copy must not claim "Kelly-sized at 25%"
+when the bet is actually floor-clamped — an auditor reading the
+exhibit will catch the discrepancy and the audit-trail credibility
+takes the hit.
+
+Two honest framings, pick one per receipt:
+
+- **"Floor-clamped, Kelly-capped"** — for bets where Kelly math
+  produced < $1 and the floor took over.
+- **"Kelly-sized"** — only when bankroll > ~$50 *and* the computed
+  Kelly stake genuinely exceeds the floor.
+
+The audit-trail story is stronger when the sizing language is
+mechanically accurate. Don't dress up floor-clamped sizing as
+Kelly-driven sizing.
 
 ### 5. Broadcasting cadence
 
@@ -170,23 +188,71 @@ Reserve the dashboard reveal for when *all three* are true:
 (b) ≥30 resolved bets with a P&L screenshot,
 (c) the EU AI Act deadline is within 60 days (news-peg).
 
-## Legal correction to verify
+**Be specific about what "30 resolved bets" means for the timeline.**
+At the proposed cadence (6h deep + 30min watch) filtered to 7–60
+day resolution markets, 30 resolved bets is realistically **6–10
+weeks** out, not 2–3. Politics / policy markets in the $5k–$50k
+volume band don't resolve fast.
 
-The memo claims **RD 958/2020 art. 23.1.b was annulled by the
-Spanish Supreme Court in 2024**, with a 2025 amendment trying to
-reinstate via Law 13/2011 (incl. DGOJ Register of Gambling Suppliers,
-€100k–€1M fines for unlicensed promotion).
+Two paths, pick one and commit to it:
 
-Our `agents/polymarket/README.md` cites art. 23.1.b as the live
-blocker. If the annulment is real, the specific citation is wrong
-— but the *conclusion* (counsel-gated public dashboard, fine to
-operate privately) is unchanged, because Ley 13/2011 art. 40.c
-(promoting unlicensed gambling) is unaffected.
+- **Widen the filter** to include some shorter-duration markets
+  (with the resolution-quality bar *held high*) — pulls the
+  dashboard window into Q3 2026 territory.
+- **Accept the dashboard is a 2026-Q4 thing** — frame it that way
+  from day one, news-peg the reveal against the AI Act enforcement
+  ramp, don't accidentally back into a corner where it's "ready" in
+  4 weeks because only 8 bets have resolved.
 
-**Action:** verify the 2024 annulment via primary source (BOE,
-Supreme Court ruling text, or Spanish counsel) **before** editing
-the README. Don't change documented compliance posture on
-secondary-source claim.
+Either is fine. What's not fine is implicitly assuming we'll have
+30 resolved bets in 4 weeks. We won't, and planning Q3 launch
+comms against that assumption will hurt.
+
+## Legal correction to verify — **Task #1, before any coding**
+
+The original deep-dive claimed RD 958/2020 art. 23.1.b was annulled
+by the Spanish Supreme Court in 2024, but the founder's follow-up
+sharpened this: what actually got annulled in the April 2024
+rulings was **RD 958/2020 art. 23 paragraph 1** as a whole (the
+general prohibition on commercial communications via information
+society services). Whether 23.1.b survives as a sub-clause is the
+*specific* thing to verify.
+
+The cleanest primary source is **STS 265/2024 and the related
+April 2024 Supreme Court decisions, as published in the BOE.**
+Osborne Clarke's secondary write-up is the clearest summary and
+explicitly lists which articles fell — useful as a starting point,
+not as the citation in our README.
+
+Two corrections to make in `agents/polymarket/README.md` once the
+BOE check completes:
+
+1. Replace the "RD 958/2020 art. 23.1.b" cite with whatever the
+   BOE actually confirms is still in force.
+2. Replace "**Ley 13/2011 art. 40.c**" with **art. 40.b** — that's
+   where the €100k–€1M fine band for promoting unlicensed gambling
+   actually lives under the original numbering (very serious
+   infractions). The 2025 amendment package is renumbering things,
+   so verify the current operative version while you're in the BOE.
+
+The substance of our compliance posture is unchanged ("we can't
+publicly promote bets on a platform unlicensed in Spain without
+exposure → public dashboard is counsel-gated, operate privately")
+— **the specific article numbers in our README are probably both
+wrong.**
+
+### Why this goes first thing, before any coding
+
+This is the only task with an external dependency and a binary
+"right answer." Every other task (prompt rewrite, filter, sizing,
+cadence split) is creative work — fun, expansive, easily eats a
+whole morning. The pattern: you sit down to verify the cite,
+something else feels more exciting, the BOE check slides to "later
+this week," then to never.
+
+Lock in 20 minutes of BOE reading + a one-line README update **as
+the first action of the next session.** Then the rest of the day
+runs clean.
 
 ## Three guesses, flagged
 
