@@ -14,6 +14,7 @@ import { FadeIn } from "@/components/fade-in";
 import { LiveStats } from "@/components/live-stats";
 import { RecentReceipts } from "@/components/recent-receipts";
 import { WaitlistProvider } from "@/components/waitlist-context";
+import { launchLive } from "@/lib/launch-flag";
 
 const GITHUB_URL = "https://github.com/vdmnexus/vdmnexus";
 
@@ -123,6 +124,8 @@ export default function Home() {
       <Nav />
       <main>
         <Hero />
+        <LiveProof />
+        {launchLive() ? <NexusToken /> : null}
         <Problem />
         <Products />
         <BuiltOnTop />
@@ -139,65 +142,177 @@ export default function Home() {
 }
 
 function Hero() {
+  const showLaunch = launchLive();
   return (
     <section className="relative overflow-hidden">
       <GridBg />
-      <div className="mx-auto w-full max-w-6xl px-6 pb-24 pt-24 sm:pb-32 sm:pt-32">
+      <div className="mx-auto w-full max-w-5xl px-6 pb-24 pt-28 sm:pb-32 sm:pt-36">
         <FadeIn>
-          <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
-            {/* Copy + CTAs */}
-            <div className="text-center lg:text-left">
-              <SectionEyebrow>Signed inference for the agent economy</SectionEyebrow>
-              <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-text sm:text-5xl md:text-6xl">
-                AI agents that{" "}
-                <span className="text-gradient">pay for their own compute</span>
-              </h1>
-              <p className="mx-auto mt-6 max-w-xl text-balance text-base text-text-muted sm:text-lg lg:mx-0">
-                No API keys. No human in the loop. Every request is signed by
-                an Ed25519 keypair and settled in USDC on Solana.
-              </p>
-              <p className="mx-auto mt-3 max-w-xl text-balance text-sm text-text-muted/80 lg:mx-0">
-                Beta protocol. v1 ships with $NEXUS.
-              </p>
-              <div className="mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center lg:justify-start">
-                <a
-                  href={GITHUB_URL}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="group inline-flex items-center justify-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-5 py-3 text-sm font-medium text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
-                >
-                  <Github className="h-4 w-4" />
-                  View on GitHub
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </a>
-                <Link
-                  href="/playground"
-                  className="group inline-flex items-center justify-center gap-2 rounded-md border border-soft bg-surface/60 px-5 py-3 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
-                >
-                  Try the playground
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </Link>
-              </div>
-            </div>
-
-            {/* Code block */}
-            <div className="lg:pl-4">
-              <HeroCode />
+          <div className="text-center">
+            <SectionEyebrow>Autonomous AI with cryptographic proof</SectionEyebrow>
+            <h1 className="mx-auto mt-8 max-w-4xl text-balance text-5xl font-semibold tracking-tight text-text sm:text-6xl md:text-7xl">
+              Agents that earn, spend, and{" "}
+              <span className="text-gradient">prove every decision</span>{" "}
+              on-chain.
+            </h1>
+            <p className="mx-auto mt-8 max-w-2xl text-balance text-base leading-relaxed text-text-muted sm:text-lg">
+              Ed25519 agent identity. USDC settlement on Solana and Base.
+              Every inference call signed, every receipt independently
+              verifiable, every decision auditable forever.
+            </p>
+            <p className="mx-auto mt-4 max-w-2xl text-balance text-sm text-text-muted/80">
+              Beta protocol — mainnet live since 2026-05-21. v1 ships with $NEXUS.
+            </p>
+            <div className="mt-12 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
+              {showLaunch ? (
+                <>
+                  <Link
+                    href="/token"
+                    className="group inline-flex items-center justify-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-6 py-3 text-sm font-semibold text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
+                  >
+                    Read the $NEXUS plan
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                  <Link
+                    href="/playground"
+                    className="group inline-flex items-center justify-center gap-2 rounded-md border border-soft bg-surface/60 px-6 py-3 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
+                  >
+                    Try a live mainnet call
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/playground"
+                    className="group inline-flex items-center justify-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-6 py-3 text-sm font-semibold text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
+                  >
+                    Try a live mainnet call
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                  <a
+                    href={GITHUB_URL}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="group inline-flex items-center justify-center gap-2 rounded-md border border-soft bg-surface/60 px-6 py-3 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
+                  >
+                    <Github className="h-4 w-4" />
+                    View on GitHub
+                  </a>
+                </>
+              )}
             </div>
           </div>
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
 
-          {/* Live mainnet counters */}
-          <div className="mt-14 sm:mt-16">
-            <LiveStats />
-          </div>
-
-          {/* Recent settlements — the receipts behind the counter */}
+function LiveProof() {
+  return (
+    <section className="relative">
+      <div className="mx-auto w-full max-w-6xl px-6 pb-8 sm:pb-12">
+        <FadeIn>
+          <LiveStats />
           <div className="mt-4">
             <RecentReceipts />
           </div>
         </FadeIn>
       </div>
     </section>
+  );
+}
+
+function NexusToken() {
+  return (
+    <Section>
+      <FadeIn className="max-w-2xl">
+        <SectionEyebrow>$NEXUS</SectionEyebrow>
+        <SectionHeading className="mt-4">
+          The utility token of the signed-inference rail.
+        </SectionHeading>
+        <p className="mt-5 text-base leading-relaxed text-text-muted">
+          Four wires on a 0/30/60/90 calendar. Each wire is a concrete
+          on-chain mechanism with a public ship date. Fair launch on
+          pump.fun with USDC pair on Solana. 100B fixed supply, no
+          team allocation, no presale.
+        </p>
+      </FadeIn>
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-indigo">
+            Day 0 · launch
+          </span>
+          <h3 className="mt-3 text-base font-semibold text-text">
+            Wire 1 — Receipt fee burn
+          </h3>
+          <p className="mt-3 text-sm leading-relaxed text-text-muted">
+            $0.01 USDC per call. 50% routes to a public buy-and-burn
+            bot. Burn pressure scales with rail usage.
+          </p>
+        </Card>
+        <Card>
+          <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-indigo">
+            Day 30
+          </span>
+          <h3 className="mt-3 text-base font-semibold text-text">
+            Wire 2 — Holder discount
+          </h3>
+          <p className="mt-3 text-sm leading-relaxed text-text-muted">
+            Hold ≥ threshold $NEXUS → approximately 20% discount on
+            /v1/chat/completions. Threshold published 7 days prior.
+          </p>
+        </Card>
+        <Card>
+          <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-indigo">
+            Day 60
+          </span>
+          <h3 className="mt-3 text-base font-semibold text-text">
+            Wire 3 — Agent reputation bond
+          </h3>
+          <p className="mt-3 text-sm leading-relaxed text-text-muted">
+            Stake $NEXUS → trust badge + additional fee discount + 2×
+            rate limit. Slashable. 14-day unbonding.
+          </p>
+        </Card>
+        <Card>
+          <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-indigo">
+            Day 90
+          </span>
+          <h3 className="mt-3 text-base font-semibold text-text">
+            Wire 4 — Verifier staking
+          </h3>
+          <p className="mt-3 text-sm leading-relaxed text-text-muted">
+            Stake $NEXUS to run a verifier node. 40% of verify SaaS
+            revenue distributes to staked verifiers.
+          </p>
+        </Card>
+      </div>
+      <FadeIn className="mt-10">
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
+          <Link
+            href="/token"
+            className="inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
+          >
+            Read the $NEXUS plan
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+          <Link
+            href="/whitepaper"
+            className="inline-flex items-center gap-2 rounded-md border border-soft bg-surface/60 px-5 py-2.5 text-sm font-medium text-text transition-colors hover:border-accent-indigo/60"
+          >
+            Whitepaper
+          </Link>
+          <Link
+            href="/disclosures"
+            className="inline-flex items-center gap-2 rounded-md border border-soft bg-surface/60 px-5 py-2.5 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/60 hover:text-text"
+          >
+            Disclosures
+          </Link>
+        </div>
+      </FadeIn>
+    </Section>
   );
 }
 
