@@ -186,7 +186,28 @@ export default function Home() {
 
   return (
     <main className="container">
-      <span className="eyebrow">verify.vdmnexus.com</span>
+      <span className="eyebrow">
+        verify.vdmnexus.com
+        <span
+          title="Beta — API stable, mainnet live. v1 ships at $NEXUS launch."
+          style={{
+            marginLeft: "8px",
+            display: "inline-block",
+            padding: "1px 6px",
+            border: "1px solid rgba(99, 102, 241, 0.4)",
+            background: "rgba(99, 102, 241, 0.1)",
+            borderRadius: "999px",
+            fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+            fontSize: "9px",
+            fontWeight: 500,
+            textTransform: "uppercase",
+            letterSpacing: "0.18em",
+            color: "rgb(129, 140, 248)",
+          }}
+        >
+          Beta
+        </span>
+      </span>
       <h1>Verify a Nexus receipt</h1>
       <p className="lead">
         Drop in a receipt URL or id. We run the same five-check

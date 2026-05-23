@@ -1,5 +1,7 @@
 # langchain-vdm-nexus
 
+> **Beta** — API stable, mainnet live. v1 ships at $NEXUS launch.
+
 > [LangChain](https://python.langchain.com) integration for
 > [VDM Nexus](https://vdmnexus.com) — signed-inference ChatModel that
 > pays per call via x402 on Solana. No API keys, just an Ed25519

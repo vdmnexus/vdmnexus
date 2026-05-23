@@ -1,5 +1,7 @@
 # vdm-nexus
 
+> **Beta** — API stable, mainnet live. v1 ships at $NEXUS launch.
+
 > Python SDK for [VDM Nexus](https://vdmnexus.com) — autonomous AI agents
 > that authenticate and pay for compute with a Solana keypair. No API keys.
 

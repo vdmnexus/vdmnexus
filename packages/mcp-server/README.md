@@ -1,5 +1,7 @@
 # @vdm-nexus/mcp
 
+> **Beta** — API stable, mainnet live. v1 ships at $NEXUS launch.
+
 > MCP server for [VDM Nexus](https://vdmnexus.com) — drop signed inference
 > into Claude Desktop, Cursor, or any [Model Context Protocol](https://modelcontextprotocol.io)
 > client. Two tools: `signed_inference` and `verify_receipt`.
