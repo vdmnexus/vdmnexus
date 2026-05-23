@@ -6,6 +6,21 @@ const SESSION_COOKIE = "nexus_console_session";
 const CHALLENGE_TTL_MS = 5 * 60 * 1000;
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * True when the env var is set and long enough to use as an HMAC key.
+ * Page-level guards call this so a missing secret renders a graceful
+ * notice instead of triggering a 500 from inside `sessionSecret()`.
+ *
+ * Defense-in-depth: `sessionSecret()` still throws if called when
+ * unconfigured. That way, if a code path forgets to guard, we fail
+ * closed (no half-broken auth) rather than silently signing with
+ * an empty string.
+ */
+export function isSessionConfigured(): boolean {
+  const s = process.env.CONSOLE_SESSION_SECRET;
+  return typeof s === "string" && s.length >= 32;
+}
+
 function sessionSecret(): string {
   const s = process.env.CONSOLE_SESSION_SECRET;
   if (!s || s.length < 32) {
@@ -98,6 +113,9 @@ export async function clearSessionCookie(): Promise<void> {
 }
 
 export async function getSessionPubkey(): Promise<string | null> {
+  // Fail closed if the HMAC key isn't configured — no session can be
+  // validly signed without it, so there's no point reading the cookie.
+  if (!isSessionConfigured()) return null;
   const c = await cookies();
   const raw = c.get(SESSION_COOKIE)?.value;
   if (!raw) return null;
