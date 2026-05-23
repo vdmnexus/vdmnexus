@@ -22,8 +22,8 @@
  * with EdDSA. Both are accepted by the CDP API.
  */
 
-import { SignJWT, importPKCS8, importJWK, type KeyLike } from "jose";
-import { randomBytes } from "node:crypto";
+import { SignJWT, importPKCS8, type KeyLike } from "jose";
+import { createPrivateKey, randomBytes } from "node:crypto";
 
 type ParsedKey = {
   key: KeyLike;
@@ -33,52 +33,145 @@ type ParsedKey = {
 let cachedKey: ParsedKey | null = null;
 let cachedKeySource: string | null = null;
 
+/**
+ * PKCS#8 prefix bytes for an Ed25519 private key. Coinbase's "Secret
+ * API Key" download for Ed25519 keys is the raw 32-byte seed (base64);
+ * to feed it to `jose.importPKCS8` we wrap it with this DER prefix
+ * to produce a valid PKCS#8 envelope.
+ *
+ *   SEQUENCE(46)
+ *     INTEGER 0           ; version
+ *     SEQUENCE(5)
+ *       OID 1.3.101.112   ; ed25519 OID
+ *     OCTET STRING(34)
+ *       OCTET STRING(32)  ; the seed
+ */
+const ED25519_PKCS8_PREFIX = Buffer.from(
+  "302e020100300506032b657004220420",
+  "hex"
+);
+
+function wrapEd25519SeedAsPkcs8Pem(seed: Buffer): string {
+  if (seed.length !== 32) {
+    throw new Error(
+      `Ed25519 seed must be 32 bytes, got ${seed.length}`
+    );
+  }
+  const der = Buffer.concat([ED25519_PKCS8_PREFIX, seed]);
+  const b64 = der.toString("base64");
+  const lines = b64.match(/.{1,64}/g)?.join("\n") ?? b64;
+  return `-----BEGIN PRIVATE KEY-----\n${lines}\n-----END PRIVATE KEY-----`;
+}
+
+function normalisePemNewlines(pem: string): string {
+  // Some env-var pipelines drop newlines entirely, leaving:
+  //   "-----BEGIN PRIVATE KEY-----MIIEvQIBADANBgk... -----END PRIVATE KEY-----"
+  // jose's PEM decoder needs the markers on their own lines. Detect the
+  // collapsed form and re-insert line breaks every 64 base64 chars.
+  if (pem.split("\n").length > 3) return pem; // already multi-line
+  const header = "-----BEGIN PRIVATE KEY-----";
+  const footer = "-----END PRIVATE KEY-----";
+  const headerIdx = pem.indexOf(header);
+  const footerIdx = pem.indexOf(footer);
+  if (headerIdx === -1 || footerIdx === -1) return pem;
+  const body = pem
+    .slice(headerIdx + header.length, footerIdx)
+    .replace(/\s+/g, "");
+  const wrapped = body.match(/.{1,64}/g)?.join("\n") ?? body;
+  return `${header}\n${wrapped}\n${footer}`;
+}
+
 async function parsePrivateKey(raw: string): Promise<ParsedKey> {
-  // Cache by source so we don't re-import on every JWT. Re-import only
-  // if the env var changed (e.g. hot reload during local dev).
   if (cachedKey && cachedKeySource === raw) return cachedKey;
 
   // Vercel + many secret stores collapse newlines. Accept either real
   // newlines or `\n` escape sequences in the env var.
-  const pem = raw.replace(/\\n/g, "\n").trim();
+  let input = raw.replace(/\\n/g, "\n").trim();
 
-  if (pem.includes("BEGIN EC PRIVATE KEY")) {
-    // SEC1 PEM — convert to PKCS#8 by wrapping. jose's importPKCS8
-    // wants PKCS#8, but Coinbase historically issued SEC1. Best path:
-    // ask the operator to re-paste in PKCS#8, or do an in-process
-    // conversion via Node's crypto.
-    throw new Error(
-      "CDP_FACILITATOR_PRIVATE_KEY is SEC1 PEM (BEGIN EC PRIVATE KEY). " +
-        "Re-export from CDP as PKCS#8 (BEGIN PRIVATE KEY) — Coinbase's " +
-        "current Secret API Key download is already PKCS#8."
-    );
-  }
-
-  if (!pem.includes("BEGIN PRIVATE KEY")) {
-    throw new Error(
-      "CDP_FACILITATOR_PRIVATE_KEY does not look like a PEM block. " +
-        "Expected PKCS#8 PEM starting with '-----BEGIN PRIVATE KEY-----'."
-    );
-  }
-
-  // Try ES256 first (P-256), fall back to EdDSA (Ed25519). jose's
-  // importPKCS8 needs the algorithm name as a hint; we attempt both
-  // and use whichever succeeds.
-  const errors: string[] = [];
-  for (const alg of ["ES256", "EdDSA"] as const) {
+  // Case A — operator pasted a JSON blob (e.g. the full download from
+  // CDP). Extract the privateKey field.
+  if (input.startsWith("{")) {
     try {
-      const key = await importPKCS8(pem, alg);
-      const parsed: ParsedKey = { key, alg };
+      const parsed = JSON.parse(input) as { privateKey?: string };
+      if (parsed.privateKey) input = parsed.privateKey.trim();
+    } catch {
+      // Not JSON — fall through.
+    }
+  }
+
+  // Case B — SEC1 EC PEM (legacy CDP keys). Convert to PKCS#8 via
+  // Node's crypto so jose can import it.
+  if (input.includes("BEGIN EC PRIVATE KEY")) {
+    const keyObject = createPrivateKey({ key: input, format: "pem" });
+    const pkcs8 = keyObject.export({ format: "pem", type: "pkcs8" }) as string;
+    input = pkcs8;
+  }
+
+  // Case C — PKCS#8 PEM. Most common path. Repair any collapsed
+  // newlines first so single-line env-var paste still works.
+  if (input.includes("BEGIN PRIVATE KEY")) {
+    const pem = normalisePemNewlines(input);
+    const errors: string[] = [];
+    for (const alg of ["ES256", "EdDSA"] as const) {
+      try {
+        const key = await importPKCS8(pem, alg);
+        const parsed: ParsedKey = { key, alg };
+        cachedKey = parsed;
+        cachedKeySource = raw;
+        return parsed;
+      } catch (e) {
+        errors.push(`${alg}: ${(e as Error).message}`);
+      }
+    }
+    throw new Error(
+      "CDP_FACILITATOR_PRIVATE_KEY parsed as PKCS#8 PEM but failed to " +
+        "import as ES256 or EdDSA: " +
+        errors.join("; ")
+    );
+  }
+
+  // Case D — bare base64 blob (no PEM markers). CDP often ships
+  // Ed25519 seeds this way. Try wrapping as PKCS#8.
+  const looksBase64 = /^[A-Za-z0-9+/=\s]+$/.test(input);
+  if (looksBase64) {
+    let bytes: Buffer;
+    try {
+      bytes = Buffer.from(input.replace(/\s+/g, ""), "base64");
+    } catch (e) {
+      throw new Error(
+        `CDP_FACILITATOR_PRIVATE_KEY looked like base64 but didn't decode: ${
+          (e as Error).message
+        }`
+      );
+    }
+    // Coinbase's "Secret API Key" Ed25519 download is either the raw
+    // 32-byte seed, the 64-byte seed||public concat, or the 32-byte
+    // seed prefixed with a 0x04 0x20 marker. Handle the common shapes.
+    let seed: Buffer | null = null;
+    if (bytes.length === 32) seed = bytes;
+    else if (bytes.length === 64) seed = bytes.subarray(0, 32);
+    else if (bytes.length === 34 && bytes[0] === 0x04 && bytes[1] === 0x20)
+      seed = bytes.subarray(2);
+    if (seed) {
+      const pem = wrapEd25519SeedAsPkcs8Pem(seed);
+      const key = await importPKCS8(pem, "EdDSA");
+      const parsed: ParsedKey = { key, alg: "EdDSA" };
       cachedKey = parsed;
       cachedKeySource = raw;
       return parsed;
-    } catch (e) {
-      errors.push(`${alg}: ${(e as Error).message}`);
     }
+    throw new Error(
+      `CDP_FACILITATOR_PRIVATE_KEY decoded to ${bytes.length} bytes — not ` +
+        "a recognised Ed25519 seed shape (expected 32, 64, or 34 bytes). " +
+        "If this is an ECDSA key, re-export from CDP as PKCS#8 PEM."
+    );
   }
+
   throw new Error(
-    "CDP_FACILITATOR_PRIVATE_KEY could not be imported as ES256 or EdDSA: " +
-      errors.join("; ")
+    "CDP_FACILITATOR_PRIVATE_KEY format not recognised. Accepted shapes: " +
+      "PKCS#8 PEM (-----BEGIN PRIVATE KEY-----), SEC1 EC PEM, base64 " +
+      "Ed25519 seed (32 / 64 / 34 bytes), or a JSON blob with a " +
+      "`privateKey` field."
   );
 }
 
