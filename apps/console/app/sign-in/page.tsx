@@ -3,11 +3,7 @@ import { redirect } from "next/navigation";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 import { SignInForm } from "./sign-in-form";
-import {
-  getSessionPubkey,
-  isSessionConfigured,
-  issueChallenge,
-} from "@/lib/session";
+import { getSessionPubkey, isSessionConfigured } from "@/lib/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,8 +26,10 @@ export default async function SignInPage() {
 
   if (await getSessionPubkey()) redirect("/dashboard");
 
-  const { nonce, expiresAt } = await issueChallenge();
-  const expiresIn = Math.max(1, Math.round((expiresAt - Date.now()) / 1000));
+  // Note: the challenge cookie is issued by GET /api/sign-in/challenge,
+  // which the SignInForm fetches on mount. Next.js 15 disallows
+  // `cookies().set()` from a server-component render, so the write
+  // has to happen in a Route Handler or Server Action.
 
   return (
     <main className="relative min-h-screen">
@@ -61,12 +59,8 @@ export default async function SignInPage() {
         </header>
 
         <div className="mt-6 rounded-2xl border border-soft bg-surface/60 p-6 backdrop-blur">
-          <SignInForm nonce={nonce} />
+          <SignInForm />
         </div>
-
-        <p className="mt-4 text-[11px] text-text-muted">
-          Challenge expires in {expiresIn}s · single-use · HttpOnly cookie
-        </p>
       </section>
 
       <Footer />
