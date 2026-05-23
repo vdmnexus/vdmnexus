@@ -4,7 +4,9 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
-    "lint": "turbo lint"
+    "lint": "turbo lint",
+    "broadcast-agent": "python3 scripts/broadcast-agent.py",
+    "broadcast-agent:validate": "tsx scripts/validate-broadcast-output.ts"
   },
   "devDependencies": {
     "turbo": "^2"

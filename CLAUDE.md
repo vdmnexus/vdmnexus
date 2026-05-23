@@ -369,6 +369,9 @@ Full schemas with inline comments live in `apps/web/.env.example` and `apps/nexu
 - `/roadmap` + admin editor at `/admin/roadmap`.
 - Gitlawb mirror (`gitlawb.com`) — agent-paid `git push` via the paywall package. Demo receipt: `vdmnexus.com/r/749fa37c`. Proves the paywall works against non-LLM resources.
 
+**Agents on the rail.**
+- **Ship-broadcast agent** (Phase 1, 2026-05-23) — first agent that lives on Nexus and pays its own way per call. `pnpm broadcast-agent <PR#>` drafts X / Farcaster / Telegram / LinkedIn posts via `X402Agent.pay_and_infer` on Solana mainnet; every draft footer carries the LLM-call receipt ID. Contract in `agents/ship-broadcast/prompt.md` (locked vocabulary, ten guardrails, JSON schema); orchestrator in `scripts/broadcast-agent.py`. Refreshes the "currently shipped" list from npm + PyPI per call so it can't reference unshipped surfaces. Picks a visual (VHS tape, silicon PNG, or skip). Writes drafts to `marketing/broadcasts/`; never schedules — `marketing/ship-broadcast.md` still owns posting. Acceptance receipts: [`r/2639c835`](https://vdmnexus.com/r/2639c835-1dd3-47a1-84aa-4cb2e3c6ef11) (PR #65 ship), [`r/895d38a9`](https://vdmnexus.com/r/895d38a9-19e3-4d7d-9adc-0f352e3f0769) (PR #66 fix), [`r/c21e59a3`](https://vdmnexus.com/r/c21e59a3-878c-452d-81da-b620d589544d) (docs-skip case). Phase 2 (cron / webhook auto-trigger) deferred.
+
 **Packages (as of 2026-05-22).**
 - npm: `@vdm-nexus/sdk@0.2.0`, `x402@0.4.0`, `paywall@0.1.0`, `mcp@0.1.0`, `ai-sdk-provider@0.1.0`, `mastra-provider@0.1.0`. All MIT, `prepublishOnly tsc`.
 - PyPI: `vdm-nexus@0.2.2`, `langchain-vdm-nexus@0.1.0`. Python SDK first mainnet-live receipt: `r/00240cb0-41e1-4adc-a88c-9a11a7ffc959`.
