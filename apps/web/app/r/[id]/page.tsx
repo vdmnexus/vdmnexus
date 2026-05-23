@@ -334,17 +334,29 @@ export default async function ReceiptPermalinkPage({
       </section>
 
       <section className="relative mx-auto w-full max-w-4xl px-6 pb-16">
-        <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-soft bg-surface/60 p-6 backdrop-blur sm:flex-row sm:items-center">
+        <div className="flex flex-col items-start gap-4 rounded-2xl border border-soft bg-surface/60 p-6 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-text-muted">
-            Run your own signed inference in the playground — no API key, no
-            signup.
+            The widget above runs in-browser. For a fully independent check
+            from a separate domain, verify this receipt on{" "}
+            <code className="font-mono text-text">verify.vdmnexus.com</code> —
+            or run your own signed inference in the playground.
           </p>
-          <Link
-            href="/playground"
-            className="inline-flex items-center justify-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-4 py-2 text-sm font-medium text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
-          >
-            Open the playground
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <a
+              href={`https://verify.vdmnexus.com/?r=${encodeURIComponent(row.id)}`}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-soft bg-bg/60 px-4 py-2 text-sm font-medium text-text transition-colors hover:border-accent-indigo/60"
+            >
+              Verify independently
+            </a>
+            <Link
+              href="/playground"
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-4 py-2 text-sm font-medium text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
+            >
+              Open the playground
+            </Link>
+          </div>
         </div>
       </section>
 
