@@ -17,45 +17,47 @@ type NavDropdownItem = {
   description?: string;
 };
 
-const PRODUCT_ITEMS: NavDropdownItem[] = [
-  {
-    href: "/inference",
-    label: "Inference",
-    description: "Signed receipts per call",
-  },
-  {
-    href: "/agents",
-    label: "Agents",
-    description: "Identity, payment, primitives",
-  },
+// "Run" — for operators / consumers spending or earning on the rail.
+const RUN_ITEMS: NavDropdownItem[] = [
   {
     href: "/playground",
     label: "Playground",
     description: "Try a live mainnet call",
   },
   {
+    href: "/agents",
+    label: "Agents",
+    description: "Browse agents on the rail",
+  },
+  {
     href: "/pricing",
     label: "Pricing",
-    description: "Per-call USDC, receipt fee, burn split",
+    description: "Per-call USDC + receipt fee",
   },
 ];
 
+// "Build" — for developers integrating signed inference into their products.
 const BUILD_ITEMS: NavDropdownItem[] = [
   {
     href: "/sdk",
     label: "SDK",
-    description: "Four MIT npm packages",
+    description: "Eight packages on npm + PyPI",
   },
   {
-    href: "/verify",
-    label: "Verify",
-    description: "Five-check receipt verifier",
+    href: "/inference",
+    label: "Inference API",
+    description: "OpenAI-compatible /chat/completions",
   },
   {
     href: "https://docs.vdmnexus.com",
     label: "Docs",
     external: true,
     description: "Quickstart, spec, ops runbooks",
+  },
+  {
+    href: "/verify",
+    label: "Verify",
+    description: "Five-check receipt verifier",
   },
 ];
 
@@ -83,7 +85,7 @@ function NavHeader({
 }) {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-soft bg-bg/70 backdrop-blur">
-      <nav className="mx-auto flex h-20 w-full max-w-6xl items-center justify-between px-6">
+      <nav className="mx-auto flex h-24 w-full max-w-6xl items-center justify-between px-6">
         <div className="flex items-center gap-3">
           <Link
             href="/"
@@ -94,14 +96,14 @@ function NavHeader({
             <img
               src="/logo.svg"
               alt="VDM Nexus"
-              className="h-14 w-auto md:h-16"
+              className="h-16 w-auto md:h-20"
             />
           </Link>
           <BetaPill />
         </div>
 
-        <div className="hidden items-center gap-8 md:flex">
-          <NavDropdown label="Product" items={PRODUCT_ITEMS} pathname={pathname} />
+        <div className="hidden items-center gap-7 md:flex">
+          <NavDropdown label="Run" items={RUN_ITEMS} pathname={pathname} />
           <NavDropdown label="Build" items={BUILD_ITEMS} pathname={pathname} />
           <NavLink
             href="/receipts"
@@ -118,8 +120,8 @@ function NavHeader({
             Roadmap
           </NavLink>
           {showLaunch && (
-            <NavLink href="/token" active={pathname === "/token"}>
-              Token
+            <NavLink href="/whitepaper" active={pathname === "/whitepaper"}>
+              Whitepaper
             </NavLink>
           )}
         </div>
@@ -143,12 +145,26 @@ function NavHeader({
           >
             <TelegramIcon className="h-4 w-4" />
           </a>
-          <a
-            href={waitlistHref}
-            className="rounded-md border border-soft bg-surface/60 px-3.5 py-1.5 text-xs font-medium text-text transition-colors hover:border-accent-indigo/60 hover:bg-accent-indigo/10 sm:text-sm"
-          >
-            Join Waitlist
-          </a>
+          {showLaunch ? (
+            <Link
+              href="/token"
+              className={cn(
+                "rounded-md border bg-accent-indigo/20 px-3.5 py-1.5 text-xs font-semibold text-text transition-colors sm:text-sm",
+                pathname === "/token"
+                  ? "border-accent-indigo"
+                  : "border-accent-indigo/60 hover:border-accent-indigo hover:bg-accent-indigo/30"
+              )}
+            >
+              $NEXUS
+            </Link>
+          ) : (
+            <a
+              href={waitlistHref}
+              className="rounded-md border border-soft bg-surface/60 px-3.5 py-1.5 text-xs font-medium text-text transition-colors hover:border-accent-indigo/60 hover:bg-accent-indigo/10 sm:text-sm"
+            >
+              Join Waitlist
+            </a>
+          )}
         </div>
       </nav>
     </header>
