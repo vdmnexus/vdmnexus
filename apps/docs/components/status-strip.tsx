@@ -28,22 +28,20 @@ const STATUS_LABEL: Record<PulseStatus, string> = {
   down: "quiet",
 };
 
-// Background colours mirror the verify-app strip — they're embedded
-// inline so this file doesn't need any extra Tailwind tokens beyond
-// what Fumadocs already configures.
+// Green only when mainnet is actively live (receipt in the last 5 min).
+// Quiet / degraded states share a muted grey — the textual label
+// already distinguishes them, and a red dot for "no traffic in the
+// last hour" reads like an outage when it's just an idle window.
+const QUIET_DOT: React.CSSProperties = {
+  background: "rgba(148, 163, 184, 0.5)",
+};
 const DOT_STYLE: Record<PulseStatus, React.CSSProperties> = {
   live: {
     background: "#34d399",
     boxShadow: "0 0 0 3px rgba(16, 185, 129, 0.18)",
   },
-  degraded: {
-    background: "#fbbf24",
-    boxShadow: "0 0 0 3px rgba(251, 191, 36, 0.16)",
-  },
-  down: {
-    background: "#f43f5e",
-    boxShadow: "0 0 0 3px rgba(244, 63, 94, 0.16)",
-  },
+  degraded: QUIET_DOT,
+  down: QUIET_DOT,
 };
 
 export function StatusStrip() {

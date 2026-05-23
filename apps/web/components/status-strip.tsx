@@ -109,10 +109,16 @@ function Separator() {
   );
 }
 
+// Green only when mainnet is actively live (receipt in the last 5 min).
+// Anything older — including the merely-quiet last-60-min and the
+// no-traffic-in-an-hour state — is a muted grey. Red is reserved for
+// genuine outages we surface elsewhere (5xx on /api/pulse silently
+// hides the strip entirely). The textual label still distinguishes
+// live vs degraded vs quiet for anyone who looks past the dot.
 const STATUS_DOT: Record<PulseStatus, string> = {
   live: "bg-emerald-400 shadow-[0_0_0_3px_rgba(16,185,129,0.18)]",
-  degraded: "bg-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.16)]",
-  down: "bg-rose-500 shadow-[0_0_0_3px_rgba(244,63,94,0.16)]",
+  degraded: "bg-slate-500/60",
+  down: "bg-slate-500/60",
 };
 
 const STATUS_LABEL: Record<PulseStatus, string> = {
