@@ -7,9 +7,9 @@ import { Card, ComingSoonBadge } from "@/components/card";
 import { consoleAuthEnabled } from "@/lib/feature-flags";
 
 export const metadata: Metadata = {
-  title: "Mission Control — VDM Nexus",
+  title: "Mission Control · v0 — VDM Nexus",
   description:
-    "Per-agent home on the VDM Nexus signed-inference rail. Public profile live now; operator dashboard coming soon.",
+    "Mission Control is shipping in layers. The public profile layer is live now — every agent on the VDM Nexus signed-inference rail has a permalink with real on-chain data.",
   alternates: { canonical: "https://console.vdmnexus.com" },
 };
 
@@ -25,20 +25,45 @@ export default function ConsoleHomePage() {
       />
       <Nav />
 
+      {/* Last-shipped strip — a thin one-liner above the hero that
+          reinforces "we ship publicly". Update the date + label whenever
+          a new layer lands; the link points at the live surface that
+          shipped (currently a sample profile demonstrating the public
+          layer). Could swap to a /changelog page once one exists. */}
+      <div className="relative border-b border-soft bg-surface/40 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-2 px-6 py-2.5 text-xs">
+          <span className="flex items-center gap-2 text-text-muted">
+            <span
+              aria-hidden
+              className="inline-block h-1.5 w-1.5 rounded-full bg-accent-indigo"
+            />
+            <span className="uppercase tracking-[0.18em]">Last shipped</span>
+            <span>· Public profile layer · 2026-05-24</span>
+          </span>
+          <Link
+            href="/a/BSKq2XtBCXHGZKvP9KStjJdpimTAJbmRP7FqZ1SBTshR"
+            prefetch={false}
+            className="text-text-muted underline underline-offset-4 transition-colors hover:text-text"
+          >
+            See it on a live profile →
+          </Link>
+        </div>
+      </div>
+
       <section className="relative mx-auto w-full max-w-5xl px-6 pt-20 pb-12 sm:pt-28">
         <FadeIn>
           <span className="inline-block rounded-full border border-soft bg-surface/60 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-text-muted backdrop-blur">
-            Mission Control
+            Mission Control · v0
           </span>
           <h1 className="mt-5 text-4xl font-semibold tracking-tight text-text sm:text-5xl md:text-6xl">
             Every agent gets a home.
           </h1>
           <p className="mt-5 max-w-2xl text-base text-text-muted sm:text-lg">
-            A canonical surface per agent on the VDM Nexus signed-inference
-            rail. Public profile pages are{" "}
-            <span className="text-text">live now</span>; the operator
-            dashboard ships once we've designed the agent-creation step
-            properly.
+            Mission Control is shipping in layers. The{" "}
+            <span className="text-text">public profile layer is live now</span>{" "}
+            — every agent on the rail has a permalink with real on-chain
+            data and one-click verify on every call. The operator side
+            ships when the agent-creation step is designed properly.
           </p>
           <div className="mt-7 flex flex-wrap gap-3 text-sm">
             <a
@@ -211,6 +236,20 @@ export default function ConsoleHomePage() {
             </Card>
           </FadeIn>
         </div>
+
+        {/* The list is the contract — counters the typical crypto-
+            roadmap-vapor problem. Anyone reading this knows exactly
+            what's promised for v1. If something gets added later, it
+            joins the list. If it's not on the list, it doesn't ship in v1. */}
+        <FadeIn>
+          <div className="mt-6 rounded-xl border border-accent-indigo/30 bg-accent-indigo/5 px-5 py-4 text-sm text-text-muted">
+            <span className="font-medium text-text">
+              Each card above ships in v1.
+            </span>{" "}
+            The list is the contract — if it's not here, it doesn't ship
+            in v1.
+          </div>
+        </FadeIn>
 
         <p className="mt-8 text-xs text-text-muted">
           We ship updates publicly. Follow{" "}
