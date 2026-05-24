@@ -135,10 +135,10 @@ export default function Home() {
       <LastShippedStrip />
       <main>
         <Hero />
+        <PrincipleStats />
         {launchLive() ? <NexusToken /> : null}
-        <Audiences />
+        <ProductGrid />
         <Problem />
-        <Products />
         <BuiltOnTop />
         <Paywall />
         <UseCases />
@@ -176,6 +176,10 @@ function Hero() {
                 console.vdmnexus.com
               </a>
               .
+            </p>
+            <p className="mx-auto mt-5 max-w-xl text-balance text-base font-medium text-text sm:text-lg">
+              60 seconds to first signed call. No API key. No account. No
+              human in the loop.
             </p>
             <p className="mx-auto mt-4 max-w-2xl text-balance text-sm text-text-muted/80">
               Beta protocol — mainnet live since 2026-05-21. v1 ships with
@@ -332,6 +336,184 @@ function NexusToken() {
         </div>
       </FadeIn>
     </Section>
+  );
+}
+
+// Four static principle-numbers above the fold. Deliberately not live
+// activity stats — those live on /agents and /points where they belong
+// as destination data. Here we lead with the durable principles
+// (package surface, chain count, verification depth, zero-auth) because
+// those don't shrink with low traffic.
+function PrincipleStats() {
+  const stats = [
+    { value: "8", label: "packages shipped", sub: "npm + PyPI · MIT" },
+    { value: "2", label: "chains live", sub: "Solana + Base mainnet" },
+    { value: "5", label: "verification checks", sub: "every receipt, anyone can run" },
+    { value: "0", label: "API keys required", sub: "Ed25519 keypair is the identity" },
+  ];
+  return (
+    <section className="relative">
+      <div className="mx-auto w-full max-w-5xl px-6 pt-2 pb-8 sm:pb-12">
+        <FadeIn>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+            {stats.map((s) => (
+              <div
+                key={s.label}
+                className="rounded-2xl border border-soft bg-surface/60 px-5 py-5 backdrop-blur"
+              >
+                <div className="text-4xl font-semibold tracking-tight text-text tabular-nums sm:text-5xl">
+                  {s.value}
+                </div>
+                <div className="mt-2 text-[11px] font-medium uppercase tracking-[0.18em] text-text-muted">
+                  {s.label}
+                </div>
+                <div className="mt-1.5 text-[11px] leading-snug text-text-muted/80">
+                  {s.sub}
+                </div>
+              </div>
+            ))}
+          </div>
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
+
+// Six-tile product grid — two columns (operators / builders), three
+// rows each. Replaces the prior For Operators / For Builders panel
+// pair: more concrete surface visible, more click targets per audience,
+// no embedded code snippet (the code lives at /sdk + docs).
+function ProductGrid() {
+  type Tile = {
+    title: string;
+    description: string;
+    href: string;
+    external?: boolean;
+  };
+  const operators: Tile[] = [
+    {
+      title: "Mission Control",
+      description:
+        "Per-agent home — public profile + private dashboard. Receipts, stats, on-chain settlements.",
+      href: "https://console.vdmnexus.com",
+      external: true,
+    },
+    {
+      title: "Agent Directory",
+      description:
+        "Every Ed25519 agent on the rail, ranked by activity. Filter by network, sort by receipts or USDC spent.",
+      href: "/agents",
+    },
+    {
+      title: "Playground",
+      description:
+        "Try a live mainnet signed-inference call free. No account, sponsored credit, real receipt at the end.",
+      href: "/playground",
+    },
+  ];
+  const builders: Tile[] = [
+    {
+      title: "SDK",
+      description:
+        "Eight packages — six on npm, two on PyPI. Ed25519 identity, x402 client, paywall middleware, MCP server, Vercel AI SDK + Mastra + LangChain providers. All MIT.",
+      href: "/sdk",
+    },
+    {
+      title: "Inference API",
+      description:
+        "OpenAI-compatible /chat/completions, x402-gated. Drop-in for any agent runtime; every response carries an Ed25519-signed SIR v2 receipt.",
+      href: "/inference",
+    },
+    {
+      title: "Verify",
+      description:
+        "Five-check receipt verification — hosted at verify.vdmnexus.com or self-host via @vdm-nexus/x402. Independent of the operator.",
+      href: "https://verify.vdmnexus.com",
+      external: true,
+    },
+  ];
+
+  return (
+    <Section>
+      <FadeIn className="max-w-2xl">
+        <SectionEyebrow>Products</SectionEyebrow>
+        <SectionHeading className="mt-4">
+          Two ways to use Nexus. Same rail underneath.
+        </SectionHeading>
+        <p className="mt-5 text-base leading-relaxed text-text-muted">
+          Run an agent that pays its own way, or add signed inference to
+          your product with one install. Both produce verifiable receipts;
+          both settle in USDC on Solana or Base.
+        </p>
+      </FadeIn>
+
+      <div className="mt-10 grid gap-5 lg:grid-cols-2 lg:gap-6">
+        <FadeIn>
+          <ProductColumn label="Run agents" tiles={operators} />
+        </FadeIn>
+        <FadeIn delay={0.06}>
+          <ProductColumn label="Build with signed inference" tiles={builders} />
+        </FadeIn>
+      </div>
+    </Section>
+  );
+}
+
+function ProductColumn({
+  label,
+  tiles,
+}: {
+  label: string;
+  tiles: Array<{
+    title: string;
+    description: string;
+    href: string;
+    external?: boolean;
+  }>;
+}) {
+  return (
+    <div className="flex h-full flex-col gap-3">
+      <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-accent-indigo">
+        {label}
+      </span>
+      <div className="grid gap-3">
+        {tiles.map((t) => {
+          const inner = (
+            <div className="group flex h-full items-start gap-4 rounded-2xl border border-soft bg-surface/60 p-5 backdrop-blur transition-colors hover:border-accent-indigo/40 sm:p-6">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-base font-semibold tracking-tight text-text">
+                    {t.title}
+                  </h3>
+                  <ArrowRight className="h-4 w-4 flex-none text-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-accent-indigo" />
+                </div>
+                <p className="mt-2 text-sm leading-relaxed text-text-muted">
+                  {t.description}
+                </p>
+              </div>
+            </div>
+          );
+          if (t.external) {
+            return (
+              <a
+                key={t.href}
+                href={t.href}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="block"
+              >
+                {inner}
+              </a>
+            );
+          }
+          return (
+            <Link key={t.href} href={t.href} className="block">
+              {inner}
+            </Link>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
