@@ -135,6 +135,7 @@ export default function Home() {
       <LastShippedStrip />
       <main>
         <Hero />
+        <FounderOrigin />
         <PrincipleStats />
         {launchLive() ? <NexusToken /> : null}
         <ProductGrid />
@@ -225,6 +226,34 @@ function Hero() {
                 </>
               )}
             </div>
+          </div>
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
+
+// Narrow founder-voice section between Hero and PrincipleStats. Lands the
+// "why this exists" hook in 30 seconds for hackathon judges, grant
+// officers, and cold visitors. Reference shape: Nova Wallet's "$300K
+// lost to malware" — a specific moment, a specific stake, the trigger.
+// The placeholder string is intentional — founder fills the prose before
+// the next public-surface PR; the visual treatment is production-ready.
+function FounderOrigin() {
+  return (
+    <section id="founder-origin" className="relative">
+      <div className="mx-auto w-full max-w-3xl px-6 pt-6 pb-10 sm:pt-8 sm:pb-14">
+        <FadeIn>
+          <div className="rounded-2xl border border-soft bg-surface/60 p-8 backdrop-blur sm:p-10">
+            <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-text-muted">
+              Why this exists
+            </div>
+            <p className="mt-4 text-base leading-relaxed text-text sm:text-lg">
+              {`{{FOUNDER VOICE — replace with 3-5 sentences in your own voice. Structure: a specific moment + a specific dollar amount or trust failure + "that's when I started building." Reference: Nova Wallet's "$300K lost to malware" hook lands in 30 seconds. Avoid corporate framing. Avoid product features. Just the moment.}}`}
+            </p>
+            <p className="mt-6 text-[11px] font-medium uppercase tracking-[0.16em] text-text-muted">
+              — Dennis van der Meulen, founder
+            </p>
           </div>
         </FadeIn>
       </div>
