@@ -1,0 +1,853 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "VDM Nexus API",
+    "version": "1.0.0",
+    "summary": "Signed-inference rail. Pay-per-call LLM access via x402 on Solana mainnet and Base mainnet. Every paid response carries a cryptographically verifiable Ed25519 receipt (SIR v2).",
+    "description": "OpenAPI spec for the public Nexus API. Covers two payment models:\n\n1. **x402 v2 (recommended)** — `/v1/chat/completions`. Unpaid POST returns `402 Payment Required` with an `X-Payment-Required` challenge; client settles on-chain (USDC on Solana mainnet, Solana devnet, Base mainnet, or Base Sepolia) and retries with an `X-Payment` header. The payer wallet IS the agent identity.\n2. **Prepaid + Ed25519** — `/v1/inference`. Agent generates a keypair, tops up by sending USDC to the Nexus deposit address (returned by `/v1/deposit-address`), and signs every request body with Ed25519. Cron credits the ledger.\n\nVerification of the SIR v2 receipt is described at [docs.vdmnexus.com/docs/spec/sir-v2](https://docs.vdmnexus.com/docs/spec/sir-v2). Reference client: [`@vdm-nexus/x402`](https://www.npmjs.com/package/@vdm-nexus/x402) (`verifyReceipt()`).\n\nCron-only endpoints (`/v1/deposits/scan`, `/v1/ops/sol-balance`) are out of scope for autonomous agents and are not documented here.",
+    "contact": {
+      "name": "VDM Nexus",
+      "url": "https://vdmnexus.com",
+      "email": "dennis@vdmnexus.com"
+    },
+    "license": {
+      "name": "MIT",
+      "identifier": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://nexus.vdmnexus.com",
+      "description": "Production"
+    }
+  ],
+  "externalDocs": {
+    "description": "Full developer documentation",
+    "url": "https://docs.vdmnexus.com"
+  },
+  "tags": [
+    {
+      "name": "inference",
+      "description": "Paid signed-inference endpoints. Two payment models: x402 (per-call, on-chain) or Ed25519 + prepaid ledger."
+    },
+    {
+      "name": "discovery",
+      "description": "Read-only endpoints agents use to discover where to pay, who signs receipts, and what they can call."
+    },
+    {
+      "name": "receipts",
+      "description": "Public, cached read endpoints for looking up SIR v2 receipts and recent activity."
+    },
+    {
+      "name": "agents",
+      "description": "Public agent metadata and one-time sponsored grants."
+    },
+    {
+      "name": "ops",
+      "description": "Operational health endpoints."
+    }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "tags": ["ops"],
+        "summary": "Liveness check",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "Service is up",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HealthResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/chat/completions": {
+      "post": {
+        "tags": ["inference"],
+        "summary": "x402-gated chat completion",
+        "description": "OpenAI-compatible chat completion. First call returns `402 Payment Required`. Sign the SPL or ERC-3009 USDC transfer per the challenge, base64-encode the resulting `PaymentPayload`, and retry with it in the `X-Payment` header. The success response is a standard OpenAI `chat.completion` body, plus an `X-Nexus-Receipt` header carrying the SIR v2 receipt and an `X-Payment-Response` header carrying the settlement reference.",
+        "operationId": "chatCompletions",
+        "parameters": [
+          {
+            "name": "X-Payment",
+            "in": "header",
+            "description": "Base64-encoded `PaymentPayload` (signed USDC transfer matching one of the entries in the prior 402's `accepts` array). Required on the paid retry; omit on the initial probe.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-Nexus-Network",
+            "in": "header",
+            "description": "Override the network used in the 402 challenge. Accepts `mainnet`, `devnet`, `base`, `base-sepolia`, or a full CAIP-2 identifier (e.g. `solana:mainnet`, `eip155:8453`). Defaults to the server's `NEXUS_NETWORK`.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "examples": ["solana:mainnet", "eip155:8453"]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ChatCompletionRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment settled, inference completed.",
+            "headers": {
+              "X-Nexus-Receipt": {
+                "description": "Base64-encoded JSON SIR v2 receipt covering prompt hash, response hash, model, cost, on-chain payment, and Ed25519 operator signature.",
+                "schema": { "type": "string" }
+              },
+              "X-Payment-Response": {
+                "description": "Base64-encoded JSON `{ status: 'settled', txSignature, network }`.",
+                "schema": { "type": "string" }
+              },
+              "X-RateLimit-Limit": { "schema": { "type": "integer" } },
+              "X-RateLimit-Remaining": { "schema": { "type": "integer" } },
+              "X-RateLimit-Reset": {
+                "description": "Reset timestamp in ms since epoch.",
+                "schema": { "type": "integer" }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ChatCompletionResponse" }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required. Body and `X-Payment-Required` header both carry the challenge.",
+            "headers": {
+              "X-Payment-Required": {
+                "description": "Base64-encoded `PaymentRequiredChallenge` (same as `body.challenge`).",
+                "schema": { "type": "string" }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PaymentRequiredResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ErrorResponse" },
+          "401": { "$ref": "#/components/responses/ErrorResponse" },
+          "403": { "$ref": "#/components/responses/ErrorResponse" },
+          "429": { "$ref": "#/components/responses/RateLimitedResponse" },
+          "500": { "$ref": "#/components/responses/ErrorResponse" },
+          "502": { "$ref": "#/components/responses/ErrorResponse" },
+          "503": { "$ref": "#/components/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/api/v1/inference": {
+      "post": {
+        "tags": ["inference"],
+        "summary": "Ed25519-signed inference against prepaid ledger",
+        "description": "For agents with a prepaid USDC credit balance. Sign the raw request body bytes with the agent's Ed25519 secret key, pass the pubkey in `X-Agent-Pubkey` and the signature in `X-Nexus-Signature`. Replay-protected via `nonce` + `timestamp` (±30s skew tolerance).",
+        "operationId": "signedInference",
+        "security": [{ "Ed25519Signature": [] }],
+        "parameters": [
+          {
+            "name": "X-Agent-Pubkey",
+            "in": "header",
+            "description": "Base58-encoded Ed25519 public key (32 bytes). The agent identity.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-Nexus-Signature",
+            "in": "header",
+            "description": "Base58-encoded Ed25519 signature (64 bytes) over the raw request body bytes (the exact string the client serialized).",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/InferenceRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inference completed, ledger debited.",
+            "headers": {
+              "X-RateLimit-Limit": { "schema": { "type": "integer" } },
+              "X-RateLimit-Remaining": { "schema": { "type": "integer" } },
+              "X-RateLimit-Reset": { "schema": { "type": "integer" } }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/InferenceResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Auth failure: missing headers, invalid pubkey, bad signature, or timestamp outside ±30s window.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthErrorResponse" }
+              }
+            }
+          },
+          "402": {
+            "description": "Insufficient credits.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/InsufficientCreditsResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Nonce replay: this `(agent_pubkey, nonce)` pair has been seen before.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "const": false },
+                    "error": { "const": "nonce_replay" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ErrorResponse" },
+          "429": { "$ref": "#/components/responses/RateLimitedResponse" },
+          "500": { "$ref": "#/components/responses/ErrorResponse" },
+          "502": { "$ref": "#/components/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/api/v1/operator-key": {
+      "get": {
+        "tags": ["discovery"],
+        "summary": "Operator public key",
+        "description": "Returns the Ed25519 public key that signs every SIR v2 receipt. Verifiers fetch this to validate `receipt.nexus_signature`.",
+        "operationId": "getOperatorKey",
+        "responses": {
+          "200": {
+            "description": "Operator public key.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OperatorKeyResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/deposit-address": {
+      "get": {
+        "tags": ["discovery"],
+        "summary": "Nexus deposit address",
+        "description": "Returns the on-chain address agents should send USDC to in order to credit their prepaid balance (used by `/v1/inference`). Per-call payment via `/v1/chat/completions` does NOT need this.",
+        "operationId": "getDepositAddress",
+        "responses": {
+          "200": {
+            "description": "Deposit address resolved.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/DepositAddressResponse" }
+              }
+            }
+          },
+          "503": {
+            "description": "Deposit address not configured on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "const": false },
+                    "error": { "const": "deposit_address_not_set" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/receipts/{lookup}": {
+      "get": {
+        "tags": ["receipts"],
+        "summary": "Fetch a receipt by inference id or tx signature",
+        "description": "Public read of a single SIR v2 receipt. `lookup` accepts either a UUID (the `inference_id`) or a base58 Solana transaction signature. Cached at the edge (`s-maxage=3600`).",
+        "operationId": "getReceipt",
+        "parameters": [
+          {
+            "name": "lookup",
+            "in": "path",
+            "required": true,
+            "description": "Receipt UUID, or base58 on-chain transaction signature.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Receipt found.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ReceiptLookupResponse" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/ErrorResponse" },
+          "400": { "$ref": "#/components/responses/ErrorResponse" },
+          "500": { "$ref": "#/components/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/api/v1/receipts/recent": {
+      "get": {
+        "tags": ["receipts"],
+        "summary": "Recent receipts feed",
+        "description": "Paginated feed of the most recent receipts across all agents. Use `cursor` to walk further back. Set `format=ndjson` for a streamable newline-delimited body.",
+        "operationId": "listRecentReceipts",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Page size (1-100, default 50).",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 50 }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "ISO 8601 timestamp; returns receipts strictly older than this. Pass `next_cursor` from the previous page.",
+            "schema": { "type": "string", "format": "date-time" }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "Response format.",
+            "schema": { "type": "string", "enum": ["json", "ndjson"], "default": "json" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page of receipts.",
+            "headers": {
+              "X-Next-Cursor": {
+                "description": "Only set when `format=ndjson`. Use as the next request's `cursor`. Absent when the page is exhausted.",
+                "schema": { "type": "string", "format": "date-time" }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RecentReceiptsResponse" }
+              },
+              "application/x-ndjson": {
+                "schema": {
+                  "type": "string",
+                  "description": "One JSON receipt object per line (newline-delimited)."
+                }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/api/v1/agents/{pubkey}": {
+      "get": {
+        "tags": ["agents"],
+        "summary": "Public agent profile",
+        "description": "Reputation and activity stats for a single agent, keyed by its base58 Ed25519 pubkey.",
+        "operationId": "getAgent",
+        "parameters": [
+          {
+            "name": "pubkey",
+            "in": "path",
+            "required": true,
+            "description": "Base58-encoded Ed25519 public key.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent profile.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AgentProfileResponse" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/ErrorResponse" },
+          "400": { "$ref": "#/components/responses/ErrorResponse" },
+          "500": { "$ref": "#/components/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/api/v1/grants": {
+      "post": {
+        "tags": ["agents"],
+        "summary": "Claim a one-time sponsored grant",
+        "description": "Bootstrap credit grant for agents that don't yet have funded wallets. One grant per agent pubkey; per-IP and global daily caps apply. After exhausting the grant, switch to per-call payment via `/v1/chat/completions`.",
+        "operationId": "claimGrant",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/GrantRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Grant issued. Balance credited.",
+            "headers": {
+              "X-RateLimit-Limit": { "schema": { "type": "integer" } },
+              "X-RateLimit-Remaining": { "schema": { "type": "integer" } },
+              "X-RateLimit-Reset": { "schema": { "type": "integer" } }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GrantResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Grant already issued for this agent.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "const": false },
+                    "error": { "const": "grant_already_issued" },
+                    "balance_usdc": { "type": "number" }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit hit. Reasons: per-IP lifetime cap (`ip_grant_exhausted`) or global daily budget (`global_grant_budget_exhausted`).",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RateLimitedBody" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ErrorResponse" },
+          "500": { "$ref": "#/components/responses/ErrorResponse" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "Ed25519Signature": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Nexus-Signature",
+        "description": "Base58-encoded Ed25519 signature over the raw request body bytes. The agent pubkey is passed alongside in `X-Agent-Pubkey`."
+      }
+    },
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "required": ["ok", "service", "time"],
+        "properties": {
+          "ok": { "type": "boolean" },
+          "service": { "type": "string", "examples": ["nexus"] },
+          "time": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ChatCompletionRequest": {
+        "type": "object",
+        "required": ["model", "messages"],
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Upstream model identifier (OpenRouter slug).",
+            "examples": ["openai/gpt-4o-mini", "anthropic/claude-haiku-4-5"]
+          },
+          "messages": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/components/schemas/ChatMessage" }
+          },
+          "stream": {
+            "type": "boolean",
+            "description": "Must be `false` or omitted. Streaming is not currently supported.",
+            "default": false
+          },
+          "network": {
+            "type": "string",
+            "description": "Alternative to the `X-Nexus-Network` header. Same accepted values.",
+            "examples": ["solana:mainnet", "eip155:8453"]
+          }
+        }
+      },
+      "ChatMessage": {
+        "type": "object",
+        "required": ["role", "content"],
+        "properties": {
+          "role": { "type": "string", "examples": ["system", "user", "assistant"] },
+          "content": { "type": "string" }
+        }
+      },
+      "ChatCompletionResponse": {
+        "type": "object",
+        "description": "Standard OpenAI chat-completion response shape. See OpenAI API docs for full field reference.",
+        "required": ["id", "object", "created", "model", "choices"],
+        "properties": {
+          "id": { "type": "string" },
+          "object": { "const": "chat.completion" },
+          "created": { "type": "integer" },
+          "model": { "type": "string" },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "index": { "type": "integer" },
+                "message": { "$ref": "#/components/schemas/ChatMessage" },
+                "finish_reason": { "type": "string" }
+              }
+            }
+          },
+          "usage": {
+            "type": "object",
+            "properties": {
+              "prompt_tokens": { "type": "integer" },
+              "completion_tokens": { "type": "integer" },
+              "total_tokens": { "type": "integer" }
+            }
+          }
+        }
+      },
+      "PaymentRequiredResponse": {
+        "type": "object",
+        "required": ["ok", "error", "challenge"],
+        "properties": {
+          "ok": { "const": false },
+          "error": { "const": "payment_required" },
+          "challenge": { "$ref": "#/components/schemas/PaymentRequiredChallenge" }
+        }
+      },
+      "PaymentRequiredChallenge": {
+        "type": "object",
+        "required": ["accepts"],
+        "properties": {
+          "accepts": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/components/schemas/PaymentRequirement" }
+          }
+        }
+      },
+      "PaymentRequirement": {
+        "type": "object",
+        "required": ["scheme", "network", "amount", "recipient"],
+        "properties": {
+          "scheme": {
+            "type": "string",
+            "enum": ["solana:usdc", "base:usdc"],
+            "description": "Payment scheme. Determines the on-chain instruction the client must build."
+          },
+          "network": {
+            "type": "string",
+            "description": "CAIP-2 network identifier.",
+            "examples": ["solana:mainnet", "solana:devnet", "eip155:8453", "eip155:84532"]
+          },
+          "amount": {
+            "type": "object",
+            "required": ["value", "currency"],
+            "properties": {
+              "value": { "type": "string", "examples": ["0.01"] },
+              "currency": { "const": "USDC" }
+            }
+          },
+          "recipient": {
+            "type": "string",
+            "description": "Address to pay (base58 Solana pubkey or 0x EVM address)."
+          },
+          "description": { "type": "string" }
+        }
+      },
+      "InferenceRequest": {
+        "type": "object",
+        "required": ["prompt", "task_type", "nonce", "timestamp"],
+        "properties": {
+          "prompt": { "type": "string", "minLength": 1 },
+          "task_type": {
+            "type": "string",
+            "enum": ["fast", "reasoning", "general"],
+            "description": "Routing hint. `fast` → Groq Llama 3 70B; `reasoning` → Anthropic Claude Haiku; `general` → OpenAI GPT-4o-mini."
+          },
+          "nonce": {
+            "type": "string",
+            "description": "Per-request unique value. Server rejects repeats with `409 nonce_replay`."
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "Unix ms. Rejected if outside ±30s of server time."
+          },
+          "max_cost_usdc": {
+            "type": "number",
+            "description": "Optional cost cap. Sub-$0.001 caps route to the cheapest available model."
+          }
+        }
+      },
+      "InferenceResponse": {
+        "type": "object",
+        "required": ["ok", "result", "receipt"],
+        "properties": {
+          "ok": { "const": true },
+          "result": { "type": "string" },
+          "receipt": { "$ref": "#/components/schemas/SirV2Receipt" }
+        }
+      },
+      "InsufficientCreditsResponse": {
+        "type": "object",
+        "required": ["ok", "error", "balance_usdc"],
+        "properties": {
+          "ok": { "const": false },
+          "error": { "const": "insufficient_credits" },
+          "balance_usdc": { "type": "number" }
+        }
+      },
+      "AuthErrorResponse": {
+        "type": "object",
+        "required": ["ok", "error"],
+        "properties": {
+          "ok": { "const": false },
+          "error": {
+            "type": "string",
+            "enum": ["missing_auth_headers", "invalid_pubkey", "invalid_signature", "request_expired"]
+          },
+          "skew_ms": {
+            "type": "integer",
+            "description": "Present when `error=request_expired`."
+          }
+        }
+      },
+      "SirV2Receipt": {
+        "type": "object",
+        "description": "Signed Inference Receipt v2. Canonical JSON for verification: sorted keys, no whitespace, `nexus_signature` field excluded from the signed payload. Full spec: https://docs.vdmnexus.com/docs/spec/sir-v2",
+        "required": [
+          "v",
+          "agent_pubkey",
+          "model",
+          "cost_usdc",
+          "prompt_hash",
+          "response_hash",
+          "timestamp",
+          "nexus_signature"
+        ],
+        "properties": {
+          "v": { "const": 2 },
+          "agent_pubkey": { "type": "string", "description": "Base58 Ed25519 pubkey of the agent that paid for / authenticated the call." },
+          "provider": { "type": "string", "description": "Inference provider (e.g. `openrouter`). Present on `/v1/inference` receipts." },
+          "upstream": { "type": "string", "description": "Upstream router (e.g. `openrouter`). Present on `/v1/chat/completions` receipts." },
+          "model": { "type": "string" },
+          "cost_usdc": { "type": "number" },
+          "balance_remaining": { "type": "number", "description": "Present on prepaid `/v1/inference` receipts; absent on x402 `/v1/chat/completions` receipts." },
+          "prompt_hash": { "type": "string", "description": "SHA-256 hex of the canonical prompt input." },
+          "response_hash": { "type": "string", "description": "SHA-256 hex of the model response text." },
+          "timestamp": { "type": "integer", "description": "Unix ms." },
+          "inference_id": {
+            "oneOf": [
+              { "type": "string", "format": "uuid" },
+              { "type": "integer" },
+              { "type": "null" }
+            ]
+          },
+          "points_total": { "type": "number" },
+          "payment": {
+            "type": "object",
+            "description": "Present on x402 `/v1/chat/completions` receipts; absent on prepaid `/v1/inference` receipts.",
+            "properties": {
+              "scheme": { "const": "x402" },
+              "network": { "type": "string", "examples": ["solana:mainnet", "eip155:8453"] },
+              "tx_signature": { "type": "string" },
+              "amount_usdc": { "type": "number" },
+              "payer": { "type": "string" },
+              "pay_to": { "type": "string" },
+              "recipient": { "type": "string" }
+            }
+          },
+          "nexus_signature": {
+            "type": "string",
+            "description": "Base58 Ed25519 signature by the operator key over the canonical-JSON serialization of this receipt (with `nexus_signature` excluded)."
+          }
+        }
+      },
+      "OperatorKeyResponse": {
+        "type": "object",
+        "required": ["pubkey", "algorithm", "encoding"],
+        "properties": {
+          "pubkey": { "type": "string", "description": "Base58 Ed25519 public key." },
+          "algorithm": { "const": "ed25519" },
+          "encoding": { "const": "base58" }
+        }
+      },
+      "DepositAddressResponse": {
+        "type": "object",
+        "required": ["ok", "network", "address", "mint"],
+        "properties": {
+          "ok": { "const": true },
+          "network": {
+            "type": "string",
+            "examples": ["mainnet-beta", "devnet"]
+          },
+          "address": { "type": "string", "description": "Base58 Solana address. Send USDC here to credit your agent balance." },
+          "mint": { "type": "string", "description": "USDC SPL token mint address (network-specific)." }
+        }
+      },
+      "ReceiptLookupResponse": {
+        "type": "object",
+        "required": ["ok", "id", "agent_pubkey", "created_at"],
+        "properties": {
+          "ok": { "const": true },
+          "id": { "type": "string", "format": "uuid" },
+          "agent_pubkey": { "type": "string" },
+          "upstream": { "type": ["string", "null"] },
+          "model": { "type": ["string", "null"] },
+          "cost_usdc": { "type": ["number", "null"] },
+          "latency_ms": { "type": ["number", "null"] },
+          "status": { "type": "string", "examples": ["success", "error"] },
+          "points": { "type": ["number", "null"] },
+          "tx_signature": { "type": ["string", "null"] },
+          "created_at": { "type": "string", "format": "date-time" },
+          "receipt": {
+            "oneOf": [
+              { "$ref": "#/components/schemas/SirV2Receipt" },
+              { "type": "null" }
+            ]
+          }
+        }
+      },
+      "RecentReceiptsResponse": {
+        "type": "object",
+        "required": ["ok", "receipts", "limit"],
+        "properties": {
+          "ok": { "const": true },
+          "receipts": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/RecentReceiptEntry" }
+          },
+          "next_cursor": {
+            "oneOf": [
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
+            ],
+            "description": "Pass into the next request's `cursor`. Null when the page is exhausted."
+          },
+          "limit": { "type": "integer" }
+        }
+      },
+      "RecentReceiptEntry": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "agent_pubkey": { "type": "string" },
+          "upstream": { "type": ["string", "null"] },
+          "model": { "type": ["string", "null"] },
+          "cost_usdc": { "type": ["number", "null"] },
+          "latency_ms": { "type": ["number", "null"] },
+          "tx_signature": { "type": ["string", "null"] },
+          "created_at": { "type": "string", "format": "date-time" },
+          "receipt": {
+            "oneOf": [
+              { "$ref": "#/components/schemas/SirV2Receipt" },
+              { "type": "null" }
+            ]
+          }
+        }
+      },
+      "AgentProfileResponse": {
+        "type": "object",
+        "required": ["pubkey", "points_total", "first_seen_at", "total_calls"],
+        "properties": {
+          "pubkey": { "type": "string" },
+          "points_total": { "type": "number" },
+          "first_seen_at": { "type": "string", "format": "date-time" },
+          "last_call_at": {
+            "oneOf": [
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
+            ]
+          },
+          "total_calls": { "type": "integer" }
+        }
+      },
+      "GrantRequest": {
+        "type": "object",
+        "required": ["agent_pubkey"],
+        "properties": {
+          "agent_pubkey": { "type": "string", "description": "Base58 Ed25519 pubkey." }
+        }
+      },
+      "GrantResponse": {
+        "type": "object",
+        "required": ["ok", "agent_pubkey", "grant_usdc", "balance_usdc"],
+        "properties": {
+          "ok": { "const": true },
+          "agent_pubkey": { "type": "string" },
+          "grant_usdc": { "type": "number", "examples": [0.10] },
+          "balance_usdc": { "type": "number" },
+          "next_steps": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "ErrorBody": {
+        "type": "object",
+        "required": ["ok", "error"],
+        "properties": {
+          "ok": { "const": false },
+          "error": { "type": "string" },
+          "detail": { "type": "string" }
+        }
+      },
+      "RateLimitedBody": {
+        "type": "object",
+        "required": ["ok", "error"],
+        "properties": {
+          "ok": { "const": false },
+          "error": { "type": "string", "examples": ["rate_limited", "ip_grant_exhausted", "global_grant_budget_exhausted"] },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "responses": {
+      "ErrorResponse": {
+        "description": "Error",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorBody" }
+          }
+        }
+      },
+      "RateLimitedResponse": {
+        "description": "Rate-limited.",
+        "headers": {
+          "X-RateLimit-Limit": { "schema": { "type": "integer" } },
+          "X-RateLimit-Remaining": { "schema": { "type": "integer" } },
+          "X-RateLimit-Reset": { "schema": { "type": "integer" } }
+        },
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/RateLimitedBody" }
+          }
+        }
+      }
+    }
+  }
+}
