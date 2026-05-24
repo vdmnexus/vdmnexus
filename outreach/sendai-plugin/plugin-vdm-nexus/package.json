@@ -60,7 +60,8 @@
     "base"
   ],
   "dependencies": {
-    "@vdm-nexus/x402": "^0.4.0",
+    "@vdm-nexus/sdk": "file:/Users/dennisvandermeulen/Development/vdmnexus/.claude/worktrees/quizzical-mclaren-06181b/packages/sdk/vdm-nexus-sdk-0.2.1.tgz",
+    "@vdm-nexus/x402": "file:/Users/dennisvandermeulen/Development/vdmnexus/.claude/worktrees/quizzical-mclaren-06181b/packages/x402/vdm-nexus-x402-0.4.3.tgz",
     "zod": "^3.23.0"
   },
   "devDependencies": {

@@ -41,8 +41,10 @@ export type {
 // Local imports for use within this module. `export ... from` re-exports
 // don't bring names into local scope, so the helpers below that reference
 // `Network` / `X402_NETWORKS` need an explicit import too.
-import { X402_NETWORKS } from "@vdm-nexus/paywall";
+import { isEvmNetwork, X402_NETWORKS } from "@vdm-nexus/paywall";
 import type { Network } from "@vdm-nexus/paywall";
+import { privateKeyToAccount } from "viem/accounts";
+import type { Hex } from "viem";
 
 /**
  * Solana-flavored payment payload — what the spec calls `payload.payload`
@@ -178,14 +180,35 @@ export function resolveNetworkInput(input: string): Network | null {
 }
 
 /**
- * Resolve the `payTo` recipient address for a given network. Mainnet falls
- * back through `NEXUS_MAINNET_DEPOSIT_ADDRESS` → `X402_RECIPIENT_ADDRESS` →
- * `NEXUS_DEPOSIT_ADDRESS`. Devnet/testnets fall through the original
- * `X402_RECIPIENT_ADDRESS` → `NEXUS_DEPOSIT_ADDRESS` chain. This lets
- * operators separate mainnet receipts into a different wallet for
- * accounting without forcing them to.
+ * Resolve the `payTo` recipient address for a given network.
+ *
+ * Solana networks fall back through:
+ *   mainnet  → NEXUS_MAINNET_DEPOSIT_ADDRESS → X402_RECIPIENT_ADDRESS → NEXUS_DEPOSIT_ADDRESS
+ *   devnet   → X402_RECIPIENT_ADDRESS → NEXUS_DEPOSIT_ADDRESS
+ *
+ * EVM networks (eip155:*) require a 20-byte `0x…` recipient. The fallback chain:
+ *   1. NEXUS_EVM_RECIPIENT_ADDRESS    — explicit override (any 0x address)
+ *   2. NEXUS_EVM_PRIVATE_KEY's derived account.address — single-account ops
+ *
+ * The two namespaces stay separate because their address formats are
+ * incompatible (base58 Ed25519 vs. hex secp256k1). Returning a Solana
+ * address as `payTo` for an EVM challenge yields invalid 402 challenges —
+ * the client rejects them with `viem` address-parsing errors.
  */
 export function getRecipientForNetwork(network: Network): string | null {
+  if (isEvmNetwork(network)) {
+    const explicit = process.env.NEXUS_EVM_RECIPIENT_ADDRESS?.trim();
+    if (explicit) return explicit;
+    const evmKey = process.env.NEXUS_EVM_PRIVATE_KEY?.trim();
+    if (!evmKey) return null;
+    const normalized = (evmKey.startsWith("0x") ? evmKey : `0x${evmKey}`) as Hex;
+    try {
+      return privateKeyToAccount(normalized).address;
+    } catch {
+      return null;
+    }
+  }
+
   const devnetOrTestnet =
     process.env.X402_RECIPIENT_ADDRESS?.trim() ||
     process.env.NEXUS_DEPOSIT_ADDRESS?.trim() ||
