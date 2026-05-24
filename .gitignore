@@ -45,3 +45,6 @@ __pycache__/
 
 # scratch diagnostic scripts (run-once, never shipped)
 diag_*.py
+packages/sdk/vdm-nexus-sdk-*.tgz
+packages/x402/vdm-nexus-x402-*.tgz
+outreach/sendai-plugin/plugin-vdm-nexus/pnpm-lock.yaml

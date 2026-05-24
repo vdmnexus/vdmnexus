@@ -21,6 +21,9 @@ import type {
 } from "@x402/core/types";
 import { ExactSvmScheme } from "@x402/svm/exact/client";
 import { toClientSvmSigner } from "@x402/svm";
+import { registerExactEvmScheme } from "@x402/evm/exact/client";
+import { privateKeyToAccount } from "viem/accounts";
+import type { Hex } from "viem";
 import type {
   SirX402,
   X402ChatRequest,
@@ -90,16 +93,62 @@ export type X402AgentOptions = {
    * callers can configure it without touching the agent constructor.
    */
   rpcUrl?: string;
+
+  /**
+   * Optional EVM private key (0x-prefixed hex secp256k1) for paying on
+   * Base mainnet (`eip155:8453`) or Base Sepolia (`eip155:84532`). When
+   * set, the agent registers `@x402/evm`'s exact scheme alongside the
+   * Solana scheme — calls with `network: "eip155:*"` settle from this
+   * EVM address via ERC-3009 `transferWithAuthorization` against USDC.
+   *
+   * The Solana keypair stays the agent's primary identity; the EVM key
+   * is a *payment-only* signer for the EVM rail. Receipts settled on
+   * EVM carry the EVM address in `payment.payer` and as the receipt's
+   * `agent_pubkey`, which intentionally diverges from the Solana
+   * identity for the duration of that call.
+   *
+   * Pass via env: also reads `NEXUS_EVM_PRIVATE_KEY` so server-side
+   * callers can configure without touching the constructor.
+   */
+  evmPrivateKey?: string;
+
+  /**
+   * Optional per-chain EVM RPC URL override. Accepts either a single
+   * `string` (used for every chain) or a record keyed by EVM chain ID
+   * (e.g. `{ 8453: "https://mainnet.base.org", 84532: "https://sepolia.base.org" }`).
+   * When unset, `@x402/evm` uses its built-in public RPC defaults.
+   */
+  evmRpcUrl?: string | Record<number, string>;
 };
 
 export class X402Agent extends Agent {
   private _x402: x402Client | null = null;
   private readonly _rpcUrl: string | undefined;
+  private readonly _evmPrivateKey: Hex | undefined;
+  private readonly _evmRpcUrl: X402AgentOptions["evmRpcUrl"];
 
   constructor(secretKey: Uint8Array, options: X402AgentOptions = {}) {
     super(secretKey);
     this._rpcUrl =
       options.rpcUrl?.trim() || process.env.SOLANA_RPC_URL?.trim() || undefined;
+    const rawEvmKey =
+      options.evmPrivateKey?.trim() ||
+      process.env.NEXUS_EVM_PRIVATE_KEY?.trim() ||
+      undefined;
+    this._evmPrivateKey = rawEvmKey
+      ? ((rawEvmKey.startsWith("0x") ? rawEvmKey : `0x${rawEvmKey}`) as Hex)
+      : undefined;
+    this._evmRpcUrl = options.evmRpcUrl;
+  }
+
+  /**
+   * Base58 Ed25519 public key (the Solana identity). The EVM payer
+   * address, when an `evmPrivateKey` is configured, is `evmPayer`
+   * below — different keyspace, different address.
+   */
+  get evmPayer(): string | undefined {
+    if (!this._evmPrivateKey) return undefined;
+    return privateKeyToAccount(this._evmPrivateKey).address;
   }
 
   /** Create a fresh agent with a new Ed25519 keypair. */
@@ -127,6 +176,22 @@ export class X402Agent extends Agent {
     // the previous behaviour.
     const config = this._rpcUrl ? { rpcUrl: this._rpcUrl } : undefined;
     client.register("solana:*", new ExactSvmScheme(signer, config));
+
+    // EVM scheme is opt-in via `evmPrivateKey`. When unset, EVM 402
+    // challenges fail with a clear `no matching scheme` error from
+    // x402Client rather than silently dropping the request.
+    if (this._evmPrivateKey) {
+      const evmAccount = privateKeyToAccount(this._evmPrivateKey);
+      const schemeOptions =
+        typeof this._evmRpcUrl === "string"
+          ? { rpcUrl: this._evmRpcUrl }
+          : this._evmRpcUrl;
+      registerExactEvmScheme(client, {
+        signer: evmAccount,
+        ...(schemeOptions ? { schemeOptions } : {}),
+      });
+    }
+
     this._x402 = client;
     return client;
   }

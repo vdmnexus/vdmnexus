@@ -1,6 +1,6 @@
 {
   "name": "@vdm-nexus/x402",
-  "version": "0.4.1",
+  "version": "0.4.3",
   "description": "x402 client for VDM Nexus — agents pay AI inference per call with a signed Solana USDC transfer.",
   "license": "MIT",
   "author": "VDM Nexus",
@@ -54,9 +54,11 @@
     "@solana/kit": "^5",
     "@vdm-nexus/sdk": "workspace:*",
     "@x402/core": "^2.12.0",
+    "@x402/evm": "^2.12.0",
     "@x402/svm": "^2.12.0",
     "bs58": "^6.0.0",
-    "tweetnacl": "^1.0.3"
+    "tweetnacl": "^1.0.3",
+    "viem": "^2.21.0"
   },
   "devDependencies": {
     "@types/node": "^22",
