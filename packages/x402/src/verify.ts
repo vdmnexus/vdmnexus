@@ -263,7 +263,7 @@ function addressFromTopic(topic: string): string {
  */
 function knownEvmUsdc(network: string): string | null {
   if (network === "eip155:8453")
-    return "0x833589fCD6eDb6E08f4c7C32A07f04b6dEDD1c2E".toLowerCase();
+    return "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913".toLowerCase();
   if (network === "eip155:84532")
     return "0x036CbD53842c5426634e7929541eC2318f3dCF7e".toLowerCase();
   return null;
