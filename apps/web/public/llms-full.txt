@@ -1,0 +1,137 @@
+# VDM Nexus — full agent-discovery surface
+
+> Signed-inference rail for autonomous AI agents. Every paid LLM call returns a cryptographically verifiable Ed25519 receipt (SIR v2) of the model response, settled in USDC on Solana mainnet and Base mainnet via x402 v2.
+
+This document is the long-form companion to [/llms.txt](https://vdmnexus.com/llms.txt). It includes the full SIR v2 receipt shape, the five-check verification protocol, pricing breakdown, and every published endpoint an AI agent crawler should know about.
+
+## What VDM Nexus is
+
+A payment-anchored signed-inference rail. Three things in one signed artifact:
+
+1. **Ed25519 agent identity** — an agent IS its keypair. No API keys to rotate, no accounts to manage. The agent signs every inference request with its secret key; the pubkey is the identity.
+2. **x402 v2 USDC settlement** — every paid call settles on-chain via the HTTP 402 Payment Required protocol. Solana mainnet (USDC mint `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`) and Base mainnet (USDC mint `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`) are both first-class.
+3. **SIR v2 cryptographic receipt** — every response includes an Ed25519 signature over the canonical-JSON receipt covering: prompt hash, response hash, model, cost, balance remaining, timestamp, inference_id, and the on-chain payment transaction. Operator pubkey is published at `https://nexus.vdmnexus.com/api/v1/operator-key`.
+
+## Endpoints (agent-callable)
+
+### POST https://nexus.vdmnexus.com/api/v1/chat/completions
+
+OpenAI-compatible chat completion endpoint, x402-gated.
+
+- Unpaid POST returns `402 Payment Required` with an `X-Payment-Required` header carrying a base64-encoded `PaymentRequired` body. The `accepts` array enumerates the supported networks: `solana:mainnet`, `solana:devnet`, `eip155:8453` (Base mainnet), `eip155:84532` (Base Sepolia).
+- The client picks one network and sends the paid retry with an `X-Payment` header (base64 JSON `PaymentPayload`).
+- Successful response: OpenAI `chat.completion` body + `X-Nexus-Receipt` header (the signed SIR v2 receipt) + `X-Payment-Response` header (the settlement transaction reference).
+
+Price: ~$0.01 USDC flat per call (inference cost from upstream + $0.01 receipt fee).
+
+### POST https://nexus.vdmnexus.com/api/v1/inference
+
+Signed-inference endpoint with off-chain credit ledger (pre-funded agents top up via USDC deposit; calls debit from balance).
+
+Auth headers:
+- `X-Agent-Pubkey: <base58 Ed25519 public key>`
+- `X-Nexus-Signature: <base58 Ed25519 signature over the raw request body>`
+
+Body: `{ prompt, task_type, nonce, timestamp, max_cost_usdc? }`
+
+### GET https://nexus.vdmnexus.com/api/v1/operator-key
+
+Returns the Nexus operator's Ed25519 public key in base58. Use for independent verification of SIR v2 signatures. No auth required.
+
+### GET https://nexus.vdmnexus.com/api/v1/deposit-address
+
+Returns `{ address, mint, network }` so agents can discover where to send USDC for credit-balance top-up.
+
+## SIR v2 receipt shape
+
+```json
+{
+  "v": 2,
+  "agent_pubkey": "<base58 Ed25519 pubkey of the calling agent>",
+  "provider": "openrouter",
+  "model": "openai/gpt-4o-mini",
+  "cost_usdc": 0.0005,
+  "balance_remaining": 0.9995,
+  "prompt_hash": "<sha256 of the prompt text, hex>",
+  "response_hash": "<sha256 of the response text, hex>",
+  "timestamp": 1716499200000,
+  "inference_id": "<uuid>",
+  "payment": {
+    "network": "solana:mainnet",
+    "tx_signature": "<base58 transaction signature>",
+    "amount_usdc": "0.01",
+    "payer": "<base58 payer pubkey>",
+    "recipient": "<base58 recipient pubkey>"
+  },
+  "nexus_signature": "<base58 Ed25519 signature by the operator over the canonical JSON of this receipt with nexus_signature excluded>"
+}
+```
+
+The `nexus_signature` covers a canonical JSON encoding of the receipt: sorted keys, no whitespace, signature field excluded.
+
+## Five-check verification
+
+Use [@vdm-nexus/x402's `verifyReceipt()`](https://www.npmjs.com/package/@vdm-nexus/x402) or the hosted verifier at [verify.vdmnexus.com](https://verify.vdmnexus.com). Either way the protocol is:
+
+1. **Prompt hash match** — recompute sha256 over the prompt text, compare to `receipt.prompt_hash`
+2. **Response hash match** — recompute sha256 over the response text, compare to `receipt.response_hash`
+3. **Operator signature** — verify `nexus_signature` against the canonical JSON of the receipt (sorted keys, no whitespace, signature field excluded) using the operator key from `https://nexus.vdmnexus.com/api/v1/operator-key`
+4. **On-chain settlement** — fetch `receipt.payment.tx_signature` from the network, confirm it transfers `amount_usdc` of USDC to the recipient
+5. **Payer match** — confirm the transaction's signer matches `receipt.agent_pubkey`
+
+All five must pass for a green check. Failures are surfaced individually.
+
+## Pricing
+
+Per-call cost = inference cost (passed through 1:1 from OpenRouter's reported USD `usage.cost`) + $0.01 USDC receipt fee.
+
+Of the receipt fee:
+- 50% accumulates in a public burn pool (USDC, on Solana) that will swap into $NEXUS at token launch and burn to a public address
+- 50% accrues to the protocol treasury
+
+Free tiers:
+- Playground (`vdmnexus.com/playground`) — one sponsored call per IP, no agent required
+- Verifier (`verify.vdmnexus.com`) — free, no fee per verification
+
+Full details: [vdmnexus.com/pricing](https://vdmnexus.com/pricing)
+
+## Packages
+
+| Package | Registry | What it does |
+|---|---|---|
+| [@vdm-nexus/sdk](https://www.npmjs.com/package/@vdm-nexus/sdk) | npm | Ed25519 agent identity, sign requests, call signed-inference endpoints |
+| [@vdm-nexus/x402](https://www.npmjs.com/package/@vdm-nexus/x402) | npm | x402 v2 client + `verifyReceipt()` |
+| [@vdm-nexus/paywall](https://www.npmjs.com/package/@vdm-nexus/paywall) | npm | Express / Hono / Next.js middleware — wrap any handler, get signed receipts |
+| [@vdm-nexus/mcp](https://www.npmjs.com/package/@vdm-nexus/mcp) | npm | MCP server for Claude Desktop / Cursor |
+| [@vdm-nexus/ai-sdk-provider](https://www.npmjs.com/package/@vdm-nexus/ai-sdk-provider) | npm | Vercel AI SDK provider |
+| [@vdm-nexus/mastra-provider](https://www.npmjs.com/package/@vdm-nexus/mastra-provider) | npm | Mastra provider |
+| [vdm-nexus](https://pypi.org/project/vdm-nexus/) | PyPI | Python equivalent of @vdm-nexus/sdk + x402 client |
+| [langchain-vdm-nexus](https://pypi.org/project/langchain-vdm-nexus/) | PyPI | LangChain adapter |
+
+All MIT, all open source at [github.com/vdmnexus/vdmnexus](https://github.com/vdmnexus/vdmnexus).
+
+## Discovery surfaces
+
+- `/llms.txt` — short summary for AI agent crawlers
+- `/llms-full.txt` — this document
+- `/.well-known/x402.json` — paid endpoint catalogue, pricing, supported networks
+- `/.well-known/x402` — alias of the above
+- `/.well-known/agent.json` — generic agent card alias
+- `/.well-known/agent-card.json` — A2A-protocol agent card
+- `/.well-known/agent-registration.json` — EIP-8004 agent card (canonical name)
+- `/.well-known/mcp.json` — MCP server discovery
+
+## Source + governance
+
+- Source: [github.com/vdmnexus/vdmnexus](https://github.com/vdmnexus/vdmnexus) (MIT)
+- Issues + responsible disclosure: [vdmnexus.com/security](https://vdmnexus.com/security)
+- Operator: Spain-resident autónomo. Disclosures at [vdmnexus.com/disclosures](https://vdmnexus.com/disclosures) (launch-gated).
+
+## Live agent activity
+
+- [Agent directory](https://vdmnexus.com/agents): every agent on the rail, ranked
+- [Per-agent profile](https://console.vdmnexus.com): Mission Control — receipts, stats, on-chain settlements per agent
+- [Receipt permalinks](https://vdmnexus.com/r/c9710ea7-9e1f-46ee-aaa9-903a536ae12e): first mainnet receipt
+- [Points leaderboard](https://vdmnexus.com/points): per-agent activity points
+
+Last updated: 2026-05-25.

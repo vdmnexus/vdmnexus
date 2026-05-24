@@ -1,0 +1,45 @@
+# VDM Nexus
+
+> Signed-inference rail for autonomous AI agents. OpenAI-compatible /chat/completions gated by x402 on Solana mainnet and Base mainnet. Every paid call returns a cryptographically verifiable Ed25519 receipt (SIR v2) of the model response. Mainnet live since 2026-05-21.
+
+## Endpoints
+
+- [Inference API — paid, x402-gated](https://nexus.vdmnexus.com/api/v1/chat/completions): OpenAI-compatible POST /chat/completions. Returns the model response + an Ed25519-signed SIR v2 receipt in the `X-Nexus-Receipt` header. ~$0.01 USDC flat per call.
+- [Operator public key](https://nexus.vdmnexus.com/api/v1/operator-key): the Ed25519 pubkey that signs every receipt. Use for independent five-check verification.
+- [Hosted verifier — free](https://verify.vdmnexus.com): paste any SIR v2 receipt JSON or `/r/<id>` permalink and get the five-check result rendered as a card.
+
+## Agents
+
+- [Public agent directory](https://vdmnexus.com/agents): every Ed25519 agent that has called the rail, ranked by activity.
+- [Per-agent profile](https://console.vdmnexus.com): Mission Control — `/a/<pubkey>` shows receipts, stats, on-chain settlements.
+- [ERC-8004 agent card](https://vdmnexus.com/.well-known/agent-card.json): canonical agent card per EIP-8004, also at `/.well-known/agent.json` and `/.well-known/agent-registration.json`.
+- [x402 manifest](https://vdmnexus.com/.well-known/x402.json): paid endpoint catalogue, supported networks, pricing.
+- [MCP discovery](https://vdmnexus.com/.well-known/mcp.json): pointer to the @vdm-nexus/mcp server for Claude Desktop / Cursor / any MCP-aware client.
+
+## Docs
+
+- [Documentation root](https://docs.vdmnexus.com)
+- [SIR v2 spec](https://docs.vdmnexus.com/docs/spec/sir-v2): canonical JSON, five-check verification, test vectors. MIT-licensed.
+- [Pricing](https://vdmnexus.com/pricing): per-call USDC + $0.01 receipt fee. 50% of every receipt fee accumulates in a public burn pool for $NEXUS launch.
+- [Security](https://vdmnexus.com/security): AWS KMS-backed Ed25519 facilitator, threat model, responsible disclosure.
+
+## Packages
+
+- [@vdm-nexus/sdk](https://www.npmjs.com/package/@vdm-nexus/sdk): Ed25519 agent identity + signed-request inference client. Two runtime deps, MIT.
+- [@vdm-nexus/x402](https://www.npmjs.com/package/@vdm-nexus/x402): x402 v2 client + `verifyReceipt()` five-check verifier.
+- [@vdm-nexus/paywall](https://www.npmjs.com/package/@vdm-nexus/paywall): Drop-in Express / Hono / Next.js middleware that signs Ed25519 receipts for any wrapped handler.
+- [@vdm-nexus/mcp](https://www.npmjs.com/package/@vdm-nexus/mcp): MCP server exposing Nexus as a tool surface.
+- [@vdm-nexus/ai-sdk-provider](https://www.npmjs.com/package/@vdm-nexus/ai-sdk-provider): Vercel AI SDK provider.
+- [@vdm-nexus/mastra-provider](https://www.npmjs.com/package/@vdm-nexus/mastra-provider): Mastra provider.
+- [vdm-nexus (PyPI)](https://pypi.org/project/vdm-nexus/): Python equivalent of @vdm-nexus/sdk + x402 client.
+- [langchain-vdm-nexus (PyPI)](https://pypi.org/project/langchain-vdm-nexus/): LangChain adapter.
+
+## Source
+
+- [Open source — MIT](https://github.com/vdmnexus/vdmnexus): all packages, the rail, the verifier, the docs.
+
+## Optional — receipts
+
+- [Live receipts feed](https://vdmnexus.com/receipts)
+- [Per-agent points](https://vdmnexus.com/points)
+- [First mainnet receipt — proof of life](https://vdmnexus.com/r/c9710ea7-9e1f-46ee-aaa9-903a536ae12e)
