@@ -83,10 +83,16 @@ export function buildChallenge(args: {
   resource: ResourceInfo;
   feePayer?: string;
 }): PaymentRequired {
-  // SVM's ExactSvmScheme needs `extra.feePayer` so it knows whose key co-signs
-  // at settlement; EVM's ExactEvmScheme pays gas in ETH and has no equivalent.
+  // SVM's ExactSvmScheme needs `extra.feePayer` so it knows whose key
+  // co-signs at settlement. EVM's ExactEvmScheme has no fee-payer
+  // analogue (gas is paid in ETH directly by the facilitator) but it
+  // does need the EIP-712 domain parameters (`name`, `version`) of
+  // the USDC ERC-3009 contract so the client can build the typed-data
+  // signature — without them @x402/evm rejects the challenge with
+  // "EIP-712 domain parameters are required". Circle's USDC on every
+  // chain uses `name: "USD Coin", version: "2"`.
   const extra: Record<string, unknown> = isEvmNetwork(args.network)
-    ? {}
+    ? { name: "USD Coin", version: "2" }
     : { feePayer: args.feePayer ?? args.payTo };
   const requirement: PaymentRequirements = {
     scheme: "exact",
