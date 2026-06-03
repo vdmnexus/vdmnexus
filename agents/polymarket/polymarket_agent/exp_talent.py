@@ -41,6 +41,7 @@ import csv
 import math
 from dataclasses import dataclass
 from datetime import date
+from pathlib import Path
 
 import numpy as np
 from scipy.optimize import minimize
@@ -78,6 +79,13 @@ def compute_talent(year: int, topk: int) -> dict[str, float]:
     """team -> mean Overall of its top-`topk` rated players, scaled by /10."""
     fname, nat_field, ovr_field = FIFA_FILE[year]
     path = DATA_DIR / fname
+    if not path.exists():
+        # CI has no gitignored .data/ — fall back to the tracked two-column
+        # trim (nationality_name, overall), which yields identical talent
+        # values since only those fields are read.
+        alt = Path(__file__).resolve().parent.parent / "refdata" / fname
+        if alt.exists():
+            path = alt
     pool: dict[str, list[float]] = {}
     with open(path, newline="", encoding="utf-8", errors="replace") as f:
         for row in csv.DictReader(f):

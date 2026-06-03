@@ -388,7 +388,32 @@ def _assign_thirds(qualified: list[str]) -> dict[int, str]:
     return slot_to_group
 
 
-def _sim_group(eng: Engine, g: str, teams: list[str]):
+def played_group_results(
+        matches) -> dict[str, dict[tuple[int, int], tuple[int, int]]]:
+    """Real WC group-stage scores, keyed group -> sorted (x, y) index pair ->
+    (goals_x, goals_y). Lets the live board PIN completed games instead of
+    re-simulating them, so the projection adapts as results land. Empty until
+    the group stage starts; `matches` is the load_results() output (played
+    games only — future fixtures are dropped there)."""
+    where = {t: (g, i) for g, ts in GROUPS.items() for i, t in enumerate(ts)}
+    out: dict[str, dict[tuple[int, int], tuple[int, int]]] = {}
+    for m in matches:
+        # The 2026 edition only — without the year bound an ancient WC meeting
+        # between two teams that happen to share a 2026 group would be pinned.
+        if m.tournament != "FIFA World Cup" or m.d.year != 2026:
+            continue
+        ph, pa = where.get(m.home), where.get(m.away)
+        if ph is None or pa is None or ph[0] != pa[0]:
+            continue  # not a same-group 2026 group fixture
+        g, ih, ia = ph[0], ph[1], pa[1]
+        if ih < ia:
+            out.setdefault(g, {})[(ih, ia)] = (m.hs, m.aws)
+        else:
+            out.setdefault(g, {})[(ia, ih)] = (m.aws, m.hs)
+    return out
+
+
+def _sim_group(eng: Engine, g: str, teams: list[str], pinned=None):
     pts: dict[str, int] = defaultdict(int)
     gd: dict[str, int] = defaultdict(int)
     gf: dict[str, int] = defaultdict(int)
@@ -396,8 +421,12 @@ def _sim_group(eng: Engine, g: str, teams: list[str]):
     for x in range(4):
         for y in range(x + 1, 4):
             a, b = teams[x], teams[y]
-            td = (td_map[(x, y)] / 1000.0) if td_map is not None else 0.0
-            i, j = eng.score(a, b, td)
+            pin = pinned.get((x, y)) if pinned else None
+            if pin is not None:
+                i, j = pin  # real result — do not re-simulate
+            else:
+                td = (td_map[(x, y)] / 1000.0) if td_map is not None else 0.0
+                i, j = eng.score(a, b, td)
             gf[a] += i; gf[b] += j
             gd[a] += i - j; gd[b] += j - i
             if i > j:
@@ -412,14 +441,18 @@ def _sim_group(eng: Engine, g: str, teams: list[str]):
     return ranked, pts, gd, gf
 
 
-def simulate_once(eng: Engine) -> str:
+def _play_tournament(eng: Engine, pinned=None) -> dict:
+    """One full tournament. Returns the teams reaching each stage so the board
+    can aggregate advancement, not just the champion. `pinned` maps group ->
+    {(x, y): (gx, gy)} of real results to lock in (see played_group_results)."""
     winners: dict[str, str] = {}
     runners: dict[str, str] = {}
     third_stat: list[tuple] = []  # (pts, gd, gf, rand, group, team)
     third_team: dict[str, str] = {}
 
     for g, teams in GROUPS.items():
-        ranked, pts, gd, gf = _sim_group(eng, g, teams)
+        ranked, pts, gd, gf = _sim_group(
+            eng, g, teams, pinned.get(g) if pinned else None)
         winners[g] = ranked[0]
         runners[g] = ranked[1]
         t = ranked[2]
@@ -430,6 +463,8 @@ def simulate_once(eng: Engine) -> str:
     third_stat.sort(reverse=True)
     qualified_groups = [row[4] for row in third_stat[:8]]
     slot_group = _assign_thirds(qualified_groups)
+
+    mwin: dict[int, str] = {}
 
     def team_of(ref) -> str:
         kind, val = ref
@@ -442,7 +477,6 @@ def simulate_once(eng: Engine) -> str:
         # "3": val is a slot id -> group -> that group's third-placed team
         return third_team[slot_group[val]]
 
-    mwin: dict[int, str] = {}
     # Knockout travel (#7): thread each surviving team's cumulative path from
     # its group end-state through the fixed KO venues. td is deterministic per
     # match only after the bracket fills, so it must be computed live here.
@@ -464,15 +498,69 @@ def simulate_once(eng: Engine) -> str:
                     st[1] = city
             td = (state[a][0] - state[b][0]) / 1000.0
         mwin[mid] = eng.knockout_winner(a, b, td)
-    return mwin[104]
+
+    return {
+        "winners": winners,
+        "runners": runners,
+        # 32 teams out of the group (each R32 ref resolves to one team)
+        "r32": [team_of(ref) for mid in R32 for ref in R32[mid]],
+        "r16": [mwin[m] for m in range(73, 89)],   # won R32 -> round of 16
+        "qf": [mwin[m] for m in range(89, 97)],     # won R16 -> quarterfinal
+        "sf": [mwin[m] for m in range(97, 101)],    # won QF  -> semifinal
+        "final": [mwin[101], mwin[102]],            # won SF  -> final
+        "champ": mwin[104],
+    }
 
 
-def run(n_sims: int, eng: Engine) -> dict[str, float]:
+def simulate_once(eng: Engine, pinned=None) -> str:
+    return _play_tournament(eng, pinned)["champ"]
+
+
+def run(n_sims: int, eng: Engine, pinned=None) -> dict[str, float]:
     champ: dict[str, int] = defaultdict(int)
     for _ in range(n_sims):
-        champ[simulate_once(eng)] += 1
+        champ[_play_tournament(eng, pinned)["champ"]] += 1
     return {t: c / n_sims for t, c in
             sorted(champ.items(), key=lambda kv: kv[1], reverse=True)}
+
+
+def run_detail(n_sims: int, eng: Engine, pinned=None) -> list[dict]:
+    """Per-team progression probabilities over `n_sims` tournaments. Stages:
+    win_group, adv (out of group), r16, qf, sf, final, champ. Sorted by champ."""
+    stages = ("adv", "r16", "qf", "sf", "final", "champ")
+    cnt: dict[str, dict[str, int]] = {s: defaultdict(int) for s in stages}
+    win_group: dict[str, int] = defaultdict(int)
+    for _ in range(n_sims):
+        d = _play_tournament(eng, pinned)
+        for t in set(d["r32"]):
+            cnt["adv"][t] += 1
+        for t in d["r16"]:
+            cnt["r16"][t] += 1
+        for t in d["qf"]:
+            cnt["qf"][t] += 1
+        for t in d["sf"]:
+            cnt["sf"][t] += 1
+        for t in d["final"]:
+            cnt["final"][t] += 1
+        cnt["champ"][d["champ"]] += 1
+        for t in d["winners"].values():
+            win_group[t] += 1
+
+    group_of = {t: g for g, ts in GROUPS.items() for t in ts}
+    board = [{
+        "team": t,
+        "group": group_of[t],
+        "win_group": win_group[t] / n_sims,
+        "adv": cnt["adv"][t] / n_sims,
+        "r16": cnt["r16"][t] / n_sims,
+        "qf": cnt["qf"][t] / n_sims,
+        "sf": cnt["sf"][t] / n_sims,
+        "final": cnt["final"][t] / n_sims,
+        "champ": cnt["champ"][t] / n_sims,
+    } for t in group_of]
+    board.sort(key=lambda r: (r["champ"], r["final"], r["sf"], r["adv"]),
+               reverse=True)
+    return board
 
 
 # --- live Polymarket outright prices (optional, for the edge read) -------

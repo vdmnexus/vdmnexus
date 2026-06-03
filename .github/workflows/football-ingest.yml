@@ -1,12 +1,18 @@
 name: Football data ingest
 
-# Pulls the martj42 international-results feed into Supabase:
-#   * football_matches  — every international ever (scores fill in ~daily)
-#   * wc_standings       — group table recomputed from played WC group games
+# Daily World Cup data refresh, two parts:
 #
-# Daily cron keeps scores/standings current through the tournament. The
-# first manual dispatch does the full ~49k-row backfill; thereafter the
-# upsert is idempotent so each run only touches changed rows.
+#   1. Ingest the martj42 international-results feed into Supabase
+#      (football_matches + wc_standings). Scores fill in ~daily, so this
+#      keeps results and the group table current through the tournament.
+#   2. Regenerate the model's web predictions from the same feed and commit
+#      them back, so /wc26 adapts as results land:
+#        * scores.json      — per-fixture exact-scoreline sheet
+#        * tournament.json  — champion + advancement board (played group
+#                             games are pinned, not re-simulated)
+#
+# The first manual dispatch does the full ~49k-row Supabase backfill; the
+# upsert is idempotent so each later run only touches changed rows.
 #
 # Requires two repo secrets (Settings → Secrets and variables → Actions):
 #   SUPABASE_URL                 https://wuxorxtniyfwjaqurwoe.supabase.co
@@ -21,6 +27,9 @@ concurrency:
   group: football-ingest
   cancel-in-progress: false
 
+permissions:
+  contents: write # commit regenerated predictions back to the repo
+
 jobs:
   ingest:
     runs-on: ubuntu-latest
@@ -32,12 +41,32 @@ jobs:
           python-version: "3.11"
 
       - name: Install deps
-        # ingest imports GROUPS from sim.py, which pulls in numpy + scipy.
+        # ingest + exporters import sim.py, which pulls in numpy + scipy.
         run: pip install numpy scipy
 
-      - name: Run ingest
+      - name: Ingest martj42 feed into Supabase
         working-directory: agents/polymarket
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python3 -m polymarket_agent.ingest
+
+      - name: Regenerate web predictions
+        working-directory: agents/polymarket
+        # Re-fits ratings on the freshly downloaded feed and re-exports both
+        # JSON snapshots. Pinned played results make the board live.
+        run: |
+          python3 -m polymarket_agent.export_scores
+          python3 -m polymarket_agent.export_tournament
+
+      - name: Commit refreshed predictions
+        run: |
+          git config user.name  "nexus-bot"
+          git config user.email "bot@vdmnexus.com"
+          git add apps/web/app/wc26/scores.json apps/web/app/wc26/tournament.json
+          if git diff --cached --quiet; then
+            echo "no prediction changes"
+          else
+            git commit -m "chore(wc26): refresh predictions from latest results [skip ci]"
+            git push
+          fi
