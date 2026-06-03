@@ -1,8 +1,10 @@
 import type { MetadataRoute } from "next";
-import { launchLive } from "@/lib/launch-flag";
+import { launchLive, polymarketPublic } from "@/lib/launch-flag";
 
 export default function robots(): MetadataRoute.Robots {
-  const disallow = launchLive() ? [] : ["/token", "/whitepaper"];
+  const disallow: string[] = [];
+  if (!launchLive()) disallow.push("/token", "/whitepaper");
+  if (!polymarketPublic()) disallow.push("/agents/predictions");
   return {
     rules: [
       {

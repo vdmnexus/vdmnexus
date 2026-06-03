@@ -12,6 +12,7 @@ import {
 import { Card } from "@/components/card";
 import { FadeIn } from "@/components/fade-in";
 import { launchLive } from "@/lib/launch-flag";
+import { EnterpriseInquiryForm } from "@/components/enterprise-inquiry-form";
 
 export const metadata: Metadata = {
   title: "Pricing — VDM Nexus",
@@ -311,17 +312,24 @@ export default function PricingPage() {
               </p>
               <p className="mt-4 text-base leading-relaxed text-text-muted">
                 For enterprise or compliance-driven evaluations now,
-                email{" "}
-                <a
-                  href="mailto:dennis@vdmnexus.com"
-                  className="underline decoration-text-muted/40 underline-offset-4 transition-colors hover:text-text hover:decoration-text"
-                >
-                  dennis@vdmnexus.com
-                </a>
-                {" "}with use case and required SLAs. Beta-tier
-                evaluations get the founder directly; v1-tier
-                contracts land into the Business tier when it ships.
+                drop your details below. Beta-tier evaluations get the
+                founder directly; v1-tier contracts land into the
+                Business tier the moment it ships.
               </p>
+            </div>
+          </FadeIn>
+          <FadeIn className="mt-6">
+            <div className="rounded-2xl border border-soft bg-surface/60 p-6 backdrop-blur sm:p-8">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-text-muted">
+                Talk to the founder
+              </h3>
+              <p className="mt-2 text-sm text-text-muted">
+                Use case + required SLAs. We read every one. Reply
+                within 48 hours.
+              </p>
+              <div className="mt-6">
+                <EnterpriseInquiryForm />
+              </div>
             </div>
           </FadeIn>
         </Section>
