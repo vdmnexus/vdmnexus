@@ -1,0 +1,43 @@
+name: Football data ingest
+
+# Pulls the martj42 international-results feed into Supabase:
+#   * football_matches  — every international ever (scores fill in ~daily)
+#   * wc_standings       — group table recomputed from played WC group games
+#
+# Daily cron keeps scores/standings current through the tournament. The
+# first manual dispatch does the full ~49k-row backfill; thereafter the
+# upsert is idempotent so each run only touches changed rows.
+#
+# Requires two repo secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_URL                 https://wuxorxtniyfwjaqurwoe.supabase.co
+#   SUPABASE_SERVICE_ROLE_KEY    the service-role key (same one apps use)
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # 06:00 UTC daily
+  workflow_dispatch: {} # manual trigger — use this for the first backfill
+
+concurrency:
+  group: football-ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        # ingest imports GROUPS from sim.py, which pulls in numpy + scipy.
+        run: pip install numpy scipy
+
+      - name: Run ingest
+        working-directory: agents/polymarket
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python3 -m polymarket_agent.ingest
