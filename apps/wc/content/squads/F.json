@@ -1,0 +1,170 @@
+{
+  "japan": {
+    "name": "Japan",
+    "group": "F",
+    "announced": "May 15",
+    "manager": "Hajime Moriyasu",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Zion Suzuki", "club": "Parma" },
+        { "name": "Keisuke Osako", "club": "Sanfrecce Hiroshima" },
+        { "name": "Tomoki Hayakawa", "club": "Kashima Antlers" }
+      ],
+      "Defenders": [
+        { "name": "Yūto Nagatomo", "club": "FC Tokyo" },
+        { "name": "Shogo Taniguchi", "club": "Sint-Truiden" },
+        { "name": "Ko Itakura", "club": "Ajax" },
+        { "name": "Tsuyoshi Watanabe", "club": "Feyenoord" },
+        { "name": "Takehiro Tomiyasu", "club": "Ajax" },
+        { "name": "Hiroki Ito", "club": "Bayern Munich" },
+        { "name": "Ayumu Seko", "club": "Le Havre" },
+        { "name": "Yukinari Sugawara", "club": "Werder Bremen" }
+      ],
+      "Midfielders": [
+        { "name": "Junnosuke Suzuki", "club": "Copenhagen" },
+        { "name": "Wataru Endo", "club": "Liverpool" },
+        { "name": "Junya Ito", "club": "Genk" },
+        { "name": "Daichi Kamada", "club": "Crystal Palace" },
+        { "name": "Ritsu Doan", "club": "Eintracht Frankfurt" },
+        { "name": "Ao Tanaka", "club": "Leeds United" },
+        { "name": "Keito Nakamura", "club": "Reims" },
+        { "name": "Kaishu Sano", "club": "Mainz" },
+        { "name": "Takefusa Kubo", "club": "Real Sociedad" },
+        { "name": "Yuito Suzuki", "club": "Freiburg" }
+      ],
+      "Forwards": [
+        { "name": "Koki Ogawa", "club": "NEC Nijmegen" },
+        { "name": "Daizen Maeda", "club": "Celtic" },
+        { "name": "Ayase Ueda", "club": "Feyenoord" },
+        { "name": "Kento Shiogai", "club": "VfL Wolfsburg" },
+        { "name": "Keisuke Goto", "club": "Sint-Truiden" }
+      ]
+    }
+  },
+  "netherlands": {
+    "name": "Netherlands",
+    "group": "F",
+    "announced": "May 27",
+    "manager": "Ronald Koeman",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Mark Flekken", "club": "Bayer Leverkusen" },
+        { "name": "Robin Roefs", "club": "Sunderland" },
+        { "name": "Bart Verbruggen", "club": "Brighton" }
+      ],
+      "Defenders": [
+        { "name": "Nathan Aké", "club": "Manchester City" },
+        { "name": "Denzel Dumfries", "club": "Inter Milan" },
+        { "name": "Jorrel Hato", "club": "Chelsea" },
+        { "name": "Jurriën Timber", "club": "Arsenal" },
+        { "name": "Jan Paul van Hecke", "club": "Brighton" },
+        { "name": "Micky van de Ven", "club": "Tottenham" },
+        { "name": "Virgil van Dijk", "club": "Liverpool" }
+      ],
+      "Midfielders": [
+        { "name": "Frenkie de Jong", "club": "Barcelona" },
+        { "name": "Marten de Roon", "club": "Atalanta" },
+        { "name": "Ryan Gravenberch", "club": "Liverpool" },
+        { "name": "Teun Koopmeiners", "club": "Juventus" },
+        { "name": "Tijjani Reijnders", "club": "Manchester City" },
+        { "name": "Guus Til", "club": "PSV" },
+        { "name": "Quinten Timber", "club": "Marseille" },
+        { "name": "Mats Wieffer", "club": "Brighton" }
+      ],
+      "Forwards": [
+        { "name": "Brian Brobbey", "club": "Sunderland" },
+        { "name": "Memphis Depay", "club": "Corinthians" },
+        { "name": "Cody Gakpo", "club": "Liverpool" },
+        { "name": "Justin Kluivert", "club": "Bournemouth" },
+        { "name": "Noa Lang", "club": "Galatasaray" },
+        { "name": "Donyell Malen", "club": "Roma" },
+        { "name": "Crysencio Summerville", "club": "West Ham" },
+        { "name": "Wout Weghorst", "club": "Ajax" }
+      ]
+    }
+  },
+  "sweden": {
+    "name": "Sweden",
+    "group": "F",
+    "announced": "May 12",
+    "manager": "Graham Potter",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Viktor Johansson", "club": "Stoke City" },
+        { "name": "Kristoffer Nordfeldt", "club": "AIK" },
+        { "name": "Jacob Widell Zetterstrom", "club": "Derby County" }
+      ],
+      "Defenders": [
+        { "name": "Hjalmar Ekdal", "club": "Burnley" },
+        { "name": "Gabriel Gudmundsson", "club": "Leeds United" },
+        { "name": "Isak Hien", "club": "Atalanta" },
+        { "name": "Emil Holm", "club": "Juventus" },
+        { "name": "Gustaf Lagerbielke", "club": "Braga" },
+        { "name": "Victor Lindelöf", "club": "Aston Villa" },
+        { "name": "Erik Smith", "club": "St. Pauli" },
+        { "name": "Carl Starfelt", "club": "Celta Vigo" },
+        { "name": "Elliot Stroud", "club": "Mjallby" },
+        { "name": "Daniel Svensson", "club": "Borussia Dortmund" }
+      ],
+      "Midfielders": [
+        { "name": "Taha Ali", "club": "Malmo" },
+        { "name": "Yasin Ayari", "club": "Brighton" },
+        { "name": "Lucas Bergvall", "club": "Tottenham" },
+        { "name": "Jesper Karlström", "club": "Udinese" },
+        { "name": "Ken Sema", "club": "Pafos" },
+        { "name": "Mattias Svanberg", "club": "Wolfsburg" },
+        { "name": "Besfort Zeneli", "club": "Union St-Gilloise" }
+      ],
+      "Forwards": [
+        { "name": "Alexander Bernhardsson", "club": "Holstein Kiel" },
+        { "name": "Anthony Elanga", "club": "Newcastle United" },
+        { "name": "Viktor Gyökeres", "club": "Arsenal" },
+        { "name": "Alexander Isak", "club": "Liverpool" },
+        { "name": "Gustaf Nilsson", "club": "Club Brugge" },
+        { "name": "Benjamin Nygren", "club": "Celtic" }
+      ]
+    }
+  },
+  "tunisia": {
+    "name": "Tunisia",
+    "group": "F",
+    "announced": "May 15",
+    "manager": "Sabri Lamouchi",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Aymen Dahmen", "club": "CS Sfaxien" },
+        { "name": "Sabri Ben Hessen", "club": "Étoile du Sahel" },
+        { "name": "Abdelmouhib Chamakh", "club": "Club Africain" }
+      ],
+      "Defenders": [
+        { "name": "Montassar Talbi", "club": "Lorient" },
+        { "name": "Dylan Bronn", "club": "Servette" },
+        { "name": "Omar Rekik", "club": "Maribor" },
+        { "name": "Yan Valery", "club": "Young Boys" },
+        { "name": "Ali Abdi", "club": "Nice" },
+        { "name": "Moutaz Neffati", "club": "IFK Norrköping" },
+        { "name": "Raed Chikhaoui", "club": "US Monastir" },
+        { "name": "Adam Arous", "club": "Kasımpaşa" },
+        { "name": "Mohamed Amine Ben Hamida", "club": "Espérance de Tunis" }
+      ],
+      "Midfielders": [
+        { "name": "Ellyes Skhiri", "club": "Eintracht Frankfurt" },
+        { "name": "Hannibal Mejbri", "club": "Burnley" },
+        { "name": "Anis Ben Slimane", "club": "Norwich City" },
+        { "name": "Hadj Mahmoud", "club": "Lugano" },
+        { "name": "Rani Khedira", "club": "Union Berlin" },
+        { "name": "Mortadha Ben Ouanes", "club": "Kasımpaşa" }
+      ],
+      "Forwards": [
+        { "name": "Elias Achouri", "club": "Copenhagen" },
+        { "name": "Ismaël Gharbi", "club": "Augsburg" },
+        { "name": "Elias Saad", "club": "Hannover 96" },
+        { "name": "Sebastian Tounekti", "club": "Celtic" },
+        { "name": "Firas Chaouat", "club": "Club Africain" },
+        { "name": "Khalil Ayari", "club": "Paris Saint-Germain" },
+        { "name": "Hazem Mastouri", "club": "Dynamo Makhachkala" },
+        { "name": "Rayan Elloumi", "club": "Vancouver Whitecaps" }
+      ]
+    }
+  }
+}

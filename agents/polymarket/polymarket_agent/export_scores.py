@@ -15,7 +15,9 @@ snapshot rather than calling Python live. Regenerate after any re-fit:
 
     python3 -m polymarket_agent.export_scores
 
-Writes to apps/web/app/wc26/scores.json (path derived from this file).
+Writes to agents/polymarket/exports/scores.json (path derived from this
+file). This is the canonical snapshot consumed by both the marketing /wc26
+route and the dedicated apps/wc (wc.vdmnexus.com) app.
 """
 
 from __future__ import annotations
@@ -35,7 +37,7 @@ from .sim import (
     GROUPS, HOST_EDGE, TALENT_K, USE_ALTITUDE, USE_TALENT, USE_TRAVEL, Engine,
 )
 
-OUT_PATH = Path(__file__).resolve().parents[3] / "apps/web/app/wc26/scores.json"
+OUT_PATH = Path(__file__).resolve().parents[1] / "exports/scores.json"
 
 
 def _flip(label: str) -> str:

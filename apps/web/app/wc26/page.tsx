@@ -4,8 +4,8 @@ import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 import { FadeIn } from "@/components/fade-in";
 import { isAdmin } from "@/lib/admin-auth";
-import scores from "./scores.json";
-import tournament from "./tournament.json";
+import scores from "../../../../agents/polymarket/exports/scores.json";
+import tournament from "../../../../agents/polymarket/exports/tournament.json";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

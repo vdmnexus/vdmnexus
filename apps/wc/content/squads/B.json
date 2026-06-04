@@ -1,0 +1,171 @@
+{
+  "canada": {
+    "name": "Canada",
+    "group": "B",
+    "announced": "May 29",
+    "manager": "Jesse Marsch",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Dayne St. Clair", "club": "Inter Miami" },
+        { "name": "Maxime Crépeau", "club": "Orlando City" },
+        { "name": "Owen Goodman", "club": "Barnsley" }
+      ],
+      "Defenders": [
+        { "name": "Moïse Bombito", "club": "Nice" },
+        { "name": "Derek Cornelius", "club": "Rangers" },
+        { "name": "Alphonso Davies", "club": "Bayern Munich" },
+        { "name": "Luc De Fougerolles", "club": "FCV Dender" },
+        { "name": "Alistair Johnston", "club": "Celtic" },
+        { "name": "Alfie Jones", "club": "Middlesbrough" },
+        { "name": "Richie Laryea", "club": "Toronto FC" },
+        { "name": "Niko Sigur", "club": "Hajduk Split" },
+        { "name": "Joel Waterman", "club": "Chicago Fire" }
+      ],
+      "Midfielders": [
+        { "name": "Ali Ahmed", "club": "Norwich City" },
+        { "name": "Tajon Buchanan", "club": "Villarreal" },
+        { "name": "Mathieu Choinière", "club": "LAFC" },
+        { "name": "Stephen Eustáquio", "club": "LAFC" },
+        { "name": "Marcelo Flores", "club": "Tigres UANL" },
+        { "name": "Ismaël Koné", "club": "Sassuolo" },
+        { "name": "Liam Millar", "club": "Hull City" },
+        { "name": "Jonathan Osorio", "club": "Toronto FC" },
+        { "name": "Nathan Saliba", "club": "Anderlecht" },
+        { "name": "Jacob Shaffelburg", "club": "LAFC" }
+      ],
+      "Forwards": [
+        { "name": "Jonathan David", "club": "Juventus" },
+        { "name": "Promise David", "club": "Royale-Union Saint Gilloise" },
+        { "name": "Cyle Larin", "club": "Southampton" },
+        { "name": "Tani Oluwaseyi", "club": "Villarreal" }
+      ]
+    }
+  },
+  "bosnia-and-herzegovina": {
+    "name": "Bosnia and Herzegovina",
+    "display": "Bosnia-Herzegovina",
+    "group": "B",
+    "announced": "May 11",
+    "manager": "Sergej Barbarez",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Nikola Vasilj", "club": "St Pauli" },
+        { "name": "Martin Zlomislic", "club": "Rijeka" },
+        { "name": "Osman Hadzikic", "club": "Slaven Belupo" }
+      ],
+      "Defenders": [
+        { "name": "Sead Kolasinac", "club": "Atalanta" },
+        { "name": "Amar Dedic", "club": "Benfica" },
+        { "name": "Nihad Mujakic", "club": "Gaziantep" },
+        { "name": "Nikola Katic", "club": "Schalke 04" },
+        { "name": "Tarik Muharemovic", "club": "Sassuolo" },
+        { "name": "Stjepan Radeljic", "club": "Rijeka" },
+        { "name": "Dennis Hadzikadunic", "club": "Sampdoria" },
+        { "name": "Nidal Celik", "club": "Lens" }
+      ],
+      "Midfielders": [
+        { "name": "Amir Hadziahmetovic", "club": "Hull City" },
+        { "name": "Ivan Sunjic", "club": "Pafos" },
+        { "name": "Ivan Basic", "club": "Astana" },
+        { "name": "Dzenis Burnic", "club": "Karlsruher SC" },
+        { "name": "Ermin Mahmic", "club": "Slovan Liberec" },
+        { "name": "Benjamin Tahirovic", "club": "Brondby" },
+        { "name": "Amar Memic", "club": "Viktoria Plzen" },
+        { "name": "Armin Gigovic", "club": "Young Boys" },
+        { "name": "Kerim Alajbegovic", "club": "RB Salzburg" },
+        { "name": "Esmir Bajraktarevic", "club": "PSV Eindhoven" }
+      ],
+      "Forwards": [
+        { "name": "Ermedin Demirovic", "club": "VfB Stuttgart" },
+        { "name": "Jovo Lukic", "club": "Universitatea Cluj" },
+        { "name": "Samed Bazdar", "club": "Jagiellonia Bialystok" },
+        { "name": "Haris Tabakovic", "club": "Borussia Moenchengladbach" },
+        { "name": "Edin Dzeko", "club": "Schalke 04" }
+      ]
+    }
+  },
+  "qatar": {
+    "name": "Qatar",
+    "group": "B",
+    "announced": "June 1",
+    "manager": "Julen Lopetegui",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Salah Zakaria", "club": "Al Duhail" },
+        { "name": "Meshaal Barsham", "club": "Al Sadd" },
+        { "name": "Mahmoud Abunada", "club": "Al Rayyan" }
+      ],
+      "Defenders": [
+        { "name": "Boualem Khoukhi", "club": "Al Sadd" },
+        { "name": "Pedro Miguel", "club": "Al Sadd" },
+        { "name": "Sultan Al Brake", "club": "Al Duhail" },
+        { "name": "Al-Hashmi Al-Hussain", "club": "Al Arabi" },
+        { "name": "Ayoub Al-Alawi", "club": "Al Gharafa" },
+        { "name": "Issa Laye", "club": "Al Arabi" },
+        { "name": "Lucas Mendes", "club": "Al Wakrah" },
+        { "name": "Homam Al-Amin", "club": "Cultural Leonesa" }
+      ],
+      "Midfielders": [
+        { "name": "Ahmed Fathi", "club": "Al Arabi" },
+        { "name": "Jassim Gaber", "club": "Al Rayyan" },
+        { "name": "Assim Madibo", "club": "Al Wakrah" },
+        { "name": "Abdulaziz Hatem", "club": "Al Rayyan" },
+        { "name": "Karim Boudiaf", "club": "Al Duhail" },
+        { "name": "Mohammed Mannai", "club": "Al Shamal" }
+      ],
+      "Forwards": [
+        { "name": "Almoez Ali", "club": "Al Duhail" },
+        { "name": "Akram Afif", "club": "Al Sadd" },
+        { "name": "Tahsin Mohammed", "club": "Al Duhail" },
+        { "name": "Edmílson Junior", "club": "Al Duhail" },
+        { "name": "Ahmed Al-Ganehi", "club": "Al Gharafa" },
+        { "name": "Ahmed Alaa", "club": "Al Rayyan" },
+        { "name": "Hassan Al-Haydos", "club": "Al Sadd" },
+        { "name": "Mohammed Muntari", "club": "Al Gharafa" },
+        { "name": "Yusuf Abdurisag", "club": "Al Wakrah" }
+      ]
+    }
+  },
+  "switzerland": {
+    "name": "Switzerland",
+    "group": "B",
+    "announced": "May 19",
+    "manager": "Murat Yakin",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Gregor Kobel", "club": "Borussia Dortmund" },
+        { "name": "Yvon Mvogo", "club": "Lorient" },
+        { "name": "Marvin Keller", "club": "Young Boys" }
+      ],
+      "Defenders": [
+        { "name": "Manuel Akanji", "club": "Inter Milan" },
+        { "name": "Nico Elvedi", "club": "Borussia Mönchengladbach" },
+        { "name": "Ricardo Rodriguez", "club": "Real Betis" },
+        { "name": "Silvan Widmer", "club": "Mainz" },
+        { "name": "Miro Muheim", "club": "Hamburger SV" },
+        { "name": "Aurèle Amenda", "club": "Eintracht Frankfurt" },
+        { "name": "Eray Cömert", "club": "Valencia" },
+        { "name": "Luca Jaquez", "club": "Stuttgart" }
+      ],
+      "Midfielders": [
+        { "name": "Granit Xhaka", "club": "Sunderland" },
+        { "name": "Johan Manzambi", "club": "Freiburg" },
+        { "name": "Remo Freuler", "club": "Bologna" },
+        { "name": "Denis Zakaria", "club": "Monaco" },
+        { "name": "Ardon Jashari", "club": "AC Milan" },
+        { "name": "Djibril Sow", "club": "Sevilla" },
+        { "name": "Christian Fassnacht", "club": "Young Boys" },
+        { "name": "Michel Aebischer", "club": "Pisa" },
+        { "name": "Fabian Rieder", "club": "Augsburg" },
+        { "name": "Rubén Vargas", "club": "Sevilla" }
+      ],
+      "Forwards": [
+        { "name": "Breel Embolo", "club": "Rennes" },
+        { "name": "Noah Okafor", "club": "Leeds" },
+        { "name": "Dan Ndoye", "club": "Nottingham Forest" },
+        { "name": "Zeki Amdouni", "club": "Burnley" },
+        { "name": "Cedric Itten", "club": "Fortuna Dusseldorf" }
+      ]
+    }
+  }
+}

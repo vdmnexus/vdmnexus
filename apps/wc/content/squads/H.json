@@ -1,0 +1,170 @@
+{
+  "cape-verde": {
+    "name": "Cape Verde",
+    "group": "H",
+    "announced": "May 18",
+    "manager": "Bubista",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Vozinha", "club": "Chaves" },
+        { "name": "Marcio Rosa", "club": "Montana" },
+        { "name": "CJ dos Santos", "club": "San Diego FC" }
+      ],
+      "Defenders": [
+        { "name": "Steven Moreira", "club": "Columbus Crew" },
+        { "name": "Wagner Pina", "club": "Trabzonspor" },
+        { "name": "Joao Paulo", "club": "FCSB" },
+        { "name": "Sidny Lopes Cabral", "club": "Benfica" },
+        { "name": "Logan Costa", "club": "Villarreal" },
+        { "name": "Pico", "club": "Shamrock Rovers" },
+        { "name": "Kelvin Pires", "club": "SJK" },
+        { "name": "Stopira", "club": "Torreense" },
+        { "name": "Diney", "club": "Al Bataeh" }
+      ],
+      "Midfielders": [
+        { "name": "Jamiro Monteiro", "club": "PEC Zwolle" },
+        { "name": "Telmo Arcanjo", "club": "Vitoria Guimaraes" },
+        { "name": "Yannick Semedo", "club": "Farense" },
+        { "name": "Laros Duarte", "club": "Puskas Akademia" },
+        { "name": "Deroy Duarte", "club": "Ludogorets Razgrad" },
+        { "name": "Kevin Pina", "club": "Krasnodar" }
+      ],
+      "Forwards": [
+        { "name": "Ryan Mendes", "club": "Igdir" },
+        { "name": "Willy Semedo", "club": "Omonia" },
+        { "name": "Garry Rodrigues", "club": "Apollon Limassol" },
+        { "name": "Jovane Cabral", "club": "Estrela Amadora" },
+        { "name": "Nuno da Costa", "club": "Istanbul Basaksehir" },
+        { "name": "Dailon Livramento", "club": "Casa Pia" },
+        { "name": "Gilson Benchimol", "club": "Akron Tolyatti" },
+        { "name": "Helio Varela", "club": "Maccabi Tel Aviv" }
+      ]
+    }
+  },
+  "saudi-arabia": {
+    "name": "Saudi Arabia",
+    "group": "H",
+    "announced": "June 1",
+    "manager": "Georgios Donis",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Mohammed Al Owais", "club": "Al Ula" },
+        { "name": "Nawaf Al Aqidi", "club": "Al Nassr" },
+        { "name": "Ahmed Al Kassar", "club": "Al Qadsiah" }
+      ],
+      "Defenders": [
+        { "name": "Abdulelah Al Amri", "club": "Al Nassr" },
+        { "name": "Hassan Tambakti", "club": "Al Hilal" },
+        { "name": "Jehad Thikri", "club": "Al Qadsiah" },
+        { "name": "Ali Lajami", "club": "Al Hilal" },
+        { "name": "Hassan Kadesh", "club": "Al Ittihad" },
+        { "name": "Saud Abdulhamid", "club": "Lens" },
+        { "name": "Mohammed Abu Al Shamat", "club": "Al Qadsiah" },
+        { "name": "Ali Majrashi", "club": "Al Ahli" },
+        { "name": "Moteb Al Harbi", "club": "Al Hilal" },
+        { "name": "Nawaf Boushal", "club": "Al Nassr" },
+        { "name": "Sultan Al-Ghannam", "club": "Al Nassr" }
+      ],
+      "Midfielders": [
+        { "name": "Mohammed Kanno", "club": "Al Hilal" },
+        { "name": "Abdullah Al Khaibari", "club": "Al Nassr" },
+        { "name": "Ziyad Al Johani", "club": "Al Ahli" },
+        { "name": "Nasser Al Dawsari", "club": "Al Hilal" },
+        { "name": "Musab Al Juwayr", "club": "Al Qadsiah" },
+        { "name": "Alaa Al Hajji", "club": "Neom" },
+        { "name": "Salem Al Dawsari", "club": "Al Hilal" },
+        { "name": "Khalid Al Ghannam", "club": "Al Ettifaq" },
+        { "name": "Ayman Yahya", "club": "Al Nassr" }
+      ],
+      "Forwards": [
+        { "name": "Firas Al Buraikan", "club": "Al Ahli" },
+        { "name": "Saleh Al Shehri", "club": "Al Ittihad" },
+        { "name": "Abdullah Al Hamdan", "club": "Al Nassr" }
+      ]
+    }
+  },
+  "spain": {
+    "name": "Spain",
+    "group": "H",
+    "announced": "May 25",
+    "manager": "Luis de la Fuente",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Unai Simón", "club": "Athletic Club" },
+        { "name": "David Raya", "club": "Arsenal" },
+        { "name": "Joan García", "club": "Barcelona" }
+      ],
+      "Defenders": [
+        { "name": "Marc Cucurella", "club": "Chelsea" },
+        { "name": "Pau Cubarsí", "club": "Barcelona" },
+        { "name": "Aymeric Laporte", "club": "Athletic Club" },
+        { "name": "Álex Grimaldo", "club": "Bayer Leverkusen" },
+        { "name": "Pedro Porro", "club": "Tottenham Hotspur" },
+        { "name": "Eric García", "club": "Barcelona" },
+        { "name": "Marcos Llorente", "club": "Atlético Madrid" },
+        { "name": "Marc Pubill", "club": "Atlético Madrid" }
+      ],
+      "Midfielders": [
+        { "name": "Gavi", "club": "Barcelona" },
+        { "name": "Rodri", "club": "Manchester City" },
+        { "name": "Pedri", "club": "Barcelona" },
+        { "name": "Martín Zubimendi", "club": "Arsenal" },
+        { "name": "Fabián Ruiz", "club": "PSG" },
+        { "name": "Álex Baena", "club": "Atlético Madrid" },
+        { "name": "Mikel Merino", "club": "Arsenal" }
+      ],
+      "Forwards": [
+        { "name": "Lamine Yamal", "club": "Barcelona" },
+        { "name": "Nico Williams", "club": "Athletic Club" },
+        { "name": "Dani Olmo", "club": "Barcelona" },
+        { "name": "Ferran Torres", "club": "Barcelona" },
+        { "name": "Mikel Oyarzabal", "club": "Real Sociedad" },
+        { "name": "Yéremy Pino", "club": "Crystal Palace" },
+        { "name": "Borja Iglesias", "club": "Celta Vigo" },
+        { "name": "Víctor Muñoz", "club": "Osasuna" }
+      ]
+    }
+  },
+  "uruguay": {
+    "name": "Uruguay",
+    "group": "H",
+    "announced": "May 31",
+    "manager": "Marcelo Bielsa",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Fernando Muslera", "club": "Estudiantes de La Plata" },
+        { "name": "Sergio Rochet", "club": "Internacional de Porto Alegre" },
+        { "name": "Santiago Mele", "club": "Monterrey" }
+      ],
+      "Defenders": [
+        { "name": "Ronald Araújo", "club": "Barcelona" },
+        { "name": "José María Giménez", "club": "Atlético Madrid" },
+        { "name": "Santiago Bueno", "club": "Wolverhampton Wanderers" },
+        { "name": "Sebastián Cáceres", "club": "América" },
+        { "name": "Mathías Olivera", "club": "Napoli" },
+        { "name": "Guillermo Varela", "club": "Flamengo" },
+        { "name": "Matías Viña", "club": "River Plate" },
+        { "name": "Joaquín Piquerez", "club": "Palmeiras" },
+        { "name": "Juan Manuel Sanabria", "club": "Real Salt Lake" }
+      ],
+      "Midfielders": [
+        { "name": "Federico Valverde", "club": "Real Madrid" },
+        { "name": "Rodrigo Bentancur", "club": "Tottenham Hotspur" },
+        { "name": "Manuel Ugarte", "club": "Manchester United" },
+        { "name": "Emiliano Martínez", "club": "Palmeiras" },
+        { "name": "Rodrigo Zalazar", "club": "Sporting CP" },
+        { "name": "Giorgian De Arrascaeta", "club": "Flamengo" },
+        { "name": "Nicolás De La Cruz", "club": "Flamengo" },
+        { "name": "Agustín Canobbio", "club": "Fluminense" },
+        { "name": "Maximiliano Araújo", "club": "Sporting CP" },
+        { "name": "Brian Rodríguez", "club": "América" },
+        { "name": "Facundo Pellistri", "club": "Panathinaikos" }
+      ],
+      "Forwards": [
+        { "name": "Darwin Núñez", "club": "Al Hilal" },
+        { "name": "Federico Viñas", "club": "Real Oviedo" },
+        { "name": "Rodrigo Aguirre", "club": "Tigres" }
+      ]
+    }
+  }
+}

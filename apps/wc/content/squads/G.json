@@ -1,0 +1,171 @@
+{
+  "belgium": {
+    "name": "Belgium",
+    "group": "G",
+    "announced": "May 15",
+    "manager": "Rudi Garcia",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Thibaut Courtois", "club": "Real Madrid" },
+        { "name": "Senne Lammens", "club": "Manchester United" },
+        { "name": "Mike Penders", "club": "Chelsea" }
+      ],
+      "Defenders": [
+        { "name": "Timothy Castagne", "club": "Fulham" },
+        { "name": "Zeno Debast", "club": "Sporting CP" },
+        { "name": "Maxim De Cuyper", "club": "Brighton & Hove Albion" },
+        { "name": "Koni De Winter", "club": "AC Milan" },
+        { "name": "Brandon Mechele", "club": "Club Brugge" },
+        { "name": "Thomas Meunier", "club": "Lille" },
+        { "name": "Nathan Ngoy", "club": "Lille" },
+        { "name": "Joaquin Seys", "club": "Club Brugge" },
+        { "name": "Arthur Theate", "club": "Eintracht Frankfurt" }
+      ],
+      "Midfielders": [
+        { "name": "Kevin De Bruyne", "club": "Napoli" },
+        { "name": "Amadou Onana", "club": "Aston Villa" },
+        { "name": "Nicolas Raskin", "club": "Rangers" },
+        { "name": "Youri Tielemans", "club": "Aston Villa" },
+        { "name": "Hans Vanaken", "club": "Club Brugge" },
+        { "name": "Axel Witsel", "club": "Girona" }
+      ],
+      "Forwards": [
+        { "name": "Charles De Ketelaere", "club": "Atalanta" },
+        { "name": "Jérémy Doku", "club": "Manchester City" },
+        { "name": "Matias Fernandez-Pardo", "club": "Lille" },
+        { "name": "Romelu Lukaku", "club": "Napoli" },
+        { "name": "Dodi Lukebakio", "club": "Benfica" },
+        { "name": "Diego Moreira", "club": "Strasbourg" },
+        { "name": "Alexis Saelemaekers", "club": "AC Milan" },
+        { "name": "Leandro Trossard", "club": "Arsenal" }
+      ]
+    }
+  },
+  "egypt": {
+    "name": "Egypt",
+    "group": "G",
+    "announced": "May 29",
+    "manager": "Hossam Hassan",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Mohamed El Shenawy", "club": "Al Ahly" },
+        { "name": "Mostafa Shobeir", "club": "Al Ahly" },
+        { "name": "El Mahdy Soliman", "club": "Zamalek" },
+        { "name": "Mohamed Alaa", "club": "El Gouna" }
+      ],
+      "Defenders": [
+        { "name": "Mohamed Hany", "club": "Al Ahly" },
+        { "name": "Tarek Alaa", "club": "Zamalek" },
+        { "name": "Hamdy Fathy", "club": "Al Wakrah" },
+        { "name": "Ramy Rabia", "club": "Al Ain" },
+        { "name": "Yasser Ibrahim", "club": "Al Ahly" },
+        { "name": "Hossam Abdelmaguid", "club": "Zamalek" },
+        { "name": "Mohamed Abdelmonem", "club": "Nice" },
+        { "name": "Ahmed Fatouh", "club": "Zamalek" },
+        { "name": "Karim Hafez", "club": "Pyramids" }
+      ],
+      "Midfielders": [
+        { "name": "Marwan Attia", "club": "Al Ahly" },
+        { "name": "Mohanad Lasheen", "club": "Pyramids" },
+        { "name": "Nabil Emad", "club": "Al Najma" },
+        { "name": "Mahmoud Saber", "club": "Zed" },
+        { "name": "Ahmed Zizo", "club": "Al Ahly" },
+        { "name": "Emam Ashour", "club": "Al Ahly" },
+        { "name": "Mostafa Ziko", "club": "Pyramids" },
+        { "name": "Mahmoud Trezeguet", "club": "Al Ahly" },
+        { "name": "Ibrahim Adel", "club": "Nordsjaelland" },
+        { "name": "Haissem Hassan", "club": "Real Oviedo" }
+      ],
+      "Forwards": [
+        { "name": "Omar Marmoush", "club": "Manchester City" },
+        { "name": "Mohamed Salah", "club": "Liverpool" },
+        { "name": "Hamza Abdelkarim", "club": "Barcelona B" }
+      ]
+    }
+  },
+  "iran": {
+    "name": "Iran",
+    "group": "G",
+    "announced": "June 1",
+    "manager": "Amir Ghalenoei",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Alireza Beiranvand", "club": "Tractor" },
+        { "name": "Hossein Hosseini", "club": "Sepahan" },
+        { "name": "Payam Niazmand", "club": "Persepolis" }
+      ],
+      "Defenders": [
+        { "name": "Danial Eiri", "club": "Malavan" },
+        { "name": "Ehsan Hajsafi", "club": "Sepahan" },
+        { "name": "Saleh Hardani", "club": "Esteghlal" },
+        { "name": "Hossein Kanaani", "club": "Persepolis" },
+        { "name": "Shoka Khalilzadeh", "club": "Tractor" },
+        { "name": "Milad Mohammadi", "club": "Persepolis" },
+        { "name": "Ali Nemati", "club": "Foolad" },
+        { "name": "Omid Noorafkan", "club": "Foolad" },
+        { "name": "Ramin Rezaeian", "club": "Foolad" }
+      ],
+      "Midfielders": [
+        { "name": "Rouzbeh Cheshmi", "club": "Esteghlal" },
+        { "name": "Saeid Ezatolahi", "club": "Shabab Al-Ahli" },
+        { "name": "Mehdi Ghaedi", "club": "Al-Nasr" },
+        { "name": "Saman Ghoddos", "club": "Kalba" },
+        { "name": "Mohammad Ghorbani", "club": "Al-Wahda" },
+        { "name": "Alireza Jahanbakhsh", "club": "Dender" },
+        { "name": "Mohammad Mohebi", "club": "Rostov" },
+        { "name": "Amir Mohammad Razzaghinia", "club": "Esteghlal" },
+        { "name": "Mehdi Torabi", "club": "Tractor" },
+        { "name": "Aria Yousefi", "club": "Sepahan" }
+      ],
+      "Forwards": [
+        { "name": "Ali Alipour", "club": "Persepolis" },
+        { "name": "Dennis Dargahi", "club": "Standard Liege" },
+        { "name": "Amirhossein Hosseinzadeh", "club": "Tractor" },
+        { "name": "Amirhossein Mahmoudi", "club": "Persepolis" },
+        { "name": "Mehdi Taremi", "club": "Olympiacos" }
+      ]
+    }
+  },
+  "new-zealand": {
+    "name": "New Zealand",
+    "group": "G",
+    "announced": "May 14",
+    "manager": "Darren Bazeley",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Max Crocombe", "club": "Millwall" },
+        { "name": "Alex Paulsen", "club": "Lechia Gdańsk" },
+        { "name": "Michael Woud", "club": "Auckland FC" }
+      ],
+      "Defenders": [
+        { "name": "Tim Payne", "club": "Wellington Phoenix" },
+        { "name": "Francis De Vries", "club": "Auckland FC" },
+        { "name": "Tyler Bindon", "club": "Nottingham Forest" },
+        { "name": "Michael Boxall", "club": "Minnesota United" },
+        { "name": "Liberato Cacace", "club": "Wrexham" },
+        { "name": "Nando Pijnaker", "club": "Auckland FC" },
+        { "name": "Finn Surman", "club": "Portland Timbers" },
+        { "name": "Callan Elliot", "club": "Auckland FC" },
+        { "name": "Tommy Smith", "club": "Braintree Town" }
+      ],
+      "Midfielders": [
+        { "name": "Joe Bell", "club": "Viking FK" },
+        { "name": "Matt Garbett", "club": "Peterborough United" },
+        { "name": "Marko Stamenic", "club": "Swansea City" },
+        { "name": "Sarpreet Singh", "club": "Wellington Phoenix" },
+        { "name": "Alex Rufer", "club": "Wellington Phoenix" },
+        { "name": "Ryan Thomas", "club": "PEC Zwolle" }
+      ],
+      "Forwards": [
+        { "name": "Chris Wood", "club": "Nottingham Forest" },
+        { "name": "Eli Just", "club": "Motherwell" },
+        { "name": "Kosta Barbarouses", "club": "Western Sydney Wanderers" },
+        { "name": "Ben Waine", "club": "Port Vale" },
+        { "name": "Ben Old", "club": "Saint-Étienne" },
+        { "name": "Callum McCowatt", "club": "Silkeborg IF" },
+        { "name": "Jesse Randall", "club": "Auckland FC" },
+        { "name": "Lachlan Bayliss", "club": "Newcastle Jets" }
+      ]
+    }
+  }
+}

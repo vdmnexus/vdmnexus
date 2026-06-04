@@ -6,7 +6,8 @@ name: Football data ingest
 #      (football_matches + wc_standings). Scores fill in ~daily, so this
 #      keeps results and the group table current through the tournament.
 #   2. Regenerate the model's web predictions from the same feed and commit
-#      them back, so /wc26 adapts as results land:
+#      them back to the canonical agents/polymarket/exports/ dir, consumed by
+#      both /wc26 and wc.vdmnexus.com, so both adapt as results land:
 #        * scores.json      — per-fixture exact-scoreline sheet
 #        * tournament.json  — champion + advancement board (played group
 #                             games are pinned, not re-simulated)
@@ -63,7 +64,7 @@ jobs:
         run: |
           git config user.name  "nexus-bot"
           git config user.email "bot@vdmnexus.com"
-          git add apps/web/app/wc26/scores.json apps/web/app/wc26/tournament.json
+          git add agents/polymarket/exports/scores.json agents/polymarket/exports/tournament.json
           if git diff --cached --quiet; then
             echo "no prediction changes"
           else

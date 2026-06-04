@@ -20,7 +20,9 @@ or once new results are in:
 
     python3 -m polymarket_agent.export_tournament [n_sims]
 
-Writes to apps/web/app/wc26/tournament.json (path derived from this file).
+Writes to agents/polymarket/exports/tournament.json (path derived from this
+file). This is the canonical snapshot consumed by both the marketing /wc26
+route and the dedicated apps/wc (wc.vdmnexus.com) app.
 """
 
 from __future__ import annotations
@@ -38,7 +40,7 @@ from .sim import (
     played_group_results, run_detail,
 )
 
-OUT_PATH = Path(__file__).resolve().parents[3] / "apps/web/app/wc26/tournament.json"
+OUT_PATH = Path(__file__).resolve().parents[1] / "exports/tournament.json"
 N_SIMS = 20000
 _PCT_KEYS = ("win_group", "adv", "r16", "qf", "sf", "final", "champ")
 

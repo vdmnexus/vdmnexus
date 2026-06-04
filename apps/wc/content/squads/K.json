@@ -1,0 +1,172 @@
+{
+  "portugal": {
+    "name": "Portugal",
+    "group": "K",
+    "announced": "May 19",
+    "manager": "Roberto Martinez",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Diogo Costa", "club": "Porto" },
+        { "name": "José Sá", "club": "Wolverhampton Wanderers" },
+        { "name": "Rui Silva", "club": "Sporting Lisbon" },
+        { "name": "Ricardo Velho", "club": "Gençlerbirliği" }
+      ],
+      "Defenders": [
+        { "name": "Rúben Dias", "club": "Manchester City" },
+        { "name": "João Cancelo", "club": "Barcelona" },
+        { "name": "Diogo Dalot", "club": "Manchester United" },
+        { "name": "Nuno Mendes", "club": "Paris Saint-Germain" },
+        { "name": "Nélson Semedo", "club": "Fenerbahce" },
+        { "name": "Matheus Nunes", "club": "Manchester City" },
+        { "name": "Gonçalo Inacio", "club": "Sporting Lisbon" },
+        { "name": "Renato Veiga", "club": "Villarreal" },
+        { "name": "Tomás Araújo", "club": "Benfica" }
+      ],
+      "Midfielders": [
+        { "name": "Bruno Fernandes", "club": "Manchester United" },
+        { "name": "Bernardo Silva", "club": "Manchester City" },
+        { "name": "Vitinha", "club": "PSG" },
+        { "name": "João Neves", "club": "PSG" },
+        { "name": "Rúben Neves", "club": "Al Hilal" },
+        { "name": "Samú Costa", "club": "Mallorca" }
+      ],
+      "Forwards": [
+        { "name": "Cristiano Ronaldo", "club": "Al Nassr" },
+        { "name": "Rafael Leão", "club": "AC Milan" },
+        { "name": "João Félix", "club": "Al Nassr" },
+        { "name": "Gonçalo Ramos", "club": "PSG" },
+        { "name": "Pedro Neto", "club": "Chelsea" },
+        { "name": "Francisco Conceição", "club": "Juventus" },
+        { "name": "Gonçalo Guedes", "club": "Real Sociedad" },
+        { "name": "Francisco Trincão", "club": "Sporting Lisbon" }
+      ]
+    }
+  },
+  "dr-congo": {
+    "name": "DR Congo",
+    "display": "Congo DR",
+    "group": "K",
+    "announced": "May 18",
+    "manager": "Sebastien Desabre",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Lionel Mpasi", "club": "Le Havre" },
+        { "name": "Timothy Fayulu", "club": "FC Noah" },
+        { "name": "Matthieu Epolo", "club": "Standard Liege" }
+      ],
+      "Defenders": [
+        { "name": "Chancel Mbemba", "club": "Lille" },
+        { "name": "Axel Tuanzebe", "club": "Burnley" },
+        { "name": "Arthur Masuaku", "club": "Lens" },
+        { "name": "Gedeon Kalulu", "club": "Aris Limassol" },
+        { "name": "Joris Kayembe", "club": "Genk" },
+        { "name": "Aaron Wan-Bissaka", "club": "West Ham United" },
+        { "name": "Aaron Tshibola", "club": "Kilmarnock" },
+        { "name": "Steve Kapuadi", "club": "Widzew Łódź" },
+        { "name": "Dylan Batubinsika", "club": "AEL" }
+      ],
+      "Midfielders": [
+        { "name": "Noah Sadiki", "club": "Sunderland" },
+        { "name": "Charles Pickel", "club": "Espanyol" },
+        { "name": "Edo Kayembe", "club": "Watford" },
+        { "name": "Samuel Moutoussamy", "club": "Atromitos" },
+        { "name": "Ngal'ayel Mukau", "club": "Lille" },
+        { "name": "Nathanaël Mbuku", "club": "Montpellier" },
+        { "name": "Meschak Elia", "club": "Alanyaspor" },
+        { "name": "Brian Cipenga", "club": "Castellón" },
+        { "name": "Gaël Kakuta", "club": "AEL" },
+        { "name": "Théo Bongonda", "club": "Spartak Moscow" }
+      ],
+      "Forwards": [
+        { "name": "Simon Banza", "club": "Al Jazira" },
+        { "name": "Yoane Wissa", "club": "Newcastle United" },
+        { "name": "Fiston Mayele", "club": "Pyramids FC" },
+        { "name": "Cédric Bakambu", "club": "Real Betis" }
+      ]
+    }
+  },
+  "colombia": {
+    "name": "Colombia",
+    "group": "K",
+    "announced": "May 25",
+    "manager": "Nestor Lorenzo",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "David Ospina", "club": "Atlético Nacional" },
+        { "name": "Álvaro Montero", "club": "Vélez Sarsfield" },
+        { "name": "Camilo Vargas", "club": "Atlas" }
+      ],
+      "Defenders": [
+        { "name": "Daniel Muñoz", "club": "Crystal Palace" },
+        { "name": "Jhon Lucumí", "club": "Bologna" },
+        { "name": "Santiago Arias", "club": "Independiente" },
+        { "name": "Davinson Sánchez", "club": "Galatasaray" },
+        { "name": "Johan Mojica", "club": "Mallorca" },
+        { "name": "Yerry Mina", "club": "Cagliari" },
+        { "name": "Willer Ditta", "club": "Cruz Azul" },
+        { "name": "Deiver Machado", "club": "Nantes" }
+      ],
+      "Midfielders": [
+        { "name": "Jorge Carrascal", "club": "Flamengo" },
+        { "name": "Kevin Castaño", "club": "River Plate" },
+        { "name": "Gustavo Puerta", "club": "Racing Santander" },
+        { "name": "Juan Fernando Quintero", "club": "River Plate" },
+        { "name": "Juan Portilla", "club": "Athletico Paranaense" },
+        { "name": "Jefferson Lerma", "club": "Crystal Palace" },
+        { "name": "Richard Ríos", "club": "Benfica" },
+        { "name": "Jhon Arias", "club": "Palmeiras" },
+        { "name": "James Rodríguez", "club": "Minnesota United" },
+        { "name": "Jaminton Campaz", "club": "Rosario Central" }
+      ],
+      "Forwards": [
+        { "name": "Luis Díaz", "club": "Bayern Munich" },
+        { "name": "Jhon Córdoba", "club": "Krasnodar" },
+        { "name": "Luis Suárez", "club": "Sporting CP" },
+        { "name": "Andrés Gómez", "club": "Vasco da Gama" },
+        { "name": "Cucho Hernández", "club": "Real Betis" }
+      ]
+    }
+  },
+  "uzbekistan": {
+    "name": "Uzbekistan",
+    "group": "K",
+    "announced": "May 5",
+    "manager": "Fabio Cannavaro",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Utkir Yusupov", "club": "Navbahor" },
+        { "name": "Botirali Ergashev", "club": "AGMK" },
+        { "name": "Abduvokhid Nematov", "club": "Nasaf" }
+      ],
+      "Defenders": [
+        { "name": "Avazbek Ulmasaliev", "club": "AGMK" },
+        { "name": "Jakhongir Urozov", "club": "Dinamo Samarqand" },
+        { "name": "Rustamjon Ashurmatov", "club": "Esteghlal" },
+        { "name": "Umarbek Eshmurodov", "club": "Nasaf" },
+        { "name": "Abdukodir Khusanov", "club": "Manchester City" },
+        { "name": "Abdulla Abdullaev", "club": "Dibba Al Fujairah" },
+        { "name": "Farrukh Sayfiev", "club": "Neftchi" },
+        { "name": "Khojiakbar Alijonov", "club": "Pakhtakor" },
+        { "name": "Sherzod Nasrullaev", "club": "Nasaf" },
+        { "name": "Behruz Karimov", "club": "Surkhon" }
+      ],
+      "Midfielders": [
+        { "name": "Sherzod Esanov", "club": "Buxoro" },
+        { "name": "Umarali Rakhmonaliev", "club": "Sabah" },
+        { "name": "Akmal Mozgovoy", "club": "Pakhtakor" },
+        { "name": "Otabek Shukurov", "club": "Baniyas" },
+        { "name": "Jamshid Iskanderov", "club": "Neftchi" },
+        { "name": "Azizjon Ganiev", "club": "Al Bataeh" },
+        { "name": "Abbosbek Fayzullaev", "club": "Istanbul Basaksehir" },
+        { "name": "Jaloliddin Masharipov", "club": "Esteghlal" },
+        { "name": "Dostonbek Khamdamov", "club": "Pakhtakor" },
+        { "name": "Oston Urunov", "club": "Persepolis" }
+      ],
+      "Forwards": [
+        { "name": "Azizbek Amonov", "club": "Buxoro" },
+        { "name": "Igor Sergeev", "club": "Persepolis" },
+        { "name": "Eldor Shomurodov", "club": "Istanbul Basaksehir" }
+      ]
+    }
+  }
+}
