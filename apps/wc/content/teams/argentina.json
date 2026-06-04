@@ -1,0 +1,26 @@
+{
+  "summary": "Reigning world champions and the model's clear favourite (champ 24.9% vs a 9% market). A settled, tournament-hardened core under Lionel Scaloni built around the best player of his generation.",
+  "style": "Flexible 4-3-3 / 4-4-2, comfortable controlling games through midfield but lethal in transition; compact mid-block out of possession.",
+  "counterReliance": { "tier": "medium", "note": "Mid-block into counter — finds Messi & Álvarez vertically and fast" },
+  "strengths": [
+    "Elite tournament experience and a winning spine that has been together since 2021",
+    "Midfield control with De Paul / Mac Allister / Fernández dictating tempo",
+    "Match-winners in the final third who decide tight knockout games"
+  ],
+  "weaknesses": [
+    "Ageing in key areas — fitness over a seven-game run is a question",
+    "Full-back depth thinner than the rest of the squad"
+  ],
+  "keyPlayers": [
+    { "name": "Lionel Messi", "role": "Free 10 / right forward", "note": "The model's single biggest swing factor — creation and finishing in one player" },
+    { "name": "Alexis Mac Allister", "role": "Left 8", "note": "Two-way engine linking defence to attack" },
+    { "name": "Emiliano Martínez", "role": "Goalkeeper", "note": "Shootout edge in the knockouts" }
+  ],
+  "tactics": "Happy to let lesser sides have the ball and strike on the counter, but can also patiently break down a low block through Messi drifting into pockets. Set-piece threat from a tall back line. The plan rarely changes; the personnel adapt to the opponent.",
+  "mismatch": "Vulnerable to high-energy pressing sides that deny the midfield time; dominant against teams that try to play open, end-to-end football.",
+  "xFactor": "Messi's fitness and minutes management across a 39-day tournament.",
+  "notes": [
+    "Edit or delete this file freely — it is here as a worked example of the knowledge-base schema (see _template.json)."
+  ],
+  "updated": "2026-06-04"
+}

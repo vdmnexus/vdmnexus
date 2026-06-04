@@ -2,8 +2,9 @@ import Link from "next/link";
 
 const links = [
   { href: "/#board", label: "Odds" },
+  { href: "/schedule", label: "Schedule" },
+  { href: "/simulation", label: "Sim" },
   { href: "/#standings", label: "Standings" },
-  { href: "/#scores", label: "Scores" },
   { href: "/methodology", label: "Method" },
 ];
 

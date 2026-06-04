@@ -1,0 +1,27 @@
+{
+  "summary": "An unpredictable transition side in a 4-2-3-1 / 4-3-3 — they won't overplay and can leak goals, but the quick breaks are dangerous.",
+  "style": "4-2-3-1 / 4-3-3 — wingers 1v1, fullbacks & CMs making underlapping runs, quick transition attacks; won't overplay.",
+  "counterReliance": {
+    "tier": "high",
+    "note": "Quick transition attacks, won't overplay"
+  },
+  "strengths": [
+    "Quick, direct transition attacks",
+    "Wingers in 1v1s with underlapping runners from fullback & midfield"
+  ],
+  "weaknesses": [
+    "Capable of \"leaking\" goals"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Don Deedson Louicius",
+      "role": "RW",
+      "note": "Pacey, direct dribbler — 4 goals in qualifying, 11 chances created"
+    }
+  ],
+  "tactics": "Keep it simple and break quickly, with wingers isolating defenders and runners underlapping. They won't overplay, but the defensive lapses make them volatile — and unpredictable.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}

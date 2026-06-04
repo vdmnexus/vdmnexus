@@ -1,0 +1,29 @@
+{
+  "summary": "A possession-dominant 4-3-3 (75.8%) with purpose and vertical thrust, but with frailties at the back if the structure is breached.",
+  "style": "4-3-3 — possession with purpose and vertical play, wingers & fullbacks making deep runs behind, lots of 1v1s and crosses into a double-occupied half-space.",
+  "counterReliance": {
+    "tier": "low",
+    "note": "Possession-dominant, builds the game on the ball"
+  },
+  "strengths": [
+    "Dominant possession (75.8%) used with purpose and verticality",
+    "Runners in behind from wingers and fullbacks",
+    "Goal-poacher up top to finish the chances created"
+  ],
+  "weaknesses": [
+    "3rd most big chances missed",
+    "Defensive frailties at times if the rest-defence is played through"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Hyun-Gyu Oh",
+      "role": "CF",
+      "note": "Proper goal-poacher, great in the air, 23 goal involvements this season"
+    }
+  ],
+  "tactics": "Control the ball and attack vertically, with wide players and fullbacks running beyond. The rest-defence structure is important — teams that get past it can find space. Group A looks exceptionally tight.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}

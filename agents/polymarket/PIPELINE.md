@@ -68,9 +68,11 @@ A third, practical filter governs the *automated* pipeline:
 | Squad talent (pool) β +0.016 | `exp_talent` | **LIVE** | ✅ "France blind spot" |
 | Travel fatigue (km) β −0.07 | `exp_travel` | **LIVE** | within-tournament |
 | Altitude | `exp_altitude` | DROPPED | failed gate |
+| Heat (both mechanisms) | `exp_heat` | DROPPED | failed gate — differential −0.7 pts RPS; symmetric ~0.0 and wrong-signed |
 | Rest / congestion | `exp_rest` | DROPPED | priced in by decay |
 | Form / momentum | `exp_form` | DROPPED | priced in by decay |
 | East-west travel | `exp_travel_ew` | PENDING (un-run) | refinement of travel |
+| Base-camp travel | `exp_travel` + `refdata/base_camps_*.csv` | PENDING (data) | refinement of travel |
 | **Roster talent** | *(planned)* | **COMMITTED — build** | ✅ sharpens talent |
 | **Coach quality** | *(planned)* | **COMMITTED — build** | weak prior |
 | **Injuries / availability** | *(planned)* | **COMMITTED — build** | ✅ but data is hard |
@@ -89,8 +91,55 @@ A third, practical filter governs the *automated* pipeline:
    feeding a talent adjustment. Highest ceiling, hardest data. Must clear the
    gate or it doesn't ship.
 
+## Future / speculative (not gateable today)
+
+Two heat ideas survive the literature but **cannot be gated now** — neither has
+point-in-time data on hand. Logged so they aren't re-litigated; both are
+DROP-by-default until someone builds the data. Heat as a *symmetric* or
+*differential-acclimatization* effect is already settled DROP (`exp_heat`, both
+mechanisms; see registry). These two are different mechanisms:
+
+- **Heat × counterattack-reliance** — the heat literature is consistent that
+  weather suppresses *physical* output (sprints, high-intensity running) while
+  *technical/outcome* output is paced to stay flat (Illmer & Daumann 2022, 21
+  studies; Zhong et al. 2024). The one channel that could break symmetry: heat
+  blunts the high-intensity transition runs that fuel counterattacks, so it
+  should hurt *counterattack-reliant* teams more than possession teams. That's a
+  per-team interaction, not a venue main-effect — so it needs a per-team
+  counterattack-reliance rating (candidate home: the `style`/`tactics` fields in
+  `apps/wc/content/teams/*.json`) snapshotted point-in-time for 2018/2022. No
+  such historical style rating exists yet → not gateable. If built: A/B
+  `beta * heat_stress * (cattack_away − cattack_home)` on 2018+2022 RPS, promote
+  only if it wins. A **2026-only** rating now exists at
+  `refdata/counter_reliance_2026.csv` (high/medium/low per team, from the
+  jwalker_2026 scouting doc; mirrored display-side in the `counterReliance` field
+  of `apps/wc/content/teams/*.json`). It is **ingest-only / ungated**: 2026 has no
+  results to score and the file is not point-in-time, so it is **not read by
+  `sim.py`** and must not be wired in until the 2018/2022 historical ratings exist
+  and the A/B above is won. It can feed the *live* engine only.
+- **Base-camp climate acclimatization** — distinct from base-camp *travel*
+  (above). Illmer & Daumann note (via Buchheit 2011) that pre-cup training camps
+  can acclimatize squads to match-venue heat, and Brocherie 2015 found acclimated
+  (Gulf) teams gain an outcome edge over non-acclimated opponents in heat. The
+  gateable version is a differential "camp-climate vs venue-climate match" term —
+  but it needs point-in-time camp *climate* for 2018/2022 (we only have 2026 camp
+  *locations*), so it can't be scored today. Note: this is the acclimatization
+  cousin of the differential-heat term `exp_heat` already DROPPED on raw
+  home-climate; the new angle is camp climate, not home climate.
+
 Not committed: **east-west travel** stays a pending un-run experiment
-(`exp_travel_ew`) — one run settles KEEP/DROP. **Fotmob** is designed out: it
+(`exp_travel_ew`) — one run settles KEEP/DROP. **Base-camp travel** is a
+pending *data* task: `exp_travel.compute_travel` already accepts an optional
+`base_camps={team:(lat,lon)}` to count the camp→opening-venue first leg (None
+reproduces the venue-to-venue baseline exactly). Templates live at
+`refdata/base_camps_{2018,2022,2026}.csv` (team names pre-filled).
+**2026 is filled** (announced FIFA training-site list, geocoded to facility
+city) — but 2026 has no results to score, so it can only feed the *live*
+engine, not the gate. The gate scores held-out **2018+2022** RPS, so those two
+files (still lat/lon-blank) must be filled to settle KEEP/DROP. Once they are:
+A/B base-camp vs venue-to-venue on 2018+2022, and promote into `sim.py` only
+if it wins. Don't wire it live until that gate passes. **Fotmob** is designed
+out: it
 can't be point-in-time'd, is redundant with the Dixon-Coles attack/defence
 parameters, and is token-gated so it can't be pipelined.
 

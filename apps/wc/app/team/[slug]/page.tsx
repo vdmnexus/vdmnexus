@@ -11,6 +11,7 @@ import {
   positionOrder,
   squadSize,
   teamBySlug,
+  teamKnowledge,
 } from "@/lib/teams";
 import { Bar } from "@/components/bar";
 
@@ -56,6 +57,7 @@ export default async function TeamPage({
   const name = team.display ?? team.name;
   const row = boardRowBySlug(slug);
   const fixtures = fixturesForTeam(team.name);
+  const kb = teamKnowledge(slug);
 
   return (
     <main className="mx-auto max-w-3xl px-5 py-12 sm:py-16">
@@ -130,6 +132,169 @@ export default async function TeamPage({
               .
             </p>
           )}
+        </section>
+      )}
+
+      {kb && (
+        <section className="mt-6 rounded-xl border border-border bg-surface p-6">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Scouting report
+            </h2>
+            {kb.updated && (
+              <span className="text-[11px] tabular-nums text-slate-600">
+                updated {kb.updated}
+              </span>
+            )}
+          </div>
+
+          {kb.summary && (
+            <p className="mt-3 text-sm leading-relaxed text-slate-300">
+              {kb.summary}
+            </p>
+          )}
+
+          {kb.style && (
+            <p className="mt-3 text-[13px] text-slate-400">
+              <span className="text-slate-500">Style · </span>
+              {kb.style}
+            </p>
+          )}
+
+          {kb.counterReliance && (
+            <div className="mt-3 flex items-center gap-2 text-[13px] text-slate-400">
+              <span className="text-slate-500">Counter-reliance ·</span>
+              <span
+                title="Display-only 2026 scouting tag, not a model input"
+                className={`inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide ${
+                  kb.counterReliance.tier === "high"
+                    ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
+                    : kb.counterReliance.tier === "medium"
+                      ? "border-amber-500/25 bg-amber-500/10 text-amber-300/90"
+                      : "border-slate-500/25 bg-slate-500/10 text-slate-300/90"
+                }`}
+              >
+                {kb.counterReliance.tier}
+              </span>
+              {kb.counterReliance.note && (
+                <span className="text-slate-500">{kb.counterReliance.note}</span>
+              )}
+            </div>
+          )}
+
+          {(kb.strengths?.length || kb.weaknesses?.length) && (
+            <div className="mt-5 grid gap-5 sm:grid-cols-2">
+              {kb.strengths?.length ? (
+                <div>
+                  <h3 className="text-[11px] font-semibold uppercase tracking-widest text-emerald-400/80">
+                    Strengths
+                  </h3>
+                  <ul className="mt-2 space-y-1.5 text-sm text-slate-300">
+                    {kb.strengths.map((s) => (
+                      <li key={s} className="flex gap-2">
+                        <span className="text-emerald-500/70">+</span>
+                        <span>{s}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {kb.weaknesses?.length ? (
+                <div>
+                  <h3 className="text-[11px] font-semibold uppercase tracking-widest text-rose-400/80">
+                    Weaknesses
+                  </h3>
+                  <ul className="mt-2 space-y-1.5 text-sm text-slate-300">
+                    {kb.weaknesses.map((s) => (
+                      <li key={s} className="flex gap-2">
+                        <span className="text-rose-500/70">−</span>
+                        <span>{s}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+          )}
+
+          {kb.keyPlayers?.length ? (
+            <div className="mt-5">
+              <h3 className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+                Key players
+              </h3>
+              <ul className="mt-2 space-y-2">
+                {kb.keyPlayers.map((p) => (
+                  <li key={p.name} className="text-sm">
+                    <span className="font-semibold text-slate-100">
+                      {p.name}
+                    </span>
+                    {p.role && (
+                      <span className="text-slate-500"> · {p.role}</span>
+                    )}
+                    {p.note && (
+                      <span className="block text-[13px] text-slate-400">
+                        {p.note}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {(kb.tactics || kb.mismatch || kb.xFactor) && (
+            <dl className="mt-5 space-y-3">
+              {kb.tactics && (
+                <div>
+                  <dt className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+                    Tactics
+                  </dt>
+                  <dd className="mt-1 text-sm leading-relaxed text-slate-300">
+                    {kb.tactics}
+                  </dd>
+                </div>
+              )}
+              {kb.mismatch && (
+                <div>
+                  <dt className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+                    Tactical mismatch
+                  </dt>
+                  <dd className="mt-1 text-sm leading-relaxed text-slate-300">
+                    {kb.mismatch}
+                  </dd>
+                </div>
+              )}
+              {kb.xFactor && (
+                <div>
+                  <dt className="text-[11px] font-semibold uppercase tracking-widest text-amber-400/80">
+                    X-factor
+                  </dt>
+                  <dd className="mt-1 text-sm leading-relaxed text-slate-300">
+                    {kb.xFactor}
+                  </dd>
+                </div>
+              )}
+            </dl>
+          )}
+
+          {kb.notes?.length ? (
+            <div className="mt-5">
+              <h3 className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+                Notes
+              </h3>
+              <ul className="mt-2 list-disc space-y-1 pl-4 text-[13px] text-slate-400">
+                {kb.notes.map((n) => (
+                  <li key={n}>{n}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {kb.sources?.length ? (
+            <p className="mt-5 text-[11px] text-slate-600">
+              Sources: {kb.sources.join(" · ")}
+            </p>
+          ) : null}
         </section>
       )}
 

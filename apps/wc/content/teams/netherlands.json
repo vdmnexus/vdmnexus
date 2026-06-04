@@ -1,0 +1,28 @@
+{
+  "summary": "A well-rounded 4-3-3 with everything required to go far — though counter-press positioning and transitions are a concern.",
+  "style": "4-3-3 — winger 1v1, overlapping fullbacks, flood the box.",
+  "counterReliance": {
+    "tier": "low",
+    "note": "Possession side — floods the box, not a counter team"
+  },
+  "strengths": [
+    "1v1 wingers and overlapping fullbacks",
+    "Flood the box with numbers",
+    "Bits of everything needed for a deep run"
+  ],
+  "weaknesses": [
+    "Counter-press positioning and transition concerns"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Cody Gakpo",
+      "role": "LW",
+      "note": "Goalscoring from range, 1v1 to create & assist, strong work-ethic back"
+    }
+  ],
+  "tactics": "Get the wingers 1v1, overlap the fullbacks and flood the box. The squad has everything — the watch-out is exposure in transition.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}

@@ -1,0 +1,28 @@
+{
+  "summary": "Marcelo Bielsa's Uruguay — aggressive, exciting and chaotic in a 4-3-3, with counter-press goals but a risky rest-defence that concedes late. Bring it on.",
+  "style": "4-3-3 under Bielsa — attacking wide & crosses into the box, aggressive build, third-man & combination play, counter-press & counter-attacking goals.",
+  "counterReliance": {
+    "tier": "medium",
+    "note": "Counter-press & counter-attack goals, but aggressive build-first"
+  },
+  "strengths": [
+    "Aggressive build and third-man combination play",
+    "Counter-press and counter-attacking goals",
+    "Wide attacking play and crossing"
+  ],
+  "weaknesses": [
+    "Risky rest-defence — open to transition goals and conceding late critical goals"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Maxi Araújo",
+      "role": "Winger",
+      "note": "9 goal contributions for Sporting, creative with end product (30 chances created), 4 assists in qualifying"
+    }
+  ],
+  "tactics": "Classic Bielsa — aggressive, combinative and relentless, winning it back high and breaking fast, at the cost of an open rest-defence. Always among the most exciting, if not always the winners.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}

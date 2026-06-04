@@ -92,6 +92,27 @@ export function fixturesForTeam(team: string): FixtureRef[] {
   );
 }
 
+// --- schedule (group stage by matchday) ------------------------------------
+// Each group lists its 6 fixtures in schedule order, so index 0–1 = matchday 1,
+// 2–3 = matchday 2, 4–5 = matchday 3 (every team plays once per matchday).
+// scores.json carries no calendar date, so we key on matchday, not a date.
+
+export type Matchday = { matchday: number; fixtures: FixtureRef[] };
+
+export function scheduleByMatchday(): Matchday[] {
+  const buckets: Record<number, FixtureRef[]> = { 1: [], 2: [], 3: [] };
+  for (const g of scores.groups) {
+    g.fixtures.forEach((fixture, index) => {
+      const md = Math.floor(index / 2) + 1;
+      buckets[md].push({ id: matchId(g.group, index), group: g.group, index, fixture });
+    });
+  }
+  return [1, 2, 3].map((matchday) => ({
+    matchday,
+    fixtures: buckets[matchday].sort((a, b) => a.group.localeCompare(b.group)),
+  }));
+}
+
 // --- board lookups ---------------------------------------------------------
 
 export function boardRow(team: string): TeamRow | undefined {

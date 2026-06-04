@@ -1,0 +1,28 @@
+{
+  "summary": "A hybrid 4-4-2 / 4-2-3-1 built on wide combinations and pace in behind, pressing and countering — but exploitable in wide defensive areas.",
+  "style": "4-4-2 / 4-2-3-1 hybrid — wide combination play, crosses into the box, exploit pace in behind, press & counter.",
+  "counterReliance": {
+    "tier": "medium",
+    "note": "Press & counter, exploit pace in behind"
+  },
+  "strengths": [
+    "Wide combination play and crossing",
+    "Pace in behind to exploit",
+    "Press and counter"
+  ],
+  "weaknesses": [
+    "Could be exploited defensively in wide areas"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Iliman Ndiaye",
+      "role": "Winger",
+      "note": "Goals, creativity and assists — pace, dribbling and an excellent crosser"
+    }
+  ],
+  "tactics": "Combine wide, cross into the box, and break with pace in behind while pressing aggressively. Could be a very exciting WC if they sort the wide defending.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}

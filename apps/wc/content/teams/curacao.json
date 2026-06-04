@@ -1,0 +1,27 @@
+{
+  "summary": "Dick Advocaat's side counter-attack with pace up top, built around the Bacuna brothers — but the rest-defence is open.",
+  "style": "4-4-3 / 4-2-3-1 — counter-attacking with pace up top, combinations with wingers & fullbacks; sit behind the ball but keep the CF high.",
+  "counterReliance": {
+    "tier": "high",
+    "note": "Counter-attacking with pace up top"
+  },
+  "strengths": [
+    "Counter-attacking pace with the CF held high as an outlet",
+    "Wide combinations with the Bacuna brothers central"
+  ],
+  "weaknesses": [
+    "Rest-defence quite \"open\""
+  ],
+  "keyPlayers": [
+    {
+      "name": "Juninho Bacuna",
+      "role": "CAM",
+      "note": "Creative midfielder (23 chances created in qualifying), drives well with the ball (67% dribbling), 5 goal involvements — the difference-maker in tight games vs Ecuador & Ivory Coast"
+    }
+  ],
+  "tactics": "Sit behind the ball, keep the striker high, and break with pace through the Bacuna brothers. The open rest-defence is the obvious risk.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}

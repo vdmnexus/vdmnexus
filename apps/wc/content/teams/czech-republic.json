@@ -1,0 +1,28 @@
+{
+  "summary": "Wing-back-driven 3-4-3 / 3-4-2-1 that crosses relentlessly (3rd highest in Europe) and is utterly lethal from set-plays.",
+  "style": "3-4-3 / 3-4-2-1 — wing-backs high & wide, wingers coming inside as '10s', huge crossing volume.",
+  "counterReliance": {
+    "tier": "low",
+    "note": "Crossing- and set-piece-led, not a transition side"
+  },
+  "strengths": [
+    "Set-play kings — 48% of qualifying goals from corners/indirect FKs",
+    "3 of 4 vital play-off goals came from corners",
+    "Elite crossing volume (3rd highest in Europe)"
+  ],
+  "weaknesses": [
+    "3rd most big chances missed"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Pavel Šulc",
+      "role": "LW",
+      "note": "Pacey, direct dribbler with creativity & end product — 14 goal involvements this season"
+    }
+  ],
+  "tactics": "Wing-backs provide the width while wingers drift inside as second strikers; the crossing volume is enormous. Defend a set-piece against them at your peril.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}

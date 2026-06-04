@@ -1,0 +1,29 @@
+{
+  "summary": "A defensively excellent side (0 goals conceded in their qualifying mid-block reference) that builds in a back-3 and attacks with numbers, but is open to transitions.",
+  "style": "4-3-3 / 4-1-4-1 / 4-2-3-1 variations — build in a back-3 (dropping a CM), push fullbacks high & wide, wingers and 10s close to the CF, crosses and numbers into the box; drop into a mid-block.",
+  "counterReliance": {
+    "tier": "medium",
+    "note": "Mid-block first, attacks with numbers; open to transition"
+  },
+  "strengths": [
+    "Excellent mid-block (0 goals conceded reference)",
+    "Attack the box with numbers and crosses",
+    "Flexible build through a back-3"
+  ],
+  "weaknesses": [
+    "Open to transition attacks",
+    "Can be opened up at times even without conceding"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Hannibal Mejbri",
+      "role": "CAM",
+      "note": "Creative dribbler in midfield — 19 chances created in a 'poor' Burnley side, 5 goal contributions"
+    }
+  ],
+  "tactics": "Build via a back-3, get fullbacks high, and load the box with crosses and runners, before dropping into a stingy mid-block. The concern is how easily they can be opened in transition.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}

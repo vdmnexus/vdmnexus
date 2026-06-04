@@ -1,0 +1,28 @@
+{
+  "summary": "A varied, fluid 4-2-3-1 (sometimes 4-4-2, 4-2-4 or 4-2-2-2) with wide play, fluid rotations and a man-for-man, high-risk approach at the back.",
+  "style": "Fluid 4-2-3-1 (also 4-4-2 / 4-2-4 / 4-2-2-2) — wide play & crosses, fluid rotations (FB inverted, wingers wide), front-four central combining with fullbacks wide.",
+  "counterReliance": {
+    "tier": "low",
+    "note": "Possession & rotation, counter-press first"
+  },
+  "strengths": [
+    "Fluid attacking rotations and wide play",
+    "Front-four combinations with fullbacks providing width",
+    "Counter-pressing rest-defence"
+  ],
+  "weaknesses": [
+    "Man-for-man, risk-vs-reward at the back"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Christoph Baumgartner",
+      "role": "CAM",
+      "note": "21 goal involvements in the Bundesliga, 37 chances created, 19 goal involvements in 31 Austria appearances"
+    }
+  ],
+  "tactics": "Rotate fluidly, get fullbacks wide and combine centrally with the front four, pressing to win it back. The man-for-man defending is high-reward but high-risk.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}

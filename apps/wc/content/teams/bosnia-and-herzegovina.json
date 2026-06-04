@@ -1,0 +1,28 @@
+{
+  "summary": "An old-school, transition-first 4-4-2 that prefers direct play and stopping attacks by any means. A team the author has a soft spot for.",
+  "style": "Old-school 4-4-2 — two big centre-forwards, wingers & fullbacks combining to cross, direct & long, transition over possession.",
+  "counterReliance": {
+    "tier": "high",
+    "note": "Transition over possession (29th in avg possession) — direct & long"
+  },
+  "strengths": [
+    "Two big strikers as a direct target",
+    "Wingers & fullbacks combine well to cross",
+    "Stop attacks by fouling — 1st in fouls & yellows"
+  ],
+  "weaknesses": [
+    "Among the lowest possession sides (29th)"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Esmir Bajraktarević",
+      "role": "21yo RW",
+      "note": "Direct dribbler, creative with an eye for goal — created 6 chances & 8 successful dribbles vs Italy"
+    }
+  ],
+  "tactics": "Go direct to the two strikers, combine wide to cross, and break in transition rather than build. They will happily foul to kill momentum. Niko Katić at CB and Sasa Papac on the staff add to the appeal.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}

@@ -1,0 +1,35 @@
+{
+  "summary": "Back at a World Cup at last — likely a 3-5-2 built on wide play, set-piece strength and big-moment goalscorers, defending in a mid-block. Come on Scotland.",
+  "style": "Likely 3-5-2 — lots of wide play & crosses, releasing wing-backs (Robertson/Hickey), underlapping/overlapping from an attacking LCB (Tierney), mid-block then force wide and defend the box.",
+  "counterReliance": {
+    "tier": "medium",
+    "note": "Mid-block, force wide and defend the box"
+  },
+  "strengths": [
+    "Strength from set-plays",
+    "Big-moment goalscorers (McTominay/McGinn)",
+    "Dangerous wing-backs and an overlapping LCB in Tierney"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Ben Doak",
+      "role": "RW",
+      "note": "Pace to burn, fearless two-footed dribbler with an ever-improving final ball — potential breakout star"
+    },
+    {
+      "name": "Scott McTominay",
+      "role": "Midfield",
+      "note": "Big-moment goalscorer"
+    },
+    {
+      "name": "John McGinn",
+      "role": "Midfield",
+      "note": "Big-moment goalscorer"
+    }
+  ],
+  "tactics": "Defend in a mid-block, force play wide and protect the box, then break through wide overloads and crosses with set-plays as a key weapon. Can escape Group C but must be near-perfect, starting against an unpredictable Haiti.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}

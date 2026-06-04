@@ -1,0 +1,25 @@
+{
+  "summary": "A disciplined 3-4-3 with a box-4 midfield that drops into a 5-4-1 — 2nd best defence in AFC qualifying. Will need to be near-perfect in a tough Group D.",
+  "style": "3-4-3 — box-4 midfield (2 CDMs, 2 CAMs), wing-backs going beyond, crosses into the box cut back to the box-4 CMs; drops into a 5-4-1 defensively.",
+  "counterReliance": {
+    "tier": "medium",
+    "note": "Solid block first, breaks via wing-backs"
+  },
+  "strengths": [
+    "2nd best defence in AFC qualifying",
+    "Disciplined 5-4-1 defensive shape",
+    "Wing-backs beyond and crosses cut back to arriving midfielders"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Mohamed Toure",
+      "role": "22yo CF",
+      "note": "Goalscorer (10 in 13 for Norwich at the end of the season), pace to run behind and power to hold up"
+    }
+  ],
+  "tactics": "Defend in a compact 5-4-1, then attack through wing-backs and cutbacks to the box-4 midfielders. Group D is evenly matched — they must be near-perfect throughout.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}

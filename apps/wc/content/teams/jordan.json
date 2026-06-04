@@ -1,0 +1,28 @@
+{
+  "summary": "A direct 3-4-3 / 5-4-1 that finds the front three quickly and defends deep — but with big gaps when the back-5 sits too low. Arab Cup finalists.",
+  "style": "3-4-3 / 5-4-1 — direct play to find the front three, wing-backs overlapping, crosses into the box, quick play behind; drop into a mid/low-block.",
+  "counterReliance": {
+    "tier": "medium",
+    "note": "Direct to the front-3, quick play behind from a deep block"
+  },
+  "strengths": [
+    "Direct supply to the front three with quick play behind",
+    "Overlapping wing-backs and crossing",
+    "Reached the Arab Cup final (narrow loss to Morocco)"
+  ],
+  "weaknesses": [
+    "Big defensive gaps when the back-5 sits too deep"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Mousa Tamari",
+      "role": "RW",
+      "note": "Creativity (34 chances created), pacey dribbler with 'mixed' success, 12 goal involvements in Ligue 1"
+    }
+  ],
+  "tactics": "Go direct to the front three, overlap the wing-backs and play quickly behind, then drop into a deep block. The gaps in a too-deep back-5 are the vulnerability.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}

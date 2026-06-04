@@ -60,6 +60,46 @@ export default function MethodologyPage() {
 
         <section>
           <h2 className="text-base font-semibold text-slate-200">
+            Why not heat?
+          </h2>
+          <p className="mt-2">
+            A 2026 cup across Texas, the Gulf coast and Mexico invites a heat
+            term, so we tested one — twice. A <Term>symmetric</Term> version
+            (hot venue suppresses both teams&rsquo; scoring) and a{" "}
+            <Term>differential-acclimatization</Term> version (teams from hot
+            climates suffer less) were both backtested on the two hottest cups
+            on record, USA &rsquo;94 and Brazil &rsquo;14. Both{" "}
+            <Term>failed the gate</Term>: the symmetric term moved the score by
+            essentially zero and carried the wrong sign, and the differential
+            term lost outright.
+          </p>
+          <p className="mt-3">
+            The sports-science literature explains why. Heat reliably degrades{" "}
+            <Term>physical</Term> output — total distance, sprint count — but
+            players <Term>pace</Term> themselves to keep the things that decide
+            matches (passing accuracy, peak speed, goals) roughly flat. A
+            systematic review of 21 real-match studies finds environmental
+            factors hit physical performance far more than technical
+            performance{" "}
+            <a
+              href="https://doi.org/10.1016/j.jsampl.2022.100002"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-indigo-300 underline-offset-4 hover:underline"
+            >
+              (Illmer &amp; Daumann, 2022)
+            </a>
+; a dedicated weather-and-technical-actions study reaches the same
+            conclusion, noting both teams share identical conditions{" "}
+            <span className="text-slate-300">(Zhong et al., 2024)</span>. Heat
+            changes <em>how</em> a match is played, not <em>who</em>{" "}
+            wins — so it ships as a <Term>display-only</Term> context badge, not
+            a model input.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-base font-semibold text-slate-200">
             From a match to a tournament
           </h2>
           <p className="mt-2">

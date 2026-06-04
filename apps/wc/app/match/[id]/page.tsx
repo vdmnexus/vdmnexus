@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { allFixtures, fixtureById, slugifyTeam, boardRow } from "@/lib/data";
 import { Bar } from "@/components/bar";
+import { HeatBadge } from "@/components/heat-badge";
+import { heatContext, CLIMATE_CENTRAL_URL } from "@/lib/heat";
 
 export function generateStaticParams() {
   return allFixtures().map((f) => ({ id: f.id }));
@@ -43,6 +45,7 @@ export default async function MatchPage({
   const winner = winnerLabel(f);
   const homeRow = boardRow(f.home);
   const awayRow = boardRow(f.away);
+  const heat = heatContext(f.city);
 
   return (
     <main className="mx-auto max-w-3xl px-5 py-12 sm:py-16">
@@ -54,9 +57,12 @@ export default async function MatchPage({
       </Link>
 
       <div className="mt-6 rounded-xl border border-border bg-surface p-6">
-        <p className="text-[11px] uppercase tracking-widest text-slate-500">
-          Group {ref.group} · {f.city}
-        </p>
+        <div className="flex items-center gap-2">
+          <p className="text-[11px] uppercase tracking-widest text-slate-500">
+            Group {ref.group} · {f.city}
+          </p>
+          <HeatBadge city={f.city} showTemp />
+        </div>
         <div className="mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
           <Link
             href={`/team/${slugifyTeam(f.home)}`}
@@ -185,6 +191,30 @@ export default async function MatchPage({
             ))}
           </div>
         </div>
+      )}
+
+      {heat && (
+        <p className="mt-6 text-[11px] leading-relaxed text-slate-600">
+          <span className="text-slate-500">{heat.label} venue</span> — typical
+          afternoon high ~{heat.tempC}°C. This is display-only context, not a
+          model input: heat was backtested both ways and failed the gate (see{" "}
+          <Link
+            href="/methodology"
+            className="text-slate-500 underline-offset-2 hover:text-slate-300 hover:underline"
+          >
+            methodology
+          </Link>
+          ). Venue heat analysis:{" "}
+          <a
+            href={CLIMATE_CENTRAL_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-slate-500 underline-offset-2 hover:text-slate-300 hover:underline"
+          >
+            Climate Central
+          </a>
+          .
+        </p>
       )}
     </main>
   );

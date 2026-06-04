@@ -1,0 +1,28 @@
+{
+  "summary": "A 4-4-2 / 4-2-3-1 built on Julio Enciso's creativity and overlapping fullbacks, but with a naive, open rest-defence in a brutal group.",
+  "style": "4-4-2 / 4-2-3-1 — wingers' 1v1 creativity (Enciso), fullbacks overlapping in transition, crosses into the box (2nd most in CONMEBOL).",
+  "counterReliance": {
+    "tier": "medium",
+    "note": "Overlapping fullbacks in transition, heavy crossing"
+  },
+  "strengths": [
+    "2nd most crosses into the box in CONMEBOL",
+    "Set-play threat (4 goals in qualifying) with big CBs key to the attack",
+    "Julio Enciso's tight-space creativity"
+  ],
+  "weaknesses": [
+    "Rest-defence naive/open"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Julio Enciso",
+      "role": "Attacker",
+      "note": "Goals & assists, technical & creative, a dribbler and tight-space player"
+    }
+  ],
+  "tactics": "Overlap the fullbacks, cross to the big centre-backs and lean on Enciso for the special moments. In such a hard group everyone will need their best players to produce.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}

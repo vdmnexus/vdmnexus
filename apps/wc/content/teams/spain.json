@@ -1,0 +1,28 @@
+{
+  "summary": "Reigning European champions in a fluid 4-3-3 / 4-2-3-1 that dominates possession with purpose — but the risky rest-defence leaves them open to counters.",
+  "style": "4-3-3 / 4-2-3-1 with fluidity — wide players 1v1, fullbacks high & wide (wingers roll inside), five always across the front-line, dominate possession with purpose, risky rest-defence to counter-press.",
+  "counterReliance": {
+    "tier": "low",
+    "note": "Dominate possession — they counter-press, not counter"
+  },
+  "strengths": [
+    "Dominant, purposeful possession",
+    "Five always across the front-line with rolling wingers",
+    "Aggressive counter-press to win it back"
+  ],
+  "weaknesses": [
+    "Risky rest-defence — open to counters (need to win the ball back first)"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Lamine Yamal",
+      "role": "RW",
+      "note": "Goals & assists, direct dribbling, through-passing & crosses — lit up the Euros at 16/17 and ready for the World stage"
+    }
+  ],
+  "tactics": "Dominate the ball, keep five across the front and counter-press aggressively. The risky rest-defence is the way to hurt them — if you can get the ball first.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}

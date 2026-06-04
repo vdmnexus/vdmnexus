@@ -1,0 +1,29 @@
+{
+  "summary": "Arguably one of the poorer stylistic top nations, but loaded with players as ever — a 4-3-3 / 4-2-3-1 around the best CF in the world. Can the squad put it together?",
+  "style": "4-3-3 / 4-2-3-1 — play to get wingers 1v1, crosses into the box, counter/transition at speed, runs in behind, central block structure.",
+  "counterReliance": {
+    "tier": "medium",
+    "note": "Counter/transition at speed alongside 1v1 wide play"
+  },
+  "strengths": [
+    "Wingers 1v1 and crossing",
+    "Counter/transition at speed and runs in behind",
+    "Harry Kane's elite link play and finishing"
+  ],
+  "weaknesses": [
+    "Press needs to be better",
+    "\"Style of play\" weaker than peer top nations"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Harry Kane",
+      "role": "CF",
+      "note": "Best CF in world football — 60 goals this season, great link-up"
+    }
+  ],
+  "tactics": "Get the wingers 1v1, cross for Kane, break at pace and run in behind from a central block. The talent is there as always — the question is whether they finally put it together.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}

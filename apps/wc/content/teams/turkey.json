@@ -1,0 +1,25 @@
+{
+  "summary": "A fluid 4-2-3-1 / 3-4-2-1 with freedom to roam, a suffocating rest-defence and serious set-piece quality. Losing Arda Güler to injury would be a huge blow.",
+  "style": "Fluid 4-2-3-1 / 3-4-2-1 — wide men 1v1, FB/WB inverting to create space, midfield roaming (Güler), rest-defence to suffocate attacks, then get back behind the ball.",
+  "counterReliance": {
+    "tier": "low",
+    "note": "Possession & roam, suffocating rest-defence"
+  },
+  "strengths": [
+    "Set-play success (6 goals in qualifying) from Güler/Çalhanoğlu deliveries",
+    "Suffocating rest-defence",
+    "Fluid, roaming attacking structure with inverting fullbacks"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Arda Güler",
+      "role": "CAM",
+      "note": "Goals & assists, technical & creative, a dribbler and tight-space player"
+    }
+  ],
+  "tactics": "Roam and rotate in possession with inverting fullbacks, suffocate transitions with the rest-defence, and punish from set-pieces. If Güler misses out injured it's one of the tournament's biggest absences.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}

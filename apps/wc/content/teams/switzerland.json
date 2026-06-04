@@ -1,0 +1,25 @@
+{
+  "summary": "A pacey, direct 4-3-3 with excellent defensive structure — 2nd best defence and 2nd lowest xG against. The author's favourite watch from Euro 2024.",
+  "style": "4-3-3 — pacey & direct front-3, fluid rotations in central midfield, great rest-defence & structure.",
+  "counterReliance": {
+    "tier": "medium",
+    "note": "Direct front-3 backed by elite structure"
+  },
+  "strengths": [
+    "2nd best defence & 2nd lowest xG against",
+    "Pacey, direct front three",
+    "Fluid central-midfield rotations and strong rest-defence"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Breel Embolo",
+      "role": "CF",
+      "note": "Goal threat — pacey & powerful runner"
+    }
+  ],
+  "tactics": "Defend superbly and break with a quick front three, with the midfield rotating to keep the ball moving. Hard to play through, dangerous on the move.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}

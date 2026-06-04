@@ -1,0 +1,27 @@
+{
+  "summary": "A transition-and-counter 4-2-3-1 that may flirt with a back-5, attacking direct and vertical — but with lots of open space defensively.",
+  "style": "4-2-3-1 (could flirt with a back-5) — transition and counter-attacking, vertical play to attack direct.",
+  "counterReliance": {
+    "tier": "high",
+    "note": "Transition and counter-attacking, vertical & direct"
+  },
+  "strengths": [
+    "Direct, vertical transition threat",
+    "Taremi's hold-up and link play to spring attacks"
+  ],
+  "weaknesses": [
+    "Lots of open spaces defensively"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Mehdi Taremi",
+      "role": "CF",
+      "note": "Goals, hold-up and link-up play, moments out of nothing — in-form for his nation"
+    }
+  ],
+  "tactics": "Defend deep, attack vertically and break in transition with Taremi leading the line. The defensive spaces are the obvious vulnerability.",
+  "sources": [
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-04"
+}
