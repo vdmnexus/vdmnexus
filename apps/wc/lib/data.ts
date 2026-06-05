@@ -5,6 +5,7 @@
 // data never forks.
 import scoresJson from "../../../agents/polymarket/exports/scores.json";
 import tournamentJson from "../../../agents/polymarket/exports/tournament.json";
+import profilesJson from "../../../agents/polymarket/exports/team_profiles.json";
 
 export type Fixture = {
   home: string;
@@ -51,6 +52,43 @@ export type Tournament = {
 
 export const scores = scoresJson as Scores;
 export const tournament = tournamentJson as Tournament;
+
+// --- team xG / style profiles (DISPLAY ONLY, NOT a model input) -------------
+// Sourced from Fotmob match xG over the current coach's tenure (with a recent
+// fallback) and committed to agents/polymarket/exports/team_profiles.json by
+// the daily ingest action. Ungated by design: Fotmob xG only exists 2022+, so
+// it cannot be backtested on the 2018 World Cup fold and never enters sim.py.
+// This is descriptive scouting context that sits *beside* the model's pick.
+export type TeamProfile = {
+  coach: string | null;
+  coach_since: string | null;
+  window: "coach" | "recent" | "recent-nocoach";
+  matches: number;
+  confidence: "high" | "medium" | "low" | "none";
+  xgf?: number;
+  xga?: number;
+  xgd?: number;
+  goals?: number;
+  setpiece_pct?: number | null;
+  counter_pct?: number | null;
+  penalty_pct?: number | null;
+};
+
+export type TeamProfiles = {
+  generated_at: string;
+  source: string;
+  note: string;
+  method: string;
+  teams_with_data: number;
+  profiles: Record<string, TeamProfile>;
+};
+
+export const teamProfiles = profilesJson as TeamProfiles;
+
+export function teamProfileBySlug(slug: string): TeamProfile | undefined {
+  const p = teamProfiles.profiles[slug];
+  return p && p.matches > 0 ? p : undefined;
+}
 
 // --- slugs (stable URL ids for teams) --------------------------------------
 

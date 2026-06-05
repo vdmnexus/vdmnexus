@@ -5,6 +5,7 @@ import {
   boardRowBySlug,
   fixturesForTeam,
   slugifyTeam,
+  teamProfileBySlug,
 } from "@/lib/data";
 import {
   allTeamSlugs,
@@ -58,6 +59,7 @@ export default async function TeamPage({
   const row = boardRowBySlug(slug);
   const fixtures = fixturesForTeam(team.name);
   const kb = teamKnowledge(slug);
+  const xg = teamProfileBySlug(slug);
 
   return (
     <main className="mx-auto max-w-3xl px-5 py-12 sm:py-16">
@@ -132,6 +134,85 @@ export default async function TeamPage({
               .
             </p>
           )}
+        </section>
+      )}
+
+      {xg && (
+        <section className="mt-6 rounded-xl border border-border bg-surface p-5">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Recent xG form
+            </h2>
+            <span
+              title="Fotmob expected goals over the current coach's tenure. Descriptive context — not a model input."
+              className="text-[11px] tabular-nums text-slate-600"
+            >
+              {xg.matches} matches · {xg.confidence} confidence
+            </span>
+          </div>
+
+          <dl className="mt-4 grid grid-cols-3 gap-x-6 gap-y-3">
+            <div>
+              <dt className="text-[11px] uppercase tracking-wide text-slate-600">
+                xG for
+              </dt>
+              <dd className="font-mono text-lg tabular-nums text-slate-100">
+                {xg.xgf?.toFixed(2)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[11px] uppercase tracking-wide text-slate-600">
+                xG against
+              </dt>
+              <dd className="font-mono text-lg tabular-nums text-slate-100">
+                {xg.xga?.toFixed(2)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[11px] uppercase tracking-wide text-slate-600">
+                xG diff
+              </dt>
+              <dd
+                className={`font-mono text-lg tabular-nums ${
+                  (xg.xgd ?? 0) >= 0 ? "text-emerald-300" : "text-rose-300"
+                }`}
+              >
+                {(xg.xgd ?? 0) >= 0 ? "+" : ""}
+                {xg.xgd?.toFixed(2)}
+              </dd>
+            </div>
+          </dl>
+
+          {xg.goals ? (
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-slate-400">
+              <span className="text-slate-500">Goal mix ·</span>
+              <span className="tabular-nums">
+                open play{" "}
+                {100 -
+                  (xg.setpiece_pct ?? 0) -
+                  (xg.counter_pct ?? 0) -
+                  (xg.penalty_pct ?? 0)}
+                %
+              </span>
+              <span className="tabular-nums">
+                set piece {xg.setpiece_pct ?? 0}%
+              </span>
+              <span className="tabular-nums">
+                counter {xg.counter_pct ?? 0}%
+              </span>
+              <span className="tabular-nums">
+                penalty {xg.penalty_pct ?? 0}%
+              </span>
+            </div>
+          ) : null}
+
+          <p className="mt-4 text-[11px] leading-relaxed text-slate-600">
+            Fotmob xG{xg.coach ? ` under ${xg.coach}` : ""}
+            {xg.window === "coach"
+              ? " (current-coach tenure)"
+              : " (recent window — coach too new for a tenure sample)"}
+            , recency-weighted. Descriptive context only — never a model input.
+          </p>
         </section>
       )}
 

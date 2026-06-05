@@ -60,11 +60,23 @@ jobs:
           python3 -m polymarket_agent.export_scores
           python3 -m polymarket_agent.export_tournament
 
+      - name: Refresh team xG profiles (display-only, Fotmob)
+        working-directory: agents/polymarket
+        # DISPLAY FEED, not a model input. Pulls per-team Fotmob xG / style
+        # profiles. The matchId cache (refdata/fotmob_xg_cache.json) is
+        # committed, and match xG is immutable, so each run only fetches the
+        # handful of internationals played since the last run — token-free and
+        # cheap. continue-on-error: profiles are cosmetic, so a Fotmob hiccup
+        # must never block the prediction commit below.
+        continue-on-error: true
+        run: python3 -m polymarket_agent.export_profiles
+
       - name: Commit refreshed predictions
         run: |
           git config user.name  "nexus-bot"
           git config user.email "bot@vdmnexus.com"
           git add agents/polymarket/exports/scores.json agents/polymarket/exports/tournament.json
+          git add agents/polymarket/exports/team_profiles.json agents/polymarket/refdata/fotmob_xg_cache.json
           if git diff --cached --quiet; then
             echo "no prediction changes"
           else
