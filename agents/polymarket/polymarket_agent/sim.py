@@ -26,7 +26,7 @@ from datetime import date
 import numpy as np
 
 from .calibrate import fifa_member_teams, fit_ratings, load_results
-from .exp_talent import compute_talent
+from .roster_talent import load_live_talent
 from .exp_travel import VENUE_LATLON, haversine_km
 from .model import ScorelineModel
 
@@ -623,7 +623,7 @@ def _main() -> None:
     # the SAME ratings as fixed gate-validated priors (not refit), so the
     # enhanced board differs from baseline only by the validated covariates.
     ratings = fit_ratings(matches, ref_day=today, eligible=eligible)
-    talent = compute_talent(FIFA_TALENT_YEAR, TALENT_K) if USE_TALENT else {}
+    talent = load_live_talent(FIFA_TALENT_YEAR) if USE_TALENT else {}
 
     # Baseline = strength + host only. Enhanced = + the VALIDATED core (talent;
     # travel when the schedule activates it). Altitude is OFF by default (§9

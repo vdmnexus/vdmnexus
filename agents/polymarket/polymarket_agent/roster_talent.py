@@ -150,7 +150,56 @@ def coverage_for(year: int, teams: list[str], topk: int = 23):
         print(f"    {team:18s} {hit}/{len(names)}")
 
 
+def live_talent(year: int, topk: int) -> dict[str, float]:
+    """The LIVE talent feature: PURE roster-restricted talent (mean Overall of
+    the actual announced 26-man squad's top-K). Same scale as pool-talent
+    (mean top-K /10), so the gated beta transfers unchanged.
+
+    NOTE — this is pure roster, NOT a roster+pool blend. The blend was gated and
+    LOST (-0.02 pts RPS, worse than pool's +0.09): mixing roster-scaled teams
+    with pool-scaled teams makes the cross-team talent differential incoherent.
+    Pure roster is internally consistent and WON the gate (+0.14 pts, beats pool
+    +0.09). Low-coverage teams (squad name-join below MIN_SQUAD) are simply
+    absent → they abstain (talent differential 0, neutral), exactly as gated."""
+    return compute_roster_talent(year, topk)
+
+
+# --- frozen, committed snapshot so CI needs no gitignored .data/ dump --------
+def _snapshot_path(year: int) -> Path:
+    return REFDATA / f"roster_talent_{year}.csv"
+
+
+def write_snapshot(year: int, topk: int = 23) -> Path:
+    """Precompute live_talent (needs .data/) and commit it as a small CSV."""
+    talent = live_talent(year, topk)
+    path = _snapshot_path(year)
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["team", "talent"])
+        for team in sorted(talent):
+            w.writerow([team, f"{talent[team]:.4f}"])
+    return path
+
+
+def load_live_talent(year: int) -> dict[str, float]:
+    """CI-safe loader: read the committed roster_talent_<year>.csv. Falls back
+    to recomputing from .data/ if the snapshot is missing (local dev)."""
+    path = _snapshot_path(year)
+    if not path.exists():
+        return live_talent(year, 23)
+    out: dict[str, float] = {}
+    with open(path, newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            out[row["team"]] = float(row["talent"])
+    return out
+
+
 def _main():
+    if len(sys.argv) > 1 and sys.argv[1] == "freeze":
+        for year in (2018, 2022, 2026):
+            p = write_snapshot(year)
+            print(f"  wrote {p.name}: {len(load_live_talent(year))} teams")
+        return
     topk = int(sys.argv[1]) if len(sys.argv) > 1 else 23
     print(f"roster-talent name-join coverage (top-K={topk})")
     for year in (2018, 2022, 2026):

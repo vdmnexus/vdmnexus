@@ -33,7 +33,7 @@ from datetime import date
 from pathlib import Path
 
 from .calibrate import fifa_member_teams, fit_ratings, load_results
-from .exp_talent import compute_talent
+from .roster_talent import load_live_talent
 from .sim import (
     BETA_TRAVEL, FIFA_TALENT_YEAR, GATED_BETA_TALENT, GROUPS, HOST_EDGE,
     TALENT_K, USE_ALTITUDE, USE_TALENT, USE_TRAVEL, Engine, fetch_outright_prices,
@@ -50,7 +50,7 @@ def build(n_sims: int = N_SIMS) -> dict:
     today = date.today()
     eligible = fifa_member_teams(matches, since=date(2018, 1, 1))
     ratings = fit_ratings(matches, ref_day=today, eligible=eligible)
-    talent = compute_talent(FIFA_TALENT_YEAR, TALENT_K) if USE_TALENT else {}
+    talent = load_live_talent(FIFA_TALENT_YEAR) if USE_TALENT else {}
     eng = Engine(ratings, host_edge=HOST_EDGE, talent=talent,
                  beta_talent=GATED_BETA_TALENT if USE_TALENT else 0.0,
                  altitude=USE_ALTITUDE,
