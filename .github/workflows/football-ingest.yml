@@ -71,6 +71,13 @@ jobs:
         continue-on-error: true
         run: python3 -m polymarket_agent.export_profiles
 
+      - name: Validate exports (gate the commit)
+        working-directory: agents/polymarket
+        # Schema/sanity guard: 48 teams, 72 fixtures, finite probabilities,
+        # champ sum ~1, final sum ~2. If a regenerate produced malformed JSON,
+        # FAIL here so the broken snapshot never reaches the live site.
+        run: python3 -m polymarket_agent.selfcheck exports
+
       - name: Commit refreshed predictions
         run: |
           git config user.name  "nexus-bot"
