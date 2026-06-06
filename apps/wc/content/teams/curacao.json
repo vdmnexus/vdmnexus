@@ -1,27 +1,43 @@
 {
-  "summary": "Dick Advocaat's side counter-attack with pace up top, built around the Bacuna brothers — but the rest-defence is open.",
-  "style": "4-4-3 / 4-2-3-1 — counter-attacking with pace up top, combinations with wingers & fullbacks; sit behind the ball but keep the CF high.",
+  "summary": "Debutants making history as the smallest nation ever (population and land area) to reach a World Cup, coached by 78-year-old Dick Advocaat — set to be the oldest coach in tournament history. Stubborn and direct, they qualified unbeaten (top CONCACAF scorers, 28) on the back of a recruitment drive for eligible Dutch-born players.",
+  "style": "4-3-3 in possession, 4-1-4-1 out of it (Dutch fingerprints), and a back five against stronger sides (as vs Australia). Usually short from the goalkeeper but the centre-backs and full-backs will go over the press. Most dangerous down the sides — crosses and long shots the main routes — with wingers coming short and narrow to support the striker.",
   "counterReliance": {
     "tier": "high",
-    "note": "Counter-attacking with pace up top"
+    "note": "Stubborn, direct, defends deep and breaks down the sides"
   },
   "strengths": [
-    "Counter-attacking pace with the CF held high as an outlet",
-    "Wide combinations with the Bacuna brothers central"
+    "Stubborn defensive resilience — qualified unbeaten, including a famous 0-0 in Jamaica (hosts hit the woodwork three times)",
+    "Improved player pool from recruited Dutch-born internationals (top CONCACAF scorers, 28)",
+    "Threat down the flanks through crosses and long shots"
   ],
   "weaknesses": [
-    "Rest-defence quite \"open\""
+    "Not used to top-level opposition — a step up from CONCACAF",
+    "Can be opened up once teams get past the deep block"
   ],
   "keyPlayers": [
     {
+      "name": "Leandro Bacuna",
+      "role": "Midfield",
+      "note": "European-league experience (16 goals in 68 caps); drops between the centre-backs in build-up. Switched from the Dutch youth setup"
+    },
+    {
       "name": "Juninho Bacuna",
-      "role": "CAM",
-      "note": "Creative midfielder (23 chances created in qualifying), drives well with the ball (67% dribbling), 5 goal involvements — the difference-maker in tight games vs Ecuador & Ivory Coast"
+      "role": "Attacking mid",
+      "note": "Creative difference-maker (13 goals in 47 caps) — the spark in tight games"
+    },
+    {
+      "name": "Gervane Kastaneer",
+      "role": "Forward",
+      "note": "Main goal threat — netted five times in qualifying"
     }
   ],
-  "tactics": "Sit behind the ball, keep the striker high, and break with pace through the Bacuna brothers. The open rest-defence is the obvious risk.",
+  "tactics": "Defend deep (often a back five), stay compact and direct, and break down the sides with crosses and long shots through the Bacuna brothers. They'll press man-to-man at times but the gap in level to elite opposition is the obvious risk — Germany on matchday one is a potential banana skin.",
+  "notes": [
+    "Only able to compete under their own flag since the Netherlands Antilles dissolved in 2010; 82nd in FIFA's rankings, 8th in CONCACAF."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group E (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }

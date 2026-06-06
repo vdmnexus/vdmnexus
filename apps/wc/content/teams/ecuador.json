@@ -1,25 +1,44 @@
 {
-  "summary": "A potential pre-tournament dark horse — a brave-building 4-4-2 with the best defence in South America and devastating counter pace.",
-  "style": "4-4-2 — brave build-up & rotations, inverted fullbacks with CMs popping out, wingers 1v1 to create, crosses into the box, exceptional rest-defence.",
+  "summary": "A genuine dark horse. Under Sebastián Beccacece, Ecuador built South America's meanest defence — conceding just five goals in 18 qualifiers and finishing second behind Argentina, with 1-0 wins over Chile, Argentina, Colombia and Peru. 2025 was their first unbeaten calendar year since 1994. Marginal football, mastered: 'score one more than the opposition'.",
+  "style": "A 4-4-2 (switched from a 3-4-3 last March) — disciplined, hard-running, quick to regain shape and counter-press, hitting opponents on the break from middle-third regains. Patient, at times defensive in possession: short goal kicks, neat wide combinations, and direct balls over the top. Rotations drop a pivot between the centre-backs and push the full-backs on (Hincapié high and narrow at left-back, switching to the winger via Caicedo).",
   "counterReliance": {
     "tier": "high",
-    "note": "Devastating pace on the counter"
+    "note": "Elite low block + counter-press, breaking at pace off regains"
   },
   "strengths": [
-    "Best defence in South America — 13 cleansheets in 18 qualifiers (most), only 3 open-play goals conceded (lowest), 9× 0-0 draws",
-    "Conceded more than one goal in only 3 of their last 37 games",
-    "Devastating pace on the counter off an exceptional rest-defence"
+    "South America's best defence — only 5 conceded in 18 qualifiers, eight 0-0 draws",
+    "Disciplined running, quick shape-recovery and effective counter-pressing",
+    "A golden-generation spine (Caicedo, Hincapié, Pacho) with technical quality and physicality",
+    "Veteran reliability — Valencia's goals and Galíndez in goal"
+  ],
+  "weaknesses": [
+    "Can be defensive with the ball — low on goals (the flip side of 'marginal football')",
+    "Discipline lapses — eight red cards across two years (half theirs)"
   ],
   "keyPlayers": [
     {
+      "name": "Moisés Caicedo",
+      "role": "Midfield (Chelsea)",
+      "note": "The engine — wins it back and feeds the wide switches; core of the Independiente del Valle generation (all 24: Caicedo, Hincapié, Pacho)"
+    },
+    {
       "name": "Enner Valencia",
-      "role": "36yo CF",
-      "note": "In the form of his international career — pace, power & goals"
+      "role": "36yo centre-forward",
+      "note": "Still leads the line and scores most of the goals — 6 in 6 World Cup appearances (two vs Qatar in 2022)"
+    },
+    {
+      "name": "Hernán Galíndez",
+      "role": "39yo goalkeeper",
+      "note": "Pillar of the record defence — saved 30 of 34 shots faced in qualifying"
     }
   ],
-  "tactics": "Build bravely with inverted fullbacks, create through wide 1v1s and crosses, but it's the elite defence and counter pace that make them a genuine dark horse.",
+  "tactics": "Sit in a compact, disciplined 4-4-2, counter-press hard, and win games by the odd goal — patient with the ball, lethal on the regain. The elite defence and golden-generation spine make them a true dark horse, even if goals can be scarce.",
+  "notes": [
+    "Knocked out of Copa América 2024 by Argentina on penalties; responded with an unbeaten 2025."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group E (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }

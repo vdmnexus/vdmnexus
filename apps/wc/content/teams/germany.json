@@ -1,25 +1,43 @@
 {
-  "summary": "Strong favourites for Group E with a dominant 4-2-3-1 — 2nd in Euro qualifying for control — but with plenty of unknowns.",
-  "style": "4-2-3-1 — complete domination (2nd in Euro qualifying), wingers free to take 1v1s, a roaming front four, fluid fullbacks (invert then overlap), rest-defence to counterpress and recover.",
+  "summary": "2014 winners and group favourites under Julian Nagelsmann, but desperate to avoid a third straight group-stage exit. A clear possession-and-press identity — 'more style than substance' so far (Euro 2024 QF, beaten in the 2025 Nations League finals). Five straight qualifying wins after an opening defeat in Slovakia.",
+  "style": "Flexible — a preferred 4-2-3-1 (likely vs the group's lesser sides), occasionally 3-4-3. Wide duo Raum and Kimmich (Kimmich kept deeper in build-up, attack-minded Raum pushed on). Want possession and territory, press aggressively, and now attack more vertically (post-Kroos/Gündoğan) with a fluid, roaming front four.",
   "counterReliance": {
     "tier": "low",
-    "note": "Complete domination — controls and counterpresses"
+    "note": "Possession-and-territory domination; aggressive counter-press"
   },
   "strengths": [
-    "Control and territorial domination",
-    "Wingers with freedom in 1v1s and a creative roaming front four",
-    "Counterpressing rest-defence"
+    "Control and territorial domination; aggressive pressing to suffocate opponents",
+    "An abundance of attacking-midfield/winger quality with freedom to roam",
+    "~31% of qualifying goals from set plays"
+  ],
+  "weaknesses": [
+    "Centre-backs have struggled to defend touch-tight — better teams have got in behind",
+    "No settled first-choice No 9; Serge Gnabry ruled out injured"
   ],
   "keyPlayers": [
     {
       "name": "Florian Wirtz",
-      "role": "CAM",
-      "note": "Pacey dribbler & 1v1 (53.5% success), creative final pass (60 chances created), 8 goal involvements in a 'poor' season; his link with Raum overlapping is key"
+      "role": "Attacking mid (Liverpool)",
+      "note": "Nagelsmann's leading attacker (10 goals, 8 assists in 29 caps); the magic to break down compact blocks — after a settling-in season at Liverpool"
+    },
+    {
+      "name": "Jamal Musiala",
+      "role": "Attacking mid (Bayern)",
+      "note": "7 goals, 5 assists since Sep 2023; back from a leg break — the other No 10 to unlock low blocks"
+    },
+    {
+      "name": "Kai Havertz",
+      "role": "Centre-forward",
+      "note": "Nagelsmann's likely No 9 if fit (with Woltemade and the in-form Undav as alternatives)"
     }
   ],
-  "tactics": "Dominate the ball, free the wingers, roam with the front four and recover via counterpressing. Favourites, but with several unknowns to resolve.",
+  "tactics": "Dominate the ball, press high, and rely on the No 10s' magic to break compact blocks — all three group opponents will sit deep. The open question is the front-four selection and the No 9. Touch-tight central defending is the vulnerability against teams that can play through.",
+  "notes": [
+    "Chasing a first deep run since the 2014 title; exited the group in both 2018 and 2022."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group E (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }
