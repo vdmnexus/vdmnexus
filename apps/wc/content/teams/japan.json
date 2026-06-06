@@ -1,25 +1,39 @@
 {
-  "summary": "A humble, hard-working 3-4-2-1 full of goals — winger 1v1s, overlapping wing-backs and a relentless work-rate.",
-  "style": "3-4-2-1 — winger 1v1, overlapping wing-backs, flood the box for crosses, counter-press positioning, big work-rate.",
+  "summary": "High-octane and well-drilled under Hajime Moriyasu (in charge since 2018) — the tactical opposite of the Netherlands. A settled 3-4-2-1 built on an aggressive high press and rapid counter-attacks. First side to qualify for 2026.",
+  "style": "3-4-2-1 — three centre-backs, two energetic ball-winners, and attack-minded wingers deployed as wing-backs to squeeze more dribblers in. Coordinated, intense high press; when it wins the ball high, five natural attackers pounce. Drops into a 5-4-1 low block under sustained pressure. Considerable freedom to rotate (even centre-backs overlap to become the most advanced player).",
   "counterReliance": {
-    "tier": "low",
-    "note": "Possession & crossing, counter-press to win it back"
+    "tier": "high",
+    "note": "Aggressive high press + rapid, direct counter-attacks"
   },
   "strengths": [
-    "Overlapping wing-backs and 1v1 wingers feeding crosses",
-    "Flood the box for crosses",
-    "Outstanding work-rate and counter-press positioning"
+    "Excellent, coordinated high press — 'well-drilled' (Tuchel, after Japan beat England 1-0)",
+    "Five natural attackers ready to break the instant they win it high",
+    "Flexible, rotational structure that drags opponents out of position",
+    "A counter-attacking ceiling proven by beating Spain 2-1 at the 2022 WC on just 18% possession"
+  ],
+  "weaknesses": [
+    "Can rarely exert control — reactive, quick-direct football cedes the ball",
+    "Shunting attackers to wing-back can stifle their creativity, especially in the 5-4-1 block"
   ],
   "keyPlayers": [
     {
       "name": "Ayase Ueda",
-      "role": "CF",
-      "note": "Goalscoring (25 in the Eredivisie) with a strong work-ethic back"
+      "role": "Centre-forward (Feyenoord)",
+      "note": "Topped the Eredivisie scoring charts (25 in 27); movement geared to attacking crosses and the space behind (SkillCorner cross-receiver 80, runs-in-behind 65), and an effective presser"
+    },
+    {
+      "name": "Kaoru Mitoma",
+      "role": "Winger",
+      "note": "The sweeping-counter finisher — scored the winner vs England off a fast break"
     }
   ],
-  "tactics": "Get wing-backs overlapping and wingers isolated, flood the box, and counter-press to win it straight back. Humble, hard-working and full of goals.",
+  "tactics": "Press aggressively, win it high, and break at speed with five attackers; sit in a 5-4-1 when pinned and spring the counter. Set pieces are a growing focus — long throws are in the plans and free-kick great Shunsuke Nakamura has joined the backroom staff.",
+  "notes": [
+    "First nation to secure 2026 qualification, breezing through their group."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group F (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }
