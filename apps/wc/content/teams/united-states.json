@@ -1,25 +1,44 @@
 {
-  "summary": "Co-hosts under Mauricio Pochettino, leaning on 1v1 wing play and pace in behind, with physical set-piece threat. A tough, even Group D.",
-  "style": "4-2-3-1 / 3-4-3 (principles consistent under Pochettino) — lots of winger/1v1 play (Pulisic, Luna, Tillman), pace behind (Balogun, Agyemang, Weah), talented technical midfielders.",
+  "summary": "Co-hosts under Mauricio Pochettino, whose brave, proactive identity is starting to shine through after a bumpy 26-game tenure (including heavy friendly defeats to Switzerland and Belgium). Sharp passing out from the back, press-baiting build-up, and serious pace to counter — the highest-ranked side in a tight, even Group D.",
+  "style": "Cycles between 4-2-3-1 and 3-4-2-1 but a consistent build-up: three at the back, a staggered midfield (Adams deepest, McKennie roaming), wing-backs high, and technical players (Pulisic) dropping into pockets to bait the press and play through it at tempo. Can also drop into a deeper 4-4-2 and break with pace.",
   "counterReliance": {
     "tier": "medium",
-    "note": "Pace in behind from a transition-friendly front line"
+    "note": "Proactive on the ball, but lethal breaking with pace when they sit"
   },
   "strengths": [
-    "1v1 wide threat across the front line",
-    "Pace to run in behind",
-    "Physical threat from set-plays and talented technical midfielders"
+    "Brave, press-baiting build-up that plays through pressure at high tempo",
+    "Positional fluidity to escape the press (Pulisic dropping, full-backs drifting in)",
+    "Pace to counter — Weah, plus Balogun/Pepi/Haji Wright running in behind",
+    "Firepower up front across multiple options"
+  ],
+  "weaknesses": [
+    "The brave build-up is turnover-prone if passes/movements are mistimed",
+    "Inconsistent results in friendlies (heavy losses to Switzerland and Belgium)"
   ],
   "keyPlayers": [
     {
       "name": "Christian Pulisic",
-      "role": "Attacker",
-      "note": "Pacey, direct & skilful with end product — 14 goal involvements for AC Milan, 38 chances created. Tournament poster boy under pressure to deliver"
+      "role": "Playmaker (AC Milan)",
+      "note": "The most technically gifted in the squad — drops to pull opponents out of shape; among the top Serie A chance-creators (2.0/90). The man to deliver"
+    },
+    {
+      "name": "Folarin Balogun",
+      "role": "Forward (Monaco)",
+      "note": "12 goals in 2026; eager runner in behind on the counter"
+    },
+    {
+      "name": "Ricardo Pepi",
+      "role": "Forward",
+      "note": "Scored at the highest rate in the Dutch top flight (1.02/90) — another in-behind threat"
     }
   ],
-  "tactics": "Get the wide players isolated in 1v1s, run the forwards in behind, and threaten physically from set-plays. The question is whether Pulisic delivers in the biggest moments.",
+  "tactics": "Take control with brave passing from the back, draw the press and play through it, then strike with pace; against stronger sides, sit in a 4-4-2 and counter. The opener vs Paraguay's stubborn block is an immediate test of the pass-and-move approach.",
+  "notes": [
+    "Most evenly-matched group at the tournament — only 24 FIFA ranking places separate top (USA, 16) and bottom (Paraguay, 40)."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group D (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }

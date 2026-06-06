@@ -1,25 +1,41 @@
 {
-  "summary": "A disciplined 3-4-3 with a box-4 midfield that drops into a 5-4-1 — 2nd best defence in AFC qualifying. Will need to be near-perfect in a tough Group D.",
-  "style": "3-4-3 — box-4 midfield (2 CDMs, 2 CAMs), wing-backs going beyond, crosses into the box cut back to the box-4 CMs; drops into a 5-4-1 defensively.",
+  "summary": "Comfortable without the ball under Tony Popovic. After thrashing the minnows early in Asian qualifying, they reverted to a secure 5-4-1 that ground out impressive wins over Japan and Saudi Arabia with ~30% possession. Compact and disciplined, but with real transition and set-piece threat — don't write them off in a tough Group D.",
+  "style": "5-4-1 out of possession — block central progression and encircle the opposition midfield, with the five-man line covering the flanks. Not purely passive: wing-backs jump and attackers press after backward/sideways passes. Transitions quickly, the wing-backs turning the 5-4-1 into a 3-4-3.",
   "counterReliance": {
-    "tier": "medium",
-    "note": "Solid block first, breaks via wing-backs"
+    "tier": "high",
+    "note": "Soak up pressure in a 5-4-1, then break fast through the wing-backs"
   },
   "strengths": [
-    "2nd best defence in AFC qualifying",
-    "Disciplined 5-4-1 defensive shape",
-    "Wing-backs beyond and crosses cut back to arriving midfielders"
+    "Disciplined, compact 5-4-1 that smothers central progression",
+    "Quick transitions via energetic wing-backs (Jordan Bos a key left outlet — 8 assists for Feyenoord)",
+    "Set-piece threat from towering defenders Souttar and Circati",
+    "Pace and power on the counter (Irankunda, Toure)"
+  ],
+  "weaknesses": [
+    "Cedes possession by design (~30%) — needs its moments to count",
+    "Lost target man Mitch Duke to injury before the tournament"
   ],
   "keyPlayers": [
     {
       "name": "Mohamed Toure",
-      "role": "22yo CF",
-      "note": "Goalscorer (10 in 13 for Norwich at the end of the season), pace to run behind and power to hold up"
+      "role": "22yo centre-forward (Norwich)",
+      "note": "Steps in for the injured Duke — most non-penalty goals in the Championship since February (9, with two hat-tricks); power and clinical finishing on the break"
+    },
+    {
+      "name": "Jordan Bos",
+      "role": "Left wing-back (Feyenoord)",
+      "note": "The key attacking outlet — energy to get forward and link with the front line; 8 assists last season"
+    },
+    {
+      "name": "Nestory Irankunda",
+      "role": "Winger",
+      "note": "Speedy, freakish ball-striker — three long-range goals in his Watford breakout"
     }
   ],
-  "tactics": "Defend in a compact 5-4-1, then attack through wing-backs and cutbacks to the box-4 midfielders. Group D is evenly matched — they must be near-perfect throughout.",
+  "tactics": "Hold a compact 5-4-1, encircle the midfield, then spring forward through the wing-backs into a 3-4-3; threaten from set pieces and on the counter. Looked dominant at times in qualifying — a genuine handful for anyone in this group.",
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group D (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }

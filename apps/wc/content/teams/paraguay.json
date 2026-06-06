@@ -1,28 +1,38 @@
 {
-  "summary": "A 4-4-2 / 4-2-3-1 built on Julio Enciso's creativity and overlapping fullbacks, but with a naive, open rest-defence in a brutal group.",
-  "style": "4-4-2 / 4-2-3-1 — wingers' 1v1 creativity (Enciso), fullbacks overlapping in transition, crosses into the box (2nd most in CONMEBOL).",
+  "summary": "The group's dark horse. Under Gustavo Alfaro, Paraguay conceded just 10 goals in 18 South American qualifiers and lost only once in his 12 competitive games — beating Brazil, Uruguay and defending champions Argentina along the way. A stubborn, defence-first side that was also the most direct team in South America.",
+  "style": "Defence-first 4-4-2 mid-block — intense, physical, shuffling side-to-side to block central passes, then snapping into an aggressive press once the ball crosses halfway. When they win it, they break fast: the most direct team in CONMEBOL qualifying — few passes, ball moved rapidly to hit the spaces. 'Centro, cabeza y gol' — cross, header, goal.",
   "counterReliance": {
-    "tier": "medium",
-    "note": "Overlapping fullbacks in transition, heavy crossing"
+    "tier": "high",
+    "note": "Stubborn mid-block, then the most direct counters in South America"
   },
   "strengths": [
-    "2nd most crosses into the box in CONMEBOL",
-    "Set-play threat (4 goals in qualifying) with big CBs key to the attack",
-    "Julio Enciso's tight-space creativity"
+    "Elite defensive organisation — only 10 conceded in 18 qualifiers; beat Argentina, Brazil and Uruguay",
+    "Most tackles and 2nd-most attacking-third recoveries in CONMEBOL qualifying — can press high as well as soak",
+    "The most direct attack in South America — rapid counters and crossing for the aerial threat",
+    "Set-piece threat with big centre-backs"
   ],
   "weaknesses": [
-    "Rest-defence naive/open"
+    "Lowest-ranked side in the group; cedes possession by design and relies on its moments"
   ],
   "keyPlayers": [
     {
       "name": "Julio Enciso",
-      "role": "Attacker",
-      "note": "Goals & assists, technical & creative, a dribbler and tight-space player"
+      "role": "Forward (Strasbourg)",
+      "note": "The potential match-winner — runs at opponents with a neat final-third touch. At Copa América 2024 took 14 shots and 22 take-ons, both far more than any team-mate; scored the 2022-23 Premier League goal of the season"
+    },
+    {
+      "name": "Diego Gómez",
+      "role": "Midfield",
+      "note": "A ferocious right-foot striker of the ball — a long-range threat"
     }
   ],
-  "tactics": "Overlap the fullbacks, cross to the big centre-backs and lean on Enciso for the special moments. In such a hard group everyone will need their best players to produce.",
+  "tactics": "Frustrate possession-dominant opponents in a disciplined mid-block, then counter fast and direct — the longer they stay level, the more they grow into the game. A genuine threat to upset anyone in Group D.",
+  "notes": [
+    "Lowest FIFA ranking in the group (40th) but arguably its form side — unbeaten run and elite defensive record."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group D (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }
