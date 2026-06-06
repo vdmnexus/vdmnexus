@@ -1,28 +1,40 @@
 {
-  "summary": "Carlo Ancelotti's Brazil in a traditional 4-3-3 with a fluid front line — perhaps the most exciting group since 2014. Endrick needs to be let off the leash.",
-  "style": "Traditional 4-3-3 under Ancelotti — fluid front three combining to create, fullbacks high & wide, structured 'deeper' and countering at speed.",
+  "summary": "Five-time world champions and clear group favourites under Carlo Ancelotti, looking to better their 2018 and 2022 quarter-final exits. A star-studded, fluid front line led by Vinícius Jr, with Casemiro a major set-piece threat. Dreaming of emulating their 1994 USA triumph.",
+  "style": "In possession a dynamic 3-2-4-1 — the right-back pushes on, Bruno Guimarães, Casemiro and a dropping Cunha progress the ball, and the front line (Vinícius, Raphinha, Cunha, Martinelli) interchanges constantly with wide rotations. Vinícius starts centrally but roams to his favoured left. Out of possession, a high press from a 4-4-2.",
   "counterReliance": {
     "tier": "medium",
-    "note": "Can control, but structured deeper and counters at speed"
+    "note": "Fluid possession and rotations; devastating breaking at speed"
   },
   "strengths": [
-    "Fluid, interchanging front three",
-    "Attacking fullbacks providing width",
-    "Devastating when countering at speed"
+    "Elite, interchanging front line (Vinícius, Raphinha, Cunha, Martinelli) with positional fluidity",
+    "Guimarães' line-splitting passing into the forwards' runs",
+    "Casemiro a serious set-piece threat — 8 set-piece goals for Man Utd this season, the most of any player in Europe's top-five leagues",
+    "Aggressive high press from a 4-4-2"
   ],
   "keyPlayers": [
     {
-      "name": "Endrick",
-      "role": "CF",
-      "note": "19yo maverick — pace, power & skill; 16 goal involvements at Lyon in 2026"
+      "name": "Vinícius Jr",
+      "role": "Forward (Real Madrid)",
+      "note": "Leads the line but roams left to attack 1v1 — 7.7 take-ons per 90, 7th-highest in Europe's top-five leagues; a nightmare matchup"
+    },
+    {
+      "name": "Matheus Cunha",
+      "role": "Forward",
+      "note": "Drops to progress and create, opening space for the rotations around him"
+    },
+    {
+      "name": "Casemiro",
+      "role": "DM (Man Utd)",
+      "note": "Progression anchor and the dead-ball threat — Europe's top-five-league set-piece scorer this season"
     }
   ],
-  "tactics": "Front three roam and combine while fullbacks stretch the pitch; they can sit a touch deeper and break at pace. Loaded with talent and Neymar back in the squad, but the author wants Endrick unleashed.",
+  "tactics": "Rotate the forwards and full-backs to pull defenders out of position, then release runners behind with Guimarães' passing; press high to win it back early. Neymar has been recalled and will hope to feature, most likely from the bench. The depth of attacking options is the headline.",
   "notes": [
-    "Neymar Jr's return adds to a deep, talented squad."
+    "Won more World Cups than any nation (5); chasing a first since 2002."
   ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group C (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }

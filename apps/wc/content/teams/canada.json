@@ -1,25 +1,44 @@
 {
-  "summary": "Co-hosts playing an old-school 442/424, pressing high and built around Jonathan David as the link. Real hope they can ride the home support.",
-  "style": "Old-school 4-4-2 / 4-2-4 — wingers high & wide, a fullback inverting to help the CMs, Jonathan David dropping in as the link, high press initially then recover and repeat.",
+  "summary": "Co-hosts under Jesse Marsch — energetic, direct, and built on pressing and counter-pressing. The fastest team in the 2024 Copa América at moving the ball forward, hunting their first-ever World Cup point on home soil (third appearance after 1986 and 2022).",
+  "style": "4-4-2 — win the ball and attack quickly in transition, progressing through wide areas to the wingers (Buchanan, Ali Ahmed, Davies), with the left side supported by an advancing full-back (Davies or Richie Laryea). Jonathan David partners Oluwaseyi or Larin and drops in to link play. High, lane-blocking press out of the 4-4-2.",
   "counterReliance": {
-    "tier": "medium",
-    "note": "High press to win it high, then recover & repeat"
+    "tier": "high",
+    "note": "Direct, transition-first — fastest direct speed at Copa América 2024"
   },
   "strengths": [
-    "High initial press to win the ball up the pitch",
-    "Jonathan David as a high-class link forward",
-    "Exciting, talented squad with home-nation momentum"
+    "Fastest team at Copa América 2024 (direct speed 1.9 m/s), only 2.8 passes per sequence — purely direct",
+    "Energetic, organised high press — block lanes, force wide, then go for the ball",
+    "Jonathan David (Juventus) as the link forward; pace out wide",
+    "Home-nation momentum"
+  ],
+  "weaknesses": [
+    "Alphonso Davies' fitness in serious doubt (ACL Mar 2025, then two further muscle injuries)",
+    "Few sustained-possession solutions — reliant on transition and wide service"
   ],
   "keyPlayers": [
     {
+      "name": "Alphonso Davies",
+      "role": "Full-back / winger (Bayern)",
+      "note": "Pace and dribbling down the left — but injury-hit (ACL + hamstring + muscle); scored Canada's first men's WC goal in 2022"
+    },
+    {
+      "name": "Tajon Buchanan",
+      "role": "Winger",
+      "note": "If Davies isn't fit, the man to watch — pace, dribbling, a counter threat"
+    },
+    {
       "name": "Jonathan David",
-      "role": "CF",
-      "note": "Pacey, powerful & technical — 39 international goals, 150+ club goals; comes short to link play"
+      "role": "CF (Juventus)",
+      "note": "Drops to link play and attack the space behind the opposition midfield; essential to the attack"
     }
   ],
-  "tactics": "Wingers stay high and wide while an inverting fullback supports the midfield. David drops to link and the press is aggressive early before recovering shape. Host-nation bias acknowledged, but the talent and atmosphere could build real momentum.",
+  "tactics": "Press from a 4-4-2 — block passing lanes, shepherd play wide, then spring the trap — and break at speed once the ball is won. Maxime Crepeau got the nod in goal over Dayne St. Clair days before the tournament. The high press versus Switzerland's fluid build-up could decide the group.",
+  "notes": [
+    "Still chasing their first-ever World Cup point (lost all three in both 1986 and 2022)."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group B (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }

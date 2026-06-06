@@ -1,25 +1,43 @@
 {
-  "summary": "A pacey, direct 4-3-3 with excellent defensive structure — 2nd best defence and 2nd lowest xG against. The author's favourite watch from Euro 2024.",
-  "style": "4-3-3 — pacey & direct front-3, fluid rotations in central midfield, great rest-defence & structure.",
+  "summary": "Group favourites after an eye-catching Euro 2024 under Murat Yakin — fluid in possession, switching between a 3-4-3 and 4-3-3, with elite defensive structure (2nd-best defence, 2nd-lowest xG against). An experienced squad orchestrated by captain Granit Xhaka.",
+  "style": "Dynamic — moves between 3-4-3 and 4-3-3, with Aebischer roaming into midfield from wing-back, Vargas and Ndoye drifting inside from the wings, and full-backs pushing on (Widmer often higher than Rodríguez). Qualifiers were a more settled 4-2-3-1. Build through Xhaka, Rodríguez, Akanji and Elvedi, finding runners behind and switching play.",
   "counterReliance": {
     "tier": "medium",
-    "note": "Direct front-3 backed by elite structure"
+    "note": "Fluid possession side backed by elite structure; breaks with a quick, interchanging front line"
   },
   "strengths": [
-    "2nd best defence & 2nd lowest xG against",
-    "Pacey, direct front three",
-    "Fluid central-midfield rotations and strong rest-defence"
+    "2nd-best defence and 2nd-lowest xG against",
+    "Fluid front line (Vargas, Ndoye, Embolo + Rieder) with licence to interchange",
+    "Deep experience — 8 of the likely XI have 50+ caps",
+    "Xhaka's line-breaking passing as the progression engine"
+  ],
+  "weaknesses": [
+    "Formation still fluid between systems — cohesion depends on the personnel chosen"
   ],
   "keyPlayers": [
     {
-      "name": "Breel Embolo",
-      "role": "CF",
-      "note": "Goal threat — pacey & powerful runner"
+      "name": "Granit Xhaka",
+      "role": "Midfield captain (Sunderland)",
+      "note": "Closing on 150 caps; intercepts and wins duels off the ball, and his line-breaking passes are over Switzerland's qualifying goals"
+    },
+    {
+      "name": "Silvan Widmer",
+      "role": "Right-back (Mainz)",
+      "note": "A threat inside the box with his in-field movement — scored from advanced runs vs Kosovo"
+    },
+    {
+      "name": "Dan Ndoye",
+      "role": "Forward (Nott'm Forest)",
+      "note": "Runs behind the line; the finish to Switzerland's slick interchange moves"
     }
   ],
-  "tactics": "Defend superbly and break with a quick front three, with the midfield rotating to keep the ball moving. Hard to play through, dangerous on the move.",
+  "tactics": "Build patiently through the experienced spine, switch play, and release an interchanging front three behind the defence; defend with structure and break at pace. Hard to play through, dangerous on the move.",
+  "notes": [
+    "The flexible build-up could be tested by Canada's high press in a potentially decisive final group game."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group B (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }

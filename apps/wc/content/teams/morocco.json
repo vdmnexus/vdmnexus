@@ -1,25 +1,43 @@
 {
-  "summary": "A proper attacking 4-3-3 under a new U23-style manager — most shots and most crosses per 90, with excellent defensive structure. Could a Moroccan side carry a continent again?",
-  "style": "4-3-3 (new manager's U23 style) — most shots per 90, 1v1 wingers & attacking fullbacks, most crosses per 90, strong both short & long.",
+  "summary": "Semi-finalists in 2022 — the first Arab and African side to reach the last four — now under new coach Mohamed Ouahbi, who replaced Walid Regragui in March (he led Morocco's U-20s to their first World Cup title in 2024). Only four games in, but the wide-combination identity and defensive compactness carry over.",
+  "style": "Attacking, wide-combination football (evolved from Regragui's 4-3-3) — full-backs, midfielders and wingers combining on the flanks, with overlapping runs from Hakimi a key weapon. Defensive organisation and compactness without the ball remain a cornerstone. Capable of a high press from a 4-2-3-1.",
   "counterReliance": {
     "tier": "low",
-    "note": "Attacking, possession-and-crossing led"
+    "note": "Attacking, possession-and-crossing led on a compact defensive base"
   },
   "strengths": [
-    "Most shots per 90 — a relentless attacking team",
-    "Most crosses per 90 from 1v1 wingers & attacking fullbacks",
-    "Best long & short passers per 90; excellent defence & rest-defence (best in AFCON, 3rd in CAF qualifying)"
+    "Excellent defensive organisation and compactness (the foundation of the 2022 semi-final run)",
+    "Wide combinations and overlapping full-backs, headlined by Hakimi",
+    "Aggressive, coordinated high press when they choose to engage",
+    "Real attacking quality through the half-spaces"
+  ],
+  "weaknesses": [
+    "Small sample under Ouahbi (4 games) — system still settling close to the tournament"
   ],
   "keyPlayers": [
     {
+      "name": "Brahim Díaz",
+      "role": "Forward / right half-space (Real Madrid)",
+      "note": "Player of the 2025 AFCON (5 goals, creativity); under Ouahbi plays a narrower right-half-space role suiting his profile"
+    },
+    {
+      "name": "Achraf Hakimi",
+      "role": "Right-back (PSG)",
+      "note": "The overlapping width and end product on the right — central to the wide combinations"
+    },
+    {
       "name": "Bilal El Khannouss",
-      "role": "CAM",
-      "note": "Exciting, creative attacking mid — pacey, direct dribbler, 9 goal involvements in 19 games, 45 chances created"
+      "role": "Attacking mid",
+      "note": "Pacey, direct creator — the run into the box that finishes the long build-up moves"
     }
   ],
-  "tactics": "Dominate the ball, get the wingers and fullbacks attacking 1v1, and flood the box with crosses, all on top of an excellent defensive base. Hakimi could have headlined, but Bilal may have a breakout moment.",
+  "tactics": "Build through wide combinations and overlapping full-backs on a compact, organised defensive base; press high when the moment suits. Whether they press Brazil in the opener (MetLife, June 13) is a key tactical question. A continent will hope they relive 2022.",
+  "notes": [
+    "Won the 2025 AFCON on home soil (awarded after a contested 1-0 final loss to Senegal, now under CAS appeal)."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group C (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }

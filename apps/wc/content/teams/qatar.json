@@ -1,28 +1,33 @@
 {
-  "summary": "A direct 4-2-3-1 built to free Akram Afif and break in transition from a mid-block — but with real defensive worries.",
-  "style": "4-2-3-1 — direct (most long balls per 90), rotations to free Akram Afif, sitting in a mid-block to create counters.",
+  "summary": "Two-time Asian Cup champions under Julen Lopetegui, looking to redeem three home defeats as hosts in 2022. Build from the back toward talisman Akram Afif, with a heavy reliance on set pieces — a 4-2-3-1 that focuses on width but has few attacking solutions beyond Afif.",
+  "style": "4-2-3-1 / 4-4-2 — build from the back and progress to Afif, the main creative force; focus on the flanks but limited variety in attack. Drops into a mid-block to spring counters and goes direct when needed (most long balls per 90).",
   "counterReliance": {
     "tier": "high",
-    "note": "Mid-block to create counters, most long balls per 90"
+    "note": "Mid-block to spring counters; direct, set-piece-reliant"
   },
   "strengths": [
-    "Most long balls per 90 — a direct, vertical threat",
-    "Clever rotations to free Akram Afif (11 assists)",
-    "Mid-block designed to spring counters"
+    "Set-piece reliant — 42% of qualifying goals from dead balls (the two FK goals that beat the UAE 2-1 sealed qualification; 8 of 19 set-piece goals in rounds 3–4)",
+    "Akram Afif — creator, dribbler, finisher, and the set-piece delivery behind the dead-ball threat",
+    "Two-time Asian Cup winners with deep continuity in the squad"
   ],
   "weaknesses": [
-    "Defensive worries — -7 goal difference in qualifying"
+    "Few attacking solutions beyond Afif",
+    "Defensive worries (negative goal difference in qualifying)"
   ],
   "keyPlayers": [
     {
       "name": "Akram Afif",
-      "role": "CAM",
-      "note": "Pacey, skilful dribbler with composure around goal and a creative final pass"
+      "role": "Forward / playmaker",
+      "note": "Does everything — dribbles, passes, scores, and delivers the set pieces. 2019 & 2023 Asian Cup winner; 2023 Golden Boot and Player of the Tournament"
     }
   ],
-  "tactics": "Drop into a mid-block, go direct, and use rotations to spring Afif on the counter. The creative upside is exciting; the defensive numbers are the concern.",
+  "tactics": "Drop into a mid-block, build toward Afif, and lean on dead balls — the set-piece threat is the genuine edge. Their progression to the knockouts likely hinges on the final group game against Bosnia.",
+  "notes": [
+    "Only previous World Cup appearance was as hosts in 2022, losing all three group games."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group B (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }
