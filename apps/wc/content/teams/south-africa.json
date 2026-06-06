@@ -1,28 +1,40 @@
 {
-  "summary": "A direct, wide 4-3-3 with creative crossing but a habit of missing big chances. Bafana Bafana bring exciting match-ups to Group A.",
-  "style": "4-3-3 — can be very direct (2nd most long passes), wingers in 1v1s with fullbacks beyond, creative crossing (2nd best crossers).",
+  "summary": "Back at the World Cup for the first time since hosting in 2010. Hugo Broos (in charge since 2021) led them to third at the 2023 AFCON — their best finish in 23 years. A possession side in build-up that turns pragmatic and counter-attacking against stronger opposition — which, in this group, will be most of the time.",
+  "style": "Usually a 4-3-2-1 — full-backs provide width, two attacking midfielders play close to striker Lyle Foster, with neat one-touch combinations through narrow forwards. Comfortable building from the back (highest possession at AFCON 2025, 63.4%), but that possession is largely in their own defensive third, and they can struggle to progress, often going long.",
   "counterReliance": {
     "tier": "medium",
-    "note": "Direct, can go long quickly into wide 1v1s"
+    "note": "Builds possession vs peers, but goes pragmatic/counter against stronger sides"
   },
   "strengths": [
-    "Direct outlet — among the most long passes of the field",
-    "Creative wide play and crossing volume",
-    "Great rest-defence and protecting structure"
+    "Comfortable on the ball — led AFCON in possession (63.4%)",
+    "Neat one-touch combinations through narrow, well-connected forwards",
+    "Pragmatic, organised counter-attacking shape when defending deep"
   ],
   "weaknesses": [
-    "Wasteful — most big chances missed in qualifying"
+    "Possession stuck in their own third — struggle to progress, resort to long balls",
+    "Wasteful — among the most big chances missed in qualifying",
+    "Lowest-ranked side in a tough group; likely backs-to-the-wall most matches"
   ],
   "keyPlayers": [
     {
-      "name": "Oswin Appollis",
-      "role": "LW",
-      "note": "Pacey, direct dribbler (56% success), creativity & goals — 6 goal involvements in 5"
+      "name": "Relebohile Mofokeng",
+      "role": "21yo attacking mid (Orlando Pirates)",
+      "note": "Versatile, slippery, spectacular — 5 of his 10 league goals came from outside the box"
+    },
+    {
+      "name": "Lyle Foster",
+      "role": "Striker (Burnley)",
+      "note": "The focal point the two No.10s play off"
     }
   ],
-  "tactics": "Happy to go direct, releasing wingers into 1v1s with fullbacks overlapping beyond. Plenty of crosses but the conversion needs to improve. Solid rest-defence keeps them in games.",
+  "tactics": "Build from the back and combine through the narrow forwards, but the side often can't break the press and goes direct. Against the calibre of opponent in Group A, Broos tends toward a defensive, counter-attacking setup. The underdog spirit of 2010 (a 1-1 opening draw with Mexico) is the template they'll look to channel.",
+  "notes": [
+    "Base camp at Pachuca, chosen for altitude preparation ahead of Mexico's high venues.",
+    "Broos, 74, returns to the Estadio Azteca 40 years after playing there for Belgium against Mexico at the 1986 World Cup."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group A (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }

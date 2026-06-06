@@ -1,29 +1,40 @@
 {
-  "summary": "A possession-dominant 4-3-3 (75.8%) with purpose and vertical thrust, but with frailties at the back if the structure is breached.",
-  "style": "4-3-3 — possession with purpose and vertical play, wingers & fullbacks making deep runs behind, lots of 1v1s and crosses into a double-occupied half-space.",
+  "summary": "The Son Heung-min show — but a camp under a cloud. Hong Myung-bo's unpopular appointment turned toxic after heavy defeats (5-0 Brazil, 4-0 Ivory Coast, 1-0 Austria), all using a new back three. Breezed through qualifying in a 4-2-3-1; the late switch threatens to derail them. Most dangerous on the counter, when Son and Lee Kang-in are released into space.",
+  "style": "Experimenting with a back three/five meant to let Son and Lee Kang-in stay high and break forward, with extra cover to absorb pressure. In practice the wing-backs have looked unsure when to drop and when to push, leaving the midfield pivot stretched. Qualifying was a more settled 4-2-3-1.",
   "counterReliance": {
-    "tier": "low",
-    "note": "Possession-dominant, builds the game on the ball"
+    "tier": "medium",
+    "note": "Tournament threat is the counter — Son & Lee Kang-in dangerous in transition; can also dominate weaker sides on the ball"
   },
   "strengths": [
-    "Dominant possession (75.8%) used with purpose and verticality",
-    "Runners in behind from wingers and fullbacks",
-    "Goal-poacher up top to finish the chances created"
+    "Son Heung-min — elite finisher and the focal point of everything",
+    "Genuine counter-attacking threat with runners in behind",
+    "Can control possession and attack vertically against lesser opponents"
   ],
   "weaknesses": [
-    "3rd most big chances missed",
-    "Defensive frailties at times if the rest-defence is played through"
+    "Back-three switch lacks cohesion and time to bed in before the opener",
+    "Wing-backs misjudge their positioning; midfield gets outnumbered and stretched",
+    "Defensive disorganisation badly exposed by Brazil, Ivory Coast and Austria"
   ],
   "keyPlayers": [
     {
-      "name": "Hyun-Gyu Oh",
-      "role": "CF",
-      "note": "Proper goal-poacher, great in the air, 23 goal involvements this season"
+      "name": "Son Heung-min",
+      "role": "Forward (LAFC)",
+      "note": "Carries the nation at 33. Since 2018: 109 league goals from 81.9 xG — ~27 above an average finisher"
+    },
+    {
+      "name": "Lee Kang-in",
+      "role": "Attacking mid",
+      "note": "The other release valve in transition — dangerous running into open space alongside Son"
     }
   ],
-  "tactics": "Control the ball and attack vertically, with wide players and fullbacks running beyond. The rest-defence structure is important — teams that get past it can find space. Group A looks exceptionally tight.",
+  "tactics": "The intent behind the back three is sound — keep the attackers high, sit deep, spring forward — but a back-three system needs familiarity South Korea haven't yet built. Hong frames it as Plan A/B versatility depending on the opponent. If the structure holds they counter dangerously; if it's played through, the gaps are large. Group A looks exceptionally tight.",
+  "notes": [
+    "Hong (57) was Bronze Ball winner as third-best player at the 2002 World Cup; his appointment over Klinsmann drew a National Assembly hearing.",
+    "Training at altitude in Salt Lake City to prepare for Mexico's high venues."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group A (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }
