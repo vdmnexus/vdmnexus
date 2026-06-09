@@ -1,25 +1,35 @@
 {
-  "summary": "A counter-attacking 4-2-3-1 built around Salah and Marmoush, with elite defensive efficiency — only 1 open-play goal conceded. Likely Salah's WC swansong.",
-  "style": "4-2-3-1 — counter-attacking & transition team, lots of goals after fewer than 3 passes, Salah & Marmoush as the difference-makers, mid-block set-up.",
+  "summary": "Led by Mohamed Salah and Omar Marmoush under Hossam Hassan, Egypt fancy their chances of finally clearing the group stage (their last two appearances, 1990 and 2018, both ended there). A disciplined, transition-based side that held Spain to a goalless draw in March.",
+  "style": "Drops into a 5-4-1 without possession using a man-marking system (the dropping midfielder can push up if needed). Works best in transition — feeding the pace of Salah and Marmoush or the 1v1 ability of Ibrahim Adel. In settled possession, quick switches to find the spare man and runs in behind.",
   "counterReliance": {
     "tier": "high",
-    "note": "Counter & transition — goals after fewer than 3 passes"
+    "note": "Disciplined man-marking block, lethal breaking through Salah/Marmoush"
   },
   "strengths": [
-    "Tight defensive play — conceded only 1 open-play goal",
-    "Lethal in transition (goals after fewer than 3 passes)",
-    "Salah & Marmoush as elite outlets"
+    "Defensive discipline — held Spain 0-0 with the 5-4-1 man-marking block",
+    "Elite transition outlets in Salah and Marmoush",
+    "Ibrahim Adel's 1v1 threat to carry the break"
+  ],
+  "weaknesses": [
+    "Reliant on Salah for the biggest moments — Egypt tend to go only as far as he takes them",
+    "Limited sustained attacking control against deep blocks"
   ],
   "keyPlayers": [
     {
       "name": "Mohamed Salah",
       "role": "Forward",
-      "note": "Record goalscorer — pace, power & creativity, capable of individual WC moments"
+      "note": "33, after a rough final Liverpool season — but Egypt's talisman; scored both their goals at the 2018 WC, and four goals + an assist across his last five qualifiers"
+    },
+    {
+      "name": "Omar Marmoush",
+      "role": "Forward",
+      "note": "11 in 49 looks modest, but he's capable of the spectacular — this could be his breakout tournament"
     }
   ],
-  "tactics": "Sit in a mid-block, defend tightly, and break fast through Salah and Marmoush. Probably Salah's WC swansong — they'll need to be at their absolute best.",
+  "tactics": "Defend deep and man-mark in a 5-4-1, then break fast through Salah and Marmoush; in possession, switch quickly to find space. They'll need Salah at his best to finally escape a World Cup group.",
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group G (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }
