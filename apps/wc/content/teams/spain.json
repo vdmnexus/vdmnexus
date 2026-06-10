@@ -1,28 +1,35 @@
 {
-  "summary": "Reigning European champions in a fluid 4-3-3 / 4-2-3-1 that dominates possession with purpose — but the risky rest-defence leaves them open to counters.",
-  "style": "4-3-3 / 4-2-3-1 with fluidity — wide players 1v1, fullbacks high & wide (wingers roll inside), five always across the front-line, dominate possession with purpose, risky rest-defence to counter-press.",
+  "summary": "Pre-tournament favourites and reigning European champions, chasing the Euro+World Cup double under Luis de la Fuente. Flawless lately — 21 goals and just 2 conceded in qualifying, scoring at three a game since 2023, with one 'loss' in three years (a Nations League final shootout to Portugal). A well-defined, all-controlling possession side.",
+  "style": "Fluid 4-3-3 / 4-2-3-1 — build with a three-man defence plus a deep midfielder (Zubimendi), two midfielders pushing on and full-backs joining to leave five or six across the opposition line. Constant rotations and incisive, penetrative passing through midfield. No classic No 9 (Ferran Torres, Oyarzabal drift in and out); midfielders arrive late onto cut-backs and crosses.",
   "counterReliance": {
     "tier": "low",
-    "note": "Dominate possession — they counter-press, not counter"
+    "note": "All-controlling possession; counter-press rather than counter"
   },
   "strengths": [
-    "Dominant, purposeful possession",
-    "Five always across the front-line with rolling wingers",
-    "Aggressive counter-press to win it back"
+    "Dominant, purposeful possession with synchronised movement that prises defences apart",
+    "Deep squad steeped in the style — 15 of the 26 played U21 under De la Fuente; Rodri, Pedri, Fabián in midfield",
+    "Elite counter-press and rest-defence positioning — most final-third ball recoveries at Euro 2024"
   ],
   "weaknesses": [
-    "Risky rest-defence — open to counters (need to win the ball back first)"
+    "Brave, risky rest-defence (two CBs while both full-backs push on) — exposed if the ball is lost",
+    "Best route to hurt them: win physical duels high up and counter the exposed defence"
   ],
   "keyPlayers": [
     {
       "name": "Lamine Yamal",
-      "role": "RW",
-      "note": "Goals & assists, direct dribbling, through-passing & crosses — lit up the Euros at 16/17 and ready for the World stage"
+      "role": "Winger (Barcelona)",
+      "note": "At 18, the world's best dribbler — unpredictable, slaloms through challenges and opens space for others; a hamstring issue may limit his early group games"
+    },
+    {
+      "name": "Pedri",
+      "role": "Midfield",
+      "note": "The metronome of the positional play, dictating tempo through the middle"
     }
   ],
-  "tactics": "Dominate the ball, keep five across the front and counter-press aggressively. The risky rest-defence is the way to hurt them — if you can get the ball first.",
+  "tactics": "Control the game, keep five across the front and rotate to unlock space, then smother any loss with the counter-press. Cede them the ball and the passing and pressing will suffocate you; the only real opening is their committed rest-defence — if you can win possession first.",
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group H (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }

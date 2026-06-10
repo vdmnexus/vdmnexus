@@ -1,28 +1,36 @@
 {
-  "summary": "Marcelo Bielsa's Uruguay — aggressive, exciting and chaotic in a 4-3-3, with counter-press goals but a risky rest-defence that concedes late. Bring it on.",
-  "style": "4-3-3 under Bielsa — attacking wide & crosses into the box, aggressive build, third-man & combination play, counter-press & counter-attacking goals.",
+  "summary": "Marcelo Bielsa's Uruguay — aggressive, intense and brave against the biggest sides. All-out tactics built on hard running and fearless man-to-man marking, swarming the ball and crunching into tackles, but able to sink into a deep block and counter. They beat world champions Argentina in November 2023 with this mix.",
+  "style": "Shapeshifting around a 5-3-2 — midfielders follow pass receivers man-to-man, wide centre-backs step out to plug gaps, and wingers (Pellistri, Maxi Araújo) drop to full-back to form a back five. Commit men high to force turnovers (most high turnovers in South American qualifying), or sink into a barricaded back-seven to ride pressure and break.",
   "counterReliance": {
     "tier": "medium",
-    "note": "Counter-press & counter-attack goals, but aggressive build-first"
+    "note": "Aggressive man-to-man press + counter; can also defend deep and break"
   },
   "strengths": [
-    "Aggressive build and third-man combination play",
-    "Counter-press and counter-attacking goals",
-    "Wide attacking play and crossing"
+    "Relentless pressing and man-to-man intensity — forces the most high turnovers in CONMEBOL",
+    "Tactical flexibility — swarm high or barricade deep, then counter",
+    "Midfield grit and physical conditioning to sustain the energy",
+    "Proven big-game pedigree (beat Argentina in 2023)"
   ],
   "weaknesses": [
-    "Risky rest-defence — open to transition goals and conceding late critical goals"
+    "Without Cavani and Suárez for the first time since 2006 — less attacking firepower",
+    "Throwing men forward leaves space if a pass is misplaced or a runner doesn't recover"
   ],
   "keyPlayers": [
     {
       "name": "Maxi Araújo",
-      "role": "Winger",
-      "note": "9 goal contributions for Sporting, creative with end product (30 chances created), 4 assists in qualifying"
+      "role": "Winger/wing-back (Sporting CP)",
+      "note": "Fired-up box-to-box presence — aggressive 1v1 defender and powerful runner who times late runs and strikes left-footed; the engine of the wide press"
+    },
+    {
+      "name": "Rodrigo Bentancur",
+      "role": "Midfield",
+      "note": "Storms out to press and anchors the man-to-man scheme that defines Bielsa's shape"
     }
   ],
-  "tactics": "Classic Bielsa — aggressive, combinative and relentless, winning it back high and breaking fast, at the cost of an open rest-defence. Always among the most exciting, if not always the winners.",
+  "tactics": "Press man-to-man and swarm the ball to win it high, or drop into a deep block to draw teams on and counter; flood the centre when in control. Always among the most exciting watches — but the aggression opens spaces, so they must be cautious against pace, especially vs Spain in the final group game.",
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group H (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }
