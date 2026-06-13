@@ -1,26 +1,46 @@
 {
-  "summary": "Reigning world champions and the model's clear favourite (champ 24.9% vs a 9% market). A settled, tournament-hardened core under Lionel Scaloni built around the best player of his generation.",
-  "style": "Flexible 4-3-3 / 4-4-2, comfortable controlling games through midfield but lethal in transition; compact mid-block out of possession.",
-  "counterReliance": { "tier": "medium", "note": "Mid-block into counter — finds Messi & Álvarez vertically and fast" },
+  "summary": "Reigning world champions and the model's clear favourite (champ ~25% vs a ~9% market), FIFA 3rd, topping CONMEBOL qualifying nine points clear. A tournament-hardened core under Lionel Scaloni — World Cup 2022 sandwiched by back-to-back Copa Américas — built around a robust spine (E. Martínez, Otamendi, De Paul, J. Álvarez) and, when fit, Messi.",
+  "style": "Nominal 4-3-3 with fluidity going forward — full-backs Tagliafico and Molina stretch the pitch and push high, enabling central rotations (midfielders dropping to build, attackers coming narrow for quick combinations). Wide overloads let Enzo Fernández and Mac Allister crash the box onto crosses and cutbacks, with late Messi runs and the last-line threat of Álvarez/Lautaro.",
+  "counterReliance": {
+    "tier": "medium",
+    "note": "Controls through midfield but lethal vertically; mid-block out of possession"
+  },
   "strengths": [
-    "Elite tournament experience and a winning spine that has been together since 2021",
-    "Midfield control with De Paul / Mac Allister / Fernández dictating tempo",
-    "Match-winners in the final third who decide tight knockout games"
+    "Elite tournament experience and a winning spine together since 2021",
+    "Midfield control (De Paul, Mac Allister, Fernández) plus full-back width for cutback chances",
+    "Match-winners from all angles — Messi's creation, box-crashing 8s, Álvarez/Lautaro on the last line",
+    "Emiliano Martínez's shootout edge in the knockouts"
   ],
   "weaknesses": [
-    "Ageing in key areas — fitness over a seven-game run is a question",
-    "Full-back depth thinner than the rest of the squad"
+    "Ageing in key areas — fitness across a long run is a question; full-back depth thinner",
+    "Tend to start slowly (1-1 v Iceland 2018, 1-2 loss to Saudi Arabia 2022) before finishing strongly"
   ],
   "keyPlayers": [
-    { "name": "Lionel Messi", "role": "Free 10 / right forward", "note": "The model's single biggest swing factor — creation and finishing in one player" },
-    { "name": "Alexis Mac Allister", "role": "Left 8", "note": "Two-way engine linking defence to attack" },
-    { "name": "Emiliano Martínez", "role": "Goalkeeper", "note": "Shootout edge in the knockouts" }
+    {
+      "name": "Lionel Messi",
+      "role": "Free 10 / right forward",
+      "note": "The single biggest swing factor — across the 2021-22 winning runs, 21% of attacking-third touches and 28% of chances created. Most World Cup games ever; four goals from passing Klose's all-time record; a record sixth tournament"
+    },
+    {
+      "name": "Julián Álvarez",
+      "role": "Forward",
+      "note": "Heir to the focal role — intelligent off-ball decoy runs (support runs/dropping off) that open space for the rotating attack"
+    },
+    {
+      "name": "Emiliano Martínez",
+      "role": "Goalkeeper",
+      "note": "Shootout specialist — the knockout edge"
+    }
   ],
-  "tactics": "Happy to let lesser sides have the ball and strike on the counter, but can also patiently break down a low block through Messi drifting into pockets. Set-piece threat from a tall back line. The plan rarely changes; the personnel adapt to the opponent.",
-  "mismatch": "Vulnerable to high-energy pressing sides that deny the midfield time; dominant against teams that try to play open, end-to-end football.",
-  "xFactor": "Messi's fitness and minutes management across a 39-day tournament.",
+  "tactics": "Let lesser sides have the ball and strike vertically, or patiently break a low block via Messi in pockets and full-back overloads into cutbacks. The plan rarely changes; the personnel adapt to the opponent.",
+  "mismatch": "Vulnerable to high-energy pressing sides that deny the midfield time; dominant against teams that play open, end-to-end football.",
+  "xFactor": "Messi's fitness and minutes management across a 39-day tournament in tough conditions.",
   "notes": [
-    "Edit or delete this file freely — it is here as a worked example of the knowledge-base schema (see _template.json)."
+    "21-year-old Como creator Nico Paz is the exciting young wildcard in the squad.",
+    "History suggests an early group slip needn't derail them — they've recovered from slow starts to go deep before."
   ],
-  "updated": "2026-06-04"
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group J (5 Jun 2026)"
+  ],
+  "updated": "2026-06-05"
 }

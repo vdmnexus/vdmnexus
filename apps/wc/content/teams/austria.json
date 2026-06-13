@@ -1,28 +1,37 @@
 {
-  "summary": "A varied, fluid 4-2-3-1 (sometimes 4-4-2, 4-2-4 or 4-2-2-2) with wide play, fluid rotations and a man-for-man, high-risk approach at the back.",
-  "style": "Fluid 4-2-3-1 (also 4-4-2 / 4-2-4 / 4-2-2-2) — wide play & crosses, fluid rotations (FB inverted, wingers wide), front-four central combining with fullbacks wide.",
+  "summary": "At a World Cup for the first time in 28 years under Ralf Rangnick, who has them resembling a club side more than an international one — intense, Red Bull-style football. At Euro 2024 they were the most transitional team in the tournament: the highest pressing intensity (lowest PPDA) combined with a high volume of direct attacks.",
+  "style": "Fluid 4-2-3-1 (also 4-4-2 / 4-2-4 / 4-2-2-2) with aggressive man-oriented pressing and rapid counter-attacks — swarm the ball, win it high, and spring forward fast (a Posch goal vs San Marino came within seven seconds of the regain). Fluid attacking rotations with full-backs providing width and the front four combining centrally.",
   "counterReliance": {
-    "tier": "low",
-    "note": "Possession & rotation, counter-press first"
+    "tier": "medium",
+    "note": "Transitional both ways — elite press intensity AND many counter-attacks (Euro 2024)"
   },
   "strengths": [
-    "Fluid attacking rotations and wide play",
-    "Front-four combinations with fullbacks providing width",
-    "Counter-pressing rest-defence"
+    "Tournament-leading pressing intensity (lowest PPDA at Euro 2024) — a relentless, coordinated press",
+    "High direct-attack volume — dangerous on the counter, a profile comparable to Germany, Portugal and Spain",
+    "A deep, high-quality midfield (Sabitzer, Laimer, Schlager, plus young Seiwald and Wanner)",
+    "Clear collective identity over individual reliance"
   ],
   "weaknesses": [
-    "Man-for-man, risk-vs-reward at the back"
+    "Man-for-man defending is high-reward but high-risk",
+    "Among the oldest European squads (avg age 29.1) — can they sustain the all-action style in heat?",
+    "Lost the connecting Christoph Baumgartner to a thigh injury — a big miss"
   ],
   "keyPlayers": [
     {
-      "name": "Christoph Baumgartner",
-      "role": "CAM",
-      "note": "21 goal involvements in the Bundesliga, 37 chances created, 19 goal involvements in 31 Austria appearances"
+      "name": "Marcel Sabitzer",
+      "role": "Midfield",
+      "note": "Experienced head in Austria's strongest department — the engine of the press-and-transition game"
+    },
+    {
+      "name": "Marko Arnautović",
+      "role": "Forward",
+      "note": "Veteran (37) and qualifying top scorer with 8 goals — still the focal point up top"
     }
   ],
-  "tactics": "Rotate fluidly, get fullbacks wide and combine centrally with the front four, pressing to win it back. The man-for-man defending is high-reward but high-risk.",
+  "tactics": "Press man-to-man to win it high, then break at speed — the Red Bull blueprint applied to a national team. The risk is the man-oriented defending and an older squad's legs in testing conditions, but few sides match their intensity.",
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group J (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }

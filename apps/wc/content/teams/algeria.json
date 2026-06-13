@@ -1,29 +1,36 @@
 {
-  "summary": "An attacking 4-3-3 with dangerous movement in behind and a good high-press — but real defensive frailties in build-up and set-play defending.",
-  "style": "4-3-3 — fluid movements into wide areas, crosses into the box, dangerous in behind, good structure & high-press.",
+  "summary": "Among the most tournament-ready in the group after reaching the AFCON quarter-finals in January. Under Vladimir Petković, a transition threat — especially in wide areas — built on the running power of a young, talented attack, though with build-up and set-piece-defending frailties to fix.",
+  "style": "A 4-3-3 (also 4-1-4-1 / 4-2-3-1) with dangerous movement in behind and a good high press. The wide runners (Chaibi, Amoura, Mahrez) stretch the pitch then drive inside to cross or finish, and the side is at its best threading through balls in behind for off-ball runs beyond the defence.",
   "counterReliance": {
     "tier": "medium",
-    "note": "Dangerous in behind off a high press"
+    "note": "Transition threat in wide areas off a high press; dangerous in behind"
   },
   "strengths": [
-    "Dangerous movement in behind",
-    "Good structure and high-press",
-    "Fluid wide movements and crossing"
+    "Pace and running power out wide (Chaibi, Amoura, Mahrez) that drive inside to finish",
+    "Dangerous through balls in behind for off-ball runners",
+    "Good high press and a young, talented core (Aït-Nouri, Maza, Chaibi all 25 or under)"
   ],
   "weaknesses": [
-    "Weak in build-up",
-    "Weak in set-play defending"
+    "Weak in build-up — can be pressed into errors",
+    "Weak set-piece defending",
+    "Captain Mahrez, 35, with powers waning"
   ],
   "keyPlayers": [
     {
       "name": "Mohamed Amoura",
-      "role": "LW/CAM",
-      "note": "Quick, direct dribbler with a great leap and final-third creativity — 11 goal involvements in the Bundesliga, 14 for Algeria in qualifying"
+      "role": "Forward (left/centre)",
+      "note": "10 goals in qualifying — more than any other African player; versatile and blistering quick, with an unpredictable, varied shotmap"
+    },
+    {
+      "name": "Luca Zidane",
+      "role": "Goalkeeper",
+      "note": "Son of Zinedine; switched eligibility to Algeria in September 2025 — set to play a World Cup almost 20 years after his father's last"
     }
   ],
-  "tactics": "Press high, move fluidly into wide areas, cross and run in behind. If they fix the build-up and set-piece defending frailties, they could really make a stab at this.",
+  "tactics": "Press high, move fluidly into wide areas, and break in behind with the front-line's pace — threading through balls for runners beyond the line. Fix the build-up and set-piece-defending frailties and they could make a real stab at the knockouts.",
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group J (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }
