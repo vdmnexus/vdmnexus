@@ -1,0 +1,5 @@
+match,group,fixture,model_pick,model_pct,outcome,hit,rps_model,rps_clim
+M01,A,Mexico 2-0 South Africa,H,53/30/17,H,Y,0.1224,0.2312
+M02,A,South Korea 2-1 Czech Republic,H,39/30/31,H,Y,0.2341,0.2312
+M03,B,Canada 1-1 Bosnia and Herzegovina,H,56/28/16,D,N,0.1696,0.1312
+M04,D,United States 4-1 Paraguay,A,29/33/38,H,N,0.3242,0.2312
