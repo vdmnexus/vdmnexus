@@ -1,25 +1,43 @@
 {
-  "summary": "Loaded with players hitting their peak years — a 4-3-3 / 4-4-2 that crosses to Sørloth & Haaland and is deadly in transition. Their best chance to do something special.",
-  "style": "4-3-3 / 4-4-2 — wing-play 1v1 (if 4-3-3, Sørloth rolls inside as a 2nd CF), crosses into Sørloth & Haaland, deadly in transition and in behind, with defensive discipline & rest-defence.",
+  "summary": "Back at a World Cup for the first time since 1998 with a genuine golden generation. Under Ståle Solbakken they outscored everyone in qualifying (37 goals), scoring in flurries while becoming more solid defensively. Built around Erling Haaland — and deadly on the counter.",
+  "style": "A lop-sided 4-3-3 with Sørloth as a wide forward off the right (hard-running Ryerson behind him). Super strengths are wide crosses and counter-attacks: dribbly wingers Nusa and Schjelderup whip inswingers, left-back Wolfe supplies the final ball, and Sørloth + Haaland give two aerial targets. Build varies — short from Nyland or long to Sørloth with midfielders on the second balls — and Ødegaard threads through balls for Haaland. Defends in a 4-1-4-1 mid-block so Haaland conserves energy.",
   "counterReliance": {
-    "tier": "medium",
-    "note": "Deadly in transition & in behind, but crosses to big strikers too"
+    "tier": "high",
+    "note": "Mid-block then lethal counters — most counter goals in European qualifying"
   },
   "strengths": [
-    "Crossing to Sørloth & Haaland",
-    "Deadly in transition and in behind",
-    "Defensive discipline and rest-defence"
+    "Two elite aerial/box threats (Haaland, Sørloth) fed by high-quality crossing",
+    "Devastating in transition — seven counter-attack goals in qualifying, the most in Europe",
+    "Ødegaard's killer passing, especially through balls for Haaland",
+    "A peak-years core and a prolific, in-flurries attack (37 goals in qualifying)"
+  ],
+  "weaknesses": [
+    "Struggles against a high press — the defensive line is too passive to press-breaking passes over midfield"
   ],
   "keyPlayers": [
     {
-      "name": "Antonio Nusa",
-      "role": "LW",
-      "note": "Goals, assists & creativity — pacey, skilful dribbler who works back and counters at speed"
+      "name": "Erling Haaland",
+      "role": "Centre-forward",
+      "note": "The team is built around him — the finisher at the end of the crosses and counters"
+    },
+    {
+      "name": "Martin Ødegaard",
+      "role": "Attacking mid (Arsenal)",
+      "note": "Creator-in-chief — pulls wide to release Haaland or Ryerson; top assister in European qualifying (7)"
+    },
+    {
+      "name": "Julian Ryerson",
+      "role": "Right-back (Dortmund)",
+      "note": "Under-the-radar menace — 15 assists this season; lethal on the overlap with a long throw too"
     }
   ],
-  "tactics": "Get the wide players 1v1, cross to the strikers and break at pace in transition, all on a disciplined defensive base. So much potential and a peak-years core — their best chance to do something special.",
+  "tactics": "Sit in a 4-1-4-1 to conserve Haaland, then spring counters and whip crosses to the big men; let Ødegaard pick the lock. The way to trouble them is a sustained high press over the top of their passive line.",
+  "notes": [
+    "First major tournament since Euro 2000; Solbakken played in that one."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group I (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }

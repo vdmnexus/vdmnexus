@@ -1,25 +1,44 @@
 {
-  "summary": "Probably the best team at the tournament — an off-the-cuff 4-2-3-1 with front-four freedom and transition goals at pace. If it clicks, unstoppable.",
-  "style": "4-2-3-1 — front-four freedom to create, 1v1 wing play, fullbacks under/overlapping to cross, transition goals at pace, structure over press.",
+  "summary": "2018 winners and 2022 finalists, chasing a historic third consecutive World Cup final under Didier Deschamps (his fourth and final tournament, coach since 2012). Pragmatic but effective — 13 wins in 18 since the Euro 2024 semi-final, including victories over Brazil and Colombia — with unrivalled attacking depth.",
+  "style": "4-2-3-1, with Deschamps constantly shuffling his forwards around Kylian Mbappé at No 9 (Kolo Muani, Thuram, Ekitike fitted in wide). Physically imposing — threatens with back-post crosses and cuts teams apart on the counter. Can press high or sit deep, rotates positions, and likes one-twos in build-up.",
   "counterReliance": {
     "tier": "medium",
-    "note": "Transition goals at pace, structure over press"
+    "note": "Structure-first; devastating transitions at pace"
   },
   "strengths": [
-    "Front-four freedom and combination play",
-    "Transition goals at pace",
-    "Structure-first defending"
+    "Elite attacking depth with a flexible, rotating front line around Mbappé",
+    "Physical presence and back-post crossing plus lethal counter-attacks",
+    "Tactical flexibility — high press or deep block",
+    "Mike Maignan in outstanding form behind it all"
+  ],
+  "weaknesses": [
+    "Creativity/finishing questions linger from Euro 2024 (4 goals in 6, just one in open play)",
+    "Shaky run in the 2024-25 Nations League (5-1 down to Spain, recovered deficits vs Croatia)"
   ],
   "keyPlayers": [
     {
-      "name": "Michael Olise",
-      "role": "RW",
-      "note": "Goals & creativity, a 1v1 specialist with work-rate & press"
+      "name": "Kylian Mbappé",
+      "role": "Centre-forward",
+      "note": "The focal point — top scorer in qualifying (5); 56 in 97 caps, one short of equalling Giroud's France record"
+    },
+    {
+      "name": "Mike Maignan",
+      "role": "Goalkeeper (Milan)",
+      "note": "Career-best season — 14 clean sheets and the 3rd-best post-shot xG of any top-five-league keeper (~13 goals prevented above average)"
+    },
+    {
+      "name": "Ousmane Dembélé",
+      "role": "Forward (PSG)",
+      "note": "2025 Ballon d'Or winner; kept wide to accommodate Mbappé, but tempting for his pressing and passing"
     }
   ],
-  "tactics": "Free the front four, get wingers 1v1 with fullbacks crossing, and break at pace from a structured base. A vibe of combination play and improvisation — if they put it all together, hard to stop.",
+  "tactics": "Build around Mbappé at No 9, rotate the forwards, and break at pace from a structured base — pressing high or sitting deep as the game demands. The talent and defence are elite; the open question is whether the creativity and finishing have improved since Euro 2024.",
+  "notes": [
+    "Only Brazil (1994-2002) and West Germany (1982-1990) have reached three straight World Cup finals."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group I (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }

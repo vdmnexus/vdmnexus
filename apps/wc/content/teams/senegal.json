@@ -1,28 +1,44 @@
 {
-  "summary": "A hybrid 4-4-2 / 4-2-3-1 built on wide combinations and pace in behind, pressing and countering — but exploitable in wide defensive areas.",
-  "style": "4-4-2 / 4-2-3-1 hybrid — wide combination play, crosses into the box, exploit pace in behind, press & counter.",
+  "summary": "Well-drilled tournament navigators under Pape Thiaw (in charge since December 2024) — they won 1-0 in the quarter, semi and final of the 2025 AFCON, only to have the title controversially stripped in March (players walked off in protest at a Morocco penalty). A high-pressing, control-oriented 4-3-3 seeking redemption.",
+  "style": "High-pressing 4-3-3 that defends on the front foot, with midfielders jumping quickly onto central passes from a mid-block. Sadio Mané drifts inside from the left (Ndiaye/Mbaye mirror on the right), attacking full-backs provide width, and Idrissa Gueye drops between the centre-backs. Wants control and threatens with early balls into the half-spaces.",
   "counterReliance": {
     "tier": "medium",
-    "note": "Press & counter, exploit pace in behind"
+    "note": "Front-foot press and control; real counter threat off regains"
   },
   "strengths": [
-    "Wide combination play and crossing",
-    "Pace in behind to exploit",
-    "Press and counter"
+    "Possession control — 2nd at AFCON (61.1%) and 2nd for big chances created",
+    "High press and quick midfield jumps onto central passes",
+    "Early balls into the half-spaces to release runners (twice vs England in a 3-1 win)",
+    "Tournament know-how and a proven comeback streak"
   ],
   "weaknesses": [
-    "Could be exploited defensively in wide areas"
+    "Tendency to overplay in their own half — high-pressing teams can force turnovers",
+    "An ageing core (Mané, Koulibaly, Mendy, Gueye all mid-30s) likely at their final World Cup"
   ],
   "keyPlayers": [
     {
+      "name": "Sadio Mané",
+      "role": "Forward",
+      "note": "All-time top scorer (55) and the attack's reference point; clutch from the spot — 16 of 19 penalties, all of the last nine"
+    },
+    {
       "name": "Iliman Ndiaye",
-      "role": "Winger",
-      "note": "Goals, creativity and assists — pace, dribbling and an excellent crosser"
+      "role": "Winger (Everton)",
+      "note": "Outstanding dribbler and creator from the right"
+    },
+    {
+      "name": "Pape Gueye",
+      "role": "Midfield (Villarreal)",
+      "note": "The secret weapon — long-range left-foot shooting (the AFCON match-winner vs Morocco)"
     }
   ],
-  "tactics": "Combine wide, cross into the box, and break with pace in behind while pressing aggressively. Could be a very exciting WC if they sort the wide defending.",
+  "tactics": "Press on the front foot, control the ball, and slip runners in behind via early half-space balls; back themselves to come from behind when needed. The vulnerability is overplaying out of their own half against an organised press.",
+  "notes": [
+    "Three of the last four AFCON finals; chasing their best World Cup run since the 2002 quarter-finals."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group I (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }

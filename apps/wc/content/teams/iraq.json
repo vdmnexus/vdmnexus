@@ -1,28 +1,39 @@
 {
-  "summary": "Back at a World Cup after a long wait — a direct, set-piece-deadly 4-4-2 / 4-2-3-1 / 4-2-2-2 mash-up that drops into a mid-to-low block.",
-  "style": "4-4-2 / 4-2-3-1 / 4-2-2-2 mash-up — direct play for territory, wide & cross, attack the box in numbers; drop into a mid-to-low block.",
+  "summary": "Back at the World Cup 40 years after their sole appearance, sealing it via the inter-continental play-off (2-1 over Bolivia). Graham Arnold — who took Australia to the 2022 Round of 16 — brought the same blueprint: stubborn defensively, dangerous at set pieces, direct with the ball. A genuine banana skin (1-1 friendly with Spain).",
+  "style": "Variations of a 4-4-2 (sometimes proper wingers, sometimes a diamond) with two No 9s (Al-Hamadi, Hussein) doing lots of sideways running to block central passes in a compact mid-block. Limited possession and low-risk build-up concentrated to the wings; set pieces are the main route to goal, with a real aerial threat from the two strikers.",
   "counterReliance": {
     "tier": "medium",
-    "note": "Direct for territory, deep block, set-piece focus"
+    "note": "Compact block, direct for territory, set-piece-led"
   },
   "strengths": [
-    "Deadly from set-plays",
-    "Direct play for territory and crossing in numbers",
-    "Mid-to-low block (12 cleansheets)"
+    "Stubborn, disciplined mid-block (10 clean sheets in qualifying)",
+    "Deadly from set pieces — most of their play-off goals came from dead balls",
+    "Two-striker aerial threat that troubles attack-minded opponents",
+    "Direct, low-risk approach that's hard to break down (took 75+ minutes to crack Thailand, Indonesia, Jordan)"
   ],
   "weaknesses": [
-    "Could struggle if they can't get the defensive block right"
+    "Very limited in possession — reliant on set pieces and a slice of luck to score",
+    "Underdogs of the group; little margin if the block is breached"
   ],
   "keyPlayers": [
     {
-      "name": "Ali Jasim",
-      "role": "Winger",
-      "note": "Creative dribbler & crosser, technically proficient — a young, exciting prospect"
+      "name": "Jalal Hassan",
+      "role": "Goalkeeper / captain",
+      "note": "35, debuted in 2011 — 10 clean sheets in qualifying, joint-most in the Asian confederation"
+    },
+    {
+      "name": "Ali Al-Hamadi",
+      "role": "Striker (Luton)",
+      "note": "Half of the two-No-9 pairing — aerial threat and a blocker of central passes out of possession"
     }
   ],
-  "tactics": "Go direct for territory, get wide and cross, attack the box in numbers and play for set-pieces, all behind a deep block. The defensive structure will decide their tournament.",
+  "tactics": "Sit compact, go direct for territory, and play for set pieces behind a stubborn block — exactly the formula Arnold rode to the knockouts with Australia. Don't expect champagne football, but they could be a real banana skin in a strong group.",
+  "notes": [
+    "Arnold took over after Jesús Casas was sacked in March 2025; this is only his ~13th match in charge."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group I (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }
