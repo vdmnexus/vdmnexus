@@ -1,25 +1,43 @@
 {
-  "summary": "A comfortable low-block 3-4-2-1 that gets the 10s 1v1 and overlaps the wing-backs to cross — excellent at the top end but with issues to fix.",
-  "style": "3-4-2-1 — play to get the wingers (10s) 1v1, overlapping FBs & WBs, crosses into the box, central block structure, comfortable low-block defending.",
+  "summary": "A rising force under Thomas Christiansen (in charge since 2020), now FIFA 33rd after peaking at 29th in 2025 — and ranked above Ghana. Gold Cup finalists (2023) and CONCACAF Nations League finalists (2025), with knockout wins over the USA in both that NL run and the 2024 Copa América. Not the side England beat 6-1 in 2018.",
+  "style": "Simple but effective — a 5-2-3 / 5-4-1 out of possession that becomes a 3-2-5 in possession as the wing-backs push on. Not swashbuckling (five CONCACAF sides outscored them in qualifying), but robust, organised and hard to break down.",
   "counterReliance": {
     "tier": "medium",
-    "note": "Comfortable low-block — can spring from deep"
+    "note": "Compact five-man block; wing-backs push to build a 3-2-5"
   },
   "strengths": [
-    "Comfortable low-block defending",
-    "1v1 creators and overlapping wing-backs",
-    "Crossing into the box and a strong top end of the pitch"
+    "Robust, well-drilled defensive structure that frustrates better sides",
+    "Real big-game pedigree — beat the USA in the 2024 Copa group and the 2025 NL semi",
+    "A creative fulcrum in Carrasquilla and a steadying leader in Godoy"
+  ],
+  "weaknesses": [
+    "Limited attacking output — among the lower scorers in CONCACAF qualifying",
+    "Step up in quality against a strong Group L"
   ],
   "keyPlayers": [
     {
-      "name": "José Luis Rodríguez",
-      "role": "CAM",
-      "note": "Goals, assists and creativity — excellent dribbler (64.6%) and a great crosser"
+      "name": "Aníbal Godoy",
+      "role": "Midfield / captain",
+      "note": "The glue — Panama's most-capped player ever (159), the coach on the pitch through a tricky group"
+    },
+    {
+      "name": "Adalberto Carrasquilla",
+      "role": "Midfield (Pumas UNAM)",
+      "note": "The creative fulcrum — 37 open-play chances created, the most of any Pumas player this season"
+    },
+    {
+      "name": "Cecilio Waterman",
+      "role": "Forward",
+      "note": "Big-moment scorer — the stoppage-time winner that knocked the USA out of the 2025 Nations League semi"
     }
   ],
-  "tactics": "Defend comfortably in a low-block, then get the 10s 1v1 and overlap to cross. A very hard group — they'll be up against the quality, but you just never know.",
+  "tactics": "Defend deep and compact in a five, then push the wing-backs to build a 3-2-5 and create through Carrasquilla. They won't overwhelm anyone, but the organisation and knockout-pedigree mean they shouldn't be underestimated.",
+  "notes": [
+    "FIFA ranking has soared from the 70s-80s in 2019-20 to 33rd now — a different proposition to their 2018 debut."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group L (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }

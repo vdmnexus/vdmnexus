@@ -1,29 +1,44 @@
 {
-  "summary": "A 3-4-2-1 built on 1v1 10s and overlapping wing-backs, excellent at the top end but very open in the press — issues to fix to give a good account.",
-  "style": "3-4-2-1 — play to get the wingers (10s) 1v1, overlapping FBs & WBs, crosses into the box, central block structure needed.",
+  "summary": "An enigma — topped their World Cup qualifying group early, then lost four friendlies in a row (Japan, South Korea, Austria, Germany), costing Otto Addo his job 78 days before the tournament. Veteran Carlos Queiroz (73, four previous World Cups with Portugal and Iran) takes over with a brief to tighten things up so the pacy wingers can counter.",
+  "style": "Switches between a back three and a back four; Queiroz's priority is defensive solidity to spring counter-attacks at speed through quick, direct wingers. An exciting top end of the pitch, but profligate at times and over-reliant on captain Jordan Ayew for the attacking output.",
   "counterReliance": {
-    "tier": "medium",
-    "note": "Get the 10s 1v1 and overlap to cross"
+    "tier": "high",
+    "note": "Tighten up and counter at speed through pacy wide men"
   },
   "strengths": [
-    "1v1 creators and overlapping wing-backs",
-    "Crossing into the box",
-    "Excellent at the top end of the pitch"
+    "Pace and 1v1 quality out wide (Semenyo, Kudus, plus Sulemana/Nuamah/Fatawu)",
+    "A genuine in-form goal threat in Semenyo",
+    "Topped a World Cup qualifying group with games to spare"
   ],
   "weaknesses": [
-    "Very open in the press",
-    "Central block structure needed"
+    "Defensively loose — four straight friendly defeats prompted a coaching change",
+    "Profligate; over-reliant on Jordan Ayew (14 goal involvements in qualifying)",
+    "Thomas Partey cannot enter the country and will miss the opening game; Kudus carrying a long-term hamstring concern"
   ],
   "keyPlayers": [
     {
+      "name": "Antoine Semenyo",
+      "role": "Winger (Man City)",
+      "note": "Best season of his career — 10 goals/3 assists earned a January move from Bournemouth, then the FA Cup final winner and a goal involvement every other game; clinical cutting into central areas"
+    },
+    {
       "name": "Jordan Ayew",
-      "role": "CAM",
-      "note": "Goals, assists and creativity — final pass, good dribbler, great crosser from set-plays"
+      "role": "Forward / captain",
+      "note": "Carries the attacking load — 7 goals and 7 assists in qualifying, far more than any team-mate"
+    },
+    {
+      "name": "Mohammed Kudus",
+      "role": "Winger",
+      "note": "Match-winning wide threat, but fitness a question after a long-term hamstring injury"
     }
   ],
-  "tactics": "Get the 10s 1v1 and overlap the wing-backs to cross. They need to tighten the press and central structure to give a great account of an excellent attacking side.",
+  "tactics": "Sit tighter under Queiroz and break at pace through the wide men — but they must fix the defensive looseness and spread the goal threat beyond Ayew. A new-manager bounce is the hope; the four-loss run is the warning.",
+  "notes": [
+    "Queiroz replaced Otto Addo just 78 days before the tournament after four consecutive friendly defeats."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group L (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }
