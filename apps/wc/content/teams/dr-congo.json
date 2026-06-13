@@ -1,25 +1,43 @@
 {
-  "summary": "A direct, transitional 4-3-3 that counters at speed and defends a central block. A very exciting time for the country, now on the biggest stage.",
-  "style": "4-3-3 (or variation) — direct and transitional play, counter at speed, in behind/wide and cross, with a central block structure.",
+  "summary": "At a World Cup for the first time since 1974 (as Zaire), reaching it the hard way — a 1-0 extra-time playoff win over Jamaica. Under Sébastien Desabre they maximise pace and physicality, and qualified with a stingy defence (seven wins in 10, just six goals conceded) — a world away from Zaire's 14-conceded group exit in '74.",
+  "style": "A 4-3-3 that, like Portugal, creates a five-on-four in attack — full-backs pushed ahead, attackers bunched close — and can be direct or play quick passing sequences from the back to free midfielders (a triangle vs Senegal sprung a switch to Bongonda, then an underlapping Wan-Bissaka and a Bakambu rebound). Out of possession, usually a passive, deep 4-4-2, sometimes a 4-1-4-1.",
   "counterReliance": {
     "tier": "high",
-    "note": "Direct, transitional, counter at speed"
+    "note": "Pace-and-physicality transitions off a deep central block"
   },
   "strengths": [
-    "Counter at speed in transition",
-    "Direct running in behind and crossing from wide",
-    "Solid central block"
+    "Stingy defence — only six conceded in qualifying",
+    "Pace and physicality on the break, with attackers bunched to spring switches",
+    "Quick passing sequences from the back to find midfielders in space"
+  ],
+  "weaknesses": [
+    "The 4-1-4-1 can be opened by players between the lines (too much for the lone holder)",
+    "Direct approach can leave them exposed on the counter themselves"
   ],
   "keyPlayers": [
     {
       "name": "Noah Sadiki",
-      "role": "CM",
-      "note": "Drives with the ball, tough-tackling duel-winner"
+      "role": "Midfield (Sunderland)",
+      "note": "21-year-old all-action engine after a strong PL debut season — snaps into tackles, roams to win it back, and a balanced carrier who keeps possession ticking"
+    },
+    {
+      "name": "Cédric Bakambu",
+      "role": "Striker (Real Betis)",
+      "note": "One goal from equalling the all-time record (22) — the finisher of the transitions"
+    },
+    {
+      "name": "Yoane Wissa",
+      "role": "Forward (Newcastle)",
+      "note": "Premier League goal threat to share the scoring load"
     }
   ],
-  "tactics": "Defend the centre, break directly at speed, and get in behind and cross. A very exciting moment for the country on the biggest stage of all.",
+  "tactics": "Defend a compact central block, break with pace and physicality into the five-on-four, and mix directness with sharp build-up passing. Congesting the space between the lines is the key to keeping technical teams (Portugal, Colombia) out.",
+  "notes": [
+    "First World Cup in 52 years; reached it via the inter-confederation playoff."
+  ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group K (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }

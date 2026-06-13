@@ -1,28 +1,38 @@
 {
-  "summary": "Debutants under a new manager — likely a direct 3-4-3 with inside 10s and high wing-backs, defending in a block to avoid space behind.",
-  "style": "3-4-3 (suspected under the new manager) — inside 10s & high wing-backs, crosses into the box, direct play; defend in a block to avoid space behind.",
+  "summary": "World Cup debutants (FIFA 50th) who finished second to Iran in qualifying. Timur Kapadze led them there but has since been replaced by Ballon d'Or winner Fabio Cannavaro, under whom they've leaned defensive — just five goals conceded in his first seven matches, anchored by Manchester City's Abdukodir Khusanov.",
+  "style": "Not expansive — often three central defenders dropping into a 5-4-1 without the ball, with the opposition retreating into their defensive third as the trigger to push more players (including defenders) forward. In possession, encouraged to play quick passes through the middle or over the top to the forwards, even when shorter options exist (the build-up to Shomurodov's goal vs Kuwait).",
   "counterReliance": {
     "tier": "medium",
-    "note": "Direct play, defends a block to deny space behind"
+    "note": "Defensive 5-4-1 block; quick vertical passing to the forwards"
   },
   "strengths": [
-    "Direct play with high wing-backs and inside 10s",
-    "Crossing supply to a proven goalscorer",
-    "Disciplined block to deny space behind"
+    "Strong, organised defence (5 conceded in Cannavaro's first 7) led by Khusanov",
+    "Direct, vertical supply through the middle or over the top to a proven goalscorer",
+    "Set-piece threat (two of three goals vs Gabon from dead balls)"
+  ],
+  "weaknesses": [
+    "Limited expansiveness — relies on its block and moments rather than control",
+    "Debutant step-up; a new manager bedding in close to the tournament"
   ],
   "keyPlayers": [
     {
+      "name": "Abdukodir Khusanov",
+      "role": "Centre-back (Man City)",
+      "note": "The defensive lynchpin of the debutants — pace and quality at the back that the whole system leans on"
+    },
+    {
       "name": "Eldor Shomurodov",
-      "role": "CF",
-      "note": "22 goals in Turkey, 9 international goal involvements in 16"
+      "role": "Striker",
+      "note": "All-time top scorer (44 in 91); coming off 23 goals in 2025-26 for İstanbul Başakşehir — the outlet for the vertical balls"
     }
   ],
-  "tactics": "Get the wing-backs high and the 10s inside, play direct and cross for Shomurodov, defending in a block. Khusanov is vital in defence — but he can't do it alone.",
+  "tactics": "Sit in a 5-4-1, stay compact, and break vertically to Shomurodov with quick passes through or over the top; threaten from set pieces. Cannavaro's defensive structure is the foundation for a debutant hoping to frustrate stronger sides.",
   "notes": [
-    "Hard to analyse precisely due to the new manager."
+    "Coach change since qualifying — Kapadze out, Fabio Cannavaro in."
   ],
   "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group K (5 Jun 2026)",
     "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
   ],
-  "updated": "2026-06-04"
+  "updated": "2026-06-05"
 }
