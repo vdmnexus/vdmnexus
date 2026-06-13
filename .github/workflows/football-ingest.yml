@@ -78,12 +78,22 @@ jobs:
         # FAIL here so the broken snapshot never reaches the live site.
         run: python3 -m polymarket_agent.selfcheck exports
 
+      - name: Refresh live calibration ledger (display/analysis only)
+        working-directory: agents/polymarket
+        # Re-scores the model's pre-match calls vs the results logged in
+        # refdata/wc26_played.csv (RPS vs a fixed prior) -> exports/
+        # wc26_calibration.csv. continue-on-error: a cosmetic tracker must
+        # never block the prediction commit.
+        continue-on-error: true
+        run: python3 -m polymarket_agent.wc26_calibrate
+
       - name: Commit refreshed predictions
         run: |
           git config user.name  "nexus-bot"
           git config user.email "bot@vdmnexus.com"
           git add agents/polymarket/exports/scores.json agents/polymarket/exports/tournament.json
           git add agents/polymarket/exports/team_profiles.json agents/polymarket/refdata/fotmob_xg_cache.json
+          git add agents/polymarket/exports/wc26_calibration.csv
           if git diff --cached --quiet; then
             echo "no prediction changes"
           else
