@@ -10,6 +10,32 @@ committed.
 
 ---
 
+## 0. Apply feedback from #nexus
+- Read messages in the `#nexus` Slack channel (id `C0BDPTS89QS`) posted since
+  the last run (use the most recent `planning/daily/` file's date; fall back to
+  last 24h).
+- Focus on messages from Dennis (dennis@vdmnexus.com) that are EXPLICIT
+  instructions reacting to the previous daily update — e.g. "drop task X",
+  "add Y", "do Z instead tomorrow", "reprioritise", or "update the business
+  plan: ...".
+- Apply with targeted edits (do not rewrite whole files):
+  - Task / plan changes → `planning/NEXT.md` and the current
+    `planning/daily/<date>.md` in this public `vdmnexus` repo.
+  - Business-plan changes → `business-plan.md` at the root of the PRIVATE
+    `vdmnexus/internal` repo, and ONLY when Dennis explicitly asks to change
+    the business plan. Never edit it from general discussion or anything that
+    isn't a clear instruction. If `business-plan.md` does not exist in
+    `vdmnexus/internal` yet, create it first with these sections (headings
+    only, brief seed text, content filled over time): Wedge / one-liner;
+    Problem; Product; Market & competition; Go-to-market; Business model;
+    Roadmap (pointer to CLAUDE.md); Regulatory / MiCA; Risks / kill-criteria;
+    Traction / metrics; Open questions.
+- NEVER write business-plan content into the public `vdmnexus` repo.
+- If a request is ambiguous, do NOT guess — note it and ask in the step-5
+  Slack summary instead of applying it.
+- Record what you changed; surface it in the step-5 Slack summary
+  ("Applied your changes: ...").
+
 ## 1. Gather
 
 - Find the most recent file in `planning/daily/` to determine the
@@ -19,6 +45,8 @@ committed.
   changed files, and CI status.
 - Read `STATUS.md` (in-flight branches) and the roadmap in `CLAUDE.md`
   (priorities + kill-criteria).
+- Read `business-plan.md` from the private `vdmnexus/internal` repo for
+  strategic context (if it exists).
 
 ## 2. Review
 
@@ -44,6 +72,9 @@ committed.
 - Update `STATUS.md` if branch states changed.
 - Commit on the current branch (`chore(planning): daily review <date>`)
   and push. Skip the commit if there are no changes.
+- Commit business-plan changes to the private `vdmnexus/internal` repo;
+  commit plan/task changes to the public `vdmnexus` repo. Keep each in its
+  own repo.
 
 ## 5. Notify Slack
 
@@ -67,3 +98,10 @@ committed.
 - Scheduled trigger uses UTC cron: `0 20 * * *` during CEST (summer,
   UTC+2) and `0 21 * * *` during CET (winter, UTC+1) — update the cron
   when DST changes so it stays at 22:00 local.
+- The business plan lives ONLY in the private `vdmnexus/internal` repo
+  (`business-plan.md`). Never commit business-plan content to the public
+  `vdmnexus` repo.
+- `business-plan.md` is changed ONLY on Dennis's explicit instruction —
+  never inferred from discussion.
+- Only Dennis's explicit instructions cause any file change in step 0;
+  ambiguous requests get asked back in Slack, not applied.
