@@ -85,6 +85,7 @@ committed.
   `full plan: planning/daily/<date>.md`.
 - Keep it skimmable. No @-mentions unless something is blocked and needs
   Dennis.
+- Plain text — avoid emoji (no ✅, checkmarks, or decorative icons). Use simple dashes for bullets. Status words like "merged" / "blocked" instead of emoji.
 - If nothing shipped, still post a one-liner:
   `quiet day, no merges — tomorrow: <plan>`.
 
@@ -105,3 +106,4 @@ committed.
   never inferred from discussion.
 - Only Dennis's explicit instructions cause any file change in step 0;
   ambiguous requests get asked back in Slack, not applied.
+- Keep Slack summaries plain and emoji-free.
