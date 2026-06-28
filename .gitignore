@@ -48,3 +48,15 @@ diag_*.py
 packages/sdk/vdm-nexus-sdk-*.tgz
 packages/x402/vdm-nexus-x402-*.tgz
 outreach/sendai-plugin/plugin-vdm-nexus/pnpm-lock.yaml
+
+# Keys & credentials (added to prevent accidental commits)
+*.key
+*.p8
+id_rsa
+id_rsa.*
+*.keypair.json
+*-keypair.json
+
+# Additional env files (keep .env.example tracked)
+.env.production
+.env.development
