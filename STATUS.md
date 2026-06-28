@@ -7,7 +7,7 @@ sessions. Every session updates its own row at start and end.
 
 | Branch | What | Started | Status | PR |
 |---|---|---|---|---|
-| _(no active branches — last merge: #74 mainnet-only homepage stats + Python SDK mainnet test wallet docs)_ | | | | |
+| _(no active branches — last merges: #115 daily-review loop + #116 .gitignore hardening, 2026-06-28)_ | | | | |
 
 ## Conventions
 
