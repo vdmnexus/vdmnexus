@@ -1,6 +1,6 @@
 # Prompt 00 — Daily Review & Plan Loop
 
-**Cadence:** End-of-day, ~18:00 daily (scheduled Claude Code session).
+**Cadence:** 22:00 Spain time (Europe/Madrid) daily (scheduled Claude Code session).
 **Branch:** the current session branch (e.g. `claude/slack-session-*`).
 **Outcome:** the day's work reviewed, tomorrow's plan committed to
 `planning/`, and a concise summary posted to `#nexus`.
@@ -64,3 +64,6 @@ committed.
 - Never schedule broadcasts and never post outside `#nexus`.
 - This session IS the model — do not route through the Nexus rail; just
   reason directly.
+- Scheduled trigger uses UTC cron: `0 20 * * *` during CEST (summer,
+  UTC+2) and `0 21 * * *` during CET (winter, UTC+1) — update the cron
+  when DST changes so it stays at 22:00 local.
