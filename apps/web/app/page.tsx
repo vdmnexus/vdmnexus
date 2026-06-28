@@ -94,7 +94,7 @@ const PAYWALL_BENEFITS = [
   "Ed25519 receipt of every response — verifiable end-to-end",
   "Per-call spend cap and loop detection, fail-closed by default",
   "Express, Hono, Next.js — pick your stack, three lines of glue",
-  "$VDM hooks wired today: discount, cashback, staking multiplier",
+  "$NEXUS hooks wired today: discount, cashback, staking multiplier",
 ];
 
 const PAYWALL_VS_VERGE: Array<{ label: string; us: string; them: string }> = [
@@ -102,7 +102,7 @@ const PAYWALL_VS_VERGE: Array<{ label: string; us: string; them: string }> = [
   { label: "Protocol fee", us: "0%", them: "0.5%" },
   { label: "Signed receipts", us: "SIR v2 — Ed25519", them: "—" },
   { label: "Self-host facilitator", us: "KMS-backed", them: "Yes" },
-  { label: "Token hooks", us: "$VDM (configurable)", them: "$VERGE" },
+  { label: "Token hooks", us: "$NEXUS (configurable)", them: "$VERGE" },
 ];
 
 const FOR_PLATFORMS = [
@@ -135,7 +135,7 @@ export default function Home() {
       <LastShippedStrip />
       <main>
         <Hero />
-        <FounderOrigin />
+        <LiveProof />
         <PrincipleStats />
         {launchLive() ? <NexusToken /> : null}
         <ProductGrid />
@@ -233,12 +233,14 @@ function Hero() {
   );
 }
 
+// TODO: founder voice copy pending from Dennis — re-add to Home() once written
 // Narrow founder-voice section between Hero and PrincipleStats. Lands the
 // "why this exists" hook in 30 seconds for hackathon judges, grant
 // officers, and cold visitors. Reference shape: Nova Wallet's "$300K
 // lost to malware" — a specific moment, a specific stake, the trigger.
-// The placeholder string is intentional — founder fills the prose before
-// the next public-surface PR; the visual treatment is production-ready.
+// NOT rendered by Home() — the body still holds a placeholder string, so the
+// component is intentionally pulled from the render flow until the real prose
+// lands. The visual treatment is production-ready.
 function FounderOrigin() {
   return (
     <section id="founder-origin" className="relative">
