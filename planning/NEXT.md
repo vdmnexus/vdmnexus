@@ -1,9 +1,9 @@
-# Tomorrow's plan — 2026-07-15
+# Tomorrow's plan — 2026-07-16
 
 Rolling pointer, overwritten in full by each daily run of
-`prompts/00-daily-review.md`. Full context: `planning/daily/2026-07-14.md`.
+`prompts/00-daily-review.md`. Full context: `planning/daily/2026-07-15.md`.
 
-1. **Decision needed on roadmap item 7** — fifteen days stale in this
+1. **Decision needed on roadmap item 7** — sixteen days stale in this
    loop. Either run `prompts/06-compliance-one-pager.md` directly, or
    tell this loop to drop it from the nightly plan.
 2. **Manual-submission backlog still open** — #2 (awesome-x402 +
@@ -16,4 +16,4 @@ Rolling pointer, overwritten in full by each daily run of
 4. **`business-plan.md` still missing in `vdmnexus/internal`** — worth
    an explicit go/no-go from Dennis on whether to seed it now.
 5. No new outreach/distribution branches until the backlog clears —
-   nine quiet days running is worth noticing, not just repeating.
+   ten quiet days running is worth noticing, not just repeating.
