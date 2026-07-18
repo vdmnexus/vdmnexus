@@ -1,0 +1,39 @@
+{
+  "summary": "Ranked 21st by FIFA but seeking a first-ever knockout berth (group exits in all six appearances since 1978). Under Amir Ghalenoei they sit deep and spring forward on the break — pragmatic and direct, with 'no expectations to win style points' (Ghalenoei called expansive football 'time-consuming').",
+  "style": "Sit deep and counter (without Egypt's man-to-man), attacking vertically and direct. Veterans keep it organised out of possession. Can play incisive short passes when afforded space — Taremi drifts wide and dovetails with the runs of winger Mohammad Mohebbi.",
+  "counterReliance": {
+    "tier": "high",
+    "note": "Deep block, vertical and direct on the counter"
+  },
+  "strengths": [
+    "Organised, experienced spine (Ghoddos, Ezatolahi; veterans Khalilzadeh, Hajsafi)",
+    "Taremi's hold-up, link play and finishing to lead the break",
+    "Mohebbi's runs in behind, dovetailing with Taremi"
+  ],
+  "weaknesses": [
+    "Lack genuine creative threats in midfield",
+    "Left out Sardar Azmoun (57 in 91) — thins the attacking options behind Taremi",
+    "Defensive spaces if the deep block is stretched"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Mehdi Taremi",
+      "role": "Centre-forward / captain",
+      "note": "Iran's second-highest scorer (behind Ali Daei's 110); 2 goals + an assist at the 2022 WC and 8 in 13 qualifiers — the focal point of everything"
+    },
+    {
+      "name": "Mohammad Mohebbi",
+      "role": "Left winger (Rostov)",
+      "note": "Dynamic runner in behind whose movement could be vital alongside Taremi"
+    }
+  ],
+  "tactics": "Defend deep, stay compact and organised, and break vertically through Taremi and Mohebbi — with the odd incisive short-passing move when given room. Won't win plaudits for style, but tough to break down.",
+  "notes": [
+    "Six World Cup appearances since 1978, all ending in the group stage."
+  ],
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group G (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}

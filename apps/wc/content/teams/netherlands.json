@@ -1,0 +1,45 @@
+{
+  "summary": "Group favourites (FIFA 7th) and Euro 2024 semi-finalists under Ronald Koeman — a technical, short-passing side, but pragmatic rather than the free-flowing Dutch of old. Effective but at times sterile and predictable, lacking the fluid rotations that once defined them.",
+  "style": "Base 4-2-3-1 that becomes a 3-2-5 once settled in the opposition half — one full-back (usually Dumfries) pushes high while the other tucks in to form a back three. Builds down one flank to drag the opponent across, then switches to the free winger/full-back. Generates overloads to free 1v1 dribblers (Gakpo, Malen). Heavily reliant on the right side: 40% of their attacking touches came down Dumfries' flank at Euro 2024.",
+  "counterReliance": {
+    "tier": "low",
+    "note": "Pragmatic possession; hard to play through, not a counter side"
+  },
+  "strengths": [
+    "Possession control with 1v1 dribblers and overloads to switch into space",
+    "Denzel Dumfries as a relentless right-sided attacking outlet",
+    "Van Dijk's authority and long diagonals to inject urgency",
+    "Strong defensively — conceded just once from set pieces in qualifying"
+  ],
+  "weaknesses": [
+    "Can be slow and predictable in attack ('perhaps too slow' — Van Dijk)",
+    "No recognised target man (top scorer Depay is really a wide forward) — long balls rarely viable",
+    "Forwards aren't natural pressers — they sit and stay compact rather than win it high"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Frenkie de Jong",
+      "role": "Midfield (Barcelona)",
+      "note": "The beating heart — superb passing range and ball-carrying to escape pressure; his Euro 2024 absence was keenly felt"
+    },
+    {
+      "name": "Virgil van Dijk",
+      "role": "Centre-back / captain (Liverpool)",
+      "note": "Authority and assurance — dribbled past just 35 times across his last eight Premier League seasons"
+    },
+    {
+      "name": "Cody Gakpo",
+      "role": "Winger",
+      "note": "The 1v1 threat the overloads are built to free — goals and assists from the left"
+    }
+  ],
+  "tactics": "Control possession, overload one side and switch to free a dribbler, with Dumfries the key right-sided outlet; defend by being hard to play through rather than pressing high. Koeman is reportedly weighing specialist set-piece coaching to add a missing cutting edge from dead balls.",
+  "notes": [
+    "Opening fixture vs Japan is a clash of styles — Dutch control vs Japanese high-octane transition."
+  ],
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group F (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}

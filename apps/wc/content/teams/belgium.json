@@ -1,0 +1,36 @@
+{
+  "summary": "Group favourites on pedigree and individual quality under Rudi Garcia, but recent tournaments have disappointed (group exit in 2022, Round of 16 at Euro 2024). A 4-2-3-1 blending exciting young talent with an experienced core (De Bruyne, Courtois, Lukaku) — devastating going forward, but vulnerable in transition and at set pieces.",
+  "style": "4-2-3-1 — the winger/full-back relationship is everything: full-backs (Meunier, De Cuyper, Castagne) make varied off-ball runs (overlaps to isolate Doku 1v1, underlaps for a goal threat) to free roaming wingers Doku, Saelemaekers and Trossard. Centre-forwards (De Ketelaere, Openda) drop deep to pull defenders and let the wingers and De Bruyne run beyond. Build from the back with a midfielder dropping into the full-back zone.",
+  "counterReliance": {
+    "tier": "medium",
+    "note": "Free-flowing attack with pace in behind; exposed in transition"
+  },
+  "strengths": [
+    "Elite 1v1 wingers with coordinated overlapping/underlapping support",
+    "Pace and quality in behind, plus an experienced spine (De Bruyne, Courtois)",
+    "Prolific — 39 goals in Garcia's first 12 games"
+  ],
+  "weaknesses": [
+    "Vulnerable defending transitions when they lose the ball",
+    "Disjointed high press (4-4-2) leaves spaces when not pressing in unison",
+    "Poor set-piece defending — conceded from corners vs Mexico, USA and Wales (tracking/communication); shipped 3 to Ukraine and 5 across two games to Wales"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Jérémy Doku",
+      "role": "Winger (Man City)",
+      "note": "9.0 take-ons per 90 — 2nd only to Yamal in Europe's top-five leagues; now more productive (2.98 chances created/90, top for key passes after a dribble); 5 goals, 4 assists in 11 under Garcia"
+    },
+    {
+      "name": "Kevin De Bruyne",
+      "role": "Attacking mid",
+      "note": "The experienced creative core — drops to build, then bursts beyond the dropping forwards"
+    }
+  ],
+  "tactics": "Free the wingers with full-back runs and drop the strikers to open space for runners; build patiently from the back. The talent is top-tier, but the games can swing on their transition defending and set-piece frailty.",
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group G (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}

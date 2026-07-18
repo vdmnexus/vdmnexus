@@ -1,0 +1,44 @@
+{
+  "summary": "Back at a World Cup after 28 years, chasing a first-ever run past the group stage. Steve Clarke shifts between a back four and a back five depending on the opponent, with a heavy reliance on crosses and attacking set pieces — and Scott McTominay's late runs into the box the standout threat.",
+  "style": "Flexible — a back four (4-2-3-1 / 4-3-3 in qualifying) or a back five (as vs Ivory Coast), chosen by opposition. Crosses into the box and dead balls are the core attacking routes; McTominay roams to support progression in wide areas, or they go direct and fight for second balls. Likely a mid-block against Brazil and Morocco, hunting transitions and set pieces.",
+  "counterReliance": {
+    "tier": "medium",
+    "note": "Mid-block vs strong sides; capitalise on transitions and set pieces"
+  },
+  "strengths": [
+    "Set-piece reliant — 38% of qualifying goals from dead balls, 2nd-highest in Europe behind Czechia",
+    "Crossing volume into the box, served by wing-backs and an overlapping LCB (Tierney)",
+    "Big-moment goalscorers (McTominay, McGinn)",
+    "Tactical flexibility between a four and a five"
+  ],
+  "weaknesses": [
+    "Lowest possession share (46%) of any qualified European side — reliant on transitions and dead balls",
+    "Limited sustained attacking quality against the better teams"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Scott McTominay",
+      "role": "Midfield (Napoli)",
+      "note": "Late runs into the box (SkillCorner cross-receiver 93/99); scored a spectacular overhead kick in the play-off win over Denmark"
+    },
+    {
+      "name": "Ben Doak",
+      "role": "Right winger",
+      "note": "Pace to burn, fearless two-footed dribbler with an improving final ball — potential breakout star"
+    },
+    {
+      "name": "John McGinn",
+      "role": "Midfield",
+      "note": "Big-moment goalscorer who arrives in the box"
+    }
+  ],
+  "tactics": "Defend in a mid-block, force play wide, and protect the box, then threaten through crosses, second balls and set pieces — the dead-ball threat is the key weapon. Eight third-placed teams reach the Round of 32, so even a strong group third could finally break the knockout duck.",
+  "notes": [
+    "In eight previous World Cups Scotland have never reached the knockout stage; a first knockout match in any major tournament is on the table with the expanded 2026 format."
+  ],
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group C (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}

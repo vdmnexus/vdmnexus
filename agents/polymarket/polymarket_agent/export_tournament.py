@@ -20,7 +20,9 @@ or once new results are in:
 
     python3 -m polymarket_agent.export_tournament [n_sims]
 
-Writes to apps/web/app/wc26/tournament.json (path derived from this file).
+Writes to agents/polymarket/exports/tournament.json (path derived from this
+file). This is the canonical snapshot consumed by both the marketing /wc26
+route and the dedicated apps/wc (wc.vdmnexus.com) app.
 """
 
 from __future__ import annotations
@@ -31,14 +33,14 @@ from datetime import date
 from pathlib import Path
 
 from .calibrate import fifa_member_teams, fit_ratings, load_results
-from .exp_talent import compute_talent
+from .roster_talent import load_live_talent
 from .sim import (
     BETA_TRAVEL, FIFA_TALENT_YEAR, GATED_BETA_TALENT, GROUPS, HOST_EDGE,
     TALENT_K, USE_ALTITUDE, USE_TALENT, USE_TRAVEL, Engine, fetch_outright_prices,
     played_group_results, run_detail,
 )
 
-OUT_PATH = Path(__file__).resolve().parents[3] / "apps/web/app/wc26/tournament.json"
+OUT_PATH = Path(__file__).resolve().parents[1] / "exports/tournament.json"
 N_SIMS = 20000
 _PCT_KEYS = ("win_group", "adv", "r16", "qf", "sf", "final", "champ")
 
@@ -48,7 +50,7 @@ def build(n_sims: int = N_SIMS) -> dict:
     today = date.today()
     eligible = fifa_member_teams(matches, since=date(2018, 1, 1))
     ratings = fit_ratings(matches, ref_day=today, eligible=eligible)
-    talent = compute_talent(FIFA_TALENT_YEAR, TALENT_K) if USE_TALENT else {}
+    talent = load_live_talent(FIFA_TALENT_YEAR) if USE_TALENT else {}
     eng = Engine(ratings, host_edge=HOST_EDGE, talent=talent,
                  beta_talent=GATED_BETA_TALENT if USE_TALENT else 0.0,
                  altitude=USE_ALTITUDE,

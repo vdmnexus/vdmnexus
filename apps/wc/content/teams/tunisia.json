@@ -1,0 +1,38 @@
+{
+  "summary": "The group's rank outsiders — safety-first and defensively excellent, but chronically blunt in attack. Conceded zero goals across 10 qualifiers, yet that attacking bluntness cost Sami Trabelsi his job after a limp AFCON exit to Mali; ex-Nottingham Forest boss Sabri Lamouchi (1-0 vs Haiti, 0-0 vs Canada) took over and is no more adventurous.",
+  "style": "A disciplined, stripped-back defensive 4-5-1 block — long a cornerstone of the Tunisian identity. Tough to break down, organised, and patient, but with little attacking thrust; they'll likely need set pieces and a slice of luck to create.",
+  "counterReliance": {
+    "tier": "medium",
+    "note": "Defend deep in a 4-5-1; limited attacking output"
+  },
+  "strengths": [
+    "Elite defensive solidity — no goals conceded in 10 qualifiers",
+    "Disciplined, hard-to-break 4-5-1 block",
+    "Strength in midfield duels to soak up long spells without the ball"
+  ],
+  "weaknesses": [
+    "Chronic attacking bluntness — the issue that got the previous coach sacked",
+    "Reliant on set pieces and luck for goals; never reached the knockouts in five prior World Cups"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Rani Khedira",
+      "role": "Defensive midfield",
+      "note": "Brother of 2014 World Cup winner Sami; switched allegiance to Tunisia in 2026 — his duel strength is vital for a side that defends for long stretches"
+    },
+    {
+      "name": "Hannibal Mejbri",
+      "role": "Attacking mid",
+      "note": "The creative spark — a dribbler who can make something from little when chances are scarce"
+    }
+  ],
+  "tactics": "Sit in a disciplined 4-5-1, stay compact, and frustrate — then hope a set piece or moment of individual quality unlocks a goal. Defensively they'll trouble anyone; the question is whether they can score enough to escape the group.",
+  "notes": [
+    "Five previous World Cup appearances, never past the group stage."
+  ],
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group F (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}

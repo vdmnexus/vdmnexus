@@ -1,0 +1,29 @@
+{
+  "features": [
+    "dist",
+    "dist2",
+    "abs_dy",
+    "angle",
+    "is_header",
+    "is_penalty",
+    "is_setpiece",
+    "is_fastbreak"
+  ],
+  "coef": [
+    -0.08273824873490951,
+    -0.0005964307193241295,
+    -0.08683323523042913,
+    1.298526041571355,
+    -1.0685548489701788,
+    1.8268152409135354,
+    -0.7302632881915655,
+    0.5122886879249672
+  ],
+  "intercept": -0.5539360692473096,
+  "n_shots": 4531,
+  "goal_rate": 0.116751269035533,
+  "cv_auc": 0.807,
+  "corr_provider_xg": 0.799,
+  "trained_on": "WC2018+WC2022+Euro2024 (Sofascore)",
+  "pitch": "goal at x=0,y=50; coords normalized 0-100 -> 105x68 m"
+}

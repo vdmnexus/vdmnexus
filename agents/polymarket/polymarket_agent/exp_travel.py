@@ -146,28 +146,73 @@ def city_of(m, cities) -> str | None:
     return cities.get((m.d.isoformat(), m.home, m.away))
 
 
-def compute_travel(matches, year, cities) -> dict[int, tuple[float, float]]:
+def load_base_camps(year: int) -> dict[str, tuple[float, float]]:
+    """team -> (lat, lon) from refdata/base_camps_<year>.csv, or {} if absent.
+
+    A base camp anchors the *first* travel leg (camp -> opening venue), which
+    compute_travel otherwise scores as 0 km (see below). Rows with a missing or
+    non-numeric latitude/longitude are skipped, so a partially filled file
+    degrades gracefully to venue-to-venue for the teams it omits. Team names
+    must match the model spelling (martj42 results.csv / sim.GROUPS).
+
+    DATA, not yet a model input: a base-camp travel variant only enters the
+    live engine after it beats the venue-to-venue baseline on the 2018+2022
+    held-out RPS gate (PIPELINE.md). The files are user-supplied.
+    """
+    import csv
+    from pathlib import Path
+
+    path = Path(__file__).resolve().parent.parent / "refdata" / f"base_camps_{year}.csv"
+    camps: dict[str, tuple[float, float]] = {}
+    if not path.exists():
+        return camps
+    with open(path, newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            try:
+                lat = float(row["latitude"])
+                lon = float(row["longitude"])
+            except (KeyError, ValueError, TypeError):
+                continue  # blank/unfilled row — skip
+            team = (row.get("team") or "").strip()
+            if team:
+                camps[team] = (lat, lon)
+    return camps
+
+
+def compute_travel(matches, year, cities, base_camps=None) -> dict[int, tuple[float, float]]:
     """id(match) -> (cum_km_home, cum_km_away) within the `year` WC, /1000.
 
     Cumulative great-circle distance each team has flown between consecutive
-    venue cities in date order. First appearance = 0 (unknown base camp).
+    venue cities in date order.
+
+    base_camps: optional {team: (lat, lon)}. When given, a team's *first* match
+    counts the camp -> opening-venue leg; when None (default) the first
+    appearance is 0 km (base camp unknown). Passing None reproduces the
+    venue-to-venue baseline exactly, so existing callers are unaffected.
     """
+    camps = base_camps or {}
     start, end = WC_WINDOWS[year]
     games = sorted((m for m in matches
                     if start <= m.d <= end and m.tournament == "FIFA World Cup"),
                    key=lambda x: (x.d, x.home))
-    last_city: dict[str, str] = {}
+    last_ll: dict[str, tuple[float, float]] = {}
+    seen: set[str] = set()
     cum: dict[str, float] = {}
     out: dict[int, tuple[float, float]] = {}
     for m in games:
         c = city_of(m, cities)
         ll = VENUE_LATLON.get(c) if c else None
         for team in (m.home, m.away):
-            if ll is not None and team in last_city and last_city[team] in VENUE_LATLON:
-                cum[team] = cum.get(team, 0.0) + haversine_km(
-                    VENUE_LATLON[last_city[team]], ll)
-            if ll is not None:
-                last_city[team] = c
+            if ll is None:
+                continue
+            if team in seen:
+                prev = last_ll.get(team)
+                if prev is not None:
+                    cum[team] = cum.get(team, 0.0) + haversine_km(prev, ll)
+            elif team in camps:  # first appearance, base camp known -> count the leg
+                cum[team] = cum.get(team, 0.0) + haversine_km(camps[team], ll)
+            last_ll[team] = ll
+            seen.add(team)
         out[id(m)] = (cum.get(m.home, 0.0) / 1000.0, cum.get(m.away, 0.0) / 1000.0)
     return out
 

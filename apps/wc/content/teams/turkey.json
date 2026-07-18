@@ -1,0 +1,40 @@
+{
+  "summary": "A dangerous, attack-minded side under Vincenzo Montella with an exciting cast of creators — they take the game to opponents. Back at a World Cup after 24 years, two years on from nearly upsetting the Netherlands in the Euro 2024 quarter-final.",
+  "style": "Build from a back three with full-backs/wing-backs pushing on and a single deep midfielder (Ismail Yüksek) for the short pass. Best progressors Arda Güler and Hakan Çalhanoğlu drop deep to pull opponents out of shape and spear incisive passes; the approach play centres on isolating Kenan Yıldız 1v1 on the wing. No true No 9 since Burak Yılmaz retired — wingers rotate to occupy centre-backs while midfielders time late runs into the box.",
+  "counterReliance": {
+    "tier": "low",
+    "note": "Proactive, possession-and-rotation side that takes the game to opponents"
+  },
+  "strengths": [
+    "Elite creative quality — Güler and Çalhanoğlu drop deep to orchestrate with pinpoint passing",
+    "Kenan Yıldız isolated 1v1 (most take-ons in Serie A last season)",
+    "Set pieces — Çalhanoğlu is one of the world's best dead-ball takers; ~37% of qualifying goals from set plays",
+    "Late runs into the box from Çalhanoğlu and Kökçü onto crosses/cutbacks"
+  ],
+  "weaknesses": [
+    "No recognised centre-forward — relies on wingers and midfield runners for goals"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Arda Güler",
+      "role": "Playmaker (Real Madrid)",
+      "note": "Directs Turkey's possession — drops into pockets to receive and create from anywhere; 8.7 xA and 9 assists in La Liga, elite on-ball involvement and creative threat"
+    },
+    {
+      "name": "Kenan Yıldız",
+      "role": "Winger (Juventus)",
+      "note": "Slippery, fearless dribbler — the focal point of the wide isolation play"
+    },
+    {
+      "name": "Hakan Çalhanoğlu",
+      "role": "Midfield",
+      "note": "Deep-lying orchestrator and world-class set-piece taker"
+    }
+  ],
+  "tactics": "Build from a three, drop the distributors deep to break lines, and isolate Yıldız to run at his man; punish from Çalhanoğlu's set pieces. Their attacking fluidity can inflict real damage in a balanced group.",
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group D (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}

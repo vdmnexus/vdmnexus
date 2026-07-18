@@ -1,0 +1,44 @@
+{
+  "summary": "Group favourites after a near-perfect qualifying campaign under Thomas Tuchel — eight wins from eight, 22 scored, none conceded. Tuchel is building a coherent system over a collection of stars ('we build a team'), but the one player England cannot do without is Harry Kane.",
+  "style": "A 4-2-3-1 — Rice and Elliot Anderson the likely midfield pair behind a No 10, pacy wingers and Kane. Kane drifts into deeper pockets, so the plan needs off-ball runners beyond him (a weakness at Euro 2024, where too many ball-to-feet forwards left no threat in behind). Under Tuchel, counter-movements from full-back (underlaps / drifting inside) free the same-side wide forward; athleticism is prioritised.",
+  "counterReliance": {
+    "tier": "medium",
+    "note": "1v1 wide play + runs in behind; can break at pace"
+  },
+  "strengths": [
+    "Elite individual quality (Kane, Bellingham, Saka) within a more coherent Tuchel structure",
+    "Watertight in qualifying — 22 scored, 0 conceded",
+    "Full-back counter-movements engineered to free the wide forwards"
+  ],
+  "weaknesses": [
+    "Heavily reliant on Kane — notably toothless without him (vs Uruguay, Japan)",
+    "Needs runners beyond Kane; can be stodgy if the front line is all ball-to-feet",
+    "Unresolved No 10 question (Palmer, Foden, Gibbs-White omitted; Bellingham/Rogers/Eze vying)"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Harry Kane",
+      "role": "Centre-forward (Bayern)",
+      "note": "White-hot — 61 goals for Bayern across all competitions, 36 in the Bundesliga at 1.4 per 90, comfortably the best rate of any top-five-league striker; 8 of England's 20 qualifying goals"
+    },
+    {
+      "name": "Jude Bellingham",
+      "role": "Attacking mid",
+      "note": "Among the candidates to be the No 10 and provide the runs beyond Kane"
+    },
+    {
+      "name": "Bukayo Saka",
+      "role": "Winger",
+      "note": "1v1 threat and end product on the right"
+    }
+  ],
+  "tactics": "Build a coherent 4-2-3-1, use full-back movement to free the wingers, and feed Kane with runners breaking beyond him. The talent is unquestioned; the recurring question is fitting the best players into one system — and not going blunt if Kane misses time.",
+  "notes": [
+    "Face Panama on matchday three — they won that 2018 meeting 6-1, their record World Cup margin."
+  ],
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group L (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}

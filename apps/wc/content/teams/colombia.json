@@ -1,0 +1,36 @@
+{
+  "summary": "Portugal's biggest threat in the group (FIFA 13th) and a genuine dark horse under Néstor Lorenzo (27 wins in 45, just seven defeats). A multi-faceted attack led by James Rodríguez and Luis Díaz that can hurt teams through control or directness, and is lethal in transition.",
+  "style": "A 4-2-3-1 / 4-3-1-2 — good at playing through pressure but happy to go direct to isolate Díaz (who 'makes difficult balls look simple'). Díaz drops into the left-back area to spring Mojica forward and free Jhon Arias from midfield. Out of possession an aggressive 4-4-2, with defenders and midfielders licensed to step out and win it high, then break fast.",
+  "counterReliance": {
+    "tier": "medium",
+    "note": "Controls or goes direct; lethal breaking in transition"
+  },
+  "strengths": [
+    "A multi-faceted attack (James + Díaz) that hurts teams multiple ways",
+    "Devastating transition — step out, win it, and release Díaz at speed (the goal vs Mexico)",
+    "James Rodríguez's set-piece delivery (3 of 5 Copa América 2024 assists from dead balls) to tall targets (Córdoba, Sánchez, Mina)",
+    "Díaz's elite club form carried into the national team"
+  ],
+  "weaknesses": [
+    "Ball-focused pressing can be manipulated by good teams (France exploited it in a 3-1)",
+    "Fall deep defending the box — leaves players free on the edge"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Luis Díaz",
+      "role": "Forward (Bayern)",
+      "note": "22 goals and 17 assists in 44 across the Bundesliga and Champions League; drives into the box, runs off the ball, and now thrives in midfield pockets"
+    },
+    {
+      "name": "James Rodríguez",
+      "role": "Playmaker",
+      "note": "Creator-in-chief and dead-ball specialist — composure at high tempo and the set-piece supply"
+    }
+  ],
+  "tactics": "Play through or go direct to Díaz, manipulate defences with his drops to left-back, and break fast from an aggressive 4-4-2; punish from James' set pieces. With James and Díaz firing, the recipe could echo their 2014 run.",
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group K (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}

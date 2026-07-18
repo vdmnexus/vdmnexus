@@ -1,0 +1,44 @@
+{
+  "summary": "Stuttered into the tournament via the play-offs under Graham Potter (appointed October, with Sweden at a low ebb after finishing bottom of their qualifying group on one point). Potter prefers possession but, needing results, opted for a pragmatic, defensively solid system — fronted by two of the world's most expensive strikers.",
+  "style": "Conservative 3-4-2-1 with a five-man defence — shift across compactly to close space and double up on wingers (beat Ukraine in the play-off on 32% possession). Straightforward attack: play long to the muscular Gyökeres with the pacy Elanga flitting around him to pounce on knock-downs, and break into the big spaces their forwards attack so well.",
+  "counterReliance": {
+    "tier": "high",
+    "note": "Defensive block, then direct and counter into space"
+  },
+  "strengths": [
+    "Compact, organised low block that's hard to open up",
+    "Elite striker pair attacking big spaces on the counter",
+    "Reacted well to simpler instructions — solid and clear",
+    "Added Spurs set-piece coach Andreas Georgson"
+  ],
+  "weaknesses": [
+    "Cedes possession by design; limited build-up sophistication for now",
+    "Confidence and form were fragile heading into qualification's play-off route"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Alexander Isak",
+      "role": "Striker (Liverpool)",
+      "note": "British-record £125m signing — fluid movement, quick feet, mastery of tight spaces; injury-hit first season but nearing fitness (scored vs Norway)"
+    },
+    {
+      "name": "Viktor Gyökeres",
+      "role": "Striker (Arsenal)",
+      "note": "£55m battering-ram — powerful, direct target for the long ball and a counter finisher"
+    },
+    {
+      "name": "Anthony Elanga",
+      "role": "Winger",
+      "note": "Pace to flit around Gyökeres and pounce on knock-downs; clinical on the break"
+    }
+  ],
+  "tactics": "Defend deep and compact, double up wide, then go long to Gyökeres or break into space for Isak and Elanga. Potter will add complexity later, but expect the simple, solid structure that rescued the campaign to stay.",
+  "notes": [
+    "Snuck into the play-offs on Nations League form despite a one-point qualifying group."
+  ],
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group F (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}

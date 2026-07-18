@@ -1,0 +1,17 @@
+{
+  "_README": "Per-team editorial knowledge base. Copy this file to <slug>.json where <slug> matches the team's URL (e.g. argentina.json, congo-dr -> see lib/teams.ts slug). Every field is optional — fill what you have, the team page renders only what's present. This is DISPLAY content and never feeds the prediction model (per PIPELINE.md, model inputs live in agents/polymarket/refdata/ and must clear the backtest gate).",
+  "summary": "One or two sentences framing the team's tournament outlook.",
+  "style": "Formation and playing identity, e.g. '4-3-3, high press, build from the back'.",
+  "counterReliance": { "tier": "high | medium | low", "note": "Short scouting phrase, e.g. 'devastating pace on the counter'. Display-only 2026 tag, never a model input." },
+  "strengths": ["Bullet strength", "Another strength"],
+  "weaknesses": ["Bullet weakness", "Another weakness"],
+  "keyPlayers": [
+    { "name": "Player Name", "role": "e.g. No.10 / creator", "note": "Why they matter" }
+  ],
+  "tactics": "Longer free-form tactical read — how they want to play, in/out of possession, set pieces.",
+  "mismatch": "Where this side is tactically vulnerable or dominant vs typical opponents.",
+  "xFactor": "The single thing most likely to swing their tournament up or down.",
+  "notes": ["Free-form scouting notes, found quotes, links to dig into later."],
+  "sources": ["Optional: where the above came from"],
+  "updated": "YYYY-MM-DD"
+}

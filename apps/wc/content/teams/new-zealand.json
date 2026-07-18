@@ -1,0 +1,44 @@
+{
+  "summary": "Lowest-ranked side in the group (85th) but arriving in good heart under Darren Bazeley — impressive recent friendlies (4-1 v Chile, 1-0 v Ivory Coast, 1-1 v Norway, and competitive one-goal losses to Ecuador, Colombia and Poland). A 'courageous, possession-based' side in the OFC, leaning on midfield turnovers, a cross-heavy attack to Chris Wood, and set pieces.",
+  "style": "Cross-heavy attack built around Chris Wood in the box — midfielders drift wide to overload a flank, then find a run in behind to cross (e.g. De Vries' assist vs Australia). Forces turnovers in midfield through ball-winners like Stamenic, and threatens consistently from set pieces.",
+  "counterReliance": {
+    "tier": "low",
+    "note": "Possession-and-crossing for Wood; wins it back via midfield turnovers"
+  },
+  "strengths": [
+    "Cross supply to a genuine box poacher in Chris Wood",
+    "Midfield ball-winning to force turnovers (Stamenic)",
+    "Strong set-piece threat — 3 of 4 goals vs Chile from corners; Stamenic scored from a corner vs Ukraine; Surman a free kick vs Norway",
+    "Thorough preparation and confidence from competitive friendlies"
+  ],
+  "weaknesses": [
+    "Step up in level from a weak OFC — most matches there are vs sides ranked 150th+",
+    "Reliant on Wood and set pieces for goals"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Chris Wood",
+      "role": "Striker / captain (Nott'm Forest)",
+      "note": "All-time leading scorer (45 in 88), elite poacher and penalty expert; one of two survivors from the 2010 World Cup squad"
+    },
+    {
+      "name": "Matthew Garbett",
+      "role": "Midfield (Peterborough)",
+      "note": "Key to the wide overloads — drifts wide, makes underlapping runs, 3rd among League One CM/DMs for take-ons (2.6/90), and plays defence-splitting passes"
+    },
+    {
+      "name": "Marko Stamenić",
+      "role": "Midfield (Swansea)",
+      "note": "Covers ground to win the ball back across midfield; also a set-piece goal threat"
+    }
+  ],
+  "tactics": "Win it back in midfield, overload the flanks to cross for Wood, and lean on a strong set-piece routine. The level jump from OFC is the unknown, but the friendlies suggest they'll be competitive in a tight group.",
+  "notes": [
+    "Previous World Cups (1982, 2010) both ended in the group stage; the 2010 side famously went unbeaten with three draws."
+  ],
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group G (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}

@@ -1,0 +1,41 @@
+{
+  "summary": "Battle-hardened tournament over-achievers under Zlatko Dalić — a World Cup final (2018) and semi-final (2022) on their recent CV, even after a disappointing Euro 2024. Built, as ever, on a robust, experienced midfield, now flying the flag through 40-year-old Luka Modrić.",
+  "style": "Shifts between a 4-2-3-1 and a 3-4-3 with similar principles — control the tempo (70% average possession in qualifying, behind only Spain, Portugal, Germany and England). Young midfielder Petar Sučić (Inter) drops into a situational back three to free the full-backs/wing-backs high, rotating with Modrić to stitch the attack together.",
+  "counterReliance": {
+    "tier": "low",
+    "note": "Possession-and-tempo control; rarely overawed"
+  },
+  "strengths": [
+    "Elite midfield control and game management — 70% possession in qualifying",
+    "Deep tournament experience; rarely overawed, and suited to the searing heat",
+    "A blend of veterans (Modrić, Kramarić, Perišić) and emerging talent (Sučić, Baturina)"
+  ],
+  "weaknesses": [
+    "An ageing squad (avg age 29, among the oldest European qualifiers)",
+    "Midfield depth thinned by retirements (Brozović, Rakitić) and Kovačić's injury return",
+    "Press can be improved; can be open to counters"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Luka Modrić",
+      "role": "Midfield",
+      "note": "Ballon d'Or winner playing in a fifth World Cup at 40 — Croatia's oldest-ever major-tournament player, joining Ronaldo (41) and Džeko (40) as rare 40-something outfielders; still showing no signs of stopping (91% of AC Milan's minutes, more than any of his Real Madrid campaigns)"
+    },
+    {
+      "name": "Petar Sučić",
+      "role": "Midfield (Inter)",
+      "note": "22-year-old taking the baton — drops into the back line or pushes forward to balance old and new"
+    },
+    {
+      "name": "Andrej Kramarić",
+      "role": "Forward (Hoffenheim)",
+      "note": "Likely the key attacking outlet"
+    }
+  ],
+  "tactics": "Control possession and tempo, drop a midfielder to build through a back three, and lean on unmatched experience to manage games — a style well-suited to the heat. The questions are legs over a long run and a midfield in transition between generations.",
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group L (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}

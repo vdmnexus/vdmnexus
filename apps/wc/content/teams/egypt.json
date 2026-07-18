@@ -1,0 +1,35 @@
+{
+  "summary": "Led by Mohamed Salah and Omar Marmoush under Hossam Hassan, Egypt fancy their chances of finally clearing the group stage (their last two appearances, 1990 and 2018, both ended there). A disciplined, transition-based side that held Spain to a goalless draw in March.",
+  "style": "Drops into a 5-4-1 without possession using a man-marking system (the dropping midfielder can push up if needed). Works best in transition — feeding the pace of Salah and Marmoush or the 1v1 ability of Ibrahim Adel. In settled possession, quick switches to find the spare man and runs in behind.",
+  "counterReliance": {
+    "tier": "high",
+    "note": "Disciplined man-marking block, lethal breaking through Salah/Marmoush"
+  },
+  "strengths": [
+    "Defensive discipline — held Spain 0-0 with the 5-4-1 man-marking block",
+    "Elite transition outlets in Salah and Marmoush",
+    "Ibrahim Adel's 1v1 threat to carry the break"
+  ],
+  "weaknesses": [
+    "Reliant on Salah for the biggest moments — Egypt tend to go only as far as he takes them",
+    "Limited sustained attacking control against deep blocks"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Mohamed Salah",
+      "role": "Forward",
+      "note": "33, after a rough final Liverpool season — but Egypt's talisman; scored both their goals at the 2018 WC, and four goals + an assist across his last five qualifiers"
+    },
+    {
+      "name": "Omar Marmoush",
+      "role": "Forward",
+      "note": "11 in 49 looks modest, but he's capable of the spectacular — this could be his breakout tournament"
+    }
+  ],
+  "tactics": "Defend deep and man-mark in a 5-4-1, then break fast through Salah and Marmoush; in possession, switch quickly to find space. They'll need Salah at his best to finally escape a World Cup group.",
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group G (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}

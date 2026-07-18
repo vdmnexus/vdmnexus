@@ -1,0 +1,170 @@
+{
+  "croatia": {
+    "name": "Croatia",
+    "group": "L",
+    "announced": "June 1",
+    "manager": "Zlatko Dalic",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Dominik Livakovic", "club": "Dinamo Zagreb" },
+        { "name": "Dominik Kotarski", "club": "Kobenhavn" },
+        { "name": "Ivor Pandur", "club": "Hull City" }
+      ],
+      "Defenders": [
+        { "name": "Josko Gvardiol", "club": "Manchester City" },
+        { "name": "Duje Caleta-Car", "club": "Real Sociedad" },
+        { "name": "Josip Sutalo", "club": "Ajax" },
+        { "name": "Josip Stanisic", "club": "Bayern Munich" },
+        { "name": "Marin Pongracic", "club": "Fiorentina" },
+        { "name": "Martin Erlic", "club": "Midtjylland" },
+        { "name": "Luka Vuskovic", "club": "Hamburg" }
+      ],
+      "Midfielders": [
+        { "name": "Luka Modric", "club": "AC Milan" },
+        { "name": "Mateo Kovacic", "club": "Manchester City" },
+        { "name": "Mario Pasalic", "club": "Atalanta" },
+        { "name": "Nikola Vlasic", "club": "Torino" },
+        { "name": "Luka Sucic", "club": "Real Sociedad" },
+        { "name": "Martin Baturina", "club": "Como" },
+        { "name": "Kristijan Jakic", "club": "Augsburg" },
+        { "name": "Petar Sucic", "club": "Inter Milan" },
+        { "name": "Nikola Moro", "club": "Bologna" },
+        { "name": "Toni Fruk", "club": "Rijeka" }
+      ],
+      "Forwards": [
+        { "name": "Ivan Perisic", "club": "PSV Eindhoven" },
+        { "name": "Andrej Kramaric", "club": "Hoffenheim" },
+        { "name": "Ante Budimir", "club": "Osasuna" },
+        { "name": "Marco Pasalic", "club": "Orlando City" },
+        { "name": "Petar Musa", "club": "FC Dallas" },
+        { "name": "Igor Matanovic", "club": "Freiburg" }
+      ]
+    }
+  },
+  "england": {
+    "name": "England",
+    "group": "L",
+    "announced": "May 22",
+    "manager": "Thomas Tuchel",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Jordan Pickford", "club": "Everton" },
+        { "name": "Dean Henderson", "club": "Crystal Palace" },
+        { "name": "James Trafford", "club": "Manchester City" }
+      ],
+      "Defenders": [
+        { "name": "Reece James", "club": "Chelsea" },
+        { "name": "Ezri Konsa", "club": "Aston Villa" },
+        { "name": "Jarell Quansah", "club": "Bayer Leverkusen" },
+        { "name": "John Stones", "club": "Manchester City" },
+        { "name": "Marc Guéhi", "club": "Manchester City" },
+        { "name": "Dan Burn", "club": "Newcastle United" },
+        { "name": "Nico O'Reilly", "club": "Manchester City" },
+        { "name": "Djed Spence", "club": "Tottenham Hotspur" },
+        { "name": "Tino Livramento", "club": "Newcastle United" }
+      ],
+      "Midfielders": [
+        { "name": "Declan Rice", "club": "Arsenal" },
+        { "name": "Elliot Anderson", "club": "Nottingham Forest" },
+        { "name": "Kobbie Mainoo", "club": "Manchester United" },
+        { "name": "Jordan Henderson", "club": "Brentford" },
+        { "name": "Morgan Rogers", "club": "Aston Villa" },
+        { "name": "Jude Bellingham", "club": "Real Madrid" },
+        { "name": "Eberechi Eze", "club": "Arsenal" }
+      ],
+      "Forwards": [
+        { "name": "Harry Kane", "club": "Bayern Munich" },
+        { "name": "Ivan Toney", "club": "Al-Ahli" },
+        { "name": "Ollie Watkins", "club": "Aston Villa" },
+        { "name": "Bukayo Saka", "club": "Arsenal" },
+        { "name": "Marcus Rashford", "club": "Manchester United" },
+        { "name": "Anthony Gordon", "club": "Newcastle United" },
+        { "name": "Noni Madueke", "club": "Arsenal" }
+      ]
+    }
+  },
+  "ghana": {
+    "name": "Ghana",
+    "group": "L",
+    "announced": "June 1",
+    "manager": "Carlos Queiroz",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Benjamin Asare", "club": "Accra Hearts of Oak SC" },
+        { "name": "Lawrence Ati-Zigi", "club": "St Gallen" },
+        { "name": "Joseph Anang", "club": "St Patrick's Athletic" }
+      ],
+      "Defenders": [
+        { "name": "Baba Abdul Rahman", "club": "PAOK Salonika" },
+        { "name": "Gideon Mensah", "club": "AJ Auxerre" },
+        { "name": "Marvin Senaya", "club": "AJ Auxerre" },
+        { "name": "Alidu Seidu", "club": "Stade Rennais" },
+        { "name": "Abdul Mumin", "club": "Rayo Vallecano" },
+        { "name": "Jerome Opoku", "club": "Istanbul Basaksehir" },
+        { "name": "Jonas Adjetey", "club": "VfL Wolfsburg" },
+        { "name": "Kojo Oppong Peprah", "club": "Nice" },
+        { "name": "Derrick Luckassen", "club": "Pafos" }
+      ],
+      "Midfielders": [
+        { "name": "Elisha Owusu", "club": "AJ Auxerre" },
+        { "name": "Thomas Partey", "club": "Villarreal" },
+        { "name": "Kwasi Sibo", "club": "Real Oviedo" },
+        { "name": "Augustine Boakye", "club": "Saint-Étienne" },
+        { "name": "Caleb Yirenkyi", "club": "FC Nordsjælland" },
+        { "name": "Abdul Fatawu Issahaku", "club": "Leicester City" }
+      ],
+      "Forwards": [
+        { "name": "Kamal Deen Sulemana", "club": "Atalanta" },
+        { "name": "Christopher Bonsu Baah", "club": "Al Qadsiah" },
+        { "name": "Ernest Nuamah", "club": "Lyon" },
+        { "name": "Antoine Semenyo", "club": "Manchester City" },
+        { "name": "Brandon Thomas-Asante", "club": "Coventry City" },
+        { "name": "Prince Kwabena Adu", "club": "Viktoria Plzen" },
+        { "name": "Iñaki Williams", "club": "Athletic Club" },
+        { "name": "Jordan Ayew", "club": "Leicester City" }
+      ]
+    }
+  },
+  "panama": {
+    "name": "Panama",
+    "group": "L",
+    "announced": "May 26",
+    "manager": "Thomas Christiansen",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Orlando Mosquera", "club": "Al Fayha" },
+        { "name": "Luis Mejía", "club": "Nacional" },
+        { "name": "César Samudio", "club": "Marathón" }
+      ],
+      "Defenders": [
+        { "name": "César Blackman", "club": "Slovan Bratislava" },
+        { "name": "Jorge Gutiérrez", "club": "Deportivo La Guaira" },
+        { "name": "Amir Murillo", "club": "Beşiktaş" },
+        { "name": "Fidel Escobar", "club": "Saprissa" },
+        { "name": "Andrés Andrade", "club": "LASK" },
+        { "name": "Edgardo Fariña", "club": "Pari Nizhny Novgorod" },
+        { "name": "José Córdoba", "club": "Norwich City" },
+        { "name": "Éric Davis", "club": "Plaza Amador" },
+        { "name": "Jiovany Ramos", "club": "Puerto Cabello" },
+        { "name": "Roderick Miller", "club": "Turan Tovuz" }
+      ],
+      "Midfielders": [
+        { "name": "Aníbal Godoy", "club": "San Diego FC" },
+        { "name": "Adalberto Carrasquilla", "club": "Pumas UNAM" },
+        { "name": "Carlos Harvey", "club": "Minnesota United" },
+        { "name": "Cristian Martínez", "club": "Ironi Kiryat Shmona" },
+        { "name": "José Luis Rodríguez", "club": "Juárez" },
+        { "name": "César Yanis", "club": "Cobresal" },
+        { "name": "Yoel Bárcenas", "club": "Mazatlán" },
+        { "name": "Alberto Quintero", "club": "Plaza Amador" },
+        { "name": "Azarias Londoño", "club": "Universidad Católica" }
+      ],
+      "Forwards": [
+        { "name": "Ismael Díaz", "club": "León" },
+        { "name": "Cecilio Waterman", "club": "Universidad de Concepción" },
+        { "name": "José Fajardo", "club": "Universidad Católica" },
+        { "name": "Tomás Rodríguez", "club": "Saprissa" }
+      ]
+    }
+  }
+}

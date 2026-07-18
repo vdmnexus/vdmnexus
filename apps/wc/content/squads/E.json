@@ -1,0 +1,169 @@
+{
+  "germany": {
+    "name": "Germany",
+    "group": "E",
+    "announced": "May 21",
+    "manager": "Julian Nagelsmann",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Oliver Baumann", "club": "Hoffenheim" },
+        { "name": "Manuel Neuer", "club": "Bayern Munich" },
+        { "name": "Alexander Nübel", "club": "Stuttgart" }
+      ],
+      "Defenders": [
+        { "name": "Waldemar Anton", "club": "Borussia Dortmund" },
+        { "name": "Nathaniel Brown", "club": "Eintracht Frankfurt" },
+        { "name": "David Raum", "club": "RB Leipzig" },
+        { "name": "Antonio Rüdiger", "club": "Real Madrid" },
+        { "name": "Nico Schlotterbeck", "club": "Borussia Dortmund" },
+        { "name": "Jonathan Tah", "club": "Bayern Munich" },
+        { "name": "Malick Thiaw", "club": "Newcastle" }
+      ],
+      "Midfielders": [
+        { "name": "Pascal Gross", "club": "Brighton" },
+        { "name": "Joshua Kimmich", "club": "Bayern Munich" },
+        { "name": "Felix Nmecha", "club": "Borussia Dortmund" },
+        { "name": "Aleksandar Pavlovic", "club": "Bayern Munich" },
+        { "name": "Angelo Stiller", "club": "Stuttgart" },
+        { "name": "Leon Goretzka", "club": "Bayern Munich" },
+        { "name": "Florian Wirtz", "club": "Liverpool" },
+        { "name": "Jamie Leweling", "club": "Stuttgart" }
+      ],
+      "Forwards": [
+        { "name": "Maximilian Beier", "club": "Borussia Dortmund" },
+        { "name": "Kai Havertz", "club": "Arsenal" },
+        { "name": "Lennart Karl", "club": "Bayern Munich" },
+        { "name": "Jamal Musiala", "club": "Bayern Munich" },
+        { "name": "Leroy Sané", "club": "Galatasaray" },
+        { "name": "Deniz Undav", "club": "Stuttgart" },
+        { "name": "Nick Woltemade", "club": "Newcastle" }
+      ]
+    }
+  },
+  "curacao": {
+    "name": "Curaçao",
+    "group": "E",
+    "announced": "May 18",
+    "manager": "Dick Advocaat",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Eloy Room", "club": "Miami FC" },
+        { "name": "Tyrick Bodak", "club": "Telstar" },
+        { "name": "Trevor Doornbusch", "club": "VVV Venlo" }
+      ],
+      "Defenders": [
+        { "name": "Riechedly Bazoer", "club": "Konyaspor" },
+        { "name": "Joshua Brenet", "club": "Kayserispor" },
+        { "name": "Roshon van Eijma", "club": "RKC Waalwijk" },
+        { "name": "Sherel Floranus", "club": "PEC Zwolle" },
+        { "name": "Deveron Fonville", "club": "NEC Nijmegen" },
+        { "name": "Jurien Gaari", "club": "Abha" },
+        { "name": "Armando Obispo", "club": "PSV Eindhoven" },
+        { "name": "Shurandy Sambo", "club": "Sparta Rotterdam" }
+      ],
+      "Midfielders": [
+        { "name": "Juninho Bacuna", "club": "Volendam" },
+        { "name": "Leandro Bacuna", "club": "Igdir" },
+        { "name": "Livano Comenencia", "club": "Zurich" },
+        { "name": "Kevin Felida", "club": "Den Bosch" },
+        { "name": "Ar'jany Martha", "club": "Rotherham United" },
+        { "name": "Tyrese Noslin", "club": "Telstar" },
+        { "name": "Godfried Roemeratoe", "club": "RKC Waalwijk" }
+      ],
+      "Forwards": [
+        { "name": "Jeremy Antonisse", "club": "Kifisia" },
+        { "name": "Tahith Chong", "club": "Sheffield United" },
+        { "name": "Kenji Gorre", "club": "Maccabi Haifa" },
+        { "name": "Sontje Hansen", "club": "Middlesbrough" },
+        { "name": "Gervane Kastaneer", "club": "Terengganu" },
+        { "name": "Brandley Kuwas", "club": "Volendam" },
+        { "name": "Jurgen Locadia", "club": "Miami FC" },
+        { "name": "Jearl Margaritha", "club": "Beveren" }
+      ]
+    }
+  },
+  "ivory-coast": {
+    "name": "Ivory Coast",
+    "group": "E",
+    "announced": "May 15",
+    "manager": "Emerse Faé",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Yahia Fofana", "club": "Rizespor" },
+        { "name": "Mohamed Koné", "club": "Charleroi" },
+        { "name": "Alban Lafont", "club": "Panathinaikos" }
+      ],
+      "Defenders": [
+        { "name": "Emmanuel Agbadou", "club": "Beşiktaş" },
+        { "name": "Clément Akpa", "club": "AJ Auxerre" },
+        { "name": "Ousmane Diomande", "club": "Sporting CP" },
+        { "name": "Guela Doué", "club": "Strasbourg" },
+        { "name": "Ghislain Konan", "club": "Gil Vicente" },
+        { "name": "Odilon Kossounou", "club": "Atalanta" },
+        { "name": "Evan Ndicka", "club": "AS Roma" },
+        { "name": "Wilfried Singo", "club": "Galatasaray" }
+      ],
+      "Midfielders": [
+        { "name": "Seko Fofana", "club": "Porto" },
+        { "name": "Parfait Guiagon", "club": "Charleroi" },
+        { "name": "Franck Kessié", "club": "Al Ahli" },
+        { "name": "Christ Inao Oulaï", "club": "Trabzonspor" },
+        { "name": "Ibrahim Sangaré", "club": "Nottingham Forest" },
+        { "name": "Jean Michaël Seri", "club": "NK Maribor" }
+      ],
+      "Forwards": [
+        { "name": "Simon Adingra", "club": "AS Monaco" },
+        { "name": "Ange-Yoan Bonny", "club": "Internazionale" },
+        { "name": "Amad Diallo", "club": "Manchester United" },
+        { "name": "Oumar Diakité", "club": "Cercle Brugge" },
+        { "name": "Yan Diomande", "club": "RB Leipzig" },
+        { "name": "Evann Guessand", "club": "Aston Villa" },
+        { "name": "Nicolas Pépé", "club": "Villarreal" },
+        { "name": "Bazoumana Touré", "club": "Hoffenheim" },
+        { "name": "Elye Wahi", "club": "Nice" }
+      ]
+    }
+  },
+  "ecuador": {
+    "name": "Ecuador",
+    "group": "E",
+    "announced": "May 29",
+    "manager": "Sebastián Beccacece",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Hernán Galíndez", "club": "Huracan" },
+        { "name": "Moisés Ramírez", "club": "AE Kifisias" },
+        { "name": "Gonzalo Valle", "club": "LDU Quito" }
+      ],
+      "Defenders": [
+        { "name": "Willian Pacho", "club": "Paris Saint-Germain" },
+        { "name": "Piero Hincapié", "club": "Arsenal" },
+        { "name": "Joel Ordóñez", "club": "Club Brugge" },
+        { "name": "Félix Torres", "club": "Internacional" },
+        { "name": "Pervis Estupiñán", "club": "AC Milan" },
+        { "name": "Yaimar Medina", "club": "Racing Genk" },
+        { "name": "Ángelo Preciado", "club": "Atlético Mineiro" },
+        { "name": "Jackson Porozo", "club": "Club Tijuana" }
+      ],
+      "Midfielders": [
+        { "name": "Alan Minda", "club": "Atlético Mineiro" },
+        { "name": "Moisés Caicedo", "club": "Chelsea" },
+        { "name": "Jordy Alcivar", "club": "Independiente del Valle" },
+        { "name": "Denil Castillo", "club": "FC Midtjylland" },
+        { "name": "John Yeboah", "club": "Venezia" },
+        { "name": "Alan Franco", "club": "Atlético Mineiro" },
+        { "name": "Pedro Vite", "club": "Pumas UNAM" },
+        { "name": "Kendry Páez", "club": "River Plate" },
+        { "name": "Nilson Angulo", "club": "Sunderland" },
+        { "name": "Gonzalo Plata", "club": "Flamengo" }
+      ],
+      "Forwards": [
+        { "name": "Kevin Rodríguez", "club": "Union St.-Gilloise" },
+        { "name": "Anthony Valencia", "club": "Antwerp" },
+        { "name": "Enner Valencia", "club": "Pachuca" },
+        { "name": "Jordy Caicedo", "club": "Huracán" },
+        { "name": "Jeremy Arévalo", "club": "VfB Stuttgart" }
+      ]
+    }
+  }
+}

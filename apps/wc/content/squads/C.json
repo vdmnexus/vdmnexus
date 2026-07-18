@@ -1,0 +1,170 @@
+{
+  "brazil": {
+    "name": "Brazil",
+    "group": "C",
+    "announced": "May 18",
+    "manager": "Carlo Ancelotti",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Alisson", "club": "Liverpool" },
+        { "name": "Éderson", "club": "Fenerbahce" },
+        { "name": "Weverton", "club": "Grêmio" }
+      ],
+      "Defenders": [
+        { "name": "Alex Sandro", "club": "Flamengo" },
+        { "name": "Bremer", "club": "Juventus" },
+        { "name": "Danilo", "club": "Flamengo" },
+        { "name": "Douglas Santos", "club": "Zenit St. Petersburg" },
+        { "name": "Gabriel Magalhães", "club": "Arsenal" },
+        { "name": "Léo Pereira", "club": "Flamengo" },
+        { "name": "Marquinhos", "club": "Paris Saint-Germain" },
+        { "name": "Roger Ibañez", "club": "Al Ahli" },
+        { "name": "Wesley", "club": "AS Roma" }
+      ],
+      "Midfielders": [
+        { "name": "Bruno Guimarães", "club": "Newcastle United" },
+        { "name": "Casemiro", "club": "Manchester United" },
+        { "name": "Danilo Santos", "club": "Botafogo" },
+        { "name": "Fabinho", "club": "Al Ittihad" },
+        { "name": "Lucas Paquetá", "club": "Flamengo" }
+      ],
+      "Forwards": [
+        { "name": "Endrick", "club": "Lyon" },
+        { "name": "Gabriel Martinelli", "club": "Arsenal" },
+        { "name": "Igor Thiago", "club": "Brentford" },
+        { "name": "Luiz Henrique", "club": "Zenit St. Petersburg" },
+        { "name": "Matheus Cunha", "club": "Manchester United" },
+        { "name": "Neymar", "club": "Santos" },
+        { "name": "Raphinha", "club": "Barcelona" },
+        { "name": "Rayan", "club": "Bournemouth" },
+        { "name": "Vinícius Júnior", "club": "Real Madrid" }
+      ]
+    }
+  },
+  "morocco": {
+    "name": "Morocco",
+    "group": "C",
+    "announced": "May 26",
+    "manager": "Mohamed Ouahbi",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Yassine Bounou", "club": "Al Hilal" },
+        { "name": "Munir El Kajoui", "club": "RS Berkane" },
+        { "name": "Reda Tagnaouti", "club": "AS Far" }
+      ],
+      "Defenders": [
+        { "name": "Noussair Mazraoui", "club": "Manchester United" },
+        { "name": "Anass Salah-Eddine", "club": "PSV Eindhoven" },
+        { "name": "Youssef Belammari", "club": "Al Ahly" },
+        { "name": "Achraf Hakimi", "club": "Paris Saint-Germain" },
+        { "name": "Zakaria El Ouahdi", "club": "Racing Genk" },
+        { "name": "Chadi Riad", "club": "Crystal Palace" },
+        { "name": "Nayef Aguerd", "club": "Marseille" },
+        { "name": "Redouane Halhal", "club": "KV Mechelen" },
+        { "name": "Issa Diop", "club": "Fulham" }
+      ],
+      "Midfielders": [
+        { "name": "Samir El Mourabet", "club": "Strasbourg" },
+        { "name": "Ayyoub Bouaddi", "club": "Lille" },
+        { "name": "Neil El Aynaoui", "club": "AS Roma" },
+        { "name": "Sofyan Amrabat", "club": "Real Betis" },
+        { "name": "Azzedine Ounahi", "club": "Girona" },
+        { "name": "Bilal El Khannouss", "club": "Stuttgart" },
+        { "name": "Ismael Saibari", "club": "PSV Eindhoven" }
+      ],
+      "Forwards": [
+        { "name": "Abde Ezzalzouli", "club": "Real Betis" },
+        { "name": "Chemsdine Talbi", "club": "Sunderland" },
+        { "name": "Soufiane Rahimi", "club": "Al Ain" },
+        { "name": "Ayoub El Kaabi", "club": "Olympiacos" },
+        { "name": "Brahim Díaz", "club": "Real Madrid" },
+        { "name": "Gessime Yassine", "club": "Strasbourg" },
+        { "name": "Ayoube Amaimouni", "club": "Eintracht Frankfurt" }
+      ]
+    }
+  },
+  "haiti": {
+    "name": "Haiti",
+    "group": "C",
+    "announced": "May 15",
+    "manager": "Sebastien Migne",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Johny Placide", "club": "Bastia" },
+        { "name": "Alexandre Pierre", "club": "Sochaux" },
+        { "name": "Josue Duverger", "club": "Cosmos Koblenz" }
+      ],
+      "Defenders": [
+        { "name": "Carlens Arcus", "club": "Angers" },
+        { "name": "Wilguens Paugain", "club": "Zulte Waregem" },
+        { "name": "Duke Lacroix", "club": "Colorado Springs Switchbacks" },
+        { "name": "Martin Expérience", "club": "Nancy" },
+        { "name": "Jean-Kévin Duverne", "club": "Gent" },
+        { "name": "Ricardo Adé", "club": "LDU Quito" },
+        { "name": "Hannes Delcroix", "club": "Lugano" },
+        { "name": "Keeto Thermoncy", "club": "Young Boys" }
+      ],
+      "Midfielders": [
+        { "name": "Carl Fred Sainté", "club": "El Paso Locomotive" },
+        { "name": "Leverton Pierre", "club": "Vizela" },
+        { "name": "Danley Jean Jacques", "club": "Philadelphia Union" },
+        { "name": "Jean-Ricner Bellegarde", "club": "Wolverhampton Wanderers" },
+        { "name": "Woodensky Pierre", "club": "Violette" },
+        { "name": "Dominique Simon", "club": "FC Tatran Prešov" }
+      ],
+      "Forwards": [
+        { "name": "Don Deedson Louicius", "club": "FC Dallas" },
+        { "name": "Josué Casimir", "club": "Auxerre" },
+        { "name": "Derrick Etienne", "club": "Toronto FC" },
+        { "name": "Ruben Providence", "club": "Almere" },
+        { "name": "Duckens Nazon", "club": "Esteghlal" },
+        { "name": "Frantzdy Pierrot", "club": "Çaykur Rizespor" },
+        { "name": "Wilson Isidor", "club": "Sunderland" },
+        { "name": "Yassin Fortuné", "club": "Vizela" },
+        { "name": "Lenny Joseph", "club": "Ferencváros" }
+      ]
+    }
+  },
+  "scotland": {
+    "name": "Scotland",
+    "group": "C",
+    "announced": "May 19",
+    "manager": "Steve Clarke",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Craig Gordon", "club": "Hearts" },
+        { "name": "Angus Gunn", "club": "Nottingham Forest" },
+        { "name": "Liam Kelly", "club": "Rangers" }
+      ],
+      "Defenders": [
+        { "name": "Grant Hanley", "club": "Hibernian" },
+        { "name": "Jack Hendry", "club": "Al Etiffaq" },
+        { "name": "Aaron Hickey", "club": "Brentford" },
+        { "name": "Dom Hyam", "club": "Wrexham" },
+        { "name": "Scott McKenna", "club": "Dinamo Zagreb" },
+        { "name": "Nathan Patterson", "club": "Everton" },
+        { "name": "Anthony Ralston", "club": "Celtic" },
+        { "name": "Andy Robertson", "club": "Liverpool" },
+        { "name": "John Souttar", "club": "Rangers" },
+        { "name": "Kieran Tierney", "club": "Celtic" }
+      ],
+      "Midfielders": [
+        { "name": "Ryan Christie", "club": "Bournemouth" },
+        { "name": "Finlay Curtis", "club": "Kilmarnock" },
+        { "name": "Lewis Ferguson", "club": "Bologna" },
+        { "name": "Ben Gannon-Doak", "club": "Bournemouth" },
+        { "name": "Billy Gilmour", "club": "Napoli" },
+        { "name": "John McGinn", "club": "Aston Villa" },
+        { "name": "Kenny McLean", "club": "Norwich" },
+        { "name": "Scott McTominay", "club": "Napoli" }
+      ],
+      "Forwards": [
+        { "name": "Ché Adams", "club": "Torino" },
+        { "name": "Lyndon Dykes", "club": "Charlton Athletic" },
+        { "name": "George Hirst", "club": "Ipswich" },
+        { "name": "Lawrence Shankland", "club": "Hearts" },
+        { "name": "Ross Stewart", "club": "Southampton" }
+      ]
+    }
+  }
+}

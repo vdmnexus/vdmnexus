@@ -1,0 +1,170 @@
+{
+  "france": {
+    "name": "France",
+    "group": "I",
+    "announced": "May 14",
+    "manager": "Didier Deschamps",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Mike Maignan", "club": "AC Milan" },
+        { "name": "Robin Risser", "club": "Lens" },
+        { "name": "Brice Samba", "club": "Rennes" }
+      ],
+      "Defenders": [
+        { "name": "Lucas Digne", "club": "Aston Villa" },
+        { "name": "Malo Gusto", "club": "Chelsea" },
+        { "name": "Lucas Hernández", "club": "Paris Saint-Germain" },
+        { "name": "Theo Hernández", "club": "Al Hilal" },
+        { "name": "Ibrahima Konaté", "club": "Liverpool" },
+        { "name": "Jules Koundé", "club": "Barcelona" },
+        { "name": "Maxence Lacroix", "club": "Crystal Palace" },
+        { "name": "William Saliba", "club": "Arsenal" },
+        { "name": "Dayot Upamecano", "club": "Bayern Munich" }
+      ],
+      "Midfielders": [
+        { "name": "N'Golo Kanté", "club": "Fenerbahçe" },
+        { "name": "Manu Koné", "club": "AS Roma" },
+        { "name": "Adrien Rabiot", "club": "AC Milan" },
+        { "name": "Aurélien Tchouaméni", "club": "Real Madrid" },
+        { "name": "Warren Zaïre-Emery", "club": "Paris Saint-Germain" }
+      ],
+      "Forwards": [
+        { "name": "Maghnes Akliouche", "club": "AS Monaco" },
+        { "name": "Bradley Barcola", "club": "Paris Saint-Germain" },
+        { "name": "Rayan Cherki", "club": "Manchester City" },
+        { "name": "Ousmane Dembélé", "club": "Paris Saint-Germain" },
+        { "name": "Désiré Doué", "club": "Paris Saint-Germain" },
+        { "name": "Jean-Philippe Mateta", "club": "Crystal Palace" },
+        { "name": "Kylian Mbappé", "club": "Real Madrid" },
+        { "name": "Michael Olise", "club": "Bayern Munich" },
+        { "name": "Marcus Thuram", "club": "Internazionale" }
+      ]
+    }
+  },
+  "senegal": {
+    "name": "Senegal",
+    "group": "I",
+    "announced": "June 1",
+    "manager": "Pape Thiaw",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Édouard Mendy", "club": "Al Ahli" },
+        { "name": "Mory Diaw", "club": "Le Havre AC" },
+        { "name": "Yehvann Diouf", "club": "Nice" }
+      ],
+      "Defenders": [
+        { "name": "Krépin Diatta", "club": "AS Monaco" },
+        { "name": "Antoine Mendy", "club": "Nice" },
+        { "name": "Kalidou Koulibaly", "club": "Al Hilal" },
+        { "name": "El Hadji Malick Diouf", "club": "West Ham United" },
+        { "name": "Mamadou Sarr", "club": "Chelsea" },
+        { "name": "Moussa Niakhaté", "club": "Lyon" },
+        { "name": "Abdoulaye Seck", "club": "Maccabi Haifa" },
+        { "name": "Ismail Jakobs", "club": "Galatasaray" }
+      ],
+      "Midfielders": [
+        { "name": "Idrissa Gana Gueye", "club": "Everton" },
+        { "name": "Pape Gueye", "club": "Villarreal" },
+        { "name": "Lamine Camara", "club": "AS Monaco" },
+        { "name": "Habib Diarra", "club": "Sunderland" },
+        { "name": "Pathé Ciss", "club": "Rayo Vallecano" },
+        { "name": "Pape Matar Sarr", "club": "Tottenham Hotspur" },
+        { "name": "Bara Sapoko Ndiaye", "club": "Bayern Munich" }
+      ],
+      "Forwards": [
+        { "name": "Sadio Mané", "club": "Al Nassr" },
+        { "name": "Ismaïla Sarr", "club": "Crystal Palace" },
+        { "name": "Iliman Ndiaye", "club": "Everton" },
+        { "name": "Assane Diao", "club": "Como" },
+        { "name": "Ibrahim Mbaye", "club": "Paris Saint-Germain" },
+        { "name": "Nicolas Jackson", "club": "Chelsea" },
+        { "name": "Bamba Dieng", "club": "Lorient" },
+        { "name": "Cherif Ndiaye", "club": "Samsunspor" }
+      ]
+    }
+  },
+  "iraq": {
+    "name": "Iraq",
+    "group": "I",
+    "announced": "June 1",
+    "manager": "Graham Arnold",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Fahad Talib", "club": "Al-Talaba" },
+        { "name": "Jalal Hassan", "club": "Al-Zawraa" },
+        { "name": "Ahmed Basil", "club": "Al-Shorta" }
+      ],
+      "Defenders": [
+        { "name": "Hussein Ali", "club": "Pogoń Szczecin" },
+        { "name": "Manaf Younis", "club": "Al-Shorta" },
+        { "name": "Zaid Tahseen", "club": "Pakhtakor" },
+        { "name": "Rebin Sulaka", "club": "Port FC" },
+        { "name": "Akam Hashem", "club": "Al-Zawraa" },
+        { "name": "Merchas Doski", "club": "Viktoria Plzeň" },
+        { "name": "Ahmed Yahya", "club": "Al-Shorta" },
+        { "name": "Zaid Ismail", "club": "Al-Talaba" },
+        { "name": "Frans Putros", "club": "Port FC" },
+        { "name": "Mustafa Saadoon", "club": "Al-Shorta" }
+      ],
+      "Midfielders": [
+        { "name": "Amir Al-Ammari", "club": "Cracovia" },
+        { "name": "Kevin Yakob", "club": "AGF Aarhus" },
+        { "name": "Zidane Iqbal", "club": "FC Utrecht" },
+        { "name": "Aimar Sher", "club": "Sarpsborg 08" },
+        { "name": "Ibrahim Bayesh", "club": "Al-Riyadh" },
+        { "name": "Ahmed Qasim", "club": "Elfsborg" },
+        { "name": "Youssef Amyn", "club": "Eintracht Braunschweig" },
+        { "name": "Marko Farji", "club": "Strømsgodset" }
+      ],
+      "Forwards": [
+        { "name": "Ali Jasim", "club": "Como" },
+        { "name": "Ali Al-Hamadi", "club": "Ipswich Town" },
+        { "name": "Ali Yousef", "club": "Al-Shorta" },
+        { "name": "Aymen Hussein", "club": "Al-Khor" },
+        { "name": "Mohanad Ali", "club": "Al-Shorta" }
+      ]
+    }
+  },
+  "norway": {
+    "name": "Norway",
+    "group": "I",
+    "announced": "May 21",
+    "manager": "Stale Solbakken",
+    "squad": {
+      "Goalkeepers": [
+        { "name": "Ørjan Nyland", "club": "Sevilla" },
+        { "name": "Egil Selvik", "club": "Watford" },
+        { "name": "Sander Tangvik", "club": "Hamburg SV" }
+      ],
+      "Defenders": [
+        { "name": "Julian Ryerson", "club": "Borussia Dortmund" },
+        { "name": "Kristoffer Ajer", "club": "Brentford" },
+        { "name": "Leo Østigård", "club": "Genoa" },
+        { "name": "David Møller Wolfe", "club": "Wolverhampton Wanderers" },
+        { "name": "Marcus Pedersen", "club": "Torino" },
+        { "name": "Torbjørn Heggem", "club": "Bologna" },
+        { "name": "Fredrik André Bjørkan", "club": "Bodø/Glimt" },
+        { "name": "Henrik Falchener", "club": "Viking" },
+        { "name": "Sondre Langås", "club": "Derby County" }
+      ],
+      "Midfielders": [
+        { "name": "Martin Ødegaard", "club": "Arsenal" },
+        { "name": "Sander Berge", "club": "Fulham" },
+        { "name": "Patrick Berg", "club": "Bodø/Glimt" },
+        { "name": "Kristian Thorstvedt", "club": "Sassuolo" },
+        { "name": "Morten Thorsby", "club": "Cremonese" },
+        { "name": "Thelo Aasgaard", "club": "Rangers" },
+        { "name": "Andreas Schjelderup", "club": "Benfica" },
+        { "name": "Jens Petter Hauge", "club": "Bodø/Glimt" },
+        { "name": "Fredrik Aursnes", "club": "Benfica" },
+        { "name": "Oscar Bobb", "club": "Fulham" },
+        { "name": "Antonio Nusa", "club": "RB Leipzig" }
+      ],
+      "Forwards": [
+        { "name": "Erling Haaland", "club": "Manchester City" },
+        { "name": "Alexander Sørloth", "club": "Atlético Madrid" },
+        { "name": "Jørgen Strand Larsen", "club": "Crystal Palace" }
+      ]
+    }
+  }
+}

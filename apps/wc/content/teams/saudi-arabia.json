@@ -1,0 +1,44 @@
+{
+  "summary": "Hard-working and direct, Saudi Arabia hit from a 4-4-2 mid-block built around pace up front — with memories of their famous smash-and-grab win over Argentina at the 2022 World Cup. Capable of slick attacking moves, but with defensive issues to address.",
+  "style": "4-4-2 mid-block — the front two sit off to screen passes into midfield while the back four push high to squeeze the space between the lines; proactive, snapping into challenges to win the ball in the middle third. On turnovers the next pass is forward — freeing Salem Al-Dawsari on the flanks and the rapid Al-Buraikan in behind. Shifts to a 4-2-3-1 going forward, the three behind the striker rotating freely.",
+  "counterReliance": {
+    "tier": "high",
+    "note": "Mid-block then direct/quick-passing breaks to pacy forwards"
+  },
+  "strengths": [
+    "Direct, vertical threat to pacy forwards (Al-Dawsari, Al-Buraikan)",
+    "Technical attackers who can combine in quick passing moves and create overloads",
+    "Proactive mid-block that hunts the ball in the middle third",
+    "Proven upset pedigree (beat Argentina in 2022)"
+  ],
+  "weaknesses": [
+    "Just one clean sheet in the last 10 competitive games",
+    "Loses runners on crosses and at set pieces",
+    "Vulnerable on the break when the line sits too high (torn apart 4-0 by Egypt)"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Salem Al-Dawsari",
+      "role": "Winger (Al Hilal)",
+      "note": "Main threat at 34 — quick-footed and slippery, loves to take on his full-back and chop inside onto his right foot"
+    },
+    {
+      "name": "Saud Abdulhamid",
+      "role": "Right-back (Lens)",
+      "note": "Tenacious defender who gets forward — 7 assists in a strong Ligue 1 season; offers for the quick switch of play"
+    },
+    {
+      "name": "Mohamed Kanno",
+      "role": "Midfield (Al Hilal)",
+      "note": "Crucial defensive presence with a late-run goal threat; long-standing understanding with Al-Dawsari from nine seasons together"
+    }
+  ],
+  "tactics": "Sit in a compact 4-4-2, screen the middle, and break quickly to the pacy forwards — backing the front players' quality to combine. To go far they'll need the defensive compactness and swift counters that beat Argentina in 2022, while fixing the frailty on crosses and transitions.",
+  "notes": [
+    "Profile added 2026-06; built from The Athletic's Group H guide (the team was missing from the scouting set despite being in the model)."
+  ],
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group H (5 Jun 2026)"
+  ],
+  "updated": "2026-06-05"
+}

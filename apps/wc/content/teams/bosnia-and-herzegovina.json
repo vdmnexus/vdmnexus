@@ -1,0 +1,38 @@
+{
+  "summary": "An old-school, transition-first 4-4-2 under Sergej Barbarez — attacking full-backs, talented wingers, two strikers, and a dual aerial threat for crosses into the box. Reached the finals via penalty-shootout wins over Wales and Italy and want more surprises.",
+  "style": "Old-school 4-4-2 — play through the wide areas to the wingers (Memić, Bajraktarević, Alajbegović), with Džeko dropping to link, leading the line alongside Tabaković or Demirović. Direct and cross-heavy, aiming for the dual aerial threat in the box; transition over possession.",
+  "counterReliance": {
+    "tier": "high",
+    "note": "Transition over possession — direct, wide, and cross-heavy"
+  },
+  "strengths": [
+    "Two big strikers as a direct aerial target in the box",
+    "Attacking full-backs and wingers combining to cross",
+    "Aggressive out of possession — most fouls of any of the 54 UEFA qualifying nations (17.7 per match)",
+    "Mental fortitude from back-to-back play-off shootout wins (Wales, Italy)"
+  ],
+  "weaknesses": [
+    "Among the lowest-possession sides — reliant on transition and set-piece/cross moments"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Edin Džeko",
+      "role": "Centre-forward",
+      "note": "All-time top scorer (73) and most-capped player; aerial target for long balls and crosses, can also drop to link"
+    },
+    {
+      "name": "Esmir Bajraktarević",
+      "role": "21yo winger",
+      "note": "Direct dribbler with creativity and an eye for goal — 6 chances created & 8 successful dribbles vs Italy"
+    }
+  ],
+  "tactics": "Go direct to Džeko and the strikers, combine wide to cross into the box, and break in transition rather than build. They will happily foul to kill momentum. Group B offers a real chance to reach the knockouts for the first time — likely hinging on the final game vs Qatar.",
+  "notes": [
+    "Since independence in 1992, Bosnia have reached just one World Cup (2014) and no Euros."
+  ],
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group B (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}

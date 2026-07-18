@@ -1,0 +1,44 @@
+{
+  "summary": "Group favourites under Roberto Martínez, led by Cristiano Ronaldo in his sixth and final World Cup (the tournament's oldest outfield player). An offensive identity built on crossing and well-timed wide deliveries, with elite squad depth — but aggressive enough in possession to be vulnerable in transition.",
+  "style": "Build in a 3-2-5 (a central midfielder drops between the centre-backs) with full-backs pinning or inverting (Semedo tucks in) and wingers inverting so the front three play in proximity. Bernardo Silva drops to combine while Rúben Neves advances toward the box (his headed winner vs Ireland came off a Trincão cross). Forwards drift across against man-marking. Out of possession, a high line and immediate counter-press to swarm losses outside their own third.",
+  "counterReliance": {
+    "tier": "low",
+    "note": "Possession, crossing and high counter-press; commits big numbers forward"
+  },
+  "strengths": [
+    "Crossing and wide-delivery threat with late runners arriving (Neves, full-backs)",
+    "Outstanding squad depth and central overloads via inverted full-backs",
+    "Aggressive high line + counter-press that wins the ball high (the source of the Trincão goal vs USA)",
+    "Bruno Fernandes' creativity (on the back of breaking the PL assist record)"
+  ],
+  "weaknesses": [
+    "Committing numbers forward leaves them exposed in transition (Spain punished it in a 2-2)",
+    "Set-piece defending a lingering concern"
+  ],
+  "keyPlayers": [
+    {
+      "name": "João Neves",
+      "role": "Midfield (PSG)",
+      "note": "All-action 21-year-old — progresses, presses hard, crashes the box; combative in duels and a sneaky aerial/set-piece threat despite his height. Crucial to the high-risk system"
+    },
+    {
+      "name": "Bruno Fernandes",
+      "role": "Attacking mid (Man Utd)",
+      "note": "The creative hub — chances and a goal threat from everywhere; arrives off the PL assist record"
+    },
+    {
+      "name": "Cristiano Ronaldo",
+      "role": "Forward",
+      "note": "41, a record sixth World Cup; 143 goals in 226 caps — yet has never scored in a World Cup knockout, and underperformed his xG most at Euro 2024 (-3.6)"
+    }
+  ],
+  "tactics": "Build through a back-three shape, invert the full-backs to overload the centre, and feed crosses to late runners; press high and counter-press to win it back early. The crossing threat and depth are elite; the risk is the transition exposure when they over-commit.",
+  "notes": [
+    "PSG's Champions League core (Mendes, Vitinha, João Neves) gives Martínez a high-class spine."
+  ],
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group K (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}

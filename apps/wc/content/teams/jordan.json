@@ -1,0 +1,38 @@
+{
+  "summary": "World Cup debutants (FIFA 63rd) under Jamal Sellami — unlikely to dominate the ball (41% average possession in qualifying) but a real punch on the counter from a deep block. A 3-4-3 that drops into a back five, giving a strong defensive foundation.",
+  "style": "3-4-3 that becomes a 5-4-1 / back five out of possession; direct to a rotating attacking trident — Al-Taamari and Olwan operating behind Al-Naimat — with quick combinations and runs in behind on the break (Olwan's goal vs Oman came barely 10 seconds after a throw-in).",
+  "counterReliance": {
+    "tier": "high",
+    "note": "Deep back-five block, counter at speed through the front three"
+  },
+  "strengths": [
+    "Counter-attacks at speed from a compact, organised deep block",
+    "A potent, rotating front three — 24 goals between Al-Taamari, Olwan and Al-Naimat in 16 Asian qualifiers",
+    "Sharp close combinations to unlock defences quickly in transition"
+  ],
+  "weaknesses": [
+    "Big defensive gaps if the back five sits too deep",
+    "Limited possession and creativity against teams that sit in against them"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Musa Al-Taamari",
+      "role": "Winger (Rennes)",
+      "note": "The talisman — a left-footer who shoots from range (a third of his efforts from outside the box), with a free kick vs Nigeria and a goal-of-the-season volley vs Lyon to his name"
+    },
+    {
+      "name": "Ali Olwan",
+      "role": "Striker",
+      "note": "Designated penalty taker on 27 international goals — three more would match the all-time record, four would break it; a chance to make history"
+    }
+  ],
+  "tactics": "Defend deep in a back five, stay compact, and break fast through the front three — quick combinations and runs in behind. The gaps when the block drops too low are the vulnerability, but they pack a counter-attacking punch on their World Cup debut.",
+  "notes": [
+    "Every Jordan player's first World Cup — first goal, assist or booking enters the history books."
+  ],
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group J (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}

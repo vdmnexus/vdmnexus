@@ -1,0 +1,44 @@
+{
+  "summary": "World Cup debutants who earned real respect — under Bubista they played expansive football to qualify ahead of a strong Cameroon, losing just one of 10 games. An exciting cast of quick attackers; likely forced deep and onto the counter against Spain and Uruguay.",
+  "style": "Best when they can seize the initiative against weaker sides — full-backs drift inside while talented No 10s combine with tricky wingers to pull compact defences apart. Against stronger opposition, expect a deep 4-4-2 with wingers tucking in to compact the middle, then breaking fast through the pace of Cabral and a streaking Livramento.",
+  "counterReliance": {
+    "tier": "high",
+    "note": "Expansive vs lesser sides; deep block and vertical counter vs the favourites"
+  },
+  "strengths": [
+    "Quick, dynamic attackers who break at pace on the counter",
+    "Clever final-third rotations (full-backs inside, No 10s and wingers combining)",
+    "Defensive tenacity to win the ball and go (Livramento's winner vs Cameroon)",
+    "Set-play output"
+  ],
+  "weaknesses": [
+    "Likely pinned in their own third for long spells against Spain and Uruguay",
+    "Step up in level from CAF qualifying for a debutant"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Dailon Livramento",
+      "role": "Centre-forward",
+      "note": "Qualifying top scorer — streaks in behind on the counter; nicked the decisive goal vs Cameroon after barging Baleba off the ball"
+    },
+    {
+      "name": "Jamiro Monteiro",
+      "role": "Winger / No 10",
+      "note": "A box of tricks with searing pace; drifts inside to make things happen"
+    },
+    {
+      "name": "Ryan Mendes",
+      "role": "Winger / captain",
+      "note": "Pace on the opposite flank to Monteiro"
+    }
+  ],
+  "tactics": "Counter with pace when pushed back, but back themselves to be expansive and rotate cleverly when they can take the initiative. They topped a group containing Cameroon — treat them as a quality side capable of surprising the favourites.",
+  "notes": [
+    "First-ever World Cup; qualified ahead of Cameroon, beaten just once in 10."
+  ],
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group H (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}

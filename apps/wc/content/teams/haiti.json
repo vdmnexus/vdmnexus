@@ -1,0 +1,42 @@
+{
+  "summary": "Only a second World Cup appearance (after three defeats in 1974). Sébastien Migné's side thrives on transitions and vertical football — patient in build-up, then sharply direct in attack, carrying the ball up and attacking the space behind with long passes.",
+  "style": "4-2-3-1 (Bellegarde behind the centre-forward) or 4-4-2 (two of Nazon, Pierrot, Isidor up top). Happy to pass it around in build-up, but vertical with passes and dribbles once they go forward — wingers in 1v1s, underlapping runs from full-back and midfield, quick transition attacks.",
+  "counterReliance": {
+    "tier": "high",
+    "note": "Patient build-up, then quick, vertical transition attacks"
+  },
+  "strengths": [
+    "Dangerous, vertical transitions — carry the ball and attack the space behind",
+    "Wingers in 1v1s with underlapping runners",
+    "Genuine goal threat across three capable centre-forwards"
+  ],
+  "weaknesses": [
+    "Can leak goals — a point is likelier to come through scoring than a clean sheet"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Jean-Ricner Bellegarde",
+      "role": "Attacking mid (Wolves)",
+      "note": "France-youth product who switched allegiance in 2025; the key link between midfield and attack, ball-carrying in transition"
+    },
+    {
+      "name": "Duckens Nazon",
+      "role": "Centre-forward",
+      "note": "All-time top scorer (44 goals) and the focal point of the direct attack"
+    },
+    {
+      "name": "Wilson Isidor",
+      "role": "Centre-forward (Sunderland)",
+      "note": "Committed to Haiti in March 2026; adds Premier League pedigree to the forward line"
+    }
+  ],
+  "tactics": "Build patiently, then break vertically at speed — isolate the wingers and run beyond the defence. The defensive lapses make them volatile, but the quick breaks are genuinely dangerous, and any point would spark celebrations in Port-au-Prince.",
+  "notes": [
+    "Their only prior World Cup (1974) ended in three losses; a first-ever point is the goal."
+  ],
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group C (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}

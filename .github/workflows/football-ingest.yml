@@ -6,7 +6,8 @@ name: Football data ingest
 #      (football_matches + wc_standings). Scores fill in ~daily, so this
 #      keeps results and the group table current through the tournament.
 #   2. Regenerate the model's web predictions from the same feed and commit
-#      them back, so /wc26 adapts as results land:
+#      them back to the canonical agents/polymarket/exports/ dir, consumed by
+#      both /wc26 and wc.vdmnexus.com, so both adapt as results land:
 #        * scores.json      — per-fixture exact-scoreline sheet
 #        * tournament.json  — champion + advancement board (played group
 #                             games are pinned, not re-simulated)
@@ -59,11 +60,40 @@ jobs:
           python3 -m polymarket_agent.export_scores
           python3 -m polymarket_agent.export_tournament
 
+      - name: Refresh team xG profiles (display-only, Fotmob)
+        working-directory: agents/polymarket
+        # DISPLAY FEED, not a model input. Pulls per-team Fotmob xG / style
+        # profiles. The matchId cache (refdata/fotmob_xg_cache.json) is
+        # committed, and match xG is immutable, so each run only fetches the
+        # handful of internationals played since the last run — token-free and
+        # cheap. continue-on-error: profiles are cosmetic, so a Fotmob hiccup
+        # must never block the prediction commit below.
+        continue-on-error: true
+        run: python3 -m polymarket_agent.export_profiles
+
+      - name: Validate exports (gate the commit)
+        working-directory: agents/polymarket
+        # Schema/sanity guard: 48 teams, 72 fixtures, finite probabilities,
+        # champ sum ~1, final sum ~2. If a regenerate produced malformed JSON,
+        # FAIL here so the broken snapshot never reaches the live site.
+        run: python3 -m polymarket_agent.selfcheck exports
+
+      - name: Refresh live calibration ledger (display/analysis only)
+        working-directory: agents/polymarket
+        # Re-scores the model's pre-match calls vs the results logged in
+        # refdata/wc26_played.csv (RPS vs a fixed prior) -> exports/
+        # wc26_calibration.csv. continue-on-error: a cosmetic tracker must
+        # never block the prediction commit.
+        continue-on-error: true
+        run: python3 -m polymarket_agent.wc26_calibrate
+
       - name: Commit refreshed predictions
         run: |
           git config user.name  "nexus-bot"
           git config user.email "bot@vdmnexus.com"
-          git add apps/web/app/wc26/scores.json apps/web/app/wc26/tournament.json
+          git add agents/polymarket/exports/scores.json agents/polymarket/exports/tournament.json
+          git add agents/polymarket/exports/team_profiles.json agents/polymarket/refdata/fotmob_xg_cache.json
+          git add agents/polymarket/exports/wc26_calibration.csv
           if git diff --cached --quiet; then
             echo "no prediction changes"
           else

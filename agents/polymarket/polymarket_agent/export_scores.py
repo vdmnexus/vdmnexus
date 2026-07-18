@@ -15,7 +15,9 @@ snapshot rather than calling Python live. Regenerate after any re-fit:
 
     python3 -m polymarket_agent.export_scores
 
-Writes to apps/web/app/wc26/scores.json (path derived from this file).
+Writes to agents/polymarket/exports/scores.json (path derived from this
+file). This is the canonical snapshot consumed by both the marketing /wc26
+route and the dedicated apps/wc (wc.vdmnexus.com) app.
 """
 
 from __future__ import annotations
@@ -27,7 +29,7 @@ from pathlib import Path
 import numpy as np
 
 from .calibrate import fifa_member_teams, fit_ratings, load_results
-from .exp_talent import compute_talent
+from .roster_talent import load_live_talent
 from .model import ScorelineModel
 from .pool_picks import EXACT_PTS, GDIFF_PTS, TEND_PTS, ev_optimal
 from .sim import (
@@ -35,7 +37,7 @@ from .sim import (
     GROUPS, HOST_EDGE, TALENT_K, USE_ALTITUDE, USE_TALENT, USE_TRAVEL, Engine,
 )
 
-OUT_PATH = Path(__file__).resolve().parents[3] / "apps/web/app/wc26/scores.json"
+OUT_PATH = Path(__file__).resolve().parents[1] / "exports/scores.json"
 
 
 def _flip(label: str) -> str:
@@ -48,7 +50,7 @@ def build() -> dict:
     today = date.today()
     eligible = fifa_member_teams(matches, since=date(2018, 1, 1))
     ratings = fit_ratings(matches, ref_day=today, eligible=eligible)
-    talent = compute_talent(FIFA_TALENT_YEAR, TALENT_K) if USE_TALENT else {}
+    talent = load_live_talent(FIFA_TALENT_YEAR) if USE_TALENT else {}
     eng = Engine(ratings, host_edge=HOST_EDGE, talent=talent,
                  beta_talent=GATED_BETA_TALENT if USE_TALENT else 0.0,
                  altitude=USE_ALTITUDE,

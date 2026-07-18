@@ -1,0 +1,40 @@
+{
+  "summary": "Don't underestimate them. Light on star quality but heavy on mental fortitude — they reached the finals via back-to-back play-off penalty-shootout wins over Ireland and Denmark under Miroslav Koubek (who replaced the sacked Ivan Hašek). A dogged back five built on defensive resilience and the most set-piece-reliant attack in Europe.",
+  "style": "Back five (3-4-3 / 3-4-2-1) — wing-backs high and wide, wingers tucking inside as second strikers, enormous crossing volume. Against better sides it becomes a purely defensive block: attackers drop deep and dig in, then spring forward on the counter through Pavel Šulc's ball-carrying.",
+  "counterReliance": {
+    "tier": "low",
+    "note": "Defensive block that breaks out via Šulc; the real weapon is the dead ball"
+  },
+  "strengths": [
+    "Set-piece kings — 45% of qualifying goals from dead balls, the highest share of any European side",
+    "The full set-piece universe: play-off goals from a penalty, a free kick, a corner and a long throw",
+    "Clear, drilled defensive responsibilities in a back five — no confusion, unlike South Korea",
+    "Elite crossing volume (3rd highest in Europe)"
+  ],
+  "weaknesses": [
+    "Limited in open play — among the most big chances missed",
+    "Little star quality; reliant on resilience and dead balls rather than sustained attacking quality"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Tomáš Souček",
+      "role": "Midfield enforcer (West Ham)",
+      "note": "Wins duels, mops up, and a huge aerial threat — most headed goals of any PL midfielder since Feb 2020 (11)"
+    },
+    {
+      "name": "Pavel Šulc",
+      "role": "Forward/winger",
+      "note": "Pacey, direct dribbler with creativity and end product — the outlet from the block; 14 goal involvements this season"
+    }
+  ],
+  "tactics": "Sit in a disciplined back five, deny space, and counter. The set-piece threat is the genuine edge — defend a corner, free kick or long throw against them at your peril. Mental fortitude is the calling card after two play-off shootout wins.",
+  "notes": [
+    "Hašek was sacked after a poor qualifying campaign that included a 2-1 home loss to the Faroe Islands; Koubek won his first two games — both shootouts — to reach the finals.",
+    "Koubek, 74, is among the oldest coaches at the tournament alongside South Africa's Broos."
+  ],
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group A (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}

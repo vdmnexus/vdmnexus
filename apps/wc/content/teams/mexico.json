@@ -1,0 +1,46 @@
+{
+  "summary": "Co-hosts and group favourites under Javier Aguirre (his third spell), a stabilising influence favouring a straightforward, organised 4-3-3. Reigning Concacaf Gold Cup champions (beat the USA 2-1 in the 2025 final). Controlled, crossing side with serious set-play and aerial threat, roared on by a raucous home crowd at altitude.",
+  "style": "Variation of 4-3-3 — Edson Álvarez anchors the midfield three; the right-back tucks in as a third centre-back so Jesús Gallardo advances from left-back, fed by long diagonals. Direct wingers (Alvarado, Vega) and high, wide full-backs pin opponents in. Combative out of possession, strong in duels, with the aggression concentrated in midfield.",
+  "counterReliance": {
+    "tier": "low",
+    "note": "Controlled, crossing side that builds rather than counters"
+  },
+  "strengths": [
+    "Set-plays a genuine weapon (5 of 9 goals at the 2025 Gold Cup)",
+    "Aerial threat — crosses funnelled to Raúl Jiménez",
+    "Strong rest-defence behind the press (3 CMs + 2 CBs)",
+    "Home crowd and altitude — the Azteca is the highest venue of all 16"
+  ],
+  "weaknesses": [
+    "Limited in open play — set pieces and crosses into Jiménez are the main route to goal",
+    "Jiménez, 35, is diligent but can't spearhead an intense high press"
+  ],
+  "keyPlayers": [
+    {
+      "name": "Alexis Vega",
+      "role": "Winger",
+      "note": "Toluca's creator — 3rd-most take-ons per 90 in Liga MX; the service for Jiménez"
+    },
+    {
+      "name": "Gilberto Mora",
+      "role": "17yo midfielder",
+      "note": "Prodigious playmaker, drifts wide from the midfield three; U20 WC standout in 2025"
+    },
+    {
+      "name": "Edson Álvarez",
+      "role": "DM",
+      "note": "Anchors the midfield three; the platform for the rotations ahead"
+    }
+  ],
+  "tactics": "Full-backs push high while wingers tuck inside, funnelling crosses to the strikers; a 3-CM / 2-CB rest-defence protects against transitions. Aguirre has trialled a more adventurous 4-1-4-1 (vs Belgium and Portugal) to give Jiménez more support in the press. With fans and altitude behind them, the Azteca becomes an intimidating cauldron.",
+  "notes": [
+    "Reigning Concacaf Gold Cup champions (2025), beating the USA 2-1 in the final — a rare competitive platform for a host with few qualifiers.",
+    "Guillermo Ochoa (40, AEL Limassol) could feature in a 6th consecutive World Cup, a feat otherwise matched only by Messi and Ronaldo.",
+    "Aguirre assembled the squad ~5 weeks early for a home-soil camp; Mexico's three venues (Azteca 2,245m, Akron 1,665m) are the highest of the tournament — a built-in acclimatisation edge."
+  ],
+  "sources": [
+    "The Athletic — 2026 World Cup tactical guide, Group A (5 Jun 2026)",
+    "John Walker (@johnwalker_1986) — pre-tournament tactical scouting, May–Jun 2026"
+  ],
+  "updated": "2026-06-05"
+}
