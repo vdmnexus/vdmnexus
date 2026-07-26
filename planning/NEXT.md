@@ -1,9 +1,9 @@
-# Tomorrow's plan — 2026-07-26
+# Tomorrow's plan — 2026-07-27
 
 Rolling pointer, overwritten in full by each daily run of
-`prompts/00-daily-review.md`. Full context: `planning/daily/2026-07-25.md`.
+`prompts/00-daily-review.md`. Full context: `planning/daily/2026-07-26.md`.
 
-1. **Decision needed on roadmap item 7** — twenty-six days stale in
+1. **Decision needed on roadmap item 7** — twenty-seven days stale in
    this loop. Either run `prompts/06-compliance-one-pager.md` directly,
    or tell this loop to drop it from the nightly plan.
 2. **Manual-submission backlog still open** — #2 (awesome-x402 +
@@ -15,8 +15,5 @@ Rolling pointer, overwritten in full by each daily run of
    action needed from this loop, just a standing reminder.
 4. **`business-plan.md` still missing in `vdmnexus/internal`** — worth
    an explicit go/no-go from Dennis on whether to seed it now.
-5. **Watch for a repeat of yesterday's stuck-PR issue** — PR #142 sat
-   unmerged for ~24h despite green CI before this run merged it. If a
-   planning PR gets stuck again, treat it as a real process break.
-6. No new outreach/distribution branches until the backlog clears —
-   twenty quiet days running is worth noticing, not just repeating.
+5. No new outreach/distribution branches until the backlog clears —
+   twenty-one quiet days running is worth noticing, not just repeating.
