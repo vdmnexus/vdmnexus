@@ -64,7 +64,12 @@ const GAPS: Array<{ title: string; body: string }> = [
   {
     title: "No third-party security audit",
     body:
-      "No external paid audit has been performed at time of publication. Code is open-source under MIT at github.com/vdmnexus/vdmnexus; public review is encouraged. An Immunefi bounty and a third-party audit are on the post-launch roadmap, gated on revenue. Do not assume any code review beyond what a public repo earns.",
+      "No external paid audit has been performed at time of publication — not of the rail, and not of the in-development Rienda / hook contracts. Code is open-source under MIT at github.com/vdmnexus/vdmnexus; public review is encouraged. An Immunefi bounty and a third-party audit are on the post-launch roadmap, gated on revenue. Do not assume any code review beyond what a public repo earns.",
+  },
+  {
+    title: "Rienda contracts: in development, unaudited, testnet-first",
+    body:
+      "The Layer 2 vault contracts (agent treasuries on Robinhood Chain: position caps, loss limits, drawdown throttles, kill switch, x402 compute metering from realized PnL) exist as a completed spec and in-development code. They are unaudited and hold no funds. They deploy to Robinhood Chain testnet (chain id 46630) first; mainnet deployment is gated behind an external security audit and legal review. Anything claiming to be a live Rienda vault before that disclosure updates here is not ours.",
   },
   {
     title: "No SLA at Beta",
@@ -79,7 +84,7 @@ const GAPS: Array<{ title: string; body: string }> = [
   {
     title: "Solo founder, single point of failure",
     body:
-      "One Spain-resident autónomo operates the rail, the deployments, the security response, and the development. Incapacitation, illness, or operator absence may pause incident response and feature work indefinitely. Critical infrastructure (KMS, Squads multisigs, Supabase, Vercel team) is recoverable by the operator only at Beta — disaster-recovery delegation is part of v1 scope.",
+      "One Spain-resident autónomo operates the rail, the deployments, the security response, and the development. Incapacitation, illness, or operator absence may pause incident response and feature work indefinitely. Critical infrastructure (KMS, multisigs, Supabase, Vercel team) is recoverable by the operator only at Beta — disaster-recovery delegation is part of v1 scope.",
   },
 ];
 

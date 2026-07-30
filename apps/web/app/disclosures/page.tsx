@@ -1,20 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
-import { launchLive } from "@/lib/launch-flag";
 
 export const metadata: Metadata = {
-  title: "Disclosures — VDM Nexus / $NEXUS",
+  title: "Disclosures — VDM Nexus / $NEXUS / Rienda",
   description:
-    "$NEXUS token risk factors, issuer disclosures, and MiCA-aware operator notice for the VDM Nexus signed-inference rail. Plain prose, no marketing.",
+    "$NEXUS token risk factors, Rienda agent-treasury status, issuer disclosures, and MiCA-aware operator notice for the VDM Nexus signed-inference rail. Plain prose, no marketing.",
   alternates: { canonical: "https://vdmnexus.com/disclosures" },
   robots: { index: true, follow: true },
 };
 
 export default function DisclosuresPage() {
-  if (!launchLive()) notFound();
   return (
     <>
       <Nav />
@@ -27,9 +24,10 @@ export default function DisclosuresPage() {
             $NEXUS — risk factors and issuer disclosures
           </h1>
           <p className="mt-4 text-sm text-text-muted">
-            Read this before you interact with $NEXUS in any way. Not
-            financial advice. Not legal advice. Not a solicitation.
-            $NEXUS can lose its entire value.
+            Read this before you interact with $NEXUS or Rienda in any
+            way. Not financial advice. Not legal advice. Not a
+            solicitation. $NEXUS can lose its entire value. Capital
+            placed in a Rienda vault can lose its entire value.
           </p>
         </header>
 
@@ -68,18 +66,26 @@ export default function DisclosuresPage() {
                 disabled at deploy.
               </li>
               <li>
-                <span className="text-text">Launch venue:</span>{" "}
-                pump.fun with USDC pair on Solana mainnet. SPL token
-                on Solana. Dollar-denominated MCAP (no SOL beta).
+                <span className="text-text">Launch venue:</span> a
+                Uniswap v4 $NEXUS/USDC pool with a custom fee-burn
+                hook on Robinhood Chain (an Ethereum L2; testnet chain
+                id 46630). ERC-20 token. Dollar-denominated MCAP (no
+                ETH beta). The launch is gated on Robinhood Chain
+                mainnet availability, an external audit of the hook +
+                vault contracts, and legal review — no launch date is
+                announced until all three clear. This venue supersedes
+                the previously published pump.fun/Solana plan.
               </li>
               <li>
                 <span className="text-text">Allocation:</span> 70%
-                liquidity pool (LP burned at pump.fun bonding
-                completion), 15% treasury vault (Squads multisig, 90d
-                lockup + 12mo linear vest), 10% retroactive airdrop
-                (non-spendable Squads, criteria within 90d, 6mo
-                distribution vest), 5% community pool (publicly tracked
-                Squads multisig, no lockup).
+                liquidity pool (Uniswap v4 LP position burned at
+                deploy), 15% treasury vault (multisig-controlled
+                vesting contract, 90d lockup + 12mo linear vest), 10%
+                retroactive airdrop (non-spendable multisig, criteria
+                within 90d, 6mo distribution vest), 5% community pool
+                (publicly tracked multisig, no lockup). Multisig
+                tooling (Safe or equivalent) finalized before
+                addresses are published.
               </li>
               <li>
                 <span className="text-text">Team allocation:</span>{" "}
@@ -107,9 +113,9 @@ export default function DisclosuresPage() {
                 authorization or MiFID II exposure.
               </li>
               <li>
-                <span className="text-text">Squads addresses:</span>{" "}
-                Published 24-48 hours before launch. Verifiable on
-                Solscan and Bubblemaps Solana as three distinct
+                <span className="text-text">Multisig addresses:</span>{" "}
+                Published 24-48 hours before launch. Verifiable on the
+                Robinhood Chain explorer as three distinct
                 allocations, not as a clustered wallet.
               </li>
             </ul>
@@ -192,19 +198,34 @@ export default function DisclosuresPage() {
               </li>
               <li>
                 <span className="text-text">Smart contract risk.</span>{" "}
-                The pump.fun pool, the Squads vesting program, the
+                The Uniswap v4 pool and its custom fee-burn hook, the
+                vesting contract, the Rienda vault contracts, the
                 future bond contract (Wire 3), and the future
                 verifier-staking contract (Wire 4) are smart
                 contracts. Smart contracts can have bugs, can be
                 exploited, and can fail in ways that result in
-                permanent loss of tokens or funds.
+                permanent loss of tokens or funds. The fee-burn hook
+                and the Rienda vaults are custom, unaudited code at
+                time of publication — they do not ship to mainnet
+                before an external audit.
               </li>
               <li>
                 <span className="text-text">Liquidity risk.</span>{" "}
-                pump.fun pre-bonding markets are thin. Post-bonding
-                liquidity is subject to traded volume on Solana DEX
-                infrastructure. Slippage on size can be high. Exits
-                may not be available at expected prices.
+                A newly created Uniswap v4 pool can be thin. Liquidity
+                is subject to traded volume on Robinhood Chain DEX
+                infrastructure, which is itself new. Slippage on size
+                can be high. Exits may not be available at expected
+                prices.
+              </li>
+              <li>
+                <span className="text-text">New-chain risk.</span>{" "}
+                Robinhood Chain is a new Ethereum L2. Its mainnet
+                availability, sequencer uptime, bridge liquidity,
+                tooling (explorers, multisigs, indexers), and USDC
+                availability are outside the issuer&apos;s control. If
+                the chain&apos;s mainnet, tooling, or USDC support do
+                not materialize as expected, the launch plan will be
+                re-venued again and this page updated.
               </li>
               <li>
                 <span className="text-text">Volatility risk.</span>{" "}
@@ -231,6 +252,68 @@ export default function DisclosuresPage() {
                 <span className="text-text">Total-loss risk.</span>{" "}
                 $NEXUS can lose its entire value. Treat any allocation
                 as fully at risk.
+              </li>
+            </ul>
+          </Section>
+
+          <Section title="Rienda — agent treasuries (in development)">
+            <p>
+              Rienda is the second product layer: smart-contract vaults
+              on Robinhood Chain that hold an LLM trading agent&apos;s
+              capital and enforce risk guardrails in contract code
+              (position caps, loss limits, drawdown throttles, kill
+              switch), paying the agent&apos;s inference via x402 out
+              of realized PnL. Its status, stated plainly:
+            </p>
+            <ul className="ml-5 list-disc space-y-2.5 marker:text-text-muted">
+              <li>
+                <span className="text-text">Not live.</span> The spec
+                is complete; the contracts are in development. Nothing
+                described as Rienda accepts deposits today.
+              </li>
+              <li>
+                <span className="text-text">Testnet first.</span>{" "}
+                Contracts deploy to Robinhood Chain testnet (chain id
+                46630) before any mainnet deployment. Mainnet is gated
+                behind an external security audit and legal review.
+                No mainnet date is announced or implied.
+              </li>
+              <li>
+                <span className="text-text">Unaudited until stated
+                otherwise.</span> No third-party audit of the Rienda
+                contracts exists at time of publication. Audit status
+                will be disclosed on this page and on{" "}
+                <Link
+                  href="/security"
+                  className="underline decoration-text-muted/40 underline-offset-4 transition-colors hover:text-text hover:decoration-text"
+                >
+                  /security
+                </Link>{" "}
+                when it changes.
+              </li>
+              <li>
+                <span className="text-text">Trading losses are the
+                operator&apos;s.</span> The vault bounds downside; it
+                does not prevent it. An agent can lose up to its
+                configured limits, and contract bugs could lose more.
+                Guardrails are code, not guarantees.
+              </li>
+              <li>
+                <span className="text-text">No performance claims.</span>{" "}
+                Nothing about Rienda is a claim that LLM trading agents
+                are profitable. The performance-metered compute design
+                exists precisely because most trading strategies lose
+                money.
+              </li>
+              <li>
+                <span className="text-text">Legal characterization
+                pending.</span> Whether operating Rienda vaults for
+                third parties triggers MiCA, MiFID II, or AIFMD
+                obligations is part of the legal scoping work. Until
+                that review concludes, Rienda is planned as
+                self-custodied, operator-deployed vaults — each
+                operator deploys and owns their own vault; Nexus does
+                not custody vault capital.
               </li>
             </ul>
           </Section>
