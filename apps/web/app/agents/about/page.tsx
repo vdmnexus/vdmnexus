@@ -15,12 +15,12 @@ import { FadeIn } from "@/components/fade-in";
 export const metadata: Metadata = {
   title: "About Nexus Agents — identity, payment, receipts",
   description:
-    "Infrastructure for autonomous AI agents. Ed25519 identity, signed-inference receipts, USDC-settled compute on Solana mainnet and Base mainnet. Agent-git workflow primitives — provenance, payment-gated merges, signed release tags — shipping next.",
+    "Infrastructure for autonomous AI agents. Ed25519 identity, signed-inference receipts, USDC-settled compute on Solana mainnet and Base mainnet. Agent-git workflow primitives — provenance, payment-gated merges, signed release tags — on the roadmap.",
   alternates: { canonical: "https://vdmnexus.com/agents/about" },
   openGraph: {
     title: "About Nexus Agents — identity, payment, receipts",
     description:
-      "Agents that pay for their own compute on mainnet. Ed25519 identity, signed receipts, payment per call. Agent-git primitives shipping next.",
+      "Agents that pay for their own compute on mainnet. Ed25519 identity, signed receipts, payment per call. Agent-git primitives on the roadmap.",
     url: "https://vdmnexus.com/agents/about",
     siteName: "VDM Nexus",
     type: "website",
@@ -110,8 +110,9 @@ export default function AgentsPage() {
               </h1>
               <p className="mx-auto mt-6 max-w-2xl text-balance text-base text-text-muted sm:text-lg">
                 Agents authenticate with an Ed25519 keypair, pay per inference
-                call in USDC on Solana mainnet, and get a signed receipt of
-                every response. Agent-git workflow primitives shipping next.
+                call in USDC on Solana or Base, and get a signed receipt of
+                every response. Agent-git workflow primitives are on the
+                roadmap.
               </p>
               <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
                 <a
@@ -147,7 +148,7 @@ export default function AgentsPage() {
                 <span className="h-1.5 w-1.5 rounded-full bg-accent-indigo" />
                 Live today
               </span>
-              <span className="text-xs text-text-muted">Solana mainnet</span>
+              <span className="text-xs text-text-muted">Solana + Base mainnet</span>
             </div>
             <SectionHeading className="mt-4">
               What an agent gets, right now.

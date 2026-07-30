@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
+import { launchLive } from "@/lib/launch-flag";
 
 export const metadata: Metadata = {
   title: "Disclosures — VDM Nexus / $NEXUS / Rienda",
@@ -96,12 +97,7 @@ export default function DisclosuresPage() {
               <li>
                 <span className="text-text">Utility wires:</span>{" "}
                 Disclosed on a dated 0/30/60/90 calendar on{" "}
-                <Link
-                  href="/whitepaper"
-                  className="underline decoration-text-muted/40 underline-offset-4 transition-colors hover:text-text hover:decoration-text"
-                >
-                  /whitepaper
-                </Link>{" "}
+                <GatedRef href="/whitepaper" />{" "}
                 Section 03. Final structure of Wires 3 (reputation
                 bond) and Wire 4 (verifier staking + revenue share) is
                 subject to a Spanish legal scoping memo under ESMA
@@ -340,19 +336,9 @@ export default function DisclosuresPage() {
 
           <Section title="Reference">
             <p className="text-sm">
-              <Link
-                href="/whitepaper"
-                className="underline decoration-text-muted/40 underline-offset-4 transition-colors hover:text-text hover:decoration-text"
-              >
-                /whitepaper
-              </Link>
+              <GatedRef href="/whitepaper" />
               {" · "}
-              <Link
-                href="/token"
-                className="underline decoration-text-muted/40 underline-offset-4 transition-colors hover:text-text hover:decoration-text"
-              >
-                /token
-              </Link>
+              <GatedRef href="/token" />
               {" · "}
               <Link
                 href="/security"
@@ -387,6 +373,31 @@ export default function DisclosuresPage() {
       </main>
       <Footer />
     </>
+  );
+}
+
+/**
+ * Reference to a launch-gated page (/token, /whitepaper). Those routes
+ * return 404 until NEXT_PUBLIC_LAUNCH_LIVE flips — a compliance page
+ * must not carry links that 404, so pre-launch this renders the path as
+ * plain text with a note instead of a dead link.
+ */
+function GatedRef({ href }: { href: "/token" | "/whitepaper" }) {
+  if (launchLive()) {
+    return (
+      <Link
+        href={href}
+        className="underline decoration-text-muted/40 underline-offset-4 transition-colors hover:text-text hover:decoration-text"
+      >
+        {href}
+      </Link>
+    );
+  }
+  return (
+    <span>
+      <span className="text-text">{href}</span>{" "}
+      <span className="text-xs text-text-muted/70">(published at launch)</span>
+    </span>
   );
 }
 

@@ -78,7 +78,7 @@ const PACKAGES: Package[] = [
     install: "pnpm add @vdm-nexus/paywall",
     audience: "Monetizing your own AI API with per-call USDC + cryptographic receipts.",
     npm: "https://www.npmjs.com/package/@vdm-nexus/paywall",
-    docs: "https://docs.vdmnexus.com/docs/paywall",
+    docs: "https://docs.vdmnexus.com/docs/sdk/paywall-reference",
     github: "https://github.com/vdmnexus/vdmnexus/tree/main/packages/paywall",
   },
   {
@@ -89,7 +89,7 @@ const PACKAGES: Package[] = [
     install: "pnpm add @vdm-nexus/mcp",
     audience: "Plugging Nexus into a Claude Desktop / Cursor workflow without writing a custom agent.",
     npm: "https://www.npmjs.com/package/@vdm-nexus/mcp",
-    docs: "https://docs.vdmnexus.com/docs/mcp",
+    docs: "https://docs.vdmnexus.com/docs/sdk/mcp-reference",
     github: "https://github.com/vdmnexus/vdmnexus/tree/main/packages/mcp-server",
   },
   {
@@ -100,7 +100,7 @@ const PACKAGES: Package[] = [
     install: "pnpm add @vdm-nexus/ai-sdk-provider",
     audience: "Already on the Vercel AI SDK and want signed-inference receipts under the hood.",
     npm: "https://www.npmjs.com/package/@vdm-nexus/ai-sdk-provider",
-    docs: "https://docs.vdmnexus.com/docs/integrations/vercel-ai-sdk",
+    docs: "https://docs.vdmnexus.com/docs/sdk",
     github: "https://github.com/vdmnexus/vdmnexus/tree/main/packages/ai-sdk-provider",
   },
   {
@@ -111,7 +111,7 @@ const PACKAGES: Package[] = [
     install: "pnpm add @vdm-nexus/mastra-provider",
     audience: "Running Mastra and want signed-inference receipts on every model call.",
     npm: "https://www.npmjs.com/package/@vdm-nexus/mastra-provider",
-    docs: "https://docs.vdmnexus.com/docs/integrations/mastra",
+    docs: "https://docs.vdmnexus.com/docs/sdk",
     github: "https://github.com/vdmnexus/vdmnexus/tree/main/packages/mastra-provider",
   },
   {
@@ -122,7 +122,7 @@ const PACKAGES: Package[] = [
     install: "uv add vdm-nexus  # or: pip install vdm-nexus",
     audience: "Building Python agents that pay per call and verify receipts.",
     npm: "https://pypi.org/project/vdm-nexus/",
-    docs: "https://docs.vdmnexus.com/docs/python",
+    docs: "https://docs.vdmnexus.com/docs/sdk",
     github: "https://github.com/vdmnexus/vdmnexus/tree/main/packages/sdk-python",
   },
   {
@@ -133,7 +133,7 @@ const PACKAGES: Package[] = [
     install: "uv add langchain-vdm-nexus  # or: pip install langchain-vdm-nexus",
     audience: "Building LangChain agents in Python and want signed-inference receipts on every model call.",
     npm: "https://pypi.org/project/langchain-vdm-nexus/",
-    docs: "https://docs.vdmnexus.com/docs/integrations/langchain",
+    docs: "https://docs.vdmnexus.com/docs/sdk",
     github: "https://github.com/vdmnexus/vdmnexus/tree/main/packages/sdk-python-langchain",
   },
 ];
