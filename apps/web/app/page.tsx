@@ -135,8 +135,10 @@ export default function Home() {
       <LastShippedStrip />
       <main>
         <Hero />
+        <TwoLayers />
         <FounderOrigin />
         <PrincipleStats />
+        <Rienda />
         {launchLive() ? <NexusToken /> : null}
         <ProductGrid />
         <Problem />
@@ -160,16 +162,18 @@ function Hero() {
       <div className="mx-auto w-full max-w-5xl px-6 pb-24 pt-28 sm:pb-32 sm:pt-36">
         <FadeIn>
           <div className="text-center">
-            <SectionEyebrow>Autonomous AI with cryptographic proof</SectionEyebrow>
+            <SectionEyebrow>The trust layer for autonomous agents</SectionEyebrow>
             <h1 className="mx-auto mt-8 max-w-4xl text-balance text-5xl font-semibold tracking-tight text-text sm:text-6xl md:text-7xl">
-              Agents that earn, spend, and{" "}
-              <span className="text-gradient">prove every decision</span>{" "}
-              on-chain.
+              Agents that{" "}
+              <span className="text-gradient">prove every decision</span> —
+              and capital that holds them to it.
             </h1>
             <p className="mx-auto mt-8 max-w-2xl text-balance text-base leading-relaxed text-text-muted sm:text-lg">
-              Ed25519 agent identity. USDC settlement on Solana and Base.
-              Every call signed, every receipt independently verifiable. Each
-              agent gets a public home at{" "}
+              Layer 1 is live: signed inference receipts (SIR v2), x402
+              pay-per-call, USDC settlement on Solana and Base. Layer 2 is in
+              development: Rienda — agent treasuries on Robinhood Chain that
+              hold an agent&apos;s capital and enforce its risk limits in
+              contract code. Each agent gets a public home at{" "}
               <a
                 href="https://console.vdmnexus.com"
                 className="text-text underline decoration-text-muted/40 underline-offset-4 transition-colors hover:decoration-text"
@@ -183,9 +187,15 @@ function Hero() {
               human in the loop.
             </p>
             <p className="mx-auto mt-4 max-w-2xl text-balance text-sm text-text-muted/80">
-              Beta protocol — mainnet live since 2026-05-21. v1 ships with
-              bonded reputation, holder discounts, attributable burn — the
-              $NEXUS utility layer.
+              Beta protocol — mainnet live since 2026-05-21. No SLA, no
+              external audit yet — see{" "}
+              <Link
+                href="/security"
+                className="underline decoration-text-muted/40 underline-offset-4 transition-colors hover:text-text"
+              >
+                /security
+              </Link>{" "}
+              for what that means.
             </p>
             <div className="mt-12 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
               {showLaunch ? (
@@ -230,6 +240,180 @@ function Hero() {
         </FadeIn>
       </div>
     </section>
+  );
+}
+
+// The two-layer story — the structural spine of the homepage. Layer 1
+// (Trust) is everything live today; Layer 2 (Capital) is Rienda, clearly
+// labeled in development / testnet-first. No launch dates, no token
+// promises here — status lines only.
+function TwoLayers() {
+  return (
+    <Section className="pt-0">
+      <FadeIn className="max-w-2xl">
+        <SectionEyebrow>Two layers</SectionEyebrow>
+        <SectionHeading className="mt-4">
+          First we made agents provable. Now we&apos;re making them
+          accountable.
+        </SectionHeading>
+      </FadeIn>
+      <div className="mt-10 grid gap-5 lg:grid-cols-2">
+        <FadeIn>
+          <div className="flex h-full flex-col rounded-2xl border border-soft bg-surface/60 p-7 backdrop-blur sm:p-8">
+            <div className="flex items-center justify-between gap-3">
+              <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-indigo">
+                Layer 1 — Trust
+              </span>
+              <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-emerald-300">
+                Live
+              </span>
+            </div>
+            <h3 className="mt-4 text-2xl font-semibold tracking-tight text-text">
+              Signed inference. Verifiable receipts. Pay-per-call.
+            </h3>
+            <p className="mt-4 text-sm leading-relaxed text-text-muted">
+              Every LLM call through Nexus returns an Ed25519-signed SIR v2
+              receipt — prompt hash, response hash, model, cost, on-chain
+              settlement — that anyone can verify without trusting us.
+              Payment is x402: USDC per call on Solana and Base mainnet,
+              no accounts, no API keys. SDKs on npm and PyPI.
+            </p>
+            <ul className="mt-6 space-y-2.5 text-sm text-text-muted">
+              {[
+                "SIR v2 signed receipts — five-check verification, open spec",
+                "x402 pay-per-call — USDC on Solana + Base, mainnet since 2026-05-21",
+                "Eight MIT packages on npm + PyPI",
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-accent-indigo" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-auto flex flex-wrap gap-3 pt-8">
+              <Link
+                href="/playground"
+                className="inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-4 py-2 text-sm font-medium text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
+              >
+                Try a live mainnet call
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+              <Link
+                href="/sdk"
+                className="inline-flex items-center gap-2 rounded-md border border-soft bg-bg/40 px-4 py-2 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
+              >
+                Browse the SDK
+              </Link>
+            </div>
+          </div>
+        </FadeIn>
+        <FadeIn delay={0.06}>
+          <div className="flex h-full flex-col rounded-2xl border border-soft bg-surface/60 p-7 backdrop-blur sm:p-8">
+            <div className="flex items-center justify-between gap-3">
+              <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-indigo">
+                Layer 2 — Capital
+              </span>
+              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-amber-300">
+                In development
+              </span>
+            </div>
+            <h3 className="mt-4 text-2xl font-semibold tracking-tight text-text">
+              Rienda — agent treasuries on Robinhood Chain.
+            </h3>
+            <p className="mt-4 text-sm leading-relaxed text-text-muted">
+              Smart-contract vaults for LLM trading agents. The vault holds
+              the agent&apos;s capital and enforces the risk guardrails in
+              contract code — position caps, loss limits, drawdown
+              throttles, a kill switch. The LLM is treated as untrusted:
+              it proposes, the contract disposes. Inference is paid via
+              x402 out of realized PnL — a performance-metered compute
+              budget, so unprofitable agents lose compute.
+            </p>
+            <ul className="mt-6 space-y-2.5 text-sm text-text-muted">
+              {[
+                "Spec complete, contracts in development",
+                "Testnet first — Robinhood Chain (Ethereum L2, testnet chain id 46630)",
+                "Mainnet gated behind an external audit + legal review",
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-amber-400/70" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-auto flex flex-wrap gap-3 pt-8">
+              <Link
+                href="/roadmap"
+                className="inline-flex items-center gap-2 rounded-md border border-soft bg-bg/40 px-4 py-2 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
+              >
+                Follow progress on the roadmap
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
+        </FadeIn>
+      </div>
+    </Section>
+  );
+}
+
+// Rienda mechanics, one level deeper than the TwoLayers card. Everything
+// here describes contract-enforced behavior from the spec — labeled in
+// development, testnet-first, no dates.
+function Rienda() {
+  const guardrails = [
+    {
+      title: "Position caps + loss limits",
+      body: "Per-position and aggregate exposure caps, hard loss limits per epoch — enforced by the vault contract, not by prompt engineering. A proposal that breaches a cap reverts.",
+    },
+    {
+      title: "Drawdown throttles",
+      body: "Drawdown past a threshold shrinks the agent's permitted position size automatically. The deeper the drawdown, the tighter the leash — recovery has to be earned at reduced size.",
+    },
+    {
+      title: "Kill switch",
+      body: "The vault owner can halt trading and withdraw at any time. The agent can never block an exit — the kill switch lives in the contract, above the agent's authority.",
+    },
+    {
+      title: "Performance-metered compute",
+      body: "The agent's inference is paid via x402 from realized PnL. Profitable agents earn their compute budget; unprofitable agents run out of it. Every call carries a signed receipt.",
+    },
+  ];
+  return (
+    <Section>
+      <FadeIn className="max-w-2xl">
+        <div className="flex flex-wrap items-center gap-3">
+          <SectionEyebrow>Rienda · Layer 2</SectionEyebrow>
+          <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-amber-300">
+            In development · testnet first
+          </span>
+        </div>
+        <SectionHeading className="mt-4">
+          The LLM is untrusted. The vault is the adult in the room.
+        </SectionHeading>
+        <p className="mt-5 text-base leading-relaxed text-text-muted">
+          Rienda vaults hold a trading agent&apos;s capital on Robinhood
+          Chain (an Ethereum L2). The agent proposes trades; the contract
+          enforces the limits. Layer 1 makes every decision provable —
+          Layer 2 makes every decision bounded. Status: spec complete,
+          contracts in development, deploying to Robinhood Chain testnet
+          (chain id 46630) first. Mainnet is gated behind an external
+          audit and legal review — no dates until both clear.
+        </p>
+      </FadeIn>
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {guardrails.map((g, i) => (
+          <FadeIn key={g.title} delay={i * 0.06}>
+            <Card className="h-full">
+              <h3 className="text-base font-semibold text-text">{g.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-text-muted">
+                {g.body}
+              </p>
+            </Card>
+          </FadeIn>
+        ))}
+      </div>
+    </Section>
   );
 }
 
@@ -286,9 +470,9 @@ function NexusToken() {
         </SectionHeading>
         <p className="mt-5 text-base leading-relaxed text-text-muted">
           Four wires on a 0/30/60/90 calendar. Each wire is a concrete
-          on-chain mechanism with a public ship date. Fair launch on
-          pump.fun with USDC pair on Solana. 100B fixed supply, no
-          team allocation, no presale.
+          on-chain mechanism with a public ship date. Fair launch into a
+          Uniswap v4 USDC pool with a custom fee-burn hook on Robinhood
+          Chain. 100B fixed supply, no team allocation, no presale.
         </p>
       </FadeIn>
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -301,7 +485,8 @@ function NexusToken() {
           </h3>
           <p className="mt-3 text-sm leading-relaxed text-text-muted">
             $0.01 USDC per call. 50% routes to a public buy-and-burn
-            bot. Burn pressure scales with rail usage.
+            flow through the Uniswap v4 pool. Burn pressure scales
+            with rail usage.
           </p>
         </Card>
         <Card>

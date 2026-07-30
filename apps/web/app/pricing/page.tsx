@@ -63,7 +63,7 @@ const FEE_SPLIT: Array<{ pct: string; name: string; detail: string }> = [
     pct: "50%",
     name: "$NEXUS burn pool",
     detail:
-      "Accumulates in USDC pre-launch. At launch, a public buy-and-burn bot swaps the pool's USDC for $NEXUS on the pump.fun pool and sends to a public burn address. Live counter on /token. Burn pressure scales with rail usage — every paid call contributes.",
+      "Accumulates in USDC pre-launch. At launch, a public buy-and-burn bot swaps the pool's USDC for $NEXUS through the Uniswap v4 pool on Robinhood Chain and sends to a public burn address. Live counter on /token. Burn pressure scales with rail usage — every paid call contributes.",
   },
   {
     pct: "50%",

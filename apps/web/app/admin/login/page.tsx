@@ -12,8 +12,7 @@ type Params = {
 
 export default async function AdminLoginPage({ searchParams }: Params) {
   const sp = await searchParams;
-  const allowed = typeof sp.next === "string" &&
-    (sp.next.startsWith("/admin") || sp.next === "/wc26");
+  const allowed = typeof sp.next === "string" && sp.next.startsWith("/admin");
   const next = allowed ? (sp.next as string) : "/admin/roadmap";
 
   if (await isAdmin()) redirect(next);
