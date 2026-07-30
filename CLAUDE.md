@@ -508,6 +508,8 @@ pnpm --filter nexus demo             # run the demo agent
 - The SDK keeps a tiny dependency surface (currently two runtime deps).
   Adding a third needs justification here.
 - Marketing copy describes what's real; flagged "Coming soon" otherwise.
+- All user-facing copy must comply with `docs/VOICE.md` (enforced in CI
+  by `scripts/copy-lint.mjs`).
 - All animations on the web app respect `prefers-reduced-motion`.
 - All tables RLS-enabled. Inserts run server-side via the service role,
   never via the anon key.

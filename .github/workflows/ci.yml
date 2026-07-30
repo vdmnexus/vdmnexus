@@ -6,6 +6,20 @@ on:
     branches: [main]
 
 jobs:
+  copy-lint:
+    name: web copy voice lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: copy-lint (docs/VOICE.md banned patterns)
+        # Pure-node grep over apps/web .tsx files — no install needed.
+        run: node scripts/copy-lint.mjs
+
   lockfile:
     name: pnpm-lock.yaml is in sync
     runs-on: ubuntu-latest
