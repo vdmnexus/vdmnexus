@@ -168,10 +168,16 @@ export async function POST(req: NextRequest) {
       upstream_error: upstream.error,
       upstream_detail: upstream.detail,
     });
+    // Surface both the machine-readable error code and the human detail
+    // (e.g. "upstream_empty_body: HTTP 500 from .../inference returned an
+    // empty body") so a failing playground call names the actual failure.
+    const parts = [upstream.error, upstream.detail].filter(
+      (p): p is string => typeof p === "string" && p.length > 0
+    );
     return NextResponse.json(
       {
         error: "upstream_error",
-        detail: upstream.error ?? upstream.detail ?? "upstream_returned_not_ok",
+        detail: parts.length > 0 ? parts.join(": ") : "upstream_returned_not_ok",
       },
       { status: 502 }
     );
