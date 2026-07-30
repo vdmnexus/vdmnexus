@@ -16,12 +16,20 @@ type NavDropdownItem = {
   description?: string;
 };
 
-// "Run" — for operators / consumers spending or earning on the rail.
-const RUN_ITEMS: NavDropdownItem[] = [
+// "Product" — the two layers. Layer 1 (trust: signed inference,
+// verification, agent directory) is live. Layer 2 (capital: Rienda)
+// has no page yet — the homepage section is its canonical entry point,
+// so the nav item is an anchor, not an invented page.
+const PRODUCT_ITEMS: NavDropdownItem[] = [
   {
-    href: "/playground",
-    label: "Playground",
-    description: "Try a live mainnet call",
+    href: "/inference",
+    label: "Inference API",
+    description: "Layer 1 · signed receipt on every call",
+  },
+  {
+    href: "/verify",
+    label: "Verify",
+    description: "Five-check receipt verifier",
   },
   {
     href: "/agents",
@@ -29,28 +37,18 @@ const RUN_ITEMS: NavDropdownItem[] = [
     description: "Browse agents on the rail",
   },
   {
-    href: "/agents/about",
-    label: "About Nexus Agents",
-    description: "Identity, payment, receipts",
-  },
-  {
-    href: "/pricing",
-    label: "Pricing",
-    description: "Per-call USDC + receipt fee",
+    href: "/#rienda",
+    label: "Rienda",
+    description: "Layer 2 · agent treasuries — in development",
   },
 ];
 
-// "Build" — for developers integrating signed inference into their products.
-const BUILD_ITEMS: NavDropdownItem[] = [
+// "Developers" — for people integrating signed inference into their code.
+const DEVELOPER_ITEMS: NavDropdownItem[] = [
   {
     href: "/sdk",
     label: "SDK",
     description: "Eight packages on npm + PyPI",
-  },
-  {
-    href: "/inference",
-    label: "Inference API",
-    description: "OpenAI-compatible /chat/completions",
   },
   {
     href: "https://docs.vdmnexus.com",
@@ -59,9 +57,14 @@ const BUILD_ITEMS: NavDropdownItem[] = [
     description: "Quickstart, spec, ops runbooks",
   },
   {
-    href: "/verify",
-    label: "Verify",
-    description: "Five-check receipt verifier",
+    href: "/playground",
+    label: "Playground",
+    description: "Run a live mainnet call",
+  },
+  {
+    href: "/receipts",
+    label: "Receipts",
+    description: "Latest signed receipts on the rail",
   },
 ];
 
@@ -102,15 +105,10 @@ function NavHeader({
         </div>
 
         <div className="hidden items-center gap-7 md:flex">
-          <NavDropdown label="Run" items={RUN_ITEMS} pathname={pathname} />
-          <NavDropdown label="Build" items={BUILD_ITEMS} pathname={pathname} />
-          <NavLink
-            href="/receipts"
-            active={
-              pathname.startsWith("/receipts") || pathname.startsWith("/r/")
-            }
-          >
-            Receipts
+          <NavDropdown label="Product" items={PRODUCT_ITEMS} pathname={pathname} />
+          <NavDropdown label="Developers" items={DEVELOPER_ITEMS} pathname={pathname} />
+          <NavLink href="/pricing" active={pathname === "/pricing"}>
+            Pricing
           </NavLink>
           <NavLink href="/points" active={pathname === "/points"}>
             Points
