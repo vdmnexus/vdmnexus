@@ -7,7 +7,7 @@ sessions. Every session updates its own row at start and end.
 
 | Branch | What | Started | Status | PR |
 |---|---|---|---|---|
-| `claude/site-two-layer-rebuild` | Two-layer homepage story (trust + capital/Rienda), disclosures/security rewrite, token plan re-venue to Uniswap v4 on Robinhood Chain, WC26 removal | 2026-07-30 | in_review | (opens with this branch) |
+| `claude/site-two-layer-rebuild` | Two-layer homepage story (trust + capital/Rienda), disclosures/security rewrite, token plan re-venue to Uniswap v4 on Robinhood Chain, WC26 removal | 2026-07-30 | in_review | [#149](https://github.com/vdmnexus/vdmnexus/pull/149) |
 
 ## Conventions
 
