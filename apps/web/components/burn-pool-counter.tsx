@@ -110,9 +110,10 @@ export function BurnPoolCounter() {
         </div>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-text-muted">
           50% of every receipt fee accrues here. At $NEXUS launch this
-          balance swaps to $NEXUS on the pump.fun pool and burns to a
-          public address. Counter is on-chain-anchored — every USDC in
-          this number traces back to a settled x402 receipt.
+          balance swaps to $NEXUS through the Uniswap v4 pool on
+          Robinhood Chain and burns to a public address. Counter is
+          on-chain-anchored — every USDC in this number traces back to
+          a settled x402 receipt.
         </p>
       </div>
 
@@ -156,9 +157,10 @@ export function BurnPoolCounter() {
 
       <p className="mt-8 text-xs text-text-muted">
         Phase A (this counter): every paid call accrues USDC into the
-        pool. Phase B (post-launch): scheduled USDC → $NEXUS swap on
-        the pump.fun pool followed by send-to-burn-address transaction.
-        Burn address publishes 48 hours before $NEXUS launch.
+        pool. Phase B (post-launch): scheduled USDC → $NEXUS swap
+        through the Uniswap v4 pool on Robinhood Chain followed by a
+        send-to-burn-address transaction. Burn address publishes 48
+        hours before $NEXUS launch.
       </p>
     </div>
   );

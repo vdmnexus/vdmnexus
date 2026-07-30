@@ -11,12 +11,12 @@ import { launchLive } from "@/lib/launch-flag";
 export const metadata: Metadata = {
   title: "Whitepaper — VDM Nexus",
   description:
-    "The one-pager. Signed inference receipts (SIR v2), $NEXUS with a four-wire utility calendar, fair launch on pump.fun with USDC pair on Solana.",
+    "The one-pager. Signed inference receipts (SIR v2), $NEXUS with a four-wire utility calendar, fair launch into a Uniswap v4 USDC pool with a custom fee-burn hook on Robinhood Chain.",
   alternates: { canonical: "https://vdmnexus.com/whitepaper" },
   openGraph: {
     title: "VDM Nexus — Whitepaper",
     description:
-      "Signed inference, $NEXUS four-wire utility, fair launch on pump.fun with USDC pair on Solana. The one-pager.",
+      "Signed inference, $NEXUS four-wire utility, fair launch into a Uniswap v4 USDC pool with a custom fee-burn hook on Robinhood Chain. The one-pager.",
     url: "https://vdmnexus.com/whitepaper",
     siteName: "VDM Nexus",
     type: "website",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     creator: "@vdmnexus",
     title: "VDM Nexus — Whitepaper",
     description:
-      "Signed inference, $NEXUS four-wire utility, fair launch on pump.fun with USDC pair on Solana.",
+      "Signed inference, $NEXUS four-wire utility, fair launch into a Uniswap v4 USDC pool on Robinhood Chain.",
   },
 };
 
@@ -94,11 +94,18 @@ const SECTIONS: Paper[] = [
         <p>
           Current state, plainly: the rail is live on Solana mainnet
           and Base mainnet at nexus.vdmnexus.com (mainnet since
-          2026-05-21). $NEXUS launches via{" "}
-          <span className="text-text">pump.fun with USDC pair on Solana</span>
-          {" "}— USDC-denominated pricing, not SOL beta. The receipt
-          format is stable; the four utility wires light up on the
-          0/30/60/90 calendar in Section 03.
+          2026-05-21). $NEXUS launches into a{" "}
+          <span className="text-text">
+            Uniswap v4 USDC pool with a custom fee-burn hook on
+            Robinhood Chain
+          </span>{" "}
+          (an Ethereum L2; testnet chain id 46630 — the same chain that
+          hosts the Rienda agent treasuries) — USDC-denominated
+          pricing, not ETH beta. The receipt format is stable; the four
+          utility wires light up on the 0/30/60/90 calendar in Section
+          03. The launch itself is gated on Robinhood Chain mainnet
+          availability, an external audit of the hook + vault
+          contracts, and legal review.
         </p>
       </>
     ),
@@ -119,9 +126,10 @@ const SECTIONS: Paper[] = [
           <li>
             <span className="text-text">Wire 1 (Day 0, launch):</span>{" "}
             receipt fee + buy-and-burn. Every paid call adds a $0.01
-            USDC receipt fee. 50% routes to a public buy-and-burn bot:
-            USDC → $NEXUS swap on the pump.fun pool → burn to a public
-            address. Live counter on{" "}
+            USDC receipt fee. 50% routes to a public buy-and-burn flow:
+            USDC → $NEXUS swap through the Uniswap v4 pool → burn to a
+            public address, with the custom v4 hook routing a share of
+            pool swap fees into the same burn. Live counter on{" "}
             <Link
               href="/token"
               className="underline decoration-text-muted/40 underline-offset-4 transition-colors hover:text-text hover:decoration-text"
@@ -174,60 +182,67 @@ const SECTIONS: Paper[] = [
   {
     n: "04",
     eyebrow: "Mechanism",
-    title: "pump.fun fair launch with USDC pair on Solana. No exceptions.",
+    title:
+      "Uniswap v4 fair launch with a USDC pair and a fee-burn hook on Robinhood Chain. No exceptions.",
     body: (
       <>
         <p>
-          $NEXUS launches via pump.fun with a USDC pair on Solana
-          mainnet. USDC pairing means dollar-denominated pricing — no
-          SOL beta riding under the token's MCAP. Every allocation is
-          public, every contract is verifiable on Solscan, and every
+          $NEXUS launches into a Uniswap v4 $NEXUS/USDC pool on
+          Robinhood Chain, an Ethereum L2 (testnet chain id 46630). A
+          custom v4 hook attaches to the pool at creation and routes a
+          share of swap fees into the public burn flow. USDC pairing
+          means dollar-denominated pricing — no ETH beta riding under
+          the token's MCAP. Every allocation is public, every contract
+          is verifiable on the Robinhood Chain explorer, and every
           credibility signal a trader runs as a standard checklist is
-          stated below.
+          stated below. The launch fires only after Robinhood Chain
+          mainnet is available and the external audit + legal review
+          have cleared.
         </p>
         <ul className="ml-5 list-disc space-y-2.5 marker:text-accent-indigo">
           <li>
             <span className="text-text">100,000,000,000 $NEXUS</span>{" "}
-            total supply. Mint authority disabled at deploy. Supply
-            cannot grow.
+            total supply. Non-mintable ERC-20 — the contract has no
+            mint function. Supply cannot grow.
           </li>
           <li>
             <span className="text-text">70% liquidity pool</span>,
-            seeded into the pump.fun USDC pool at deploy. LP burned at
-            bonding completion. Liquidity cannot be withdrawn by the
-            team.
+            seeded into the Uniswap v4 USDC pool at deploy. The LP
+            position is burned at deploy. Liquidity cannot be
+            withdrawn by the team.
           </li>
           <li>
             <span className="text-text">15% treasury vault</span>,
-            held by a Squads multisig vesting program on Solana —
-            vault-locked 90 days from deploy, then linear-vested over
-            12 months. Vesting schedule immutable, enforced by the
-            on-chain vesting contract. No cliff unlocks; maximum daily
-            unlock after lockup is approximately 41M $NEXUS (about
-            0.04% of supply per day).
+            held by a multisig-controlled vesting contract on Robinhood
+            Chain — vault-locked 90 days from deploy, then
+            linear-vested over 12 months. Vesting schedule immutable,
+            enforced by the on-chain vesting contract. No cliff
+            unlocks; maximum daily unlock after lockup is approximately
+            41M $NEXUS (about 0.04% of supply per day).
           </li>
           <li>
             <span className="text-text">10% retroactive airdrop</span>,
-            held in a non-spendable Squads multisig until criteria are
+            held in a non-spendable multisig until criteria are
             published within 90 days of launch. Recipients vest over 6
             months from the distribution date.
           </li>
           <li>
             <span className="text-text">5% community pool</span>,
-            publicly tracked Squads multisig, no lockup. Used for
-            ecosystem incentives and pattern-library bounties.
+            publicly tracked multisig, no lockup. Used for ecosystem
+            incentives and pattern-library bounties.
           </li>
           <li>
             <span className="text-text">USDC-denominated pricing</span>{" "}
-            at deploy via the pump.fun USDC pair. MCAP is reported in
-            dollars, not SOL — removes SOL volatility from the token's
+            at deploy via the $NEXUS/USDC pair. MCAP is reported in
+            dollars, not ETH — removes ETH volatility from the token's
             chart.
           </li>
           <li>
-            <span className="text-text">All Squads addresses published</span>{" "}
-            24–48 hours before launch. Three separate Squads multisigs,
-            not bundled, not clustered. Bubblemaps Solana will show
-            three distinct allocations.
+            <span className="text-text">All multisig addresses published</span>{" "}
+            24–48 hours before launch. Three separate multisigs (Safe
+            or equivalent), not bundled, not clustered.
+            Holder-clustering views will show three distinct
+            allocations.
           </li>
           <li>
             <span className="text-text">No team allocation</span>, no
@@ -246,10 +261,13 @@ const SECTIONS: Paper[] = [
       <ul className="ml-5 list-disc space-y-3 marker:text-accent-indigo">
         <li>
           <span className="text-text">Day 0 (launch):</span> token live
-          on pump.fun USDC pair on Solana. Wire 1 (receipt fee +
+          in the Uniswap v4 USDC pool on Robinhood Chain, fee-burn
+          hook attached at pool creation. Wire 1 (receipt fee +
           buy-and-burn) active immediately — burn address public, live
-          counter on /token. Allocations verifiable on Solscan and
-          Bubblemaps Solana within minutes of deploy.
+          counter on /token. Allocations verifiable on the Robinhood
+          Chain explorer within minutes of deploy. Day 0 itself is
+          undated until the audit + legal + mainnet-availability gates
+          clear.
         </li>
         <li>
           <span className="text-text">Day 30:</span> Wire 2 — holder
@@ -325,10 +343,11 @@ const SECTIONS: Paper[] = [
         <li>
           <span className="text-text">Not a bundler rug.</span> No
           team allocation, no sniper carve-out, no insider rounds. The
-          launch transaction is public on pump.fun. Treasury, airdrop
-          holding, and community pool each sit in a separate Squads
-          multisig on Solana — Bubblemaps Solana renders three
-          distinct allocations, not a cluster.
+          pool-creation transaction is public on the Robinhood Chain
+          explorer. Treasury, airdrop holding, and community pool each
+          sit in a separate multisig on Robinhood Chain —
+          holder-clustering views render three distinct allocations,
+          not a cluster.
         </li>
         <li>
           <span className="text-text">No paid security audit at this

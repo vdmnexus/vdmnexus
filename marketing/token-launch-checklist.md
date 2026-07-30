@@ -1,13 +1,20 @@
 # $NEXUS — Launch Readiness Checklist
 
-> Operational sequencing for the $NEXUS token launch on pump.fun
-> (USDC pair) on Solana. Append updates here as items complete;
-> don't delete — leaves an auditable trail.
+> Operational sequencing for the $NEXUS token launch. Append updates
+> here as items complete; don't delete — leaves an auditable trail.
 
-**Launch venue:** pump.fun with USDC pair, Solana mainnet
+**Launch venue:** Uniswap v4 $NEXUS/USDC pool with custom fee-burn
+hook, Robinhood Chain (Ethereum L2; testnet chain id 46630).
+*Re-venued 2026-07-30 from pump.fun (USDC pair) on Solana — see Log.
+The T-14/T-48h/T-0 operational steps below still describe the Solana
+tooling (pump.fun deploy, Squads, Solscan, Bubblemaps Solana) and
+need an operational rewrite pass for the new venue before any date
+is set.*
 **Ticker:** $NEXUS
 **Issuer:** Spain-resident autónomo (see [/disclosures](https://vdmnexus.com/disclosures))
-**Status:** pre-launch
+**Status:** pre-launch — additionally gated on Robinhood Chain
+mainnet availability, external audit of the hook + Rienda vault
+contracts, and legal review
 
 ---
 
@@ -183,3 +190,13 @@ postponed, not pushed through.
 ## Log
 
 - [date TBD] — initial checklist authored. All items pending.
+- [2026-07-30] — launch plan re-venued from pump.fun (USDC pair,
+  Solana) to a Uniswap v4 $NEXUS/USDC pool with a custom fee-burn
+  hook on Robinhood Chain (Ethereum L2; testnet chain id 46630),
+  aligned with the Rienda agent-treasury layer landing on the same
+  chain. /token, /whitepaper, /disclosures, /pricing, and the
+  homepage updated in the same PR (`claude/site-two-layer-rebuild`).
+  All `{{TODO}}` placeholders remain placeholders. The operational
+  T-14/T-48h/T-0 step lists in this file still describe Solana
+  tooling and are pending an operational rewrite; kill criteria
+  unchanged.

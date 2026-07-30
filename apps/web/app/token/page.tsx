@@ -18,12 +18,12 @@ import { launchLive } from "@/lib/launch-flag";
 export const metadata: Metadata = {
   title: "$NEXUS — utility token for the signed-inference rail",
   description:
-    "$NEXUS is the utility token of the VDM Nexus signed-inference rail. Four wires on a 0/30/60/90 calendar: receipt-fee burn, holder discount, agent reputation bond, verifier staking. Fair launch on pump.fun with USDC pair on Solana.",
+    "$NEXUS is the utility token of the VDM Nexus signed-inference rail. Four wires on a 0/30/60/90 calendar: receipt-fee burn, holder discount, agent reputation bond, verifier staking. Fair launch into a Uniswap v4 USDC pool with a custom fee-burn hook on Robinhood Chain.",
   alternates: { canonical: "https://vdmnexus.com/token" },
   openGraph: {
     title: "$NEXUS — utility token for the signed-inference rail",
     description:
-      "Fair launch on pump.fun with USDC pair on Solana. 100B supply, mint authority disabled, LP burned at bonding. Four utility wires on a dated 0/30/60/90 calendar.",
+      "Fair launch into a Uniswap v4 USDC pool with a custom fee-burn hook on Robinhood Chain. 100B supply, non-mintable, LP position burned at deploy. Four utility wires on a dated 0/30/60/90 calendar.",
     url: "https://vdmnexus.com/token",
     siteName: "VDM Nexus",
     type: "website",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     creator: "@vdmnexus",
     title: "$NEXUS — utility token for the signed-inference rail",
     description:
-      "pump.fun with USDC pair on Solana. 100B supply, four wires on 0/30/60/90 calendar. Receipt-fee burn live at launch.",
+      "Uniswap v4 USDC pool with a custom fee-burn hook on Robinhood Chain. 100B supply, four wires on 0/30/60/90 calendar. Receipt-fee burn live at launch.",
   },
 };
 
@@ -47,18 +47,18 @@ const STATS: Array<{ label: string; value: string; sub?: string; mono?: boolean 
     sub: "100B $NEXUS, fixed forever",
   },
   {
-    label: "Mint authority",
-    value: "Disabled",
-    sub: "Revoked at deploy. Supply cannot grow.",
+    label: "Minting",
+    value: "None",
+    sub: "Non-mintable ERC-20. Supply cannot grow.",
   },
   {
     label: "LP",
     value: "Burned",
-    sub: "pump.fun USDC pair. Burned at bonding.",
+    sub: "Uniswap v4 USDC pool. LP position burned at deploy.",
   },
   {
     label: "Token contract",
-    value: `${TODO}: Solscan link`,
+    value: `${TODO}: Robinhood Chain explorer link`,
     mono: true,
   },
 ];
@@ -68,28 +68,28 @@ const ALLOCATION = [
     pct: "70%",
     name: "Liquidity pool",
     detail:
-      "Seeded into the pump.fun USDC pool on Solana at deploy. LP burned at pump.fun bonding completion — liquidity cannot be withdrawn by the team. USDC pair means dollar-denominated MCAP, no SOL beta.",
-    badge: "LP burned at bonding",
+      "Seeded into the Uniswap v4 $NEXUS/USDC pool on Robinhood Chain at deploy, with the fee-burn hook attached at pool creation. The LP position is burned at deploy — liquidity cannot be withdrawn by the team. USDC pair means dollar-denominated MCAP, no ETH beta.",
+    badge: "LP burned at deploy",
   },
   {
     pct: "15%",
     name: "Treasury vault",
     detail:
-      "Held by a Squads multisig vesting program on Solana. Vault-locked 90 days from deploy, then linear-vested over 12 months. Vesting schedule is immutable and enforced by the on-chain vesting contract. No cliff unlocks at the end of the lockup — vesting begins smoothly on day 91.",
+      "Held by a multisig-controlled vesting contract on Robinhood Chain (Safe or equivalent — tooling finalized before addresses are published). Vault-locked 90 days from deploy, then linear-vested over 12 months. Vesting schedule is immutable and enforced by the on-chain vesting contract. No cliff unlocks at the end of the lockup — vesting begins smoothly on day 91.",
     badge: "Locked 90d + 12mo vest",
   },
   {
     pct: "10%",
     name: "Retroactive airdrop",
     detail:
-      "Held in a non-spendable Squads multisig until criteria are published within 90 days of launch. Recipients vest over 6 months from the distribution date. Targets early agents on the signed-inference rail and early signed-receipt verifiers.",
+      "Held in a non-spendable multisig until criteria are published within 90 days of launch. Recipients vest over 6 months from the distribution date. Targets early agents on the signed-inference rail and early signed-receipt verifiers.",
     badge: "Criteria within 90d",
   },
   {
     pct: "5%",
     name: "Community pool",
     detail:
-      "No lockup. Publicly tracked Squads multisig on Solana. Used for ecosystem incentives, pattern-library bounties (Layer 5), and partner integrations. Every outflow is on-chain and signed by multiple keys.",
+      "No lockup. Publicly tracked multisig on Robinhood Chain. Used for ecosystem incentives, pattern-library bounties (Layer 5), and partner integrations. Every outflow is on-chain and signed by multiple keys.",
     badge: "Publicly tracked",
   },
 ];
@@ -99,7 +99,7 @@ const UTILITY = [
     stage: "Wire 1 — Day 0 (launch)",
     title: "Receipt fee + buy-and-burn",
     body:
-      "Every paid call adds a $0.01 USDC receipt fee. 50% routes to a public buy-and-burn bot — USDC → $NEXUS swap on the pump.fun pool → burn to a public address. Live counter below. Burn pressure scales with rail usage.",
+      "Every paid call adds a $0.01 USDC receipt fee. 50% routes to a public buy-and-burn flow — USDC → $NEXUS swap through the Uniswap v4 pool → burn to a public address. The custom v4 hook additionally routes a share of pool swap fees into the same burn. Live counter below. Burn pressure scales with rail usage.",
   },
   {
     stage: "Wire 2 — Day 30",
@@ -140,13 +140,18 @@ export default function TokenPage() {
                 signed-inference rail. Four wires on a 0/30/60/90
                 calendar — receipt-fee burn live at launch, holder
                 discount Day 30, agent reputation bond Day 60, verifier
-                staking Day 90. Fair launch on pump.fun with USDC pair
-                on Solana.
+                staking Day 90. Fair launch into a Uniswap v4 USDC pool
+                with a custom fee-burn hook on Robinhood Chain — the
+                same Ethereum L2 that hosts the Rienda agent
+                treasuries.
               </p>
               <p className="mx-auto mt-4 max-w-2xl text-sm text-text-muted">
-                100B supply. Mint authority disabled at deploy. LP
-                burned at pump.fun bonding. USDC-denominated pricing.
-                No presale. No team allocation. No insider rounds.
+                100B supply. Non-mintable ERC-20. LP position burned at
+                deploy. USDC-denominated pricing. No presale. No team
+                allocation. No insider rounds. Launch is gated on
+                Robinhood Chain mainnet availability, an external audit
+                of the hook + vault contracts, and legal review — no
+                launch date is announced until all three clear.
               </p>
               <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
                 <Link
@@ -244,42 +249,51 @@ export default function TokenPage() {
           <FadeIn className="max-w-2xl">
             <SectionEyebrow>Mechanism</SectionEyebrow>
             <SectionHeading className="mt-4">
-              pump.fun USDC pair fair launch on Solana.
+              Uniswap v4 USDC pool with a fee-burn hook, on Robinhood Chain.
             </SectionHeading>
+            <p className="mt-5 text-base leading-relaxed text-text-muted">
+              Robinhood Chain is an Ethereum L2. The launch plan targets
+              its testnet first (chain id 46630); the pool deploys to
+              mainnet only when Robinhood Chain mainnet is available and
+              the audit + legal gates below have cleared.
+            </p>
           </FadeIn>
           <FadeIn className="mt-10 grid gap-4 sm:grid-cols-3">
             <Card>
               <h3 className="text-base font-semibold text-text">
-                Mint authority disabled
+                Non-mintable ERC-20
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-text-muted">
-                Mint authority is revoked at deploy. Supply is fixed at
-                100,000,000,000 $NEXUS forever. Verifiable on Solscan at{" "}
-                <Placeholder text="{{TODO}}: Solscan link to token contract" />
+                The token contract has no mint function. Supply is fixed
+                at 100,000,000,000 $NEXUS forever. Verifiable on the
+                Robinhood Chain explorer at{" "}
+                <Placeholder text="{{TODO}}: explorer link to token contract" />
                 .
               </p>
             </Card>
             <Card>
               <h3 className="text-base font-semibold text-text">
-                Liquidity pool burned
+                Liquidity position burned
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-text-muted">
-                LP tokens burned at pump.fun bonding completion.
-                Liquidity cannot be withdrawn by the team. Verifiable on
-                Solscan at{" "}
-                <Placeholder text="{{TODO}}: Solscan link to LP burn tx" />
+                The Uniswap v4 LP position is burned at deploy.
+                Liquidity cannot be withdrawn by the team. Verifiable
+                on the Robinhood Chain explorer at{" "}
+                <Placeholder text="{{TODO}}: explorer link to LP burn tx" />
                 .
               </p>
             </Card>
             <Card>
               <h3 className="text-base font-semibold text-text">
-                USDC-denominated pricing
+                Custom fee-burn hook
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-text-muted">
-                Pair is $NEXUS/USDC, not $NEXUS/SOL. MCAP is reported in
-                dollars — no SOL volatility riding under the token's
-                chart. Serious-buyer profile, higher MCAP ceiling at
-                pump.fun's ~$58K bonding threshold.
+                A custom Uniswap v4 hook attaches to the pool at
+                creation and routes a share of swap fees into the
+                public burn flow. The hook contract is in development
+                and ships only after the external audit. Hook address:{" "}
+                <Placeholder text="{{TODO}}: hook contract address" />
+                .
               </p>
             </Card>
           </FadeIn>
@@ -289,14 +303,16 @@ export default function TokenPage() {
           <FadeIn className="max-w-2xl">
             <SectionEyebrow>Treasury</SectionEyebrow>
             <SectionHeading className="mt-4">
-              Three separate Squads multisigs. Not bundled, not clustered.
+              Three separate multisigs. Not bundled, not clustered.
             </SectionHeading>
             <p className="mt-5 text-base leading-relaxed text-text-muted">
-              Three Squads multisigs on Solana, each separately
-              deployed, each with its own published address. Bubblemaps
-              Solana will render these as three distinct allocations,
-              not as a clustered wallet. Each multisig is funded only
-              from the deployer wallet — no farmed-wallet origin chains.
+              Three multisigs on Robinhood Chain (Safe or equivalent —
+              tooling finalized before addresses are published), each
+              separately deployed, each with its own published address.
+              Holder-clustering views will render these as three
+              distinct allocations, not as a clustered wallet. Each
+              multisig is funded only from the deployer wallet — no
+              farmed-wallet origin chains.
             </p>
           </FadeIn>
           <div className="mt-10 grid gap-4 lg:grid-cols-3">
@@ -316,15 +332,16 @@ export default function TokenPage() {
                 <p className="mt-3 text-sm leading-relaxed text-text-muted">
                   15% of supply, locked 90 days from launch, then
                   linear-vested over 12 months. Vesting schedule
-                  immutable, enforced by the on-chain Squads vesting
-                  program on Solana. The treasury cannot sell during
+                  immutable, enforced by the on-chain vesting contract
+                  on Robinhood Chain. The treasury cannot sell during
                   the 90-day lockup. After the lockup ends, the maximum
                   daily unlock is approximately 41M $NEXUS (about 0.04%
                   of supply per day) on a smooth linear curve. No cliff
                   unlocks.
                 </p>
                 <p className="mt-4 font-mono text-xs text-text-muted">
-                  Recipient: <Placeholder text="{{TODO}}: Squads address (Solana)" />
+                  Recipient:{" "}
+                  <Placeholder text="{{TODO}}: multisig address (Robinhood Chain)" />
                 </p>
               </Card>
             </FadeIn>
@@ -350,7 +367,7 @@ export default function TokenPage() {
                 </p>
                 <p className="mt-4 font-mono text-xs text-text-muted">
                   Holding account:{" "}
-                  <Placeholder text="{{TODO}}: Squads address (Solana)" />
+                  <Placeholder text="{{TODO}}: multisig address (Robinhood Chain)" />
                 </p>
               </Card>
             </FadeIn>
@@ -368,14 +385,15 @@ export default function TokenPage() {
                   Community pool
                 </h3>
                 <p className="mt-3 text-sm leading-relaxed text-text-muted">
-                  5% of supply, no lockup, publicly tracked Squads
-                  multisig on Solana. Funds ecosystem incentives,
+                  5% of supply, no lockup, publicly tracked multisig on
+                  Robinhood Chain. Funds ecosystem incentives,
                   pattern-library bounties (Layer 5), and partner
                   integrations. Every outflow is on-chain and signed by
                   multiple keys.
                 </p>
                 <p className="mt-4 font-mono text-xs text-text-muted">
-                  Recipient: <Placeholder text="{{TODO}}: Squads address (Solana)" />
+                  Recipient:{" "}
+                  <Placeholder text="{{TODO}}: multisig address (Robinhood Chain)" />
                 </p>
               </Card>
             </FadeIn>
@@ -393,32 +411,31 @@ export default function TokenPage() {
             <div className="rounded-2xl border border-soft bg-surface/60 p-8 backdrop-blur sm:p-10">
               <dl className="grid gap-6 sm:grid-cols-2">
                 <VerifyRow label="Deployer wallet">
-                  <Placeholder text="{{TODO}}: deployer wallet address (Solana)" />
+                  <Placeholder text="{{TODO}}: deployer wallet address (Robinhood Chain)" />
                   <p className="mt-2 text-xs text-text-muted">
-                    Built and deployed from this address, public on
-                    Solscan. The deployer wallet does not hold a team
-                    allocation — all 30% non-LP supply sits in the three
-                    Squads multisigs above.
+                    Built and deployed from this address, public on the
+                    Robinhood Chain explorer. The deployer wallet does
+                    not hold a team allocation — all 30% non-LP supply
+                    sits in the three multisigs above.
                   </p>
                 </VerifyRow>
                 <VerifyRow label="Token contract">
-                  <Placeholder text="{{TODO}}: Solscan link" />
+                  <Placeholder text="{{TODO}}: explorer link" />
                   <p className="mt-2 text-xs text-text-muted">
-                    Mint authority disabled at deploy. Supply is 100B,
-                    fixed forever.
+                    Non-mintable ERC-20. Supply is 100B, fixed forever.
                   </p>
                 </VerifyRow>
                 <VerifyRow label="LP burn tx">
-                  <Placeholder text="{{TODO}}: Solscan link" />
+                  <Placeholder text="{{TODO}}: explorer link" />
                   <p className="mt-2 text-xs text-text-muted">
-                    LP tokens burned at pump.fun bonding completion.
-                    Liquidity cannot be withdrawn by the team.
+                    Uniswap v4 LP position burned at deploy. Liquidity
+                    cannot be withdrawn by the team.
                   </p>
                 </VerifyRow>
                 <VerifyRow label="Wallet clustering">
-                  <Placeholder text="{{TODO}}: Bubblemaps Solana link" />
+                  <Placeholder text="{{TODO}}: holder-clustering view link (Bubblemaps or equivalent, subject to Robinhood Chain support)" />
                   <p className="mt-2 text-xs text-text-muted">
-                    Three Squads multisigs render as three distinct
+                    Three multisigs render as three distinct
                     allocations, not as a clustered wallet.
                   </p>
                 </VerifyRow>
@@ -478,8 +495,9 @@ export default function TokenPage() {
                   </h3>
                   <ul className="mt-4 space-y-3 text-sm leading-relaxed text-text-muted">
                     <li>
-                      An SPL token on Solana, fair-launched via
-                      pump.fun with USDC pair. No presale, no team
+                      An ERC-20 token on Robinhood Chain (an Ethereum
+                      L2), fair-launched into a Uniswap v4 USDC pool
+                      with a custom fee-burn hook. No presale, no team
                       allocation, no insider rounds.
                     </li>
                     <li>
@@ -555,9 +573,9 @@ export default function TokenPage() {
                     Charts and contracts go live post-deploy.
                   </p>
                   <p className="mt-3 text-sm text-text-muted">
-                    Links resolve the moment the pump.fun deploy
-                    transaction confirms. Squads addresses are
-                    published 24–48 hours before launch.
+                    Links resolve the moment the pool-creation
+                    transaction confirms on Robinhood Chain. Multisig
+                    addresses are published 24–48 hours before launch.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3">
@@ -565,19 +583,19 @@ export default function TokenPage() {
                     aria-disabled="true"
                     className="inline-flex items-center gap-2 rounded-md border border-soft bg-surface/60 px-4 py-2.5 text-sm font-medium text-text-muted"
                   >
-                    pump.fun <Placeholder text="{{TODO}}" />
+                    Uniswap v4 pool <Placeholder text="{{TODO}}" />
                   </span>
                   <span
                     aria-disabled="true"
                     className="inline-flex items-center gap-2 rounded-md border border-soft bg-surface/60 px-4 py-2.5 text-sm font-medium text-text-muted"
                   >
-                    DexScreener Solana <Placeholder text="{{TODO}}" />
+                    DexScreener <Placeholder text="{{TODO}}" />
                   </span>
                   <span
                     aria-disabled="true"
                     className="inline-flex items-center gap-2 rounded-md border border-soft bg-surface/60 px-4 py-2.5 text-sm font-medium text-text-muted"
                   >
-                    Solscan <Placeholder text="{{TODO}}" />
+                    Explorer <Placeholder text="{{TODO}}" />
                   </span>
                   <Link
                     href="/whitepaper"
