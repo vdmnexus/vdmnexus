@@ -380,7 +380,7 @@ function Rienda() {
     },
   ];
   return (
-    <Section>
+    <Section id="rienda">
       <FadeIn className="max-w-2xl">
         <div className="flex flex-wrap items-center gap-3">
           <SectionEyebrow>Rienda · Layer 2</SectionEyebrow>

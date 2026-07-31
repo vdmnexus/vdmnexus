@@ -22,7 +22,7 @@ const APPLICATION_FORM_EMBED_URL =
 export const metadata: Metadata = {
   title: "Build with VDM Nexus",
   description:
-    "Recruiting the first 1–2 collaborators on the trust layer for AI agents. No salary yet — real equity, meaningful $NEXUS allocation, and a seat at the table on a three-week-old project.",
+    "Recruiting the first 1–2 collaborators on the trust layer for AI agents. No salary yet — real equity, an allocation of the planned $NEXUS token, and a seat at the table.",
   alternates: { canonical: "https://vdmnexus.com/team" },
   openGraph: {
     title: "Build with VDM Nexus",
@@ -45,13 +45,13 @@ export const metadata: Metadata = {
 const SHIPPED = [
   "Open spec for signed AI inference receipts (SIR v2)",
   "Multi-chain x402 rail — Solana and Base — live in production",
-  "Four SDKs on npm — MIT licensed",
-  "Live receipt verifier at verify.vdmnexus.com",
+  "Eight packages — six on npm, two on PyPI — MIT licensed",
+  "Five-check receipt verifier — verifyReceipt() in @vdm-nexus/x402, plus a hosted UI",
   "Public points leaderboard at /points",
 ];
 
 const GET = [
-  "Meaningful $NEXUS allocation, carved from the contributor pool",
+  "Allocation of the planned $NEXUS token, carved from the contributor pool — launch-gated, see /disclosures",
   "Equity — 4-year vest, 1-year cliff",
   "Public credit — your name on what we ship",
   "Decision autonomy on the work you own",

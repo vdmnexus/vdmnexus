@@ -10,6 +10,7 @@ import {
 } from "@/components/section";
 import { Card } from "@/components/card";
 import { FadeIn } from "@/components/fade-in";
+import { launchLive } from "@/lib/launch-flag";
 
 export const metadata: Metadata = {
   title: "Security — VDM Nexus",
@@ -309,12 +310,17 @@ export default function SecurityPage() {
                 </Link>
                 {" "}(token + protocol legal disclosures, MiCA-aware
                 issuer notice),{" "}
-                <Link
-                  href="/whitepaper"
-                  className="underline decoration-text-muted/40 underline-offset-4 transition-colors hover:text-text hover:decoration-text"
-                >
-                  /whitepaper
-                </Link>
+                {launchLive() ? (
+                  <Link
+                    href="/whitepaper"
+                    className="underline decoration-text-muted/40 underline-offset-4 transition-colors hover:text-text hover:decoration-text"
+                  >
+                    /whitepaper
+                  </Link>
+                ) : (
+                  // Launch-gated route — 404s until the flag flips, so no link.
+                  <span className="text-text">/whitepaper</span>
+                )}
                 {" "}(protocol architecture and token role),{" "}
                 <a
                   href="https://docs.vdmnexus.com/docs/spec/sir-v2"

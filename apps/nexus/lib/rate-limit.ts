@@ -57,28 +57,48 @@ const ALLOW_NOOP = (key_type: KeyType): RateLimitDecision => {
   return { allowed: true, key_type, limit, remaining: limit, reset: 0 };
 };
 
+/**
+ * A Redis failure (deleted database, rotated token, network partition)
+ * must not take the paid endpoints down with it. Before this guard, a
+ * dead Upstash credential made `limit()` throw on every call —
+ * /inference, /grants, and /chat/completions all returned 500 with an
+ * empty body while the un-rate-limited routes kept working. Rate
+ * limiting degrades to allow-all with a loud log; the balance gate and
+ * grant budget checks still bound spend.
+ */
+async function limitOrAllow(
+  limiter: Ratelimit,
+  key: string,
+  key_type: KeyType,
+  limit: number
+): Promise<RateLimitDecision> {
+  try {
+    const r = await limiter.limit(key);
+    return {
+      allowed: r.success,
+      key_type,
+      limit,
+      remaining: r.remaining,
+      reset: r.reset,
+    };
+  } catch (e) {
+    log.error({
+      event: "rate_limit.backend_error",
+      key_type,
+      reason: e instanceof Error ? e.message : String(e),
+    });
+    return { allowed: true, key_type, limit, remaining: limit, reset: 0 };
+  }
+}
+
 export async function enforceIp(ip: string): Promise<RateLimitDecision> {
   if (!ipLimiter) return ALLOW_NOOP("ip");
-  const r = await ipLimiter.limit(ip);
-  return {
-    allowed: r.success,
-    key_type: "ip",
-    limit: IP_LIMIT_PER_MINUTE,
-    remaining: r.remaining,
-    reset: r.reset,
-  };
+  return limitOrAllow(ipLimiter, ip, "ip", IP_LIMIT_PER_MINUTE);
 }
 
 export async function enforcePubkey(pubkey: string): Promise<RateLimitDecision> {
   if (!pubkeyLimiter) return ALLOW_NOOP("pubkey");
-  const r = await pubkeyLimiter.limit(pubkey);
-  return {
-    allowed: r.success,
-    key_type: "pubkey",
-    limit: PUBKEY_LIMIT_PER_MINUTE,
-    remaining: r.remaining,
-    reset: r.reset,
-  };
+  return limitOrAllow(pubkeyLimiter, pubkey, "pubkey", PUBKEY_LIMIT_PER_MINUTE);
 }
 
 export function rateLimitHeaders(d: RateLimitDecision): Record<string, string> {

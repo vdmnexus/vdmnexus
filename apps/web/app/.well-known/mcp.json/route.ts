@@ -59,7 +59,7 @@ function buildManifest(): McpManifest {
       },
       source:
         "https://github.com/vdmnexus/vdmnexus/tree/main/packages/mcp-server",
-      documentation: "https://docs.vdmnexus.com/docs/mcp",
+      documentation: "https://docs.vdmnexus.com/docs/sdk/mcp-reference",
     },
     tools: [
       {

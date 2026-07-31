@@ -9,7 +9,7 @@ import { PlaygroundConsole } from "@/components/playground/console";
 export const metadata: Metadata = {
   title: "Playground — VDM Nexus",
   description:
-    "Live signed-inference demo. Every call is signed by the VDM Nexus operator key, paid via x402, and emits a receipt anyone can verify.",
+    "Live signed-inference demo. Every call runs against mainnet on an operator-funded sponsor agent and emits a signed receipt anyone can verify.",
 };
 
 export default function PlaygroundPage() {
@@ -26,9 +26,9 @@ export default function PlaygroundPage() {
                 Try <span className="text-gradient">signed inference</span>
               </h1>
               <p className="mt-5 max-w-2xl text-balance text-base leading-relaxed text-text-muted sm:text-lg">
-                Every call below is signed by VDM Nexus&apos;s operator key
-                and pays for itself via the x402 payment rail. Verify any
-                receipt yourself.
+                Every call below runs against mainnet, paid in USDC from an
+                operator-funded sponsor agent, and returns a receipt signed
+                by the VDM Nexus operator key. Verify any receipt yourself.
               </p>
             </FadeIn>
           </div>

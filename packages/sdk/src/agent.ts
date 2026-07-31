@@ -122,7 +122,7 @@ export class Agent {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ agent_pubkey: this.pubkey }),
       });
-      return (await res.json()) as GrantResponse;
+      return await parseJsonResponse<GrantResponse>(res, `${base}/grants`);
     } catch (e) {
       return {
         ok: false,
@@ -157,8 +157,42 @@ export class Agent {
       body,
     });
 
-    return (await res.json()) as InferenceResponse;
+    return await parseJsonResponse<InferenceResponse>(res, `${base}/inference`);
   }
+}
+
+/**
+ * Parse a fetch Response that is expected to carry a JSON body.
+ *
+ * Endpoints normally return JSON on every path, but infrastructure in
+ * front of them (load balancer, serverless platform, crashed handler)
+ * can produce an empty or non-JSON body — historically that surfaced as
+ * a bare `SyntaxError: Unexpected end of JSON input` with no HTTP
+ * context. Instead, return a structured `{ ok: false }` object that
+ * names the status code, the endpoint, and a snippet of whatever body
+ * came back, so callers can log and display something actionable.
+ */
+async function parseJsonResponse<T extends { ok: boolean; error?: string; detail?: string }>(
+  res: Response,
+  endpoint: string
+): Promise<T> {
+  const text = await res.text();
+  if (text.length > 0) {
+    try {
+      return JSON.parse(text) as T;
+    } catch {
+      return {
+        ok: false,
+        error: "upstream_non_json",
+        detail: `HTTP ${res.status} from ${endpoint} returned a non-JSON body: ${text.slice(0, 200)}`,
+      } as T;
+    }
+  }
+  return {
+    ok: false,
+    error: "upstream_empty_body",
+    detail: `HTTP ${res.status} from ${endpoint} returned an empty body`,
+  } as T;
 }
 
 function cryptoRandomUUID(): string {
