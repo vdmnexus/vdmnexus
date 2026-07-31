@@ -67,7 +67,7 @@ extensions: {
         model: {
           type: "string",
           description:
-            "OpenAI-compatible model slug. Examples: openai/gpt-4o-mini, anthropic/claude-haiku, meta-llama/llama-3-70b-instruct.",
+            "OpenAI-compatible model slug. Examples: openai/gpt-4o-mini, anthropic/claude-3-haiku, meta-llama/llama-3.3-70b-instruct.",
         },
         messages: {
           type: "array",

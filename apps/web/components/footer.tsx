@@ -26,7 +26,7 @@ function footerGroups(showLaunch: boolean): Array<{
         { href: "/inference", label: "Inference API" },
         { href: "/verify", label: "Verify" },
         { href: "/agents", label: "Agents" },
-        { href: "/#rienda", label: "Rienda" },
+        { href: "/rienda", label: "Rienda" },
         { href: "/pricing", label: "Pricing" },
       ],
     },

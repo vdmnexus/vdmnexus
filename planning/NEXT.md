@@ -1,18 +1,29 @@
-# Tomorrow's plan — 2026-07-31
+# Tomorrow's plan — retargeted 2026-07-31
 
-Rolling pointer, overwritten in full by each daily run of
-`prompts/00-daily-review.md`. Full context: `planning/daily/2026-07-30.md`.
+Hand-edited (per `planning/README.md`, corrections only) as part of the
+loop retarget in `prompts/00-daily-review.md`: the nightly plan now
+tracks (1) launch readiness, (2) Rienda M1-M5 status, (3) site/API
+health, (4) Dennis-blocked standing items — in that order. The old
+May distribution backlog no longer drives the plan.
 
-1. **Decision needed on roadmap item 7** — thirty-one days stale in this
-   loop. Either run `prompts/06-compliance-one-pager.md` directly, or tell
-   this loop to drop it from the nightly plan.
-2. **Manual-submission backlog still open** — #2 (awesome-x402 +
-   x402.direct), #3 (Sepolia mint), #4 (AgentKit PR), #8 (SendAI plugin),
-   all ~5-30 min of Dennis clicking submit, unchanged since May.
-3. **#114 / #106 / #95 still waiting on a decision** (Vercel+DNS for #114;
-   merge-or-close for #106; Spanish counsel for #95) — no new action
-   needed from this loop, just a standing reminder.
-4. **`business-plan.md` still missing in `vdmnexus/internal`** — worth an
-   explicit go/no-go from Dennis on whether to seed it now.
-5. No new outreach/distribution branches until the backlog clears —
-   twenty-five quiet days running is worth noticing, not just repeating.
+1. **Launch readiness** (`marketing/token-launch-checklist.md`): the
+   T-14 / T-48h / T-0 operational steps still describe Solana tooling
+   (pump.fun, Squads, Solscan) and need a rewrite pass for the
+   Uniswap v4 / Robinhood Chain venue before any date can be set —
+   that rewrite is the next actionable checklist item. /disclosures,
+   /security, and the token-page rewrite merged in #149/#150; verify
+   which checklist boxes that actually closes and log it.
+2. **Rienda M1-M5**: last reported status (2026-07-31, from Dennis) —
+   spec complete; token + Uniswap v4 fee-burn hook contracts built,
+   26 passing tests; M1 (vault + policy engine) in development.
+   M2-M5 not started. Ask for an M1 update only if this goes stale
+   past 7 days.
+3. **Health checks**: run the three read-only checks (playground
+   inference JSON, verify.vdmnexus.com, nexus /api/health) and report
+   pass/fail. Note: the playground upstream_error root cause was fixed
+   in #150; a follow-up branch is replacing a dead OpenRouter model
+   slug — re-check after it merges.
+4. **Standing blocked items**: #114 — decision request: close it? (#150
+   removed the wc26 pages from the site). #106 — merge or close. #95 —
+   Spanish counsel. Legal memo — status: email drafted, awaiting
+   Dennis send. May manual-submission backlog — one line, no more.

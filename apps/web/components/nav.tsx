@@ -18,8 +18,7 @@ type NavDropdownItem = {
 
 // "Product" — the two layers. Layer 1 (trust: signed inference,
 // verification, agent directory) is live. Layer 2 (capital: Rienda)
-// has no page yet — the homepage section is its canonical entry point,
-// so the nav item is an anchor, not an invented page.
+// has a dedicated page at /rienda; the homepage section is the teaser.
 const PRODUCT_ITEMS: NavDropdownItem[] = [
   {
     href: "/inference",
@@ -37,7 +36,7 @@ const PRODUCT_ITEMS: NavDropdownItem[] = [
     description: "Browse agents on the rail",
   },
   {
-    href: "/#rienda",
+    href: "/rienda",
     label: "Rienda",
     description: "Layer 2 · agent treasuries — in development",
   },

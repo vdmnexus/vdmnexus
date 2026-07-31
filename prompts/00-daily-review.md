@@ -36,6 +36,54 @@ committed.
 - Record what you changed; surface it in the step-5 Slack summary
   ("Applied your changes: ...").
 
+## Tracked objects (priority order — retargeted 2026-07-31)
+
+This loop's job is to track these four objects, in this order. The
+Phase-1 distribution roadmap in `CLAUDE.md` (locked 2026-05-22) no
+longer drives the nightly plan — it stays as background context and its
+kill-criteria still apply, but the nightly plan is built from this list.
+
+1. **Launch readiness — `marketing/token-launch-checklist.md`.** The
+   $NEXUS launch, re-venued 2026-07-30 to a Uniswap v4 $NEXUS/USDC pool
+   with a fee-burn hook on Robinhood Chain. Each night: which checklist
+   items moved, which are actionable next, and the standing flag that
+   the T-14 / T-48h / T-0 operational steps still describe Solana
+   tooling and need a rewrite pass before any date is set. Surface the
+   1-3 most actionable unchecked items, not the whole list.
+2. **Rienda milestones M1-M5.** M1 vault + policy engine → M2 paper
+   agent + router → M3 compute budget + x402 paymaster → M4 endurance
+   run → M5 external audit + legal gate. The contracts live in a
+   separate PRIVATE repo this loop cannot read — track ONLY the status
+   Dennis reports (via `#nexus` or planning notes). Record last-known
+   status + the date it was reported. Never advance or complete a
+   milestone without an explicit report from Dennis; if status is
+   older than 7 days, ask for an update in the step-5 summary.
+3. **Site / API health — read-only checks.** Each run, verify and
+   report pass/fail:
+   - `POST https://www.vdmnexus.com/api/playground/inference` with a
+     trivial prompt returns JSON (one call max per run; a structured
+     JSON error still counts as "endpoint alive", a non-JSON 5xx or
+     timeout does not).
+   - `https://verify.vdmnexus.com` responds.
+   - `https://nexus.vdmnexus.com/api/health` returns ok.
+   HTTP checks only — no deploys, no config changes, no paid x402
+   calls. A failing check is a blocker line at the top of the summary.
+4. **Dennis-blocked standing items.** Keep nagging, but verify state
+   via GitHub every run before repeating a nag, and demote items that
+   resolved. As of 2026-07-31: PRs #149 + #150 are MERGED (two-layer
+   site, disclosures/security, nav IA, VOICE.md + copy-lint) — done,
+   stop tracking. #114 (WC26 site) is still open, but #150 removed the
+   wc26 pages from the marketing site — reframe as a decision request
+   ("close #114?"), not a build reminder. #106 (cards-v1 spec):
+   merge-or-close decision. #95 (Polymarket agent): blocked on Spanish
+   counsel. **Legal memo (was "compliance one-pager / roadmap item 7",
+   31+ days stale): reframed to status-tracking — "engage law firm
+   memo — email drafted, awaiting Dennis send". Track send/response
+   status; do not re-plan it as a nightly build task.** The May
+   manual-submission backlog (discovery listings, Sepolia mint,
+   AgentKit PR, SendAI plugin) stays Dennis-blocked — one summary line
+   at most, below launch-readiness items.
+
 ## 1. Gather
 
 - Find the most recent file in `planning/daily/` to determine the
@@ -43,25 +91,32 @@ committed.
 - Via the GitHub MCP tools on `vdmnexus/vdmnexus`: pull merged PRs, open
   PRs, and commits to `main` since that date. Read PR titles, bodies,
   changed files, and CI status.
-- Read `STATUS.md` (in-flight branches) and the roadmap in `CLAUDE.md`
-  (priorities + kill-criteria).
+- Read `STATUS.md` (in-flight branches),
+  `marketing/token-launch-checklist.md` (tracked object 1), and the
+  kill-criteria in `CLAUDE.md`.
 - Read `business-plan.md` from the private `vdmnexus/internal` repo for
   strategic context (if it exists).
+- Run the read-only health checks (tracked object 3).
 
 ## 2. Review
 
-- Merged PRs: what shipped, does it match the roadmap, any follow-ups /
-  regressions / TODOs left behind.
+- Merged PRs: what shipped, does it advance a tracked object, any
+  follow-ups / regressions / TODOs left behind.
 - Open PRs: status, blockers, what's needed to merge.
-- Flag anything that contradicts the roadmap or trips a kill-criterion.
+- Flag anything that trips a kill-criterion (`CLAUDE.md` +
+  `marketing/token-launch-checklist.md` both have kill-criteria lists).
 
 ## 3. Plan tomorrow
 
-- Pick the next highest-leverage roadmap item(s). Roadmap order in
-  `CLAUDE.md` governs; speed-to-distribution beats feature work.
-- Map each to the relevant `prompts/NN-*.md` file. If none exists, note
-  that one should be written.
-- Write a concrete, ordered build plan for tomorrow.
+- Build the plan from the tracked objects, in their priority order:
+  launch-readiness actions first, then Rienda status asks, then health
+  failures, then standing-blocked reminders.
+- Map each planned action to a `prompts/NN-*.md` file where one exists.
+  If none exists, note that one should be written — do not write it in
+  this session.
+- Write a concrete, ordered plan. Small and real beats long and stale:
+  if an item has appeared unchanged for 7+ nights, escalate it to a
+  direct question in the step-5 summary instead of repeating it.
 
 ## 4. Persist (the repo is the only shared memory)
 
@@ -92,7 +147,10 @@ committed.
 ## Rules
 
 - Read-only on code. The only writes are the `planning/` docs +
-  `STATUS.md`.
+  `STATUS.md`. This loop does not open code PRs — that expansion was
+  considered and is not approved; permissions stay as they are.
+- The private Rienda contracts repo is out of bounds — the loop tracks
+  reported status only, it never reads or clones that repo.
 - Never schedule broadcasts and never post outside `#nexus`.
 - This session IS the model — do not route through the Nexus rail; just
   reason directly.
