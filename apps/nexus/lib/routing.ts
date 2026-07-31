@@ -12,8 +12,11 @@ export type Route = {
 const ROUTES: Record<TaskType, Route> = {
   fast: {
     provider: "groq",
-    model: "llama-3-70b",
-    upstreamModel: "meta-llama/llama-3-70b-instruct",
+    model: "llama-3.3-70b",
+    // meta-llama/llama-3-70b-instruct was delisted from OpenRouter
+    // (404 "No endpoints found", verified 2026-07-31); 3.3-70b is the
+    // maintained same-tier successor at a comparable price.
+    upstreamModel: "meta-llama/llama-3.3-70b-instruct",
   },
   reasoning: {
     provider: "anthropic",

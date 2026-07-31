@@ -413,6 +413,15 @@ function Rienda() {
           </FadeIn>
         ))}
       </div>
+      <FadeIn className="mt-10">
+        <Link
+          href="/rienda"
+          className="inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
+        >
+          Rienda in full — the ten guardrails and the compute budget
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </FadeIn>
     </Section>
   );
 }
