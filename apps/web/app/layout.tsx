@@ -27,12 +27,21 @@ export const metadata: Metadata = {
     url: "https://vdmnexus.com",
     siteName: "VDM Nexus",
     type: "website",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "VDM Nexus — The model never holds the keys",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "VDM Nexus — The model never holds the keys",
     description:
       "Agent vaults. Guardrails in the contract, not the prompt. Losses get bounded, not prevented.",
+    images: ["/og.png"],
   },
 };
 
