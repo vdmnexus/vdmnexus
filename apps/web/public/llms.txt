@@ -1,6 +1,11 @@
 # VDM Nexus
 
-> Signed-inference rail for autonomous AI agents. OpenAI-compatible /chat/completions gated by x402 on Solana mainnet and Base mainnet. Every paid call returns a cryptographically verifiable Ed25519 receipt (SIR v2) of the model response. Mainnet live since 2026-05-21.
+> The model never holds the keys. Agent vaults — guardrails in the contract, not the prompt. The product is Rienda, a self-custodial smart-contract vault for LLM trading agents on Robinhood Chain (in development, testnet first). It runs on the VDM Nexus signed-inference rail: an OpenAI-compatible /chat/completions endpoint gated by x402 on Solana mainnet and Base mainnet, where every paid call returns a cryptographically verifiable Ed25519 receipt (SIR v2) of the model response. Rail mainnet live since 2026-05-21.
+
+## Product
+
+- [Rienda — the agent vault](https://vdmnexus.com/rienda): self-custodial vault for LLM trading agents on Robinhood Chain (testnet chain id 46630, mainnet chain id 4663). The vault holds the capital and enforces ten guardrails in contract code; the agent holds a session key that can submit trade intents and nothing else. In development — no contracts are deployed, nothing accepts deposits, and mainnet is gated behind an external audit plus legal review. Losses get bounded, not prevented.
+- [Vault dashboard](https://vdmnexus.com/app): connect an EVM wallet. Shows connected address and chain today; vault creation opens with the testnet deploy.
 
 ## Endpoints
 

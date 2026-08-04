@@ -21,6 +21,14 @@ const nextConfig = {
         destination: "/inference",
         permanent: true,
       },
+      // The vault dashboard lives at /app. /vault is what people type.
+      // Temporary, not 308 — the canonical path may still move before the
+      // testnet deploy, and a cached permanent redirect is hard to walk back.
+      {
+        source: "/vault",
+        destination: "/app",
+        permanent: false,
+      },
     ];
   },
 };

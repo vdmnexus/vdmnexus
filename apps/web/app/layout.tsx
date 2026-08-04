@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { WalletProvider } from "@/components/wallet/wallet-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -8,23 +9,30 @@ const inter = Inter({
   display: "swap",
 });
 
+// Canonical brand line, verbatim, on every metadata surface: title, OG,
+// Twitter. The supporting line follows it in each description. If you
+// change the wording, change it here and in the two hero blocks
+// (`app/page.tsx`, `app/rienda/page.tsx`) in the same commit.
 export const metadata: Metadata = {
-  title: "VDM Nexus — Signed inference for the agent economy",
+  title: "VDM Nexus — The model never holds the keys",
   description:
-    "AI agents that pay for their own compute. Solana-keypair identity, signed inference receipts, USDC-settled. Cryptographic proof of every model call.",
+    "Agent vaults. Guardrails in the contract, not the prompt. Rienda is a self-custodial vault for LLM trading agents on Robinhood Chain — the vault holds the capital, the agent holds a session key that can trade and nothing else. In development, testnet first. Losses get bounded, not prevented.",
   metadataBase: new URL("https://vdmnexus.com"),
+  // `app/icon.svg` and `app/apple-icon.tsx` are picked up by convention —
+  // both render the VDM Nexus mark. No manual icons block needed.
   openGraph: {
-    title: "VDM Nexus — Signed inference for the agent economy",
+    title: "VDM Nexus — The model never holds the keys",
     description:
-      "AI agents that pay for their own compute. Signed receipts, USDC settlement, x402-native. Live on Solana mainnet.",
+      "Agent vaults. Guardrails in the contract, not the prompt. Contract-enforced limits, a signed receipt behind every decision. In development — testnet first.",
     url: "https://vdmnexus.com",
     siteName: "VDM Nexus",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "VDM Nexus",
-    description: "Signed inference for autonomous agents. No API keys.",
+    title: "VDM Nexus — The model never holds the keys",
+    description:
+      "Agent vaults. Guardrails in the contract, not the prompt. Losses get bounded, not prevented.",
   },
 };
 
@@ -35,7 +43,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="font-sans bg-bg text-text antialiased">{children}</body>
+      <body className="font-sans bg-bg text-text antialiased">
+        {/*
+          Wallet context wraps the whole app so the nav's connect button
+          works on every route. Children are passed as props, so pages
+          below this boundary still render as server components.
+        */}
+        <WalletProvider>{children}</WalletProvider>
+      </body>
     </html>
   );
 }

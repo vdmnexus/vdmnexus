@@ -8,144 +8,42 @@ import {
   SectionEyebrow,
   SectionHeading,
 } from "@/components/section";
-import { Card, ComingSoonBadge } from "@/components/card";
+import { Card } from "@/components/card";
 import { WaitlistForm } from "@/components/waitlist-form";
 import { FadeIn } from "@/components/fade-in";
-import { LiveStats } from "@/components/live-stats";
-import { RecentReceipts } from "@/components/recent-receipts";
 import { WaitlistProvider } from "@/components/waitlist-context";
 import { launchLive } from "@/lib/launch-flag";
 
 const GITHUB_URL = "https://github.com/vdmnexus/vdmnexus";
 
-const PROBLEMS = [
-  {
-    title: "API keys don't model agents",
-    body:
-      "Autonomous agents can't share a bearer key with humans. There's no identity, no per-agent attribution, no revocation that doesn't break everything else built on it.",
-  },
-  {
-    title: "On-chain actions need verifiable inputs",
-    body:
-      "An agent executing a trade, signing a contract, or calling another agent needs cryptographic proof of what the model returned — not a black-box JSON blob.",
-  },
-  {
-    title: "No standard for agent inference payment",
-    body:
-      "Providers assume human accounts and credit cards. Agents have wallets and need pay-per-call settlement that any other agent can verify and audit.",
-  },
-];
-
-const USE_CASES = [
-  {
-    title: "Ship-broadcast agent",
-    badge: "live",
-    body:
-      "Our own agent drafts X / Farcaster / Telegram posts via the SDK and pays per call. Every draft footer carries the receipt ID of the LLM call that produced it. The protocol runs its own agents and pays itself.",
-  },
-  {
-    title: "Trading agent",
-    body:
-      "Watch a market condition, pull a signed inference for the decision, execute on-chain. The receipt is the audit log when the strategy gets reviewed.",
-  },
-  {
-    title: "Multi-agent workflow",
-    body:
-      "Agent A asks Agent B for a judgment call. Agent B routes through Nexus and returns a signed receipt. Agent A verifies the inference before acting on it.",
-  },
-  {
-    title: "Tweet-to-execute",
-    body:
-      "A user tweets an intent. A Bankr-style platform parses it through Nexus, then triggers the on-chain action. The receipt proves what the model actually returned.",
-  },
-  {
-    title: "Autonomous research agent",
-    body:
-      "An agent crawls papers and pays per inference. Every summary carries a receipt, so the knowledge base it builds stays auditable end-to-end.",
-  },
-];
-
-const STEPS = [
-  {
-    title: "Sign",
-    body: "Your agent signs every request with its Ed25519 secret key. The public key is the identity — no API key to leak or rotate.",
-  },
-  {
-    title: "Verify",
-    body: "Nexus verifies the signature, checks the nonce and timestamp, debits the agent's USDC balance, and routes to the inference provider.",
-  },
-  {
-    title: "Receipt",
-    body: "The response carries a signed receipt: prompt hash, response hash, cost, balance remaining, timestamp. Cryptographic proof of what happened.",
-  },
-  {
-    title: "Public profile",
-    body: "Every receipt also lands on the agent's public profile at console.vdmnexus.com/a/<pubkey>. Stats accrue, reputation builds, the audit trail is permanent.",
-  },
-];
-
-const FOR_BUILDERS = [
-  "Solana-keypair agent identity",
-  "USDC-settled compute, no human in the loop",
-  "Open source SDK, MIT licensed",
-];
-
-const PAYWALL_BENEFITS = [
-  "Ed25519 receipt of every response — verifiable end-to-end",
-  "Per-call spend cap and loop detection, fail-closed by default",
-  "Express, Hono, Next.js — pick your stack, three lines of glue",
-  "$VDM hooks wired today: discount, cashback, staking multiplier",
-];
-
-const PAYWALL_VS_VERGE: Array<{ label: string; us: string; them: string }> = [
-  { label: "Chains", us: "Solana (today), Base", them: "Base" },
-  { label: "Protocol fee", us: "0%", them: "0.5%" },
-  { label: "Signed receipts", us: "SIR v2 — Ed25519", them: "—" },
-  { label: "Self-host facilitator", us: "KMS-backed", them: "Yes" },
-  { label: "Token hooks", us: "$VDM (configurable)", them: "$VERGE" },
-];
-
-const FOR_PLATFORMS = [
-  "x402-native pay-per-call on Solana + Base",
-  "Signed receipts for downstream verification",
-  "Plug-in identity layer for agent marketplaces",
-];
-
-const BUILT_ON_TOP = [
-  { label: "SDK", href: "/sdk", external: false },
-  {
-    label: "MCP",
-    href: "https://www.npmjs.com/package/@vdm-nexus/mcp",
-    external: true,
-  },
-  {
-    label: "Paywall",
-    href: "https://www.npmjs.com/package/@vdm-nexus/paywall",
-    external: true,
-  },
-  { label: "Verify", href: "https://verify.vdmnexus.com", external: true },
-  { label: "Playground", href: "/playground", external: false },
-  { label: "Docs", href: "https://docs.vdmnexus.com", external: true },
-];
-
+/**
+ * Homepage. One brand — VDM Nexus. One product — Rienda, the agent vault.
+ *
+ * The signed-inference rail (receipts, x402, the SDKs) is live and has real
+ * callers, so it keeps every route it had. It just stops being marketed as
+ * a second product and appears here as "the technology underneath" — the
+ * thing that makes a vault's decision history checkable by someone who
+ * doesn't trust us.
+ *
+ * Status framing is load-bearing, not decoration: in development, testnet
+ * first, mainnet gated behind an external audit and a legal review. No
+ * dates, no performance claims, no token language outside the launch-gated
+ * /token and /whitepaper routes.
+ */
 export default function Home() {
   return (
     <WaitlistProvider>
       <Nav />
-      <LastShippedStrip />
       <main>
         <Hero />
-        <TwoLayers />
+        <WhatItIs />
         <FounderOrigin />
-        <PrincipleStats />
-        <Rienda />
+        <Guardrails />
+        <ComputeBudget />
+        <UnderTheHood />
         {launchLive() ? <NexusToken /> : null}
-        <ProductGrid />
-        <Problem />
-        <BuiltOnTop />
-        <Paywall />
-        <UseCases />
-        <HowItWorks />
+        <Status />
+        <ForDevelopers />
         <OpenSource />
         <Waitlist />
       </main>
@@ -155,87 +53,70 @@ export default function Home() {
 }
 
 function Hero() {
-  const showLaunch = launchLive();
   return (
     <section className="relative overflow-hidden">
       <GridBg />
-      <div className="mx-auto w-full max-w-5xl px-6 pb-24 pt-28 sm:pb-32 sm:pt-36">
+      <div className="mx-auto w-full max-w-5xl px-6 pb-24 pt-24 sm:pb-32 sm:pt-32">
         <FadeIn>
           <div className="text-center">
-            <SectionEyebrow>The trust layer for autonomous agents</SectionEyebrow>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <SectionEyebrow>Rienda · the agent vault</SectionEyebrow>
+              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-amber-300">
+                In development · testnet first
+              </span>
+            </div>
+            {/*
+              Canonical brand line. One phrasing across the whole site —
+              homepage, /rienda, metadata, OG. The supporting line sits
+              directly beneath so a cold reader learns what the product is
+              in the next breath. Don't fork it into a variant.
+            */}
             <h1 className="mx-auto mt-8 max-w-4xl text-balance text-5xl font-semibold tracking-tight text-text sm:text-6xl md:text-7xl">
-              Agents that{" "}
-              <span className="text-gradient">prove every decision</span> —
-              and capital that holds them to it.
+              The model never holds{" "}
+              <span className="text-gradient">the keys</span>.
             </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-balance text-xl font-medium text-text sm:text-2xl">
+              Agent vaults. Guardrails in the contract, not the prompt.
+            </p>
             <p className="mx-auto mt-8 max-w-2xl text-balance text-base leading-relaxed text-text-muted sm:text-lg">
-              Layer 1 is live: signed inference receipts (SIR v2), x402
-              pay-per-call, USDC settlement on Solana and Base. Layer 2 is in
-              development: Rienda — agent treasuries on Robinhood Chain that
-              hold an agent&apos;s capital and enforce its risk limits in
-              contract code. Each agent gets a public home at{" "}
-              <a
-                href="https://console.vdmnexus.com"
-                className="text-text underline decoration-text-muted/40 underline-offset-4 transition-colors hover:decoration-text"
-              >
-                console.vdmnexus.com
-              </a>
-              .
+              Rienda is a self-custodial vault for LLM trading agents on
+              Robinhood Chain. The vault holds the capital and enforces the
+              risk policy on-chain. The agent gets a session key that submits
+              trade intents and does nothing else — it cannot withdraw, cannot
+              change a limit, cannot grant itself either.
             </p>
             <p className="mx-auto mt-5 max-w-xl text-balance text-base font-medium text-text sm:text-lg">
-              60 seconds to first signed call. No API key. No account. No
-              human in the loop.
+              Losses get bounded, not prevented. That is the whole promise.
             </p>
-            <p className="mx-auto mt-4 max-w-2xl text-balance text-sm text-text-muted/80">
-              Beta protocol — mainnet live since 2026-05-21. No SLA, no
-              external audit yet — see{" "}
+            <div className="mt-12 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
+              <Link
+                href="/app"
+                className="group inline-flex items-center justify-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-6 py-3 text-sm font-semibold text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
+              >
+                Connect a wallet
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <Link
+                href="/rienda"
+                className="group inline-flex items-center justify-center gap-2 rounded-md border border-soft bg-surface/60 px-6 py-3 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
+              >
+                Read the ten guardrails
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </div>
+            <p className="mx-auto mt-8 max-w-2xl text-balance text-sm text-text-muted/80">
+              Nothing here accepts deposits today. The vault contracts deploy
+              to Robinhood Chain testnet (chain id 46630) first; mainnet waits
+              on an external audit and a legal review. What&apos;s already
+              live is the rail underneath — see{" "}
               <Link
                 href="/security"
                 className="underline decoration-text-muted/40 underline-offset-4 transition-colors hover:text-text"
               >
                 /security
               </Link>{" "}
-              for what that means.
+              for what it does and doesn&apos;t guarantee.
             </p>
-            <div className="mt-12 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
-              {showLaunch ? (
-                <>
-                  <Link
-                    href="/token"
-                    className="group inline-flex items-center justify-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-6 py-3 text-sm font-semibold text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
-                  >
-                    Read the $NEXUS plan
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                  </Link>
-                  <Link
-                    href="/playground"
-                    className="group inline-flex items-center justify-center gap-2 rounded-md border border-soft bg-surface/60 px-6 py-3 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
-                  >
-                    Try a live mainnet call
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/playground"
-                    className="group inline-flex items-center justify-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-6 py-3 text-sm font-semibold text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
-                  >
-                    Try a live mainnet call
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                  </Link>
-                  <a
-                    href={GITHUB_URL}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="group inline-flex items-center justify-center gap-2 rounded-md border border-soft bg-surface/60 px-6 py-3 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
-                  >
-                    <Github className="h-4 w-4" />
-                    View on GitHub
-                  </a>
-                </>
-              )}
-            </div>
           </div>
         </FadeIn>
       </div>
@@ -243,199 +124,61 @@ function Hero() {
   );
 }
 
-// The two-layer story — the structural spine of the homepage. Layer 1
-// (Trust) is everything live today; Layer 2 (Capital) is Rienda, clearly
-// labeled in development / testnet-first. No launch dates, no token
-// promises here — status lines only.
-function TwoLayers() {
-  return (
-    <Section className="pt-0">
-      <FadeIn className="max-w-2xl">
-        <SectionEyebrow>Two layers</SectionEyebrow>
-        <SectionHeading className="mt-4">
-          First we made agents provable. Now we&apos;re making them
-          accountable.
-        </SectionHeading>
-      </FadeIn>
-      <div className="mt-10 grid gap-5 lg:grid-cols-2">
-        <FadeIn>
-          <div className="flex h-full flex-col rounded-2xl border border-soft bg-surface/60 p-7 backdrop-blur sm:p-8">
-            <div className="flex items-center justify-between gap-3">
-              <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-indigo">
-                Layer 1 — Trust
-              </span>
-              <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-emerald-300">
-                Live
-              </span>
-            </div>
-            <h3 className="mt-4 text-2xl font-semibold tracking-tight text-text">
-              Signed inference. Verifiable receipts. Pay-per-call.
-            </h3>
-            <p className="mt-4 text-sm leading-relaxed text-text-muted">
-              Every LLM call through Nexus returns an Ed25519-signed SIR v2
-              receipt — prompt hash, response hash, model, cost, on-chain
-              settlement — that anyone can verify without trusting us.
-              Payment is x402: USDC per call on Solana and Base mainnet,
-              no accounts, no API keys. SDKs on npm and PyPI.
-            </p>
-            <ul className="mt-6 space-y-2.5 text-sm text-text-muted">
-              {[
-                "SIR v2 signed receipts — five-check verification, open spec",
-                "x402 pay-per-call — USDC on Solana + Base, mainnet since 2026-05-21",
-                "Eight MIT packages on npm + PyPI",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-accent-indigo" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-auto flex flex-wrap gap-3 pt-8">
-              <Link
-                href="/playground"
-                className="inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-4 py-2 text-sm font-medium text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
-              >
-                Try a live mainnet call
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-              <Link
-                href="/sdk"
-                className="inline-flex items-center gap-2 rounded-md border border-soft bg-bg/40 px-4 py-2 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
-              >
-                Browse the SDK
-              </Link>
-            </div>
-          </div>
-        </FadeIn>
-        <FadeIn delay={0.06}>
-          <div className="flex h-full flex-col rounded-2xl border border-soft bg-surface/60 p-7 backdrop-blur sm:p-8">
-            <div className="flex items-center justify-between gap-3">
-              <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-indigo">
-                Layer 2 — Capital
-              </span>
-              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-amber-300">
-                In development
-              </span>
-            </div>
-            <h3 className="mt-4 text-2xl font-semibold tracking-tight text-text">
-              Rienda — agent treasuries on Robinhood Chain.
-            </h3>
-            <p className="mt-4 text-sm leading-relaxed text-text-muted">
-              Smart-contract vaults for LLM trading agents. The vault holds
-              the agent&apos;s capital and enforces the risk guardrails in
-              contract code — position caps, loss limits, drawdown
-              throttles, a kill switch. The LLM is treated as untrusted:
-              it proposes, the contract disposes. Inference is paid via
-              x402 out of realized PnL — a performance-metered compute
-              budget, so unprofitable agents lose compute.
-            </p>
-            <ul className="mt-6 space-y-2.5 text-sm text-text-muted">
-              {[
-                "Spec complete, contracts in development",
-                "Testnet first — Robinhood Chain (Ethereum L2, testnet chain id 46630)",
-                "Mainnet gated behind an external audit + legal review",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-amber-400/70" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-auto flex flex-wrap gap-3 pt-8">
-              <Link
-                href="/roadmap"
-                className="inline-flex items-center gap-2 rounded-md border border-soft bg-bg/40 px-4 py-2 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
-              >
-                Follow progress on the roadmap
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          </div>
-        </FadeIn>
-      </div>
-    </Section>
-  );
-}
-
-// Rienda mechanics, one level deeper than the TwoLayers card. Everything
-// here describes contract-enforced behavior from the spec — labeled in
-// development, testnet-first, no dates.
-function Rienda() {
-  const guardrails = [
+// Three claims, each one a mechanism rather than an adjective. Every line
+// here has to be true of the contracts as specced, not of an aspiration.
+function WhatItIs() {
+  const facts = [
     {
-      title: "Position caps + loss limits",
-      body: "Per-position and aggregate exposure caps, hard loss limits per epoch — enforced by the vault contract, not by prompt engineering. A proposal that breaches a cap reverts.",
+      title: "Self-custodial",
+      body: "Deposits sit in a vault contract owned by you. VDM Nexus never holds a key and cannot move funds. The kill switch — halt trading, withdraw everything — sits above the agent's authority, where the agent can't reach it.",
     },
     {
-      title: "Drawdown throttles",
-      body: "Drawdown past a threshold shrinks the agent's permitted position size automatically. The deeper the drawdown, the tighter the leash — recovery has to be earned at reduced size.",
+      title: "Guardrails in contract code",
+      body: "Position caps, loss limits, drawdown throttles, an asset whitelist. Every trade intent is checked against all ten before it executes. A jailbroken model still can't talk its way past a revert.",
     },
     {
-      title: "Kill switch",
-      body: "The vault owner can halt trading and withdraw at any time. The agent can never block an exit — the kill switch lives in the contract, above the agent's authority.",
-    },
-    {
-      title: "Performance-metered compute",
-      body: "The agent's inference is paid via x402 from realized PnL. Profitable agents earn their compute budget; unprofitable agents run out of it. Every call carries a signed receipt.",
+      title: "A decision history you can check",
+      body: "Each trade links to the Ed25519-signed receipt of the inference that proposed it. Anyone the owner shows it to can verify the chain — this exact model output produced this exact trade — without trusting us.",
     },
   ];
   return (
-    <Section id="rienda">
+    <Section className="pt-0">
       <FadeIn className="max-w-2xl">
-        <div className="flex flex-wrap items-center gap-3">
-          <SectionEyebrow>Rienda · Layer 2</SectionEyebrow>
-          <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-amber-300">
-            In development · testnet first
-          </span>
-        </div>
-        <SectionHeading className="mt-4">
-          The LLM is untrusted. The vault is the adult in the room.
-        </SectionHeading>
+        <SectionEyebrow>What it is</SectionEyebrow>
+        <SectionHeading className="mt-4">Where the limits live.</SectionHeading>
         <p className="mt-5 text-base leading-relaxed text-text-muted">
-          Rienda vaults hold a trading agent&apos;s capital on Robinhood
-          Chain (an Ethereum L2). The agent proposes trades; the contract
-          enforces the limits. Layer 1 makes every decision provable —
-          Layer 2 makes every decision bounded. Status: spec complete,
-          contracts in development, deploying to Robinhood Chain testnet
-          (chain id 46630) first. Mainnet is gated behind an external
-          audit and legal review — no dates until both clear.
+          Prompt-level guardrails fail the moment the model is jailbroken,
+          hallucinating, or simply wrong. Rienda assumes all three will
+          happen and puts the limits where the model can&apos;t reach them:
+          the model proposes, the contract disposes.
         </p>
       </FadeIn>
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {guardrails.map((g, i) => (
-          <FadeIn key={g.title} delay={i * 0.06}>
+      <div className="mt-10 grid gap-4 lg:grid-cols-3">
+        {facts.map((f, i) => (
+          <FadeIn key={f.title} delay={i * 0.06}>
             <Card className="h-full">
-              <h3 className="text-base font-semibold text-text">{g.title}</h3>
+              <h3 className="text-base font-semibold text-text">{f.title}</h3>
               <p className="mt-3 text-sm leading-relaxed text-text-muted">
-                {g.body}
+                {f.body}
               </p>
             </Card>
           </FadeIn>
         ))}
       </div>
-      <FadeIn className="mt-10">
-        <Link
-          href="/rienda"
-          className="inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
-        >
-          Rienda in full — the ten guardrails and the compute budget
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
-      </FadeIn>
     </Section>
   );
 }
 
-// Narrow founder-voice section between Hero and PrincipleStats. Lands the
-// "why this exists" hook in 30 seconds for hackathon judges, grant
-// officers, and cold visitors. Reference shape: Nova Wallet's "$300K
-// lost to malware" — a specific moment, a specific stake, the trigger.
-// The placeholder string is intentional — founder fills the prose before
-// the next public-surface PR; the visual treatment is production-ready.
+// Narrow founder-voice section. Lands the "why this exists" hook in 30
+// seconds for hackathon judges, grant officers, and cold visitors.
+// Reference shape: Nova Wallet's "$300K lost to malware" — a specific
+// moment, a specific stake, the trigger. The placeholder string is
+// intentional — founder fills the prose before the next public-surface PR;
+// the visual treatment is production-ready.
 function FounderOrigin() {
   return (
     <section id="founder-origin" className="relative">
-      <div className="mx-auto w-full max-w-3xl px-6 pt-6 pb-10 sm:pt-8 sm:pb-14">
+      <div className="mx-auto w-full max-w-3xl px-6 pb-10 pt-6 sm:pb-14 sm:pt-8">
         <FadeIn>
           <div className="rounded-2xl border border-soft bg-surface/60 p-8 backdrop-blur sm:p-10">
             <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-text-muted">
@@ -454,18 +197,180 @@ function FounderOrigin() {
   );
 }
 
-function LiveProof() {
+// Four of the ten, chosen because they're the ones that answer "what stops
+// the obvious disaster". The full list lives at /rienda.
+function Guardrails() {
+  const guardrails = [
+    {
+      n: "01",
+      title: "Position caps + gross exposure",
+      body: "No single asset can exceed its configured share of the vault, and total open exposure is capped on top of that. An intent that would breach either reverts before it touches a venue.",
+    },
+    {
+      n: "03",
+      title: "Daily realized loss limit",
+      body: "Once realized losses hit the day's limit, the vault accepts risk-reducing intents only until the window resets. A bad day stops being a worse one.",
+    },
+    {
+      n: "04",
+      title: "Drawdown throttles",
+      body: "Past the first threshold, permitted sizing halves. Past the second, the vault goes risk-reducing-only. Recovery has to be earned at reduced size.",
+    },
+    {
+      n: "09",
+      title: "No leverage, structurally",
+      body: "The vault cannot borrow. No margin means no margin call, no liquidation cascade, and no path to owing more than the vault holds.",
+    },
+  ];
   return (
-    <section className="relative">
-      <div className="mx-auto w-full max-w-6xl px-6 pb-8 sm:pb-12">
-        <FadeIn>
-          <LiveStats />
-          <div className="mt-4">
-            <RecentReceipts />
-          </div>
-        </FadeIn>
+    <Section id="guardrails">
+      <FadeIn className="max-w-2xl">
+        <SectionEyebrow>Four of ten</SectionEyebrow>
+        <SectionHeading className="mt-4">
+          Every intent passes all ten, or it reverts.
+        </SectionHeading>
+        <p className="mt-5 text-base leading-relaxed text-text-muted">
+          The guardrails compose — an intent has to clear each one to
+          execute. None of them read the model&apos;s prose. They only read
+          its orders, which is why none of them can be argued with.
+        </p>
+      </FadeIn>
+      <div className="mt-10 grid gap-4 sm:grid-cols-2">
+        {guardrails.map((g, i) => (
+          <FadeIn key={g.n} delay={Math.min(i, 3) * 0.05}>
+            <Card className="h-full">
+              <div className="flex items-baseline gap-3">
+                <span className="font-mono text-xs text-accent-indigo">
+                  {g.n}
+                </span>
+                <h3 className="text-base font-semibold text-text">
+                  {g.title}
+                </h3>
+              </div>
+              <p className="mt-3 text-sm leading-relaxed text-text-muted">
+                {g.body}
+              </p>
+            </Card>
+          </FadeIn>
+        ))}
       </div>
-    </section>
+      <FadeIn className="mt-10">
+        <Link
+          href="/rienda#guardrails"
+          className="inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
+        >
+          All ten guardrails, in full
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </FadeIn>
+    </Section>
+  );
+}
+
+function ComputeBudget() {
+  return (
+    <Section id="compute-budget">
+      <FadeIn>
+        <div className="rounded-2xl border border-soft bg-surface/60 p-8 backdrop-blur sm:p-10">
+          <SectionEyebrow>The compute budget</SectionEyebrow>
+          <h2 className="mt-4 max-w-2xl text-balance text-2xl font-semibold tracking-tight text-text sm:text-3xl">
+            Agents that don&apos;t earn, don&apos;t think.
+          </h2>
+          <p className="mt-5 max-w-2xl text-base leading-relaxed text-text-muted">
+            Inference costs money, so the vault meters it against
+            performance. Each day the agent gets a survival minimum plus a
+            share of the 7-day moving average of its{" "}
+            <span className="text-text">realized</span> PnL, hard-capped at
+            the top. Unrealized gains buy nothing. Sustained losses shrink
+            the allowance toward the minimum, and in that state the agent may
+            only submit risk-reducing intents — enough compute to get
+            smaller, not to dig deeper.
+          </p>
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-text-muted">
+            The allowance is spent through x402: per-call USDC, one signed
+            receipt per call. The design assumes most trading strategies lose
+            money. That assumption is why the budget exists.
+          </p>
+          <div className="mt-8">
+            <Link
+              href="/rienda#compute-budget"
+              className="inline-flex items-center gap-2 rounded-md border border-soft bg-bg/40 px-4 py-2 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
+            >
+              How the allowance is calculated
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        </div>
+      </FadeIn>
+    </Section>
+  );
+}
+
+// The demoted trust rail. Live, load-bearing, and now framed as the thing
+// that makes a vault's history checkable — not as a second product.
+function UnderTheHood() {
+  const pieces: Array<{
+    title: string;
+    body: string;
+    href: string;
+    external?: boolean;
+  }> = [
+    {
+      title: "Signed inference",
+      body: "Every LLM call returns an Ed25519-signed SIR v2 receipt — prompt hash, response hash, model, cost, settlement. The receipt is what a trade points back at.",
+      href: "/inference",
+    },
+    {
+      title: "Five-check verification",
+      body: "Recompute both hashes, check the operator signature, confirm the on-chain transfer, match the payer. Run it yourself or paste a receipt into the hosted verifier.",
+      href: "/verify",
+    },
+    {
+      title: "x402 pay-per-call",
+      body: "USDC per call on Solana and Base mainnet, live since 2026-05-21. No accounts, no API keys — the payer wallet is the identity. This is how a vault pays for its own thinking.",
+      href: "/pricing",
+    },
+    {
+      title: "Receipts + agent directory",
+      body: "The public feed of signed receipts on the rail, and every agent that has called it. Both open, both free to read.",
+      href: "/receipts",
+    },
+  ];
+  return (
+    <Section id="under-the-hood">
+      <FadeIn className="max-w-2xl">
+        <SectionEyebrow>Under the hood</SectionEyebrow>
+        <SectionHeading className="mt-4">
+          The rail that makes the history checkable.
+        </SectionHeading>
+        <p className="mt-5 text-base leading-relaxed text-text-muted">
+          A vault bounds what an agent can lose. It doesn&apos;t, on its own,
+          tell you why the agent did what it did. That part comes from the
+          signed-inference rail VDM Nexus has been running on Solana and Base
+          mainnet since 2026-05-21 — mainnet-live infrastructure, not a
+          diagram.
+        </p>
+      </FadeIn>
+      <div className="mt-10 grid gap-4 sm:grid-cols-2">
+        {pieces.map((p, i) => (
+          <FadeIn key={p.title} delay={Math.min(i, 3) * 0.05}>
+            <Link href={p.href} className="block h-full">
+              <div className="group flex h-full flex-col rounded-2xl border border-soft bg-surface/60 p-6 backdrop-blur transition-colors hover:border-accent-indigo/40">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-base font-semibold text-text">
+                    {p.title}
+                  </h3>
+                  <ArrowRight className="h-4 w-4 flex-none text-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-accent-indigo" />
+                </div>
+                <p className="mt-3 text-sm leading-relaxed text-text-muted">
+                  {p.body}
+                </p>
+              </div>
+            </Link>
+          </FadeIn>
+        ))}
+      </div>
+    </Section>
   );
 }
 
@@ -475,7 +380,7 @@ function NexusToken() {
       <FadeIn className="max-w-2xl">
         <SectionEyebrow>$NEXUS</SectionEyebrow>
         <SectionHeading className="mt-4">
-          The utility token of the signed-inference rail.
+          The utility token of the rail underneath.
         </SectionHeading>
         <p className="mt-5 text-base leading-relaxed text-text-muted">
           Four wires on a 0/30/60/90 calendar. Each wire is a concrete
@@ -493,9 +398,9 @@ function NexusToken() {
             Wire 1 — Receipt fee burn
           </h3>
           <p className="mt-3 text-sm leading-relaxed text-text-muted">
-            $0.01 USDC per call. 50% routes to a public buy-and-burn
-            flow through the Uniswap v4 pool. Burn pressure scales
-            with rail usage.
+            $0.01 USDC per call. 50% routes to a public buy-and-burn flow
+            through the Uniswap v4 pool. Burn pressure scales with rail
+            usage.
           </p>
         </Card>
         <Card>
@@ -518,8 +423,8 @@ function NexusToken() {
             Wire 3 — Agent reputation bond
           </h3>
           <p className="mt-3 text-sm leading-relaxed text-text-muted">
-            Stake $NEXUS → trust badge + additional fee discount + 2×
-            rate limit. Slashable. 14-day unbonding.
+            Stake $NEXUS → trust badge + additional fee discount + 2× rate
+            limit. Slashable. 14-day unbonding.
           </p>
         </Card>
         <Card>
@@ -530,13 +435,13 @@ function NexusToken() {
             Wire 4 — Verifier staking
           </h3>
           <p className="mt-3 text-sm leading-relaxed text-text-muted">
-            Stake $NEXUS to run a verifier node. 40% of verify SaaS
-            revenue distributes to staked verifiers.
+            Stake $NEXUS to run a verifier node. 40% of verify SaaS revenue
+            distributes to staked verifiers.
           </p>
         </Card>
       </div>
       <FadeIn className="mt-10">
-        <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
+        <div className="flex flex-wrap items-center gap-3">
           <Link
             href="/token"
             className="inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
@@ -562,765 +467,112 @@ function NexusToken() {
   );
 }
 
-// Four static principle-numbers above the fold. Deliberately not live
-// activity stats — those live on /agents and /points where they belong
-// as destination data. Here we lead with the durable principles
-// (package surface, chain count, verification depth, zero-auth) because
-// those don't shrink with low traffic.
-function PrincipleStats() {
-  const stats = [
-    { value: "8", label: "packages shipped", sub: "npm + PyPI · MIT" },
-    { value: "2", label: "chains live", sub: "Solana + Base mainnet" },
-    { value: "5", label: "verification checks", sub: "every receipt, anyone can run" },
-    { value: "0", label: "API keys required", sub: "Ed25519 keypair is the identity" },
+// The status table is the honesty gate. If a line here can't be defended
+// against the repo, it doesn't belong on the page.
+function Status() {
+  const items: Array<{ label: string; state: string }> = [
+    { label: "Rienda protocol spec", state: "complete" },
+    {
+      label: "Token + Uniswap v4 fee-burn hook contracts",
+      state: "built — 26 passing tests",
+    },
+    { label: "Vault + policy engine (M1)", state: "in development" },
+    { label: "VaultFactory deploy — Robinhood Chain testnet", state: "next" },
+    {
+      label: "Rienda mainnet",
+      state: "gated behind external audit + legal review",
+    },
+    {
+      label: "Signed-inference rail (Solana + Base)",
+      state: "mainnet live since 2026-05-21",
+    },
+    { label: "Third-party security audit", state: "none scheduled" },
   ];
   return (
-    <section className="relative">
-      <div className="mx-auto w-full max-w-5xl px-6 pt-2 pb-8 sm:pb-12">
-        <FadeIn>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-            {stats.map((s) => (
-              <div
-                key={s.label}
-                className="rounded-2xl border border-soft bg-surface/60 px-5 py-5 backdrop-blur"
-              >
-                <div className="text-4xl font-semibold tracking-tight text-text tabular-nums sm:text-5xl">
-                  {s.value}
-                </div>
-                <div className="mt-2 text-[11px] font-medium uppercase tracking-[0.18em] text-text-muted">
-                  {s.label}
-                </div>
-                <div className="mt-1.5 text-[11px] leading-snug text-text-muted/80">
-                  {s.sub}
-                </div>
-              </div>
-            ))}
-          </div>
-        </FadeIn>
-      </div>
-    </section>
-  );
-}
-
-// Six-tile product grid — two columns (operators / builders), three
-// rows each. Replaces the prior For Operators / For Builders panel
-// pair: more concrete surface visible, more click targets per audience,
-// no embedded code snippet (the code lives at /sdk + docs).
-function ProductGrid() {
-  type Tile = {
-    title: string;
-    description: string;
-    href: string;
-    external?: boolean;
-  };
-  const operators: Tile[] = [
-    {
-      title: "Mission Control",
-      description:
-        "Per-agent home — public profile + private dashboard. Receipts, stats, on-chain settlements.",
-      href: "https://console.vdmnexus.com",
-      external: true,
-    },
-    {
-      title: "Agent Directory",
-      description:
-        "Every Ed25519 agent on the rail, ranked by activity. Filter by network, sort by receipts or USDC spent.",
-      href: "/agents",
-    },
-    {
-      title: "Playground",
-      description:
-        "Try a live mainnet signed-inference call free. No account, sponsored credit, real receipt at the end.",
-      href: "/playground",
-    },
-  ];
-  const builders: Tile[] = [
-    {
-      title: "SDK",
-      description:
-        "Eight packages — six on npm, two on PyPI. Ed25519 identity, x402 client, paywall middleware, MCP server, Vercel AI SDK + Mastra + LangChain providers. All MIT.",
-      href: "/sdk",
-    },
-    {
-      title: "Inference API",
-      description:
-        "OpenAI-compatible /chat/completions, x402-gated. Drop-in for any agent runtime; every response carries an Ed25519-signed SIR v2 receipt.",
-      href: "/inference",
-    },
-    {
-      title: "Verify",
-      description:
-        "Five-check receipt verification — hosted at verify.vdmnexus.com or self-host via @vdm-nexus/x402. Independent of the operator.",
-      href: "https://verify.vdmnexus.com",
-      external: true,
-    },
-  ];
-
-  return (
-    <Section>
+    <Section id="status">
       <FadeIn className="max-w-2xl">
-        <SectionEyebrow>Products</SectionEyebrow>
-        <SectionHeading className="mt-4">
-          Two ways to use Nexus. Same rail underneath.
-        </SectionHeading>
+        <SectionEyebrow>Status</SectionEyebrow>
+        <SectionHeading className="mt-4">Where it stands.</SectionHeading>
         <p className="mt-5 text-base leading-relaxed text-text-muted">
-          Run an agent that pays its own way, or add signed inference to
-          your product with one install. Both produce verifiable receipts;
-          both settle in USDC on Solana or Base.
+          No dates. No performance claims — nothing has traded, so there is
+          no track record to show yet.
         </p>
       </FadeIn>
-
-      <div className="mt-10 grid gap-5 lg:grid-cols-2 lg:gap-6">
-        <FadeIn>
-          <ProductColumn label="Run agents" tiles={operators} />
-        </FadeIn>
-        <FadeIn delay={0.06}>
-          <ProductColumn label="Build with signed inference" tiles={builders} />
-        </FadeIn>
-      </div>
-    </Section>
-  );
-}
-
-function ProductColumn({
-  label,
-  tiles,
-}: {
-  label: string;
-  tiles: Array<{
-    title: string;
-    description: string;
-    href: string;
-    external?: boolean;
-  }>;
-}) {
-  return (
-    <div className="flex h-full flex-col gap-3">
-      <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-accent-indigo">
-        {label}
-      </span>
-      <div className="grid gap-3">
-        {tiles.map((t) => {
-          const inner = (
-            <div className="group flex h-full items-start gap-4 rounded-2xl border border-soft bg-surface/60 p-5 backdrop-blur transition-colors hover:border-accent-indigo/40 sm:p-6">
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-base font-semibold tracking-tight text-text">
-                    {t.title}
-                  </h3>
-                  <ArrowRight className="h-4 w-4 flex-none text-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-accent-indigo" />
-                </div>
-                <p className="mt-2 text-sm leading-relaxed text-text-muted">
-                  {t.description}
-                </p>
-              </div>
+      <FadeIn className="mt-8 max-w-3xl">
+        <div className="overflow-hidden rounded-2xl border border-soft bg-surface/60 backdrop-blur">
+          {items.map((item) => (
+            <div
+              key={item.label}
+              className="flex flex-col gap-1 border-b border-soft px-5 py-4 last:border-b-0 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
+            >
+              <span className="text-sm font-medium text-text">
+                {item.label}
+              </span>
+              <span className="font-mono text-xs text-text-muted">
+                {item.state}
+              </span>
             </div>
-          );
-          if (t.external) {
-            return (
-              <a
-                key={t.href}
-                href={t.href}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="block"
-              >
-                {inner}
-              </a>
-            );
-          }
-          return (
-            <Link key={t.href} href={t.href} className="block">
-              {inner}
-            </Link>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function HeroCode() {
-  return (
-    <div className="relative overflow-hidden rounded-xl border border-soft bg-bg/80 shadow-[0_0_60px_-12px_rgba(99,102,241,0.35)] backdrop-blur">
-      {/* Header bar */}
-      <div className="flex items-center justify-between border-b border-soft px-4 py-2.5">
-        <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#3a3a4a]" />
-          <span className="h-2.5 w-2.5 rounded-full bg-[#3a3a4a]" />
-          <span className="h-2.5 w-2.5 rounded-full bg-[#3a3a4a]" />
+          ))}
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-text-muted">
-          agent.ts
-        </span>
-        <span className="w-12" />
-      </div>
-
-      <pre className="overflow-x-auto px-4 py-5 font-mono text-[13px] leading-relaxed">
-        <code className="text-text">
-          <span className="text-text-muted">{`// Spawn a Solana-keypair agent`}</span>{"\n"}
-          <span className="text-violet-300">import</span>{" "}
-          <span className="text-text">{`{ Agent }`}</span>{" "}
-          <span className="text-violet-300">from</span>{" "}
-          <span className="text-emerald-300">{`"@vdm-nexus/sdk"`}</span>;
-          {"\n\n"}
-          <span className="text-violet-300">const</span>{" "}
-          <span className="text-sky-300">agent</span>{" "}
-          <span className="text-violet-300">=</span>{" "}
-          <span className="text-sky-300">Agent</span>.
-          <span className="text-yellow-200">generate</span>();
-          {"\n\n"}
-          <span className="text-violet-300">const</span>{" "}
-          <span className="text-sky-300">reply</span>{" "}
-          <span className="text-violet-300">=</span>{" "}
-          <span className="text-violet-300">await</span>{" "}
-          <span className="text-sky-300">agent</span>.
-          <span className="text-yellow-200">inference</span>({"\n"}
-          {"  "}
-          <span className="text-emerald-300">
-            {`"https://nexus.vdmnexus.com/api/v1"`}
-          </span>,{"\n"}
-          {"  "}{"{"}{" "}
-          <span className="text-sky-300">prompt</span>:{" "}
-          <span className="text-emerald-300">{`"Why Ed25519?"`}</span>,{" "}
-          <span className="text-sky-300">task_type</span>:{" "}
-          <span className="text-emerald-300">{`"fast"`}</span>{" "}{"}"}{"\n"}
-          );
-          {"\n\n"}
-          <span className="text-text-muted">{`// reply.receipt.cost_usdc → $0.0005`}</span>{"\n"}
-          <span className="text-text-muted">{`// reply.receipt.balance_remaining → $0.9995`}</span>
-        </code>
-      </pre>
-
-      <div className="flex items-center justify-between border-t border-soft bg-surface/40 px-4 py-2.5 text-[11px]">
-        <code className="font-mono text-text-muted">
-          npm install @vdm-nexus/sdk
-        </code>
-        <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-emerald-300">
-          live
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function Problem() {
-  return (
-    <Section>
-      <FadeIn className="max-w-2xl">
-        <SectionEyebrow>The problem</SectionEyebrow>
-        <SectionHeading className="mt-4">
-          Agents can&apos;t trust black-box inference
-        </SectionHeading>
       </FadeIn>
-      <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {PROBLEMS.map((p, i) => (
-          <FadeIn key={p.title} delay={i * 0.08}>
-            <Card className="h-full">
-              <h3 className="text-base font-semibold text-text">{p.title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-text-muted">
-                {p.body}
-              </p>
-            </Card>
-          </FadeIn>
-        ))}
-      </div>
     </Section>
   );
 }
 
-/**
- * Thin strip above the Hero — surfaces the most recent meaningful ship
- * + a link to the live surface. Updates manually when a new layer
- * lands; could swap to a /changelog endpoint once one exists.
- *
- * Mirrors the same strip on console.vdmnexus.com/ — keeps the
- * "we ship publicly" signal visible to first-time visitors.
- */
-function LastShippedStrip() {
-  return (
-    <div className="relative border-b border-soft bg-surface/40 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 px-6 py-2.5 text-xs">
-        <span className="flex items-center gap-2 text-text-muted">
-          <span
-            aria-hidden
-            className="inline-block h-1.5 w-1.5 rounded-full bg-accent-indigo"
-          />
-          <span className="uppercase tracking-[0.18em]">Last shipped</span>
-          <span>· Mission Control v0 · 2026-05-24</span>
-        </span>
-        <a
-          href="https://console.vdmnexus.com"
-          className="text-text-muted underline underline-offset-4 transition-colors hover:text-text"
-        >
-          See it on the console →
-        </a>
-      </div>
-    </div>
-  );
-}
-
-function Products() {
+// The developer surface is demoted in the IA, not removed. These packages
+// are published and have callers; the links stay one click from the
+// homepage so nobody integrating today has to hunt.
+function ForDevelopers() {
+  const links: Array<{ label: string; href: string; external?: boolean }> = [
+    { label: "SDK", href: "/sdk" },
+    { label: "Docs", href: "https://docs.vdmnexus.com", external: true },
+    { label: "Playground", href: "/playground" },
+    { label: "Pricing", href: "/pricing" },
+    { label: "Points", href: "/points" },
+    { label: "Console", href: "https://console.vdmnexus.com", external: true },
+  ];
   return (
     <Section>
       <FadeIn className="max-w-2xl">
-        <SectionEyebrow>Products</SectionEyebrow>
+        <SectionEyebrow>For developers</SectionEyebrow>
         <SectionHeading className="mt-4">
-          Three layers. One platform.
+          Eight packages, still shipping.
         </SectionHeading>
-      </FadeIn>
-
-      <div className="mt-12 grid gap-4 md:grid-cols-3">
-        <FadeIn>
-          <Link href="/inference" className="block h-full">
-            <Card className="group h-full">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium uppercase tracking-[0.16em] text-accent-indigo">
-                  Active
-                </span>
-                <ArrowRight className="h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-text" />
-              </div>
-              <h3 className="mt-4 text-xl font-semibold text-text">
-                Nexus Inference
-              </h3>
-              <p className="mt-3 text-sm leading-relaxed text-text-muted">
-                Cryptographically receipted AI inference. Solana-keypair agent
-                identity, USDC-settled compute, append-only ledger. Live on
-                Solana mainnet today.
-              </p>
-            </Card>
-          </Link>
-        </FadeIn>
-
-        <FadeIn delay={0.08}>
-          <Link href="/agents/about" className="block h-full">
-            <Card className="group h-full">
-              <div className="flex items-center justify-between">
-                <ComingSoonBadge />
-                <ArrowRight className="h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-text" />
-              </div>
-              <h3 className="mt-4 text-xl font-semibold text-text">
-                Nexus Agents
-              </h3>
-              <p className="mt-3 text-sm leading-relaxed text-text-muted">
-                Marketplace for autonomous agents to discover, hire, and pay
-                each other for compute and tools — built on the same signed-
-                receipt rail.
-              </p>
-            </Card>
-          </Link>
-        </FadeIn>
-
-        <FadeIn delay={0.16}>
-          <a
-            href="https://console.vdmnexus.com"
-            className="block h-full"
-          >
-            <Card className="group h-full">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium uppercase tracking-[0.16em] text-accent-indigo">
-                  Public layer live · v0
-                </span>
-                <ArrowRight className="h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-text" />
-              </div>
-              <h3 className="mt-4 text-xl font-semibold text-text">
-                Mission Control
-              </h3>
-              <p className="mt-3 text-sm leading-relaxed text-text-muted">
-                Every agent on the rail gets a permalink at{" "}
-                <code className="rounded bg-bg/60 px-1 py-0.5 font-mono text-[11px] text-text">
-                  console.vdmnexus.com/a/&lt;pubkey&gt;
-                </code>{" "}
-                — stats, receipts, one-click verify, ERC-8004 card.
-                Operator dashboard ships in v1.
-              </p>
-            </Card>
-          </a>
-        </FadeIn>
-      </div>
-    </Section>
-  );
-}
-
-function BuiltOnTop() {
-  return (
-    <Section>
-      <FadeIn className="max-w-2xl">
-        <SectionEyebrow>Built on top</SectionEyebrow>
-        <SectionHeading className="mt-4">
-          One stack, six entry points.
-        </SectionHeading>
-        <p className="mt-4 text-sm leading-relaxed text-text-muted sm:text-base">
-          Every piece ships independently — pick what fits your role. The
-          SDK identifies your agent, x402 pays per call, the paywall lets
-          you sell your own API, MCP plugs into Claude Desktop and Cursor.
+        <p className="mt-5 text-base leading-relaxed text-text-muted">
+          Six on npm, two on PyPI, all MIT. Ed25519 identity, the x402
+          client, paywall middleware for Express / Hono / Next.js, an MCP
+          server, and providers for the Vercel AI SDK, Mastra, and LangChain.
+          They&apos;re what Rienda is built on, and they keep working
+          standalone.
         </p>
       </FadeIn>
       <FadeIn delay={0.06} className="mt-8">
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          {BUILT_ON_TOP.map((b) =>
-            b.external ? (
+          {links.map((l) =>
+            l.external ? (
               <a
-                key={b.label}
-                href={b.href}
+                key={l.label}
+                href={l.href}
                 target="_blank"
                 rel="noreferrer noopener"
                 className="inline-flex items-center gap-1.5 rounded-md border border-soft bg-surface/60 px-3 py-1.5 text-xs font-medium text-text-muted transition-colors hover:border-accent-indigo/60 hover:text-text sm:text-sm"
               >
-                {b.label}
+                {l.label}
                 <ArrowRight className="h-3 w-3 -rotate-45" />
               </a>
             ) : (
               <Link
-                key={b.label}
-                href={b.href}
+                key={l.label}
+                href={l.href}
                 className="inline-flex items-center gap-1.5 rounded-md border border-soft bg-surface/60 px-3 py-1.5 text-xs font-medium text-text-muted transition-colors hover:border-accent-indigo/60 hover:text-text sm:text-sm"
               >
-                {b.label}
+                {l.label}
                 <ArrowRight className="h-3 w-3" />
               </Link>
-            ),
+            )
           )}
         </div>
       </FadeIn>
-    </Section>
-  );
-}
-
-function Paywall() {
-  return (
-    <Section>
-      <FadeIn className="max-w-2xl">
-        <SectionEyebrow>For API builders</SectionEyebrow>
-        <SectionHeading className="mt-4">
-          <span className="text-gradient">Paywall + Proofs.</span>
-        </SectionHeading>
-        <p className="mt-6 text-base leading-relaxed text-text-muted sm:text-lg">
-          One line of code gates your API with x402 — and every paid call
-          hands the caller a signed receipt of exactly what your handler
-          returned. Verge stops at the payment. We don&apos;t.
-        </p>
-      </FadeIn>
-
-      <div className="mt-12 grid gap-4 lg:grid-cols-[1.05fr_1fr] lg:gap-6">
-        <FadeIn>
-          <PaywallCode />
-        </FadeIn>
-
-        <FadeIn delay={0.08}>
-          <Card className="h-full">
-            <span className="text-xs font-medium uppercase tracking-[0.16em] text-text-muted">
-              @vdm-nexus/paywall
-            </span>
-            <ul className="mt-6 space-y-3 text-sm text-text-muted">
-              {PAYWALL_BENEFITS.map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-accent-indigo" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-8 overflow-hidden rounded-md border border-soft">
-              <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 border-b border-soft bg-surface/40 px-3 py-2 text-[10px] font-medium uppercase tracking-[0.12em] text-text-muted">
-                <span />
-                <span>VDM Nexus</span>
-                <span>Verge</span>
-              </div>
-              {PAYWALL_VS_VERGE.map((row) => (
-                <div
-                  key={row.label}
-                  className="grid grid-cols-[1fr_auto_auto] items-center gap-x-4 border-b border-soft px-3 py-2 text-xs last:border-b-0"
-                >
-                  <span className="text-text-muted">{row.label}</span>
-                  <span className="text-text">{row.us}</span>
-                  <span className="text-text-muted">{row.them}</span>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </FadeIn>
-      </div>
-    </Section>
-  );
-}
-
-function PaywallCode() {
-  return (
-    <div className="relative h-full overflow-hidden rounded-xl border border-soft bg-bg/80 shadow-[0_0_60px_-12px_rgba(99,102,241,0.35)] backdrop-blur">
-      <div className="flex items-center justify-between border-b border-soft px-4 py-2.5">
-        <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#3a3a4a]" />
-          <span className="h-2.5 w-2.5 rounded-full bg-[#3a3a4a]" />
-          <span className="h-2.5 w-2.5 rounded-full bg-[#3a3a4a]" />
-        </div>
-        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-text-muted">
-          server.ts
-        </span>
-        <span className="w-12" />
-      </div>
-
-      <pre className="overflow-x-auto px-4 py-5 font-mono text-[13px] leading-relaxed">
-        <code className="text-text">
-          <span className="text-violet-300">import</span>{" "}
-          <span className="text-text">{`{ expressPaywall }`}</span>{" "}
-          <span className="text-violet-300">from</span>{" "}
-          <span className="text-emerald-300">{`"@vdm-nexus/paywall/express"`}</span>;
-          {"\n\n"}
-          <span className="text-sky-300">app</span>.
-          <span className="text-yellow-200">post</span>(
-          <span className="text-emerald-300">{`"/agent"`}</span>,{"\n"}
-          {"  "}
-          <span className="text-yellow-200">expressPaywall</span>({"{"}
-          {"\n"}
-          {"    "}
-          <span className="text-sky-300">amount</span>:{" "}
-          <span className="text-amber-200">0.01</span>,{"\n"}
-          {"    "}
-          <span className="text-sky-300">recipient</span>:{" "}
-          <span className="text-text">{`process.env.WALLET!`}</span>,{"\n"}
-          {"    "}
-          <span className="text-sky-300">network</span>:{" "}
-          <span className="text-emerald-300">{`"solana-devnet"`}</span>,{"\n"}
-          {"    "}
-          <span className="text-sky-300">operatorSecretKey</span>:{" "}
-          <span className="text-text">{`process.env.OPERATOR_KEY!`}</span>,{"\n"}
-          {"    "}
-          <span className="text-sky-300">facilitator</span>:{" "}
-          <span className="text-text">{`{ mode: "http", url: "…/x402" }`}</span>,
-          {"\n\n"}
-          {"    "}
-          <span className="text-sky-300">onPaid</span>:{" "}
-          <span className="text-violet-300">async</span>{" "}
-          <span className="text-text">{`({ body }) =>`}</span>{" "}
-          {"{"}
-          {"\n"}
-          {"      "}
-          <span className="text-violet-300">const</span>{" "}
-          <span className="text-sky-300">reply</span>{" "}
-          <span className="text-violet-300">=</span>{" "}
-          <span className="text-violet-300">await</span>{" "}
-          <span className="text-yellow-200">myLLM</span>(
-          <span className="text-text">body.prompt</span>);{"\n"}
-          {"      "}
-          <span className="text-violet-300">return</span>{" "}
-          {"{"}{" "}
-          <span className="text-sky-300">response</span>:{" "}
-          {"{"} <span className="text-sky-300">reply</span> {"}"},{"\n"}
-          {"        "}
-          <span className="text-sky-300">promptForHash</span>:{" "}
-          <span className="text-text">body.prompt</span>,{"\n"}
-          {"        "}
-          <span className="text-sky-300">responseForHash</span>:{" "}
-          <span className="text-sky-300">reply</span>,{"\n"}
-          {"        "}
-          <span className="text-sky-300">model</span>:{" "}
-          <span className="text-emerald-300">{`"my-app/v1"`}</span>{" "}
-          {"};"}{"\n"}
-          {"    "}
-          {"}"},{"\n"}
-          {"  "}
-          {"}"})
-          {"\n"}
-          );
-          {"\n\n"}
-          <span className="text-text-muted">{`// Response carries X-Nexus-Receipt — verifiable end-to-end`}</span>
-        </code>
-      </pre>
-
-      <div className="flex items-center justify-between border-t border-soft bg-surface/40 px-4 py-2.5 text-[11px]">
-        <code className="font-mono text-text-muted">
-          npm install @vdm-nexus/paywall
-        </code>
-        <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-emerald-300">
-          new
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function UseCases() {
-  return (
-    <Section>
-      <FadeIn className="max-w-2xl">
-        <SectionEyebrow>Use cases</SectionEyebrow>
-        <SectionHeading className="mt-4">
-          What you can build on the rail.
-        </SectionHeading>
-      </FadeIn>
-
-      <div className="mt-12 grid gap-4 sm:grid-cols-2">
-        {USE_CASES.map((u, i) => (
-          <FadeIn key={u.title} delay={i * 0.08}>
-            <Card className="h-full">
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="text-base font-semibold text-text">{u.title}</h3>
-                {"badge" in u && u.badge === "live" ? (
-                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-emerald-300">
-                    Live
-                  </span>
-                ) : null}
-              </div>
-              <p className="mt-3 text-sm leading-relaxed text-text-muted">
-                {u.body}
-              </p>
-            </Card>
-          </FadeIn>
-        ))}
-      </div>
-    </Section>
-  );
-}
-
-function HowItWorks() {
-  return (
-    <Section>
-      <FadeIn className="max-w-2xl">
-        <SectionEyebrow>How it works</SectionEyebrow>
-        <SectionHeading className="mt-4">
-          Cryptographic proof in four steps.
-        </SectionHeading>
-      </FadeIn>
-
-      <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {STEPS.map((s, i) => (
-          <FadeIn key={s.title} delay={i * 0.08}>
-            <Card className="h-full">
-              <span className="font-mono text-xs text-accent-indigo">
-                0{i + 1}
-              </span>
-              <h3 className="mt-3 text-base font-semibold text-text">
-                {s.title}
-              </h3>
-              <p className="mt-3 text-sm leading-relaxed text-text-muted">
-                {s.body}
-              </p>
-            </Card>
-          </FadeIn>
-        ))}
-      </div>
-    </Section>
-  );
-}
-
-function Audiences() {
-  return (
-    <Section>
-      <FadeIn className="max-w-2xl">
-        <SectionEyebrow>For you</SectionEyebrow>
-        <SectionHeading className="mt-4">
-          Two ways to use Nexus. Same rail underneath.
-        </SectionHeading>
-        <p className="mt-5 text-base leading-relaxed text-text-muted">
-          Run an agent that pays its own way. Or add signed inference to your
-          product with one install. Both produce verifiable receipts; both
-          settle in USDC on Solana or Base.
-        </p>
-      </FadeIn>
-
-      <div className="mt-10 grid gap-5 lg:grid-cols-2">
-        {/* For Operators — left panel */}
-        <FadeIn>
-          <div className="flex h-full flex-col rounded-2xl border border-soft bg-surface/60 p-7 backdrop-blur sm:p-8">
-            <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-indigo">
-              For operators
-            </span>
-            <h3 className="mt-4 text-2xl font-semibold tracking-tight text-text">
-              Fund an agent. Watch it earn. Every decision provable.
-            </h3>
-            <p className="mt-4 text-sm leading-relaxed text-text-muted">
-              Spin up an Ed25519 agent in 60 seconds, fund with USDC, let it
-              run trading strategies, prediction-market bets, or research
-              workflows. Every call generates a signed receipt. Your bankroll
-              is bounded; your audit trail is permanent.
-            </p>
-            <ul className="mt-6 space-y-2.5 text-sm text-text-muted">
-              <li className="flex items-start gap-3">
-                <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-accent-indigo" />
-                <span>Non-custodial wallet — your keys, your funds</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-accent-indigo" />
-                <span>Per-call USDC settlement, no subscriptions, no minimum</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-accent-indigo" />
-                <span>Public agent profile with verified track record</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-accent-indigo" />
-                <span>$NEXUS holder discount + reputation bond (Wires 2-3)</span>
-              </li>
-            </ul>
-            <div className="mt-auto flex flex-wrap gap-3 pt-8">
-              <Link
-                href="/playground"
-                className="inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-4 py-2 text-sm font-medium text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
-              >
-                Try the playground
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-              <Link
-                href="/agents"
-                className="inline-flex items-center gap-2 rounded-md border border-soft bg-bg/40 px-4 py-2 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
-              >
-                Browse agents
-              </Link>
-              <Link
-                href="/points"
-                className="inline-flex items-center gap-2 rounded-md border border-soft bg-bg/40 px-4 py-2 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
-              >
-                Points / airdrop
-              </Link>
-            </div>
-          </div>
-        </FadeIn>
-
-        {/* For Builders — right panel, includes HeroCode */}
-        <FadeIn delay={0.06}>
-          <div className="flex h-full flex-col rounded-2xl border border-soft bg-surface/60 p-7 backdrop-blur sm:p-8">
-            <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent-indigo">
-              For builders
-            </span>
-            <h3 className="mt-4 text-2xl font-semibold tracking-tight text-text">
-              Add signed inference to your product. One install.
-            </h3>
-            <p className="mt-4 text-sm leading-relaxed text-text-muted">
-              OpenAI-compatible <code className="rounded bg-bg/60 px-1.5 py-0.5 font-mono text-[12px] text-text">/chat/completions</code> endpoint. Drop-in providers for Vercel AI
-              SDK and Mastra, MCP server for Claude Desktop and Cursor, Python
-              SDK with LangChain integration. Every call returns a verifiable
-              receipt — your users prove what your AI told them, you prove
-              what it cost.
-            </p>
-            <div className="mt-6">
-              <HeroCode />
-            </div>
-            <div className="mt-auto flex flex-wrap gap-3 pt-8">
-              <Link
-                href="/sdk"
-                className="inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-4 py-2 text-sm font-medium text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
-              >
-                Browse the SDK
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-              <a
-                href="https://docs.vdmnexus.com"
-                target="_blank"
-                rel="noreferrer noopener"
-                className="inline-flex items-center gap-2 rounded-md border border-soft bg-bg/40 px-4 py-2 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
-              >
-                Read the docs
-              </a>
-              <Link
-                href="/inference"
-                className="inline-flex items-center gap-2 rounded-md border border-soft bg-bg/40 px-4 py-2 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
-              >
-                Inference API
-              </Link>
-            </div>
-          </div>
-        </FadeIn>
-      </div>
     </Section>
   );
 }
@@ -1338,7 +590,8 @@ function OpenSource() {
             <div className="max-w-xl">
               <SectionEyebrow>Open source</SectionEyebrow>
               <p className="mt-4 text-balance text-2xl font-semibold tracking-tight text-text sm:text-3xl">
-                The SDK is open. The infrastructure is yours to control.
+                The rail is MIT. The vault contracts open with the testnet
+                deploy.
               </p>
             </div>
             <a
@@ -1363,13 +616,13 @@ function Waitlist() {
     <Section id="waitlist" className="pb-32">
       <div className="mx-auto max-w-xl text-center">
         <FadeIn>
-          <SectionEyebrow>Building something?</SectionEyebrow>
-          <SectionHeading className="mt-4">Tell us about it</SectionHeading>
+          <SectionEyebrow>Want the testnet deploy in your inbox?</SectionEyebrow>
+          <SectionHeading className="mt-4">Leave an email</SectionHeading>
           <p className="mt-4 text-base text-text-muted">
-            Mainnet is live and the SDK is on npm — no gate. Drop a note
-            if you&apos;re shipping with Nexus; we&apos;d like to know what
-            you&apos;re building and we&apos;ll send the occasional build-log
-            digest your way.
+            One note when the VaultFactory hits Robinhood Chain testnet, plus
+            the occasional build-log digest. If you&apos;re already shipping
+            on the rail, say what you&apos;re building — that&apos;s the
+            message worth reading.
           </p>
         </FadeIn>
         <FadeIn delay={0.1} className="mt-10 text-left">
