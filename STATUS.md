@@ -7,10 +7,10 @@ sessions. Every session updates its own row at start and end.
 
 | Branch | What | Started | Status | PR |
 |---|---|---|---|---|
-| `claude/site-brand-rienda-wallet` | New mark + one-brand/one-product IA (Rienda), wallet connect + `/app` | 2026-08-04 | `in_review` | [#156](https://github.com/vdmnexus/vdmnexus/pull/156) |
-| `claude/build-with-us` | `/build` page — collaborator sign-up posting to `/api/waitlist`, tagged `utm_source=build-page` | 2026-08-04 | `in_review` | [#158](https://github.com/vdmnexus/vdmnexus/pull/158) |
 
-#149, #150, #151 all merged as of 2026-07-31 — rows cleared per the
+No active branches as of 2026-08-04. #149, #150, #151 merged as of
+2026-07-31; #156, #157, #158 (rebrand + wallet connect, og:image,
+`/build` page) all merged as of 2026-08-04 — rows cleared per the
 "delete once merged" convention below.
 
 ## Conventions
