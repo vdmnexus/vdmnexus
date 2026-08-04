@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Check } from "lucide-react";
 import { useWaitlist } from "./waitlist-context";
+import { useWaitlistSubmit } from "@/lib/use-waitlist-submit";
 import { cn } from "@/lib/utils";
 
 const BUILDING_OPTIONS = [
@@ -12,55 +13,12 @@ const BUILDING_OPTIONS = [
   "Other",
 ];
 
-type Status = "idle" | "submitting" | "success" | "error";
-
-type Attribution = {
-  utm_source?: string;
-  utm_medium?: string;
-  utm_campaign?: string;
-  utm_term?: string;
-  utm_content?: string;
-  referrer?: string;
-};
-
-function captureAttribution(): Attribution {
-  if (typeof window === "undefined") return {};
-  const params = new URLSearchParams(window.location.search);
-  const out: Attribution = {};
-  for (const key of [
-    "utm_source",
-    "utm_medium",
-    "utm_campaign",
-    "utm_term",
-    "utm_content",
-  ] as const) {
-    const v = params.get(key);
-    if (v) out[key] = v;
-  }
-  const ref = document.referrer;
-  if (ref) {
-    try {
-      const parsed = new URL(ref);
-      if (parsed.hostname !== window.location.hostname) out.referrer = ref;
-    } catch {
-      // ignore malformed referrer
-    }
-  }
-  return out;
-}
-
 export function WaitlistForm() {
   const ctx = useWaitlist();
   const [email, setEmail] = useState("");
   const [building, setBuilding] = useState("");
-  const [status, setStatus] = useState<Status>("idle");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const honeypotRef = useRef<HTMLInputElement>(null);
-  const attributionRef = useRef<Attribution>({});
-
-  useEffect(() => {
-    attributionRef.current = captureAttribution();
-  }, []);
+  const { status, errorMessage, submit } = useWaitlistSubmit();
 
   useEffect(() => {
     if (ctx?.prefilledEmail) {
@@ -70,49 +28,11 @@ export function WaitlistForm() {
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setErrorMessage(null);
-
-    const trimmedEmail = email.trim();
-    if (!trimmedEmail) {
-      setErrorMessage("Please enter your email.");
-      setStatus("error");
-      return;
-    }
-
-    setStatus("submitting");
-
-    try {
-      const res = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: trimmedEmail,
-          building: building || null,
-          website: honeypotRef.current?.value ?? "",
-          ...attributionRef.current,
-        }),
-      });
-
-      if (res.ok) {
-        setStatus("success");
-        return;
-      }
-
-      const data = (await res.json().catch(() => ({}))) as { error?: string };
-      if (data.error === "rate_limited") {
-        setErrorMessage("Too many attempts. Please try again later.");
-      } else if (data.error === "invalid_email") {
-        setErrorMessage("Please enter a valid email address.");
-      } else if (data.error === "service_unavailable") {
-        setErrorMessage("Waitlist is temporarily unavailable. Please try again later.");
-      } else {
-        setErrorMessage("Something went wrong. Please try again.");
-      }
-      setStatus("error");
-    } catch {
-      setErrorMessage("Network error. Please try again.");
-      setStatus("error");
-    }
+    await submit({
+      email,
+      building: building || null,
+      website: honeypotRef.current?.value ?? "",
+    });
   }
 
   if (status === "success") {
