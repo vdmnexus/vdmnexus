@@ -86,6 +86,7 @@ function footerGroups(showLaunch: boolean): Array<{
       links: [
         { href: "/roadmap", label: "Roadmap" },
         { href: "/team", label: "Team" },
+        { href: "/build", label: "Build with us" },
         { href: "/brand", label: "Brand" },
         { href: "https://x.com/vdmnexus", label: "@vdmnexus", external: true },
         { href: "https://t.me/vdmnexus", label: "Telegram", external: true },

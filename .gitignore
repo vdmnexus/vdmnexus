@@ -8,6 +8,8 @@ node_modules/
 out/
 dist/
 build/
+# ...but /build is a real marketing route, not a build artifact.
+!apps/web/app/build/
 
 # env
 .env
