@@ -70,7 +70,7 @@ const GAPS: Array<{ title: string; body: string }> = [
   {
     title: "Rienda contracts: in development, unaudited, testnet-first",
     body:
-      "The Layer 2 vault contracts (agent treasuries on Robinhood Chain: position caps, loss limits, drawdown throttles, kill switch, x402 compute metering from realized PnL) exist as a completed spec and in-development code. They are unaudited and hold no funds. They deploy to Robinhood Chain testnet (chain id 46630) first; mainnet deployment is gated behind an external security audit and legal review. Anything claiming to be a live Rienda vault before that disclosure updates here is not ours.",
+      "The Rienda vault contracts (agent vaults on Robinhood Chain: position caps, loss limits, drawdown throttles, kill switch, x402 compute metering from realized PnL) exist as a completed spec and in-development code. They are unaudited and hold no funds. They deploy to Robinhood Chain testnet (chain id 46630) first; mainnet deployment is gated behind an external security audit and legal review. Anything claiming to be a live Rienda vault before that disclosure updates here is not ours.",
   },
   {
     title: "No SLA at Beta",

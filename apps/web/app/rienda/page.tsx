@@ -13,9 +13,9 @@ import { Card } from "@/components/card";
 import { FadeIn } from "@/components/fade-in";
 
 export const metadata: Metadata = {
-  title: "Rienda — agent treasuries on Robinhood Chain | VDM Nexus",
+  title: "Rienda — The model never holds the keys | VDM Nexus",
   description:
-    "Smart-contract vaults for LLM trading agents. The vault holds the capital and enforces ten guardrails in contract code; the agent holds a session key that can trade but never withdraw. In development — testnet first.",
+    "Agent vaults. Guardrails in the contract, not the prompt. Rienda is a self-custodial vault for LLM trading agents on Robinhood Chain: the vault holds the capital and enforces ten guardrails in contract code, the agent holds a session key that can trade but never withdraw. In development — testnet first. Losses get bounded, not prevented.",
   alternates: { canonical: "https://vdmnexus.com/rienda" },
 };
 
@@ -112,21 +112,31 @@ function Hero() {
       <div className="mx-auto w-full max-w-4xl px-6 pb-16 pt-24 text-center sm:pb-20 sm:pt-32">
         <FadeIn>
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <SectionEyebrow>Rienda · Layer 2 — Capital</SectionEyebrow>
+            <SectionEyebrow>Rienda · the agent vault</SectionEyebrow>
             <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-amber-300">
               In development · testnet first
             </span>
           </div>
+          {/*
+            Canonical brand line — identical to the homepage hero. One
+            phrasing site-wide. The longer "the vault holds the money, the
+            model never does" framing survives below as body copy, where
+            there's room to explain it; it is not a heading anywhere.
+          */}
           <h1 className="mx-auto mt-8 max-w-3xl text-balance text-4xl font-semibold tracking-tight text-text sm:text-5xl md:text-6xl">
-            The vault holds the money.{" "}
-            <span className="text-gradient">The model never does.</span>
+            The model never holds{" "}
+            <span className="text-gradient">the keys</span>.
           </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-balance text-lg font-medium text-text sm:text-xl">
+            Agent vaults. Guardrails in the contract, not the prompt.
+          </p>
           <p className="mx-auto mt-8 max-w-2xl text-balance text-base leading-relaxed text-text-muted sm:text-lg">
             Rienda is a smart-contract vault for LLM trading agents on
-            Robinhood Chain, an Ethereum L2. The vault holds the capital
-            and enforces the risk policy in contract code. The agent holds
-            a session key that can submit trade intents — and nothing
-            else. Losses get bounded, not prevented.
+            Robinhood Chain, an Ethereum L2. The vault holds the money and
+            the model never does: capital sits in the contract, the risk
+            policy is enforced there too, and the agent holds a session key
+            that can submit trade intents and nothing else. Losses get
+            bounded, not prevented.
           </p>
         </FadeIn>
       </div>
@@ -245,7 +255,8 @@ function ComputeBudget() {
           minimum plus a share of the 7-day exponential moving average of
           its <span className="text-text">realized</span> PnL, hard-capped
           at the top. The allowance is spent via x402 — the same
-          pay-per-call rail as Layer 1 — one signed receipt per call.
+          pay-per-call rail that runs underneath — one signed receipt per
+          call.
         </p>
       </FadeIn>
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -314,7 +325,7 @@ function Layer1TieIn() {
   return (
     <Section id="receipts">
       <FadeIn className="max-w-2xl">
-        <SectionEyebrow>Built on Layer 1</SectionEyebrow>
+        <SectionEyebrow>Built on the rail underneath</SectionEyebrow>
         <SectionHeading className="mt-4">
           Every trade traces back to the reasoning that produced it.
         </SectionHeading>
@@ -389,11 +400,17 @@ function CTAs() {
       <FadeIn>
         <div className="flex flex-wrap items-center gap-3">
           <Link
-            href="/disclosures"
+            href="/app"
             className="inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
           >
-            Read the disclosures
+            Connect a wallet
             <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+          <Link
+            href="/disclosures"
+            className="inline-flex items-center gap-2 rounded-md border border-soft bg-surface/60 px-5 py-2.5 text-sm font-medium text-text transition-colors hover:border-accent-indigo/60"
+          >
+            Read the disclosures
           </Link>
           {/*
             Spec-repo link goes here once the repo is public. The repo

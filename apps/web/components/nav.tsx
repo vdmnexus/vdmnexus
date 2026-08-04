@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { launchLive } from "@/lib/launch-flag";
 import { BetaPill } from "@/components/beta-pill";
+import { Lockup } from "@/components/mark";
+import { ConnectButton } from "@/components/wallet/connect-button";
 
 type NavDropdownItem = {
   href: string;
@@ -16,14 +18,15 @@ type NavDropdownItem = {
   description?: string;
 };
 
-// "Product" — the two layers. Layer 1 (trust: signed inference,
-// verification, agent directory) is live. Layer 2 (capital: Rienda)
-// has a dedicated page at /rienda; the homepage section is the teaser.
-const PRODUCT_ITEMS: NavDropdownItem[] = [
+// One brand, one product. Rienda is the product and gets a top-level link;
+// the signed-inference rail it runs on is real, live, and has real callers,
+// so it keeps every route — it just stops being marketed as a second
+// product line and moves under "Under the hood".
+const UNDER_THE_HOOD_ITEMS: NavDropdownItem[] = [
   {
     href: "/inference",
-    label: "Inference API",
-    description: "Layer 1 · signed receipt on every call",
+    label: "Signed inference",
+    description: "A signed receipt behind every model call",
   },
   {
     href: "/verify",
@@ -31,18 +34,19 @@ const PRODUCT_ITEMS: NavDropdownItem[] = [
     description: "Five-check receipt verifier",
   },
   {
-    href: "/agents",
-    label: "Agents",
-    description: "Browse agents on the rail",
+    href: "/receipts",
+    label: "Receipts",
+    description: "Latest signed receipts on the rail",
   },
   {
-    href: "/rienda",
-    label: "Rienda",
-    description: "Layer 2 · agent treasuries — in development",
+    href: "/agents",
+    label: "Agent directory",
+    description: "Every agent that has called the rail",
   },
 ];
 
-// "Developers" — for people integrating signed inference into their code.
+// "Developers" — the published SDKs and the API surface. Live packages on
+// npm and PyPI with real callers; every link here stays reachable.
 const DEVELOPER_ITEMS: NavDropdownItem[] = [
   {
     href: "/sdk",
@@ -61,57 +65,66 @@ const DEVELOPER_ITEMS: NavDropdownItem[] = [
     description: "Run a live mainnet call",
   },
   {
-    href: "/receipts",
-    label: "Receipts",
-    description: "Latest signed receipts on the rail",
+    href: "/pricing",
+    label: "Pricing",
+    description: "Per-call USDC + receipt fee",
+  },
+  {
+    href: "/points",
+    label: "Points",
+    description: "Per-agent leaderboard",
   },
 ];
 
 export function Nav() {
   const pathname = usePathname();
-  const waitlistHref = pathname === "/" ? "#waitlist" : "/#waitlist";
   const showLaunch = launchLive();
 
-  return <NavHeader pathname={pathname} waitlistHref={waitlistHref} showLaunch={showLaunch} />;
+  return <NavHeader pathname={pathname} showLaunch={showLaunch} />;
 }
 
 function NavHeader({
   pathname,
-  waitlistHref,
   showLaunch,
 }: {
   pathname: string;
-  waitlistHref: string;
   showLaunch: boolean;
 }) {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-soft bg-bg/70 backdrop-blur">
-      <nav className="mx-auto flex h-24 w-full max-w-6xl items-center justify-between px-6">
+      <nav className="mx-auto flex h-20 w-full max-w-6xl items-center justify-between px-6">
         <div className="flex items-center gap-3">
+          {/*
+            Lockup = mark (inline SVG, currentColor) + wordmark as HTML text.
+            The mark inherits `text-text` here; hovering warms it to indigo.
+          */}
           <Link
             href="/"
             aria-label="VDM Nexus"
-            className="group flex items-center"
+            className="flex items-center text-text transition-colors hover:text-accent-indigo"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/logo.svg"
-              alt="VDM Nexus"
-              className="h-16 w-auto md:h-20"
-            />
+            <Lockup markClassName="h-7 w-7" wordClassName="text-base sm:text-lg" />
           </Link>
           <BetaPill />
         </div>
 
-        <div className="hidden items-center gap-7 md:flex">
-          <NavDropdown label="Product" items={PRODUCT_ITEMS} pathname={pathname} />
-          <NavDropdown label="Developers" items={DEVELOPER_ITEMS} pathname={pathname} />
-          <NavLink href="/pricing" active={pathname === "/pricing"}>
-            Pricing
+        <div className="hidden items-center gap-7 lg:flex">
+          <NavLink href="/rienda" active={pathname.startsWith("/rienda")}>
+            Rienda
           </NavLink>
-          <NavLink href="/points" active={pathname === "/points"}>
-            Points
+          <NavLink href="/app" active={pathname === "/app"}>
+            Vault
           </NavLink>
+          <NavDropdown
+            label="Under the hood"
+            items={UNDER_THE_HOOD_ITEMS}
+            pathname={pathname}
+          />
+          <NavDropdown
+            label="Developers"
+            items={DEVELOPER_ITEMS}
+            pathname={pathname}
+          />
           <NavLink href="/roadmap" active={pathname === "/roadmap"}>
             Roadmap
           </NavLink>
@@ -128,7 +141,7 @@ function NavHeader({
             target="_blank"
             rel="noreferrer noopener"
             aria-label="VDM Nexus on X"
-            className="rounded-md p-2 text-text-muted transition-colors hover:text-text"
+            className="hidden rounded-md p-2 text-text-muted transition-colors hover:text-text sm:block"
           >
             <XIcon className="h-4 w-4" />
           </a>
@@ -137,11 +150,11 @@ function NavHeader({
             target="_blank"
             rel="noreferrer noopener"
             aria-label="VDM Nexus on Telegram"
-            className="rounded-md p-2 text-text-muted transition-colors hover:text-text"
+            className="hidden rounded-md p-2 text-text-muted transition-colors hover:text-text sm:block"
           >
             <TelegramIcon className="h-4 w-4" />
           </a>
-          {showLaunch ? (
+          {showLaunch && (
             <Link
               href="/token"
               className={cn(
@@ -153,14 +166,8 @@ function NavHeader({
             >
               $NEXUS
             </Link>
-          ) : (
-            <a
-              href={waitlistHref}
-              className="rounded-md border border-soft bg-surface/60 px-3.5 py-1.5 text-xs font-medium text-text transition-colors hover:border-accent-indigo/60 hover:bg-accent-indigo/10 sm:text-sm"
-            >
-              Join Waitlist
-            </a>
           )}
+          <ConnectButton />
         </div>
       </nav>
     </header>
@@ -197,11 +204,13 @@ function NavLink({
  * flicker the panel shut while crossing the seam). Escape and
  * click-outside also close. The trigger reflects "active" when any item
  * in the dropdown matches the current pathname, so visiting a sub-page
- * (e.g. `/sdk`) highlights its parent ("Build") in the top nav.
+ * (e.g. `/sdk`) highlights its parent ("Developers") in the top nav.
  *
- * Marketing-site only — the desktop nav lives inside `hidden md:flex`.
- * Mobile doesn't render a nav at all today; if/when we add a mobile menu
- * it should not reuse this component (mobile wants accordion, not popover).
+ * Marketing-site only — the desktop nav lives inside `hidden lg:flex`
+ * (lg, not md: the connect-wallet button eats the room md used to have).
+ * Below lg only the lockup and the connect button render; there is still
+ * no mobile menu, and if/when we add one it should not reuse this
+ * component (mobile wants accordion, not popover).
  */
 function NavDropdown({
   label,

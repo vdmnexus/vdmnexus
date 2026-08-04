@@ -252,9 +252,9 @@ export default function DisclosuresPage() {
             </ul>
           </Section>
 
-          <Section title="Rienda — agent treasuries (in development)">
+          <Section title="Rienda — agent vaults (in development)">
             <p>
-              Rienda is the second product layer: smart-contract vaults
+              Rienda is the VDM Nexus product: smart-contract vaults
               on Robinhood Chain that hold an LLM trading agent&apos;s
               capital and enforce risk guardrails in contract code
               (position caps, loss limits, drawdown throttles, kill

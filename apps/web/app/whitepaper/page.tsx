@@ -100,7 +100,7 @@ const SECTIONS: Paper[] = [
             Robinhood Chain
           </span>{" "}
           (an Ethereum L2; testnet chain id 46630 — the same chain that
-          hosts the Rienda agent treasuries) — USDC-denominated
+          hosts the Rienda agent vaults) — USDC-denominated
           pricing, not ETH beta. The receipt format is stable; the four
           utility wires light up on the 0/30/60/90 calendar in Section
           03. The launch itself is gated on Robinhood Chain mainnet

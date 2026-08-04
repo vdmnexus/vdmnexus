@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { launchLive } from "@/lib/launch-flag";
+import { Lockup } from "@/components/mark";
 
 type FooterLink = {
   href: string;
@@ -9,11 +10,15 @@ type FooterLink = {
 };
 
 /**
- * Footer IA mirrors the two-layer story: Product (what runs), Developers
- * (how to integrate), Trust & legal (/disclosures and /security are always
- * reachable here — they are the canonical disclosure surfaces and must not
- * be launch-gated), Company. /token and /whitepaper stay behind the launch
- * flag because those routes 404 until it flips.
+ * Footer IA mirrors the site story: one brand, one product.
+ *
+ * Rienda is the product. "Under the hood" is the signed-inference rail it
+ * runs on — live, with real callers, so every route stays reachable here
+ * even though it is no longer marketed as a separate product. Developers
+ * carries the published packages. Trust & legal keeps /disclosures and
+ * /security permanently reachable (canonical disclosure surfaces, never
+ * launch-gated). /token and /whitepaper stay behind the launch flag
+ * because those routes 404 until it flips.
  */
 function footerGroups(showLaunch: boolean): Array<{
   title: string;
@@ -21,13 +26,26 @@ function footerGroups(showLaunch: boolean): Array<{
 }> {
   return [
     {
-      title: "Product",
+      title: "Rienda",
       links: [
-        { href: "/inference", label: "Inference API" },
+        { href: "/rienda", label: "Overview" },
+        { href: "/rienda#guardrails", label: "The ten guardrails" },
+        { href: "/rienda#compute-budget", label: "Compute budget" },
+        { href: "/app", label: "Vault" },
+      ],
+    },
+    {
+      title: "Under the hood",
+      links: [
+        { href: "/inference", label: "Signed inference" },
         { href: "/verify", label: "Verify" },
-        { href: "/agents", label: "Agents" },
-        { href: "/rienda", label: "Rienda" },
-        { href: "/pricing", label: "Pricing" },
+        { href: "/receipts", label: "Receipts" },
+        { href: "/agents", label: "Agent directory" },
+        {
+          href: "https://console.vdmnexus.com",
+          label: "Console",
+          external: true,
+        },
       ],
     },
     {
@@ -36,7 +54,7 @@ function footerGroups(showLaunch: boolean): Array<{
         { href: "https://docs.vdmnexus.com", label: "Docs", external: true },
         { href: "/sdk", label: "SDK" },
         { href: "/playground", label: "Playground" },
-        { href: "/receipts", label: "Receipts" },
+        { href: "/pricing", label: "Pricing" },
         { href: "/points", label: "Points" },
         {
           href: "https://github.com/vdmnexus/vdmnexus",
@@ -86,13 +104,12 @@ export function Footer() {
           <Link
             href="/"
             aria-label="VDM Nexus"
-            className="flex items-start self-start"
+            className="flex items-start self-start text-text-muted transition-colors hover:text-text"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.svg" alt="VDM Nexus" className="h-14 w-auto" />
+            <Lockup markClassName="h-8 w-8" wordClassName="text-lg" />
           </Link>
 
-          <div className="grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
             {groups.map((group) => (
               <nav key={group.title} aria-label={group.title}>
                 <h3 className="text-[11px] font-medium uppercase tracking-[0.18em] text-text-muted">
