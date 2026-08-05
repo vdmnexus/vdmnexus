@@ -69,6 +69,16 @@ export function explorerAddressUrl(
   return `${chain.blockExplorers.default.url}/address/${address}`;
 }
 
+/** Explorer transaction URL for a chain we know about; null for anything else. */
+export function explorerTxUrl(
+  chainId: number | undefined,
+  txHash: string
+): string | null {
+  const chain = supportedChain(chainId);
+  if (!chain) return null;
+  return `${chain.blockExplorers.default.url}/tx/${txHash}`;
+}
+
 /** `0x1234…abcd` — enough to recognise, short enough for a nav button. */
 export function shortAddress(address: string): string {
   return address.length > 10

@@ -389,6 +389,17 @@ function Status() {
           before any mainnet deployment, and mainnet waits for both the
           audit and the legal review — however long that takes.
         </p>
+        <p className="mt-4 text-sm leading-relaxed text-text-muted">
+          <Link
+            href="/live"
+            className="text-text underline decoration-text-muted/40 underline-offset-4 transition-colors hover:decoration-text"
+          >
+            /live
+          </Link>{" "}
+          reads the testnet directly — vault state, guardrail headroom, and
+          every event the vaults emit. It is empty until the deploy lands,
+          and it says so rather than showing a preview.
+        </p>
       </FadeIn>
     </Section>
   );
@@ -400,11 +411,17 @@ function CTAs() {
       <FadeIn>
         <div className="flex flex-wrap items-center gap-3">
           <Link
-            href="/app"
+            href="/live"
             className="inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
           >
-            Connect a wallet
+            Watch it run on testnet
             <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+          <Link
+            href="/app"
+            className="inline-flex items-center gap-2 rounded-md border border-soft bg-surface/60 px-5 py-2.5 text-sm font-medium text-text transition-colors hover:border-accent-indigo/60"
+          >
+            Connect a wallet
           </Link>
           <Link
             href="/disclosures"

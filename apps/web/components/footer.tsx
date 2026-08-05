@@ -31,6 +31,7 @@ function footerGroups(showLaunch: boolean): Array<{
         { href: "/rienda", label: "Overview" },
         { href: "/rienda#guardrails", label: "The ten guardrails" },
         { href: "/rienda#compute-budget", label: "Compute budget" },
+        { href: "/live", label: "Live on testnet" },
         { href: "/app", label: "Vault" },
       ],
     },
