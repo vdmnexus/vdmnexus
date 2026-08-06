@@ -7,11 +7,10 @@ sessions. Every session updates its own row at start and end.
 
 | Branch | What | Started | Status | PR |
 |---|---|---|---|---|
+| `claude/live-activity` | `/live` page reading real vault state from Robinhood Chain testnet | 2026-08-05 | in_review (CI green, needs Dennis to add 6 env vars in Vercel + ABI reconciliation follow-up) | #160 |
 
-No active branches as of 2026-08-04. #149, #150, #151 merged as of
-2026-07-31; #156, #157, #158 (rebrand + wallet connect, og:image,
-`/build` page) all merged as of 2026-08-04 — rows cleared per the
-"delete once merged" convention below.
+#149, #150, #151 merged as of 2026-07-31; #156, #157, #158 (rebrand +
+wallet connect, og:image, `/build` page) all merged as of 2026-08-04.
 
 ## Conventions
 
