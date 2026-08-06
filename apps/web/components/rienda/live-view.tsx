@@ -118,14 +118,16 @@ function ChainHeader({ data }: { data: LivePayload }) {
  * in env. Prefers the factory's own count getter when that reads.
  */
 function vaultCountLabel(data: LivePayload): string {
+  const fromFactory = data.vaults.filter((v) => v.source === "factory").length;
   const fromLogs = data.vaults.filter((v) => v.source === "log").length;
   const pinned = data.vaults.filter((v) => v.source === "pinned").length;
 
   if (data.vaultCount?.ok) {
     return `${data.vaultCount.value} per the factory`;
   }
-  if (fromLogs === 0 && pinned === 0) return "none found";
+  if (fromFactory === 0 && fromLogs === 0 && pinned === 0) return "none found";
   const parts: string[] = [];
+  if (fromFactory > 0) parts.push(`${fromFactory} from factory storage`);
   if (fromLogs > 0) parts.push(`${fromLogs} from logs`);
   if (pinned > 0) parts.push(`${pinned} pinned in env`);
   return parts.join(" + ");
@@ -257,6 +259,11 @@ function VaultCard({
             )}
             {vault.preset && <span>preset {vault.preset}</span>}
             {vault.createdBlock && <span>created at block {vault.createdBlock}</span>}
+            {vault.source === "factory" && (
+              <span className="text-emerald-300/80">
+                enumerated from factory storage
+              </span>
+            )}
             {vault.source === "pinned" && (
               <span className="text-amber-300/90">
                 pinned via env, not read from a factory log
