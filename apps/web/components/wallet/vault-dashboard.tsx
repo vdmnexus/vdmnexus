@@ -172,8 +172,14 @@ function VaultEmptyState() {
       </p>
       <div className="mt-7 flex flex-wrap gap-3">
         <Link
-          href="/rienda"
+          href="/live"
           className="inline-flex items-center gap-2 rounded-md border border-accent-indigo/60 bg-accent-indigo/20 px-4 py-2 text-sm font-medium text-text transition-colors hover:border-accent-indigo hover:bg-accent-indigo/30"
+        >
+          Watch the testnet
+        </Link>
+        <Link
+          href="/rienda"
+          className="inline-flex items-center gap-2 rounded-md border border-soft bg-bg/40 px-4 py-2 text-sm font-medium text-text-muted transition-colors hover:border-accent-indigo/40 hover:text-text"
         >
           Read the ten guardrails
         </Link>
