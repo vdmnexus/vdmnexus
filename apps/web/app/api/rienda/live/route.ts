@@ -88,8 +88,9 @@ export type VaultPanel = {
   preset: string | null;
   createdTx: string | null;
   createdBlock: string | null;
-  /** "log" — decoded from a factory event. "pinned" — from env. */
-  source: "log" | "pinned";
+  /** "factory" — enumerated from factory storage (totalVaults/vaultAt).
+   *  "log" — decoded from a factory event. "pinned" — from env. */
+  source: "factory" | "log" | "pinned";
   state: Array<{ key: string; label: string; hint?: string; value: FieldValue }>;
   guardrails: GuardrailValue[];
 };
@@ -274,7 +275,7 @@ async function readChain(
         source: "pinned",
       })
     );
-  const refs = [...fromLogs, ...pinned];
+  let refs: VaultRef[] = [...fromLogs, ...pinned];
 
   // Skip the probe entirely when the RPC is down — five doomed calls would
   // report "no getter matched", which blames the ABI for a transport failure.
@@ -287,6 +288,37 @@ async function readChain(
           kind: "uint",
           candidates: VAULT_COUNT_CANDIDATES,
         });
+
+  // Prefer factory-storage enumeration (totalVaults → vaultAt): complete and
+  // trustless, unlike the log window (gaps) or env pins (told, not discovered).
+  // Log/pin metadata still enriches enumerated entries; anything the factory
+  // doesn't report (e.g. beyond the enumeration cap) stays listed as before.
+  if (vaultCount?.ok) {
+    const reported = Number(vaultCount.value);
+    const enumerated =
+      reported > 0 ? await enumerateVaults(client, factory, reported) : [];
+    if (enumerated !== null) {
+      const byAddress = new Map(refs.map((r) => [r.address.toLowerCase(), r]));
+      const fromFactory = enumerated.map((address): VaultRef => {
+        const meta = byAddress.get(address.toLowerCase());
+        return {
+          address,
+          owner: meta?.owner ?? null,
+          preset: meta?.preset ?? null,
+          createdTx: meta?.createdTx ?? null,
+          createdBlock: meta?.createdBlock ?? null,
+          source: "factory",
+        };
+      });
+      const inFactory = new Set(enumerated.map((a) => a.toLowerCase()));
+      refs = [...fromFactory, ...refs.filter((r) => !inFactory.has(r.address.toLowerCase()))];
+      if (reported > MAX_ENUMERATED_VAULTS) {
+        notes.push(
+          `The factory reports ${reported} vaults; the first ${MAX_ENUMERATED_VAULTS} were enumerated from storage.`
+        );
+      }
+    }
+  }
 
   // --- settlement-token metadata -------------------------------------------
   let tokenSymbol: string | null = null;
@@ -378,8 +410,49 @@ type VaultRef = {
   preset: string | null;
   createdTx: string | null;
   createdBlock: string | null;
-  source: "log" | "pinned";
+  source: "factory" | "log" | "pinned";
 };
+
+/** Exact fragment — `vaultAt` is verified against the deployed factory source. */
+const VAULT_AT_ABI = [
+  {
+    type: "function",
+    name: "vaultAt",
+    stateMutability: "view",
+    inputs: [{ type: "uint256" }],
+    outputs: [{ type: "address" }],
+  },
+] as const;
+
+/** Storage enumeration is one read per vault — bound it independently of panels. */
+const MAX_ENUMERATED_VAULTS = 50;
+
+/**
+ * Enumerate vault addresses from factory storage: totalVaults() → vaultAt(i).
+ * Trustless (no env pinning) and complete (no log-window gaps). Returns null
+ * when the factory doesn't answer, so callers can fall back to logs + pins.
+ */
+async function enumerateVaults(
+  client: PublicClient,
+  factory: Address,
+  count: number
+): Promise<Address[] | null> {
+  const n = Math.min(count, MAX_ENUMERATED_VAULTS);
+  const reads = await Promise.all(
+    Array.from({ length: n }, (_, i) =>
+      safe(() =>
+        client.readContract({
+          address: factory,
+          abi: VAULT_AT_ABI,
+          functionName: "vaultAt",
+          args: [BigInt(i)],
+        })
+      )
+    )
+  );
+  const found = reads.filter((v): v is Address => typeof v === "string");
+  return found.length > 0 ? found : null;
+}
 
 type Decoded = { eventName: string; args: Record<string, unknown> };
 
