@@ -12,7 +12,8 @@ sessions. Every session updates its own row at start and end.
 #149, #150, #151 merged as of 2026-07-31; #156, #157, #158 (rebrand +
 wallet connect, og:image, `/build` page) merged as of 2026-08-04;
 #160 (`/live` chain reads) and #162 (trustless vault enumeration)
-merged as of 2026-08-06.
+merged as of 2026-08-06; #163 (2026-08-06 daily review, recovered
+from a stuck-unmerged state) merged 2026-08-07.
 
 ## Conventions
 
