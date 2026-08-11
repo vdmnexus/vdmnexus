@@ -18,7 +18,9 @@ daily review, recovered from a stuck-unmerged state — fifth such
 recovery: #142, #152, #155, #163, #165) merged 2026-08-09; #166
 (2026-08-09 daily review, recovered from a stuck-unmerged state —
 sixth such recovery, and the first time it happened two nights in a
-row) merged 2026-08-10.
+row) merged 2026-08-10; #167 (2026-08-10 daily review) merged
+cleanly the same night — no recovery needed, second clean night
+(after #164) against six stuck recoveries in the same window.
 
 ## Conventions
 
