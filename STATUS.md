@@ -22,7 +22,11 @@ row) merged 2026-08-10; #167 (2026-08-10 daily review) merged
 cleanly the same night — no recovery needed, second clean night
 (after #164) against six stuck recoveries in the same window; #168
 (2026-08-11 daily review) merged within 5 seconds of opening — third
-clean night in a row, same window.
+clean night in a row, same window; #169 (2026-08-12 daily review)
+merged within 20 seconds of opening — fourth clean night in a row,
+same window. Four in a row now leans toward "resolved" rather than
+intermittent — still no auto-merge decision from Dennis, but no
+longer re-escalating that ask nightly.
 
 ## Conventions
 
