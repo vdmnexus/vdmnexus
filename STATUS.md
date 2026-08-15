@@ -22,7 +22,16 @@ row) merged 2026-08-10; #167 (2026-08-10 daily review) merged
 cleanly the same night — no recovery needed, second clean night
 (after #164) against six stuck recoveries in the same window; #168
 (2026-08-11 daily review) merged within 5 seconds of opening — third
-clean night in a row, same window.
+clean night in a row, same window; #169 (2026-08-12 daily review)
+also merged cleanly — fourth clean night in a row.
+
+**2026-08-13 gap.** A "Daily review 2026-08-13" summary was posted to
+`#nexus` that night, but no matching PR, branch, or commit exists in
+this repo — `main` went straight from #169 (2026-08-12) to this
+session's PR with no commit in between. Different failure mode from
+the green-CI-but-unmerged pattern above: here nothing was ever pushed.
+Flagged to Dennis in the 2026-08-14 daily review; no action taken here
+beyond noting it, since there is nothing in-repo to recover.
 
 ## Conventions
 
