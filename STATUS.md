@@ -27,11 +27,24 @@ also merged cleanly — fourth clean night in a row.
 
 **2026-08-13 gap.** A "Daily review 2026-08-13" summary was posted to
 `#nexus` that night, but no matching PR, branch, or commit exists in
-this repo — `main` went straight from #169 (2026-08-12) to this
-session's PR with no commit in between. Different failure mode from
+this repo — `main` went straight from #169 (2026-08-12) to #170
+(2026-08-14) with no commit in between. Different failure mode from
 the green-CI-but-unmerged pattern above: here nothing was ever pushed.
-Flagged to Dennis in the 2026-08-14 daily review; no action taken here
-beyond noting it, since there is nothing in-repo to recover.
+The 2026-08-14 session found and documented this in #170's body, but
+that session never posted to Slack, so Dennis was not actually told
+until the 2026-08-15 session's summary. Nothing left to recover
+in-repo for 08-13 itself.
+
+**#170 (2026-08-14 daily review) — stuck unmerged for ~24h despite
+green CI** (`mergeable_state: clean`, 4/4 Vercel checks passing).
+Recovered and merged (`a930492`) by the 2026-08-15 session before
+gathering. Seventh occurrence of the green-CI-but-unmerged pattern
+(#142, #152, #155, #163, #165, #166, #170) — notably recurring right
+after four consecutive clean nights (#164, #167, #168, #169) that had
+looked like resolution. Combined with the 08-13 no-commit gap, three
+distinct failure modes have now shown up in five nights. 2026-08-15's
+daily review escalates the auto-merge-for-planning-PRs ask on the
+strength of this recurrence.
 
 ## Conventions
 
