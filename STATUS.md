@@ -46,6 +46,13 @@ distinct failure modes have now shown up in five nights. 2026-08-15's
 daily review escalates the auto-merge-for-planning-PRs ask on the
 strength of this recurrence.
 
+#171 (2026-08-15 daily review) merged cleanly the same night (`e6e5dc4`)
+— no recovery needed. Fifth clean night out of the last six (#164,
+#167, #168, #169, #171) against seven earlier stuck recoveries. The
+2026-08-16 session confirmed this directly against `main` before
+gathering and treated it as one data point, not resolution — the
+auto-merge ask stays open pending a decision from Dennis.
+
 ## Conventions
 
 - One session = one branch = one PR. Never two sessions on the same branch.
