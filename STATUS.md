@@ -53,6 +53,16 @@ strength of this recurrence.
 gathering and treated it as one data point, not resolution — the
 auto-merge ask stays open pending a decision from Dennis.
 
+**#172 (2026-08-16 daily review) — stuck unmerged for ~24h despite
+green CI** (`mergeable_state: clean`, 4/4 Vercel checks passing).
+Recovered and merged (`c467903`) by the 2026-08-17 session before
+gathering. Eighth occurrence of the green-CI-but-unmerged pattern
+(#142, #152, #155, #163, #165, #166, #170, #172) — and the second
+time the pattern has alternated a clean night straight into a stuck
+one (previously #164-#169 clean → #170 stuck; now #171 clean → #172
+stuck). The auto-merge-for-planning-PRs ask has been open in `#nexus`
+since 2026-08-09 with no reply.
+
 ## Conventions
 
 - One session = one branch = one PR. Never two sessions on the same branch.

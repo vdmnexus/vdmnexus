@@ -1,27 +1,24 @@
-# Tomorrow's plan — 2026-08-17
+# Tomorrow's plan — 2026-08-18
 
 Tracked objects, in priority order (per `prompts/00-daily-review.md`):
 launch readiness, Rienda M1-M5, site/API health, standing-blocked items.
 Plus the process-integrity item, listed first.
 
 0. **Process integrity — auto-merge decision still open.** Tonight
-   (2026-08-16) was a clean night: #171 (2026-08-15's review) had
-   already merged cleanly on its own before this session started, no
-   recovery needed. That's the fifth clean night out of the last six
-   (#164, #167, #168, #169, #171), against seven stuck recoveries
-   earlier in the run (#142, #152, #155, #163, #165, #166, #170). One
-   clean night doesn't resolve the standing question — the pattern
-   has already alternated between clean streaks and stuck recurrences
-   once before (four clean nights, then #170 stuck ~24h). The
+   (2026-08-17) recovered #172 (2026-08-16's review), stuck unmerged
+   ~24h despite green CI — the eighth occurrence of this pattern
+   (#142, #152, #155, #163, #165, #166, #170, #172), and the second
+   time it has alternated a clean night into a stuck one (#164-#169
+   clean → #170 stuck; #171 clean → #172 stuck). The
    auto-merge / merge-on-green ask for this loop's own docs-only
-   `planning/**` + `STATUS.md` PRs is still open with no reply visible
-   in `#nexus`. Keep repeating it plainly; no further escalation in
-   wording until it gets an answer.
+   `planning/**` + `STATUS.md` PRs has now gone unanswered in
+   `#nexus` for over a week (first raised 2026-08-09). Keep repeating
+   it plainly; recover and merge immediately if it recurs.
 1. **Launch readiness** (`marketing/token-launch-checklist.md`): the
    T-14 / T-48h / T-0 operational steps still describe Solana tooling
    (pump.fun deploy, Squads multisigs, Solscan, Bubblemaps Solana) and
    need a rewrite pass for the Uniswap v4 / Robinhood Chain venue —
-   nineteenth night running as the top actionable item with no PR
+   twentieth night running as the top actionable item with no PR
    picking it up. Not a pure copy-substitution: the three-separate-
    Squads-multisig step and the Bubblemaps-Solana clustering check
    need an explicit Safe-multisig / Robinhood-explorer-equivalent
@@ -33,31 +30,31 @@ Plus the process-integrity item, listed first.
 2. **Rienda M1-M5**: last reported status (2026-07-31, from Dennis) —
    spec complete; token + Uniswap v4 fee-burn hook contracts built, 26
    passing tests; M1 (vault + policy engine) in development. M2-M5 not
-   started. Now 16 days stale as of 2026-08-16 — continue asking
+   started. Now 17 days stale as of 2026-08-17 — continue asking
    Dennis directly for a fresh update. Carry forward unchanged until
    one lands.
-3. **Health checks — still an infra blocker, at least 17 consecutive
+3. **Health checks — still an infra blocker, at least 18 consecutive
    confirmed nights.** This session's outbound proxy rejects
    `www.vdmnexus.com`, `verify.vdmnexus.com`, and `nexus.vdmnexus.com`
-   with a CONNECT-tunnel 403 — confirmed again tonight via verbose
-   `curl` (the proxy itself returns `HTTP/1.1 403 Forbidden` on the
-   CONNECT, before the app is ever reached), identical to every prior
-   confirmed night since 2026-07-31. Needs Dennis's decision:
-   allowlist these three hosts for the scheduled session's egress
-   policy, or move health checks to a job that has broader access.
-   Until resolved, keep reporting the health-check line as "not run,"
-   not pass/fail.
+   with a CONNECT-tunnel 403 — confirmed again tonight via `curl`,
+   identical to every prior confirmed night since 2026-07-31. Needs
+   Dennis's decision: allowlist these three hosts for the scheduled
+   session's egress policy, or move health checks to a job that has
+   broader access. Until resolved, keep reporting the health-check
+   line as "not run," not pass/fail.
 4. **Standing blocked items**: #106 (cards-v1 spec) — still a merge-
-   or-close decision, open since 2026-05-24 (84+ days). #95
-   (Polymarket agent) — still blocked on Spanish counsel, 85+ days.
+   or-close decision, open since 2026-05-24 (85+ days). #95
+   (Polymarket agent) — still blocked on Spanish counsel, 86+ days.
    Legal memo — still status-tracking: email drafted, awaiting Dennis
    send. May manual-submission backlog — one line, no more.
 
 ## Process watch
 
-Tonight (2026-08-16) found #171 already merged cleanly — no recovery
-needed, fifth clean night out of six. Do not read this as the pattern
-resolved; #170 recurred the very cycle after four consecutive clean
-nights looked the same way. Keep tracking clean-vs-stuck per night in
-`STATUS.md` and keep the auto-merge ask open until Dennis answers it
-either way.
+Tonight (2026-08-17) recovered #172 and confirmed a second
+clean-then-stuck alternation (#171 clean, #172 stuck the very next
+night). This undercuts any reading of prior clean streaks as
+resolution — the pattern is intermittent, not fixed, and manual
+recovery is the only thing keeping it from silently stalling. Keep
+tracking clean-vs-stuck per night in `STATUS.md`, keep recovering
+immediately on recurrence, and keep the auto-merge ask open — it has
+been unanswered in `#nexus` since 2026-08-09.
