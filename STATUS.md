@@ -63,6 +63,16 @@ one (previously #164-#169 clean → #170 stuck; now #171 clean → #172
 stuck). The auto-merge-for-planning-PRs ask has been open in `#nexus`
 since 2026-08-09 with no reply.
 
+**#173 (2026-08-17 daily review) — stuck unmerged ~24h despite green
+CI** (`mergeable_state: clean`, 4/4 Vercel checks passing). Recovered
+and merged (`f0b53cf`) by the 2026-08-18 session before gathering.
+Ninth occurrence of the green-CI-but-unmerged pattern (#142, #152,
+#155, #163, #165, #166, #170, #172, #173) — the third time the
+pattern has alternated a clean night into a stuck one. The
+auto-merge-for-planning-PRs ask has been open in `#nexus` and
+unanswered since 2026-08-09 (9+ days); manual recovery is holding
+every night but the underlying question is unresolved.
+
 ## Conventions
 
 - One session = one branch = one PR. Never two sessions on the same branch.
