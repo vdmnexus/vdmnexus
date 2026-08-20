@@ -5,24 +5,25 @@ launch readiness, Rienda M1-M5, site/API health, standing-blocked items.
 Plus tonight's new Vercel-deploy finding, listed first, and the
 process-integrity item second.
 
-0. **New — `nexus` Vercel deploy failure, needs Dennis's eyes.** PR
-   #175 (2026-08-19's review) has a failing `Vercel – nexus` check
-   (`state: failure`, "Deployment failed") — the other three checks
-   (docs, console, vdmnexus-web) passed. Not merged tonight: every
+0. **New — `nexus` Vercel deploy pipeline stalled, needs Dennis's
+   eyes.** Both PR #175 (2026-08-19's review) and this session's own
+   #176 (2026-08-20's review) show a failing `Vercel – nexus` check
+   (`state: failure`, "Deployment failed", identical target URL on
+   both despite unrelated commits) — the other three checks (docs,
+   console, vdmnexus-web) passed on both. Confirmed via the Vercel
+   API that this isn't a build actually failing: `list_deployments`
+   for the `nexus` project shows no new entry at all for either
+   push — the pipeline has stopped triggering new deployments since
+   2026-08-18T20:13 (over 2 days now). Not merging either PR: every
    prior recovery (#142 through #174) required confirmed-green CI
-   first, and this one fails that bar. This session couldn't diagnose
-   further — the GitHub status API's `target_url` is a `vercel.link`
-   short-link this session's egress policy blocks, and Vercel's own
-   API 404s on both a branch-alias lookup and a build-log lookup for
-   it. Checked production directly instead: `nexus.vdmnexus.com`'s
-   live alias is still on the deployment built from `f0b53cf` (PR
-   #173, 2026-08-17) — `READY`, alias intact, no sign of an outage —
-   but that also means the `nexus` Vercel project hasn't taken a
-   successful production deploy in 3 days, through 2 merges (#174 was
-   docs-only, so nothing functional was skipped, but the pipeline
-   itself looks stuck). Needs Dennis to check the Vercel dashboard
-   for the `nexus` project directly. If a fresh session finds #175
-   still red, re-check status and escalate again if unresolved.
+   first, and neither of these clears that bar. Checked production
+   directly too: `nexus.vdmnexus.com`'s live alias is still on the
+   deployment built from `f0b53cf` (PR #173, 2026-08-17) — `READY`,
+   alias intact, no sign of an outage right now. Needs Dennis to check
+   the Vercel dashboard / the `nexus` project's GitHub App integration
+   directly — this session's tools and egress access can't reach
+   further. If a fresh session finds the same failure tomorrow,
+   re-check status and escalate again if unresolved.
 1. **Process integrity — auto-merge decision still open.** Now 11
    nights unanswered (first raised 2026-08-09). Tonight didn't add a
    new occurrence of the old pattern (see item 0 above — different
@@ -64,9 +65,11 @@ process-integrity item second.
 ## Process watch
 
 Tonight (2026-08-20) did not recover a stuck-but-green PR — instead
-found PR #175 has an actual failing `Vercel – nexus` check, a new
-failure mode. Left it unmerged. Also found the `nexus` Vercel
-project's production alias hasn't redeployed since 2026-08-17 (3
-days). Flagged directly to Dennis; needs the Vercel dashboard to
+found that both PR #175 and this session's own #176 have an actual
+failing `Vercel – nexus` check, a new failure mode. Left both
+unmerged. Confirmed via the Vercel API this is a stalled deploy
+pipeline (no new deployments created since 2026-08-18T20:13), not a
+build genuinely failing on either PR's content. Flagged directly to
+Dennis; needs the Vercel dashboard / GitHub App integration to
 diagnose further. The older auto-merge-for-planning-PRs ask stays
 open too, now 11 nights unanswered.

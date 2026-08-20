@@ -73,24 +73,35 @@ auto-merge-for-planning-PRs ask has been open in `#nexus` and
 unanswered since 2026-08-09 (9+ days); manual recovery is holding
 every night but the underlying question is unresolved.
 
-**PR #175 (2026-08-19 daily review) — open, unmerged, but a new
-failure mode.** Unlike the ten prior green-CI-but-unmerged recoveries
-(#142, #152, #155, #163, #165, #166, #170, #172, #173, #174), #175 has
-an actual failing check: `Vercel – nexus` reports `state: failure`
-("Deployment failed"), while `docs`, `console`, and `vdmnexus-web` all
-passed. `mergeable_state: unstable`. The 2026-08-20 session did **not**
-merge it — every prior recovery required confirmed-green CI first, and
-this doesn't clear that bar. Diagnosis hit a wall: the GitHub commit
-status's `target_url` is a `vercel.link` short link this session's
-egress policy blocks, and the Vercel API 404s on both a branch-alias
-lookup and a direct build-log lookup for it. Checked the live
-`nexus.vdmnexus.com` alias directly instead — it's still serving the
+**PR #175 (2026-08-19 daily review) — open, unmerged, and this
+session's own #176 hit the identical problem: the `nexus` Vercel
+project has stopped creating deployments entirely, not just failing
+builds.** Unlike the ten prior green-CI-but-unmerged recoveries
+(#142, #152, #155, #163, #165, #166, #170, #172, #173, #174), both
+#175 and tonight's #176 show an actual failing check: `Vercel – nexus`
+reports `state: failure` ("Deployment failed"), while `docs`,
+`console`, and `vdmnexus-web` all passed on both PRs. Both failures
+point to the exact same `vercel.link/3Fpeeb1` target URL despite the
+two PRs touching completely different commits and files — that ruled
+out a code-level break in either diff and pointed at the Vercel↔GitHub
+integration itself. Confirmed via the Vercel API: `list_deployments`
+for the `nexus` project shows no new deployment record at all for
+either #175's (2026-08-19) or #176's (2026-08-20) pushes — the most
+recent entry is still the one built from commit `0ae70102`
+(2026-08-18T20:13, part of #174). So the integration isn't attempting
+and failing new builds, it has stopped triggering them since
+2026-08-18T20:13. The 2026-08-20 session did **not** merge #175 or
+force-merge its own #176 — every prior recovery required
+confirmed-green CI first, and neither clears that bar. Checked the
+live `nexus.vdmnexus.com` alias directly — it's still serving the
 deployment built from `f0b53cf` (PR #173, 2026-08-17), state `READY`,
-no sign of an actual outage — but that also means the `nexus` Vercel
-project hasn't taken a successful production deploy in 3 days despite
-2 merges landing on `main` since (#174 was docs-only, so nothing
-functional was skipped). Needs Dennis to check the Vercel dashboard
-directly for the `nexus` project's build error.
+no sign of an actual outage, but the `nexus` Vercel project's deploy
+pipeline has been stalled for 2+ days and needs Dennis to check the
+Vercel dashboard / GitHub App integration directly — this session's
+tools and egress access can't reach further (the GitHub status's
+`target_url` is a `vercel.link` short link this session's egress
+policy blocks, and the Vercel API 404s on both a branch-alias lookup
+and a direct build-log lookup for it).
 
 ## Conventions
 
