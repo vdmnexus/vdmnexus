@@ -73,6 +73,25 @@ auto-merge-for-planning-PRs ask has been open in `#nexus` and
 unanswered since 2026-08-09 (9+ days); manual recovery is holding
 every night but the underlying question is unresolved.
 
+**PR #175 (2026-08-19 daily review) — open, unmerged, but a new
+failure mode.** Unlike the ten prior green-CI-but-unmerged recoveries
+(#142, #152, #155, #163, #165, #166, #170, #172, #173, #174), #175 has
+an actual failing check: `Vercel – nexus` reports `state: failure`
+("Deployment failed"), while `docs`, `console`, and `vdmnexus-web` all
+passed. `mergeable_state: unstable`. The 2026-08-20 session did **not**
+merge it — every prior recovery required confirmed-green CI first, and
+this doesn't clear that bar. Diagnosis hit a wall: the GitHub commit
+status's `target_url` is a `vercel.link` short link this session's
+egress policy blocks, and the Vercel API 404s on both a branch-alias
+lookup and a direct build-log lookup for it. Checked the live
+`nexus.vdmnexus.com` alias directly instead — it's still serving the
+deployment built from `f0b53cf` (PR #173, 2026-08-17), state `READY`,
+no sign of an actual outage — but that also means the `nexus` Vercel
+project hasn't taken a successful production deploy in 3 days despite
+2 merges landing on `main` since (#174 was docs-only, so nothing
+functional was skipped). Needs Dennis to check the Vercel dashboard
+directly for the `nexus` project's build error.
+
 ## Conventions
 
 - One session = one branch = one PR. Never two sessions on the same branch.
