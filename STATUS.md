@@ -73,6 +73,53 @@ auto-merge-for-planning-PRs ask has been open in `#nexus` and
 unanswered since 2026-08-09 (9+ days); manual recovery is holding
 every night but the underlying question is unresolved.
 
+**#174 (2026-08-18 daily review) — stuck unmerged ~24h despite green
+CI.** Recovered and merged (`85bc1e7`) by the 2026-08-19 session
+before gathering. Tenth occurrence of the green-CI-but-unmerged
+pattern (#142, #152, #155, #163, #165, #166, #170, #172, #173, #174)
+— and the third *consecutive* stuck night (#172, #173, #174),
+superseding the earlier clean/stuck-alternation read.
+
+**#175 (2026-08-19 daily review) and #176 (2026-08-20 daily review) —
+new failure mode, not the green-CI-but-unmerged pattern above.** Both
+still open as of 2026-08-21. Unlike #142-#174, CI on these two is
+*genuinely* red (`Vercel – nexus` check: "Deployment failed"), not a
+false-stuck-despite-green case, so neither was merged by the
+2026-08-20 or 2026-08-21 sessions per the standing "never merge
+without confirmed-green CI" policy.
+
+**Root cause found 2026-08-21.** The `Vercel – nexus` check is failing
+because the `vdm-nexus` Vercel team's plan (Hobby-tier cron limit,
+inferred from the deploy error text — no billing API available to
+confirm the tier directly) rejects the project's existing
+`*/2 * * * *` deposit-scan cron (`apps/nexus/vercel.json`, unchanged)
+on any new deploy. Confirmed via the Vercel API: zero deployment
+records of any kind exist for the `nexus` project after
+2026-08-18T20:13:09Z (the last one that built, `dpl_87VBtuek…`) — the
+plan/cron check fails pre-build, not a code regression in either PR's
+diff. Sibling projects (`vdmnexus-web`, `docs`, `console`) on the same
+team deployed fine on both pushes — isolated to `nexus`. Production
+`nexus.vdmnexus.com` itself is unaffected (still serving the
+2026-08-17 build, `f0b53cf`), and Vercel does not retroactively kill a
+cron already attached to a live deployment on a plan downgrade — it
+only blocks *new* deploys carrying a violating cron config. So the
+existing cron kept firing every ~2 minutes straight through tonight.
+
+**Separate finding, same night: the surviving cron isn't crediting
+anything.** `get_runtime_logs` on the live production deployment shows
+`/api/v1/deposits/scan` running on schedule but every Solana
+`getTransaction` RPC call returning HTTP 429 (rate-limited), crediting
+0 of ~10 transactions per run. Independent of the deploy-blocker above
+— on-chain USDC deposits are very likely not being credited to the
+ledger right now. Needs Dennis's attention on `SOLANA_RPC_URL` /
+`apps/nexus/lib/deposits.ts` regardless of the Vercel plan decision.
+
+Tonight's own PR (2026-08-21 review) will very likely hit the same
+`Vercel – nexus` failure for the same reason (the cron config is
+unchanged) and join #175/#176 as a third unmerged planning PR unless
+Dennis resolves the plan/cron question or the still-open auto-merge-
+for-planning-PRs ask (open since 2026-08-09, 12+ days unanswered).
+
 ## Conventions
 
 - One session = one branch = one PR. Never two sessions on the same branch.

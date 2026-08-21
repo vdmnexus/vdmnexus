@@ -1,61 +1,73 @@
-# Tomorrow's plan — 2026-08-19
+# Tomorrow's plan — 2026-08-22
 
 Tracked objects, in priority order (per `prompts/00-daily-review.md`):
 launch readiness, Rienda M1-M5, site/API health, standing-blocked items.
-Plus the process-integrity item, listed first.
+Plus two new infra findings from tonight (2026-08-21), listed first —
+they outrank the standing process-integrity item since they're now
+concrete and actionable rather than a recurring status ask.
 
-0. **Process integrity — auto-merge decision still open.** Tonight
-   (2026-08-18) recovered #173 (2026-08-17's review), stuck unmerged
-   ~24h despite green CI — the ninth occurrence of the
-   green-CI-but-unmerged pattern (#142, #152, #155, #163, #165, #166,
-   #170, #172, #173), and the third time it has alternated a clean
-   night straight into a stuck one (#164-#169 clean → #170 stuck;
-   #171 clean → #172 stuck; #172's own recovery night clean → #173
-   stuck). Manual recovery is holding — nothing has actually been
-   lost — but the stuck rate is now close to nightly, not
-   intermittent. The auto-merge / merge-on-green ask for this loop's
-   own docs-only `planning/**` + `STATUS.md` PRs has been open and
-   unanswered in `#nexus` since 2026-08-09 (9+ days). Keep repeating
-   it plainly; no further escalation in wording until it gets an
-   answer.
-1. **Launch readiness** (`marketing/token-launch-checklist.md`): the
+1. **Deposit-scan RPC rate-limiting — new, top priority.** Confirmed
+   tonight via production runtime logs: `/api/v1/deposits/scan` is
+   running on its 2-minute schedule but every Solana `getTransaction`
+   call is returning HTTP 429, crediting 0 of ~10 transactions per run.
+   Needs Dennis to look at `SOLANA_RPC_URL` — likely a shared/public
+   RPC endpoint hitting rate limits; a paid or dedicated RPC provider
+   (or backoff/batching in `apps/nexus/lib/deposits.ts`) is probably
+   needed. Agents sending USDC to the deposit address are very likely
+   not being credited right now. This loop cannot query Solana RPC
+   directly to confirm root cause beyond what the app's own logs show.
+2. **`nexus` Vercel deploy blocker — now diagnosed, needs a decision.**
+   Root cause confirmed tonight: the `vdm-nexus` Vercel team's plan
+   (Hobby-tier cron limit, inferred from the deploy error text — not
+   confirmed via a billing API) rejects the existing `*/2 * * * *`
+   deposit-scan cron on any new deploy of the `nexus` project, blocking
+   builds since 2026-08-18T20:13Z (3 days). Production
+   `nexus.vdmnexus.com` itself is unaffected — still serving the
+   2026-08-17 build, and the cron kept running from that build (see
+   item 1 for why it's not actually helping). Two ways to unblock new
+   deploys: (a) upgrade the team to Pro, or (b) change the cron
+   cadence in `apps/nexus/vercel.json` to something Hobby-compatible
+   (trades off deposit-detection latency). Needs Dennis's call; this
+   loop won't change billing or the cron config unprompted.
+3. **Auto-merge-for-planning-PRs ask — now directly relevant to #1/#2.**
+   Open and unanswered since 2026-08-09 (12+ days). PR #175
+   (2026-08-19 review) and #176 (2026-08-20 review) are both still
+   open, genuinely red on the `Vercel – nexus` check (not the earlier
+   false-stuck-despite-green pattern) — tonight's PR is likely to join
+   them for the same reason. Resolving the auto-merge ask (merge on
+   green CI, or stop gating `planning/**` + `STATUS.md`-only PRs on
+   the `Vercel – nexus` check) would clear this backlog regardless of
+   the cron/plan decision above.
+4. **Launch readiness** (`marketing/token-launch-checklist.md`): the
    T-14 / T-48h / T-0 operational steps still describe Solana tooling
-   (pump.fun deploy, Squads multisigs, Solscan, Bubblemaps Solana) and
-   need a rewrite pass for the Uniswap v4 / Robinhood Chain venue —
-   twenty-first night running as the top actionable item with no PR
-   picking it up. Not a pure copy-substitution: the three-separate-
-   Squads-multisig step and the Bubblemaps-Solana clustering check
-   need an explicit Safe-multisig / Robinhood-explorer-equivalent
-   decision first, not just a renamed tool. Three real building blocks
-   are merged and ready to reuse: #156 (wallet connect, wagmi/viem,
-   chain IDs 46630 testnet / 4663 mainnet), #160 (`/live` reading real
-   chain state), and #162 (trustless vault enumeration from factory
-   storage, no env pins).
-2. **Rienda M1-M5**: last reported status (2026-07-31, from Dennis) —
+   and need a rewrite pass for the Uniswap v4 / Robinhood Chain venue —
+   24th night running as the top actionable item with no PR picking it
+   up. Building blocks merged and ready: #156, #160, #162.
+5. **Rienda M1-M5**: last reported status (2026-07-31, from Dennis) —
    spec complete; token + Uniswap v4 fee-burn hook contracts built, 26
-   passing tests; M1 (vault + policy engine) in development. M2-M5 not
-   started. Now 18 days stale as of 2026-08-18 — continue asking
-   Dennis directly for a fresh update. Carry forward unchanged until
-   one lands.
-3. **Health checks — still an infra blocker, at least 19 consecutive
+   passing tests; M1 (vault + policy engine) in development. Now 21
+   days stale — continue asking Dennis directly. Carry forward
+   unchanged until a fresh report lands.
+6. **Health checks — still an infra blocker, at least 22 consecutive
    confirmed nights.** This session's outbound proxy rejects
    `www.vdmnexus.com`, `verify.vdmnexus.com`, and `nexus.vdmnexus.com`
-   with a CONNECT-tunnel 403 — confirmed again tonight via curl
-   (`curl: (56) CONNECT tunnel failed, response 403` on all three
-   hosts), identical to every prior confirmed night since 2026-07-31.
-   Needs Dennis's decision: allowlist these three hosts for the
-   scheduled session's egress policy, or move health checks to a job
-   that has broader access. Until resolved, keep reporting the
-   health-check line as "not run," not pass/fail.
-4. **Standing blocked items**: #106 (cards-v1 spec) — still a merge-
-   or-close decision, open since 2026-05-24 (86+ days). #95
-   (Polymarket agent) — still blocked on Spanish counsel, 87+ days.
+   with a CONNECT-tunnel error (curl exit 56) — confirmed again
+   tonight, identical to every prior confirmed night since 2026-07-31.
+   Needs Dennis's decision: allowlist these three hosts, or move
+   health checks to a job with broader access. Keep reporting as "not
+   run," not pass/fail.
+7. **Standing blocked items**: #106 (cards-v1 spec) — still a merge-
+   or-close decision, open since 2026-05-24 (89+ days). #95
+   (Polymarket agent) — still blocked on Spanish counsel, 90+ days.
    Legal memo — still status-tracking: email drafted, awaiting Dennis
    send. May manual-submission backlog — one line, no more.
 
 ## Process watch
 
-Tonight (2026-08-18) recovered #173 — ninth green-CI-but-unmerged
-occurrence, third clean-into-stuck alternation. Keep tracking
-clean-vs-stuck per night in `STATUS.md` and keep the auto-merge ask
-open until Dennis answers it either way.
+Tonight (2026-08-21) diagnosed two concrete infra issues instead of
+recovering a stuck PR: the `nexus` Vercel project's builds have been
+blocked for 3 days by a Hobby-plan cron-frequency limit, and the
+deposit-scan cron that survived that block is crediting 0 deposits per
+run due to Solana RPC 429s. #175 and #176 stay unmerged (genuinely red
+CI); tonight's PR is likely to join them. Keep both findings open until
+Dennis responds.
