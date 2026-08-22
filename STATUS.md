@@ -73,6 +73,26 @@ auto-merge-for-planning-PRs ask has been open in `#nexus` and
 unanswered since 2026-08-09 (9+ days); manual recovery is holding
 every night but the underlying question is unresolved.
 
+**#175/#176/#177 (2026-08-19/20/21 daily reviews) — open, genuinely
+CI-red, NOT the stuck-despite-green pattern.** Root cause (found by
+#177, independently reconfirmed by the 2026-08-22 session against the
+live Vercel API and production runtime logs): team `vdm-nexus` is on
+the Vercel **Hobby** plan; `apps/nexus/vercel.json`'s deposit-scan cron
+(`*/2 * * * *`) exceeds the Hobby daily-cron limit, so every build of
+the `nexus` project has failed pre-build since 2026-08-18T20:13. None
+of the three PRs touch `vercel.json` — this is an infra/plan decision,
+not a code fix this loop can make (out of scope: no deploys, no config
+changes). Production `nexus.vdmnexus.com` is unaffected but stale
+(still the 2026-08-17 build). Separate, also independently reconfirmed
+2026-08-22: the surviving deposit-scan cron is hitting Solana RPC 429s
+on every run and crediting 0 deposits — needs a `SOLANA_RPC_URL` fix,
+independent of the Vercel plan question. Per the standing "never merge
+without confirmed-green CI" policy, none of #175/#176/#177 (nor
+2026-08-22's own PR) were merged. Backlog: 3 open planning PRs, about
+to be 4 — the largest backlog this loop has had. Needs Dennis to
+decide: Vercel plan upgrade vs. cron cadence change, plus the RPC
+provider question.
+
 ## Conventions
 
 - One session = one branch = one PR. Never two sessions on the same branch.
