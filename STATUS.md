@@ -73,6 +73,39 @@ auto-merge-for-planning-PRs ask has been open in `#nexus` and
 unanswered since 2026-08-09 (9+ days); manual recovery is holding
 every night but the underlying question is unresolved.
 
+**#174 (2026-08-18 daily review) — tenth green-CI-but-unmerged
+occurrence, third *consecutive* stuck night** (#172, #173, #174).
+Recovered and merged (`85bc1e7`) by the 2026-08-19 session.
+
+**2026-08-19 onward — new failure mode: genuine CI-red, not the
+green-CI-but-unmerged pattern.** Starting with #175 (2026-08-19
+review), the `Vercel – nexus` check fails for real: the `vdm-nexus`
+Vercel team is on the Hobby plan, which rejects any deployment while
+`apps/nexus/vercel.json` declares the `*/2 * * * *` deposit-scan
+cron (Hobby plans only allow daily crons). Confirmed via the Vercel
+API on 2026-08-20/21: zero `nexus` deployments have succeeded since
+2026-08-18T20:13Z; production `nexus.vdmnexus.com` is unaffected but
+stale (still the 2026-08-17 build). #175, #176, #177, and #178
+(2026-08-19 through 2026-08-22 reviews) are all open and unmerged for
+this reason — this loop does not merge on confirmed-red CI, and
+cannot fix `vercel.json` or the Vercel plan itself (read-only on
+code). A separate, unrelated finding from 2026-08-21: the deposit-scan
+cron that is still running is crediting 0 deposits per run because
+every Solana `getTransaction` call hits HTTP 429 — on-chain USDC
+deposits are very likely not being credited right now, independent of
+the Vercel plan question.
+
+**2026-08-23 (tonight).** Re-verified #175/#176/#177/#178
+individually rather than assuming carry-forward: all four still show
+`Vercel – nexus: failure`, unchanged since 2026-08-18T20:13Z, with
+the other three Vercel checks green on each. Not merging any of them
+or tonight's PR (#179, this session's). Planning-PR backlog is now
+five deep (#175 → #176 → #177 → #178 → #179), all blocked on the same
+Vercel plan-vs-cron-cadence decision. The auto-merge-for-planning-PRs
+ask remains separately open since 2026-08-09 (14+ days). Both asks
+repeated plainly in tonight's `#nexus` summary, no further escalation
+in wording.
+
 ## Conventions
 
 - One session = one branch = one PR. Never two sessions on the same branch.
