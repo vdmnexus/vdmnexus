@@ -73,6 +73,65 @@ auto-merge-for-planning-PRs ask has been open in `#nexus` and
 unanswered since 2026-08-09 (9+ days); manual recovery is holding
 every night but the underlying question is unresolved.
 
+**#174 (2026-08-18 daily review) — stuck unmerged ~24h despite green
+CI.** Recovered and merged (`85bc1e7`) by the 2026-08-19 session
+before gathering. Tenth occurrence of the green-CI-but-unmerged
+pattern, and the third *consecutive* stuck night (#172, #173, #174).
+`main` has sat at this merge (`85bc1e7`) ever since — every planning
+PR opened since has hit genuine CI-red instead (see below), so none
+of it has merged.
+
+**2026-08-19 → 2026-08-26: `nexus` Vercel deploy blocker — genuine
+CI-red, eight consecutive nights, seven-PR backlog.** Starting with
+PR #175 (2026-08-19's review), the `Vercel – nexus` commit status has
+failed with "Deployment failed" on every planning PR opened since —
+diagnosed 2026-08-21 as a Hobby-plan cron-frequency limit: the
+`vdm-nexus` Vercel team is on the Hobby plan, which rejects any build
+touching `apps/nexus/vercel.json`'s `*/2 * * * *` deposit-scan cron
+("Hobby accounts are limited to daily cron jobs"). Confirmed via the
+Vercel API — zero `nexus` deployment records exist after
+2026-08-18T20:13Z; sibling projects (`docs`, `console`,
+`vdmnexus-web`) deploy fine. Production `nexus.vdmnexus.com` is
+unaffected but stale, still serving the 2026-08-17 build. This is a
+genuinely different failure mode from the green-CI-but-unmerged
+pattern above (#142 through #174) — CI is actually red, not stuck
+despite green — so none of the affected PRs have been merged, per the
+standing "never merge without confirmed-green CI" policy:
+
+- #175 (2026-08-19) — open, `Vercel – nexus: failure`.
+- #176 (2026-08-20) — open, same failure; also the night the Vercel
+  deploy-pipeline stall was first noticed (no deployment record at
+  all, not a failed one, at that point).
+- #177 (2026-08-21) — open, same failure. **Root cause diagnosed this
+  night** (Hobby-plan cron limit). Also found, separately: the
+  surviving deposit-scan cron is crediting 0 deposits per run —
+  Solana `getTransaction` calls are hitting HTTP 429. Financial
+  stakes: on-chain USDC deposits are very likely not being credited.
+- #178 (2026-08-22) — open, same failure, reconfirmed via fresh
+  production logs (still 429s, still `credited: 0`).
+- #179 (2026-08-23) — open, same failure, reconfirmed.
+- #180 (2026-08-24) — open, same failure, reconfirmed.
+- #181 (2026-08-25) — open, same failure, reconfirmed. Attempted to
+  backfill this section in `STATUS.md` but the PR itself never
+  merged, so that update never reached `main` — done properly here
+  instead, by the 2026-08-26 session.
+- 2026-08-26 session: re-verified all seven (#175-#181) individually
+  again — all still `Vercel – nexus: failure`, unchanged. Opened an
+  eighth planning PR tonight, expected to hit the same check.
+
+**Two decisions and one financial-stakes finding remain open, with
+zero human replies anywhere in `#nexus`'s history** (first channel
+message 2026-06-28): (1) upgrade the `vdm-nexus` Vercel team to Pro,
+or drop the deposit-scan cron to once-daily, in
+`apps/nexus/vercel.json`; (2) auto-merge (or merge-on-green Action)
+for this loop's own docs-only `planning/**` + `STATUS.md` PRs, open
+since 2026-08-09; (3) `SOLANA_RPC_URL` capacity for the deposit-scan
+cron, open since 2026-08-21, real money at stake. If the Vercel check
+clears, the next session should merge the backlog in strict order
+(#175 → #176 → #177 → #178 → #179 → #180 → #181 → 08-26's PR) rather
+than starting fresh, since each targets the same `main` base
+(`85bc1e7`).
+
 ## Conventions
 
 - One session = one branch = one PR. Never two sessions on the same branch.
