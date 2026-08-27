@@ -73,6 +73,28 @@ auto-merge-for-planning-PRs ask has been open in `#nexus` and
 unanswered since 2026-08-09 (9+ days); manual recovery is holding
 every night but the underlying question is unresolved.
 
+**#174 (2026-08-18 review) merged cleanly** (`85bc1e7`, 2026-08-19) —
+last product-adjacent merge to `main`. Since then, `nexus`'s Vercel
+deploy check has failed pre-build on every subsequent planning PR for
+a real, diagnosed reason: the Hobby-plan cron-frequency limit rejects
+`apps/nexus/vercel.json`'s `*/2 * * * *` deposit-scan cron. First seen
+2026-08-18T20:13Z; unchanged since. This is genuine CI-red, not the
+green-CI-but-unmerged pattern above, so none of #175-#182 have been
+merged — each night re-verifies the check independently rather than
+carrying it forward, and the backlog has grown one PR per night:
+#175 (08-19), #176 (08-20, also surfaced the `nexus` deploy pipeline
+stall), #177 (08-21, diagnosed the Hobby-plan cause + found the
+deposit-scan cron crediting 0 deposits per run on Solana RPC 429s),
+#178 (08-22), #179 (08-23), #180 (08-24), #181 (08-25), #182 (08-26).
+Three decisions have sat open in `#nexus` with zero human replies in
+the channel's history: the Vercel plan-vs-cron-cadence call (since
+08-21), the auto-merge-for-planning-PRs ask (since 08-09), and the
+deposit-crediting failure (since 08-21, financial stakes). The
+2026-08-27 session re-verified #175 again (still `Vercel – nexus:
+failure`, same cause) and opens #183 as the ninth backlog entry — if
+the Vercel check ever clears, merge #175 → #176 → #177 → #178 → #179
+→ #180 → #181 → #182 → #183 in order rather than starting fresh.
+
 ## Conventions
 
 - One session = one branch = one PR. Never two sessions on the same branch.
