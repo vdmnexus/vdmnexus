@@ -68,10 +68,52 @@ CI** (`mergeable_state: clean`, 4/4 Vercel checks passing). Recovered
 and merged (`f0b53cf`) by the 2026-08-18 session before gathering.
 Ninth occurrence of the green-CI-but-unmerged pattern (#142, #152,
 #155, #163, #165, #166, #170, #172, #173) — the third time the
-pattern has alternated a clean night into a stuck one. The
-auto-merge-for-planning-PRs ask has been open in `#nexus` and
-unanswered since 2026-08-09 (9+ days); manual recovery is holding
-every night but the underlying question is unresolved.
+pattern has alternated a clean night into a stuck one.
+
+**#174 (2026-08-18 daily review) — stuck unmerged ~24h despite green
+CI.** Recovered and merged (`85bc1e7`) by the 2026-08-19 session
+before gathering. Tenth occurrence of the green-CI-but-unmerged
+pattern, and the third *consecutive* stuck night (#172, #173, #174).
+This is the last commit currently on `main` (as of 2026-08-28).
+
+**2026-08-19 → 2026-08-28: the failure mode changed, and every one of
+these ten nights' PRs is still open.** Starting with #175 (2026-08-19
+review), CI on the `nexus` Vercel project began failing for a
+genuine, diagnosed reason rather than the stuck-despite-green pattern
+above:
+
+- 2026-08-19/20 (#175, #176): `Vercel – nexus` shows a straight
+  deployment failure with no new deployment record at all — the
+  pipeline had stopped triggering builds, not failing them.
+- 2026-08-21 (#177): root-caused — Vercel's Hobby plan rejects
+  `apps/nexus/vercel.json`'s `*/2 * * * *` deposit-scan cron
+  ("Hobby accounts are limited to daily cron jobs"), confirmed via the
+  Vercel API that team `vdm-nexus` is on Hobby. Unchanged on every
+  subsequent night (#178-#183) through 2026-08-28. Production
+  `nexus.vdmnexus.com` itself is unaffected — still serving the
+  2026-08-17 build (`f0b53cf`) as of the last check.
+- Same night (2026-08-21), a second, separate finding: the surviving
+  deposit-scan cron is crediting **0 deposits per run** — every Solana
+  `getTransaction` call is hitting HTTP 429. On-chain USDC deposits
+  are very likely not being credited. Unaddressed as of 2026-08-28 (7
+  days).
+- Per the standing "never merge without confirmed-green CI" policy,
+  none of #175 through #183 have been merged — each night re-verifies
+  the failing PRs individually rather than trusting carry-forward.
+  Backlog as of 2026-08-28: **nine open planning PRs** (#175, #176,
+  #177, #178, #179, #180, #181, #182, #183), a tenth expected from
+  tonight's session. **If the Vercel check ever clears, merge them in
+  order** (#175 → #176 → ... → #183 → the newest) rather than starting
+  fresh — each night's plan/STATUS content supersedes the previous
+  night's, so only the newest PR's docs need to actually land, but the
+  numeric merge order matters for git history.
+- Three decisions remain open in `#nexus` as of 2026-08-28, a channel
+  with zero human replies since its first message (2026-06-28):
+  the Vercel plan-vs-cron-cadence call (since 08-21, 7 days), the
+  auto-merge-for-planning-PRs ask (since 08-09, 19 days), and the
+  deposit-scan financial-stakes finding above (since 08-21, 7 days).
+  A direct notification went out on 2026-08-28 given the stakes and
+  duration.
 
 ## Conventions
 
