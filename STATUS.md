@@ -73,6 +73,60 @@ auto-merge-for-planning-PRs ask has been open in `#nexus` and
 unanswered since 2026-08-09 (9+ days); manual recovery is holding
 every night but the underlying question is unresolved.
 
+**#174 (2026-08-18 daily review) — stuck unmerged ~24h despite green
+CI.** Recovered and merged (`85bc1e7`) by the 2026-08-19 session
+before gathering. Tenth occurrence of the green-CI-but-unmerged
+pattern (#142, #152, #155, #163, #165, #166, #170, #172, #173, #174)
+— and the third *consecutive* stuck night (#172, #173, #174). This is
+the **last PR to actually merge to `main`** in this saga.
+
+**2026-08-19 → 2026-08-30: the `nexus` Vercel-check blocker, backfilled.**
+Starting with #175 (2026-08-19's review), the `Vercel – nexus` check
+began failing pre-build on every planning PR, and has not cleared
+since. The 2026-08-20 session (#176) first noticed the pipeline had
+stalled — no new deployment record at all, not a code-level failure.
+The 2026-08-21 session (#177) diagnosed the cause via the Vercel API:
+the `vdm-nexus` team is on the Hobby plan, which only permits daily
+cron jobs, and `apps/nexus/vercel.json`'s deposit-scan cron runs every
+2 minutes (`*/2 * * * *`) — Vercel now rejects the deploy outright
+with an explicit error. The same session found a second, separate,
+higher-stakes problem: the *surviving* (pre-#175) deposit-scan cron on
+production `nexus.vdmnexus.com` is hitting Solana RPC 429s on every
+`getTransaction` call and crediting 0 deposits per run — on-chain USDC
+deposits are very likely not being credited to agent balances.
+
+This is genuine CI-red, not the earlier stuck-despite-green pattern,
+so the standing never-merge-without-confirmed-green-CI policy holds:
+every session from #175 through #185 individually re-verified the
+check (not carried forward) and found it unchanged, so none of
+#175-#185 merged. Each session's `planning/**` + `STATUS.md` writes
+therefore never reached `main` — this backfill entry is the first
+record on `main` of what those eleven sessions found. Sequence:
+#175 (08-19, first hit) → #176 (08-20, pipeline-stalled finding) →
+#177 (08-21, root cause + deposit-crediting finding, first ask for a
+Vercel plan-vs-cron-cadence decision) → #178 (08-22, confirmed via
+Vercel team API + production runtime logs) → #179 (08-23) → #180
+(08-24) → #181 (08-25, first "unanswered a full week" flag) → #182
+(08-26, STATUS.md backfill attempted from that session's own branch,
+never landed since it too stayed unmerged) → #183 (08-27) → #184
+(08-28) → #185 (08-29, backlog reaches eleven, first direct
+notification sent alongside the Slack post) → tonight's PR (08-30,
+13th consecutive night, backlog reaches twelve). No product code has
+merged since #162 (2026-08-06).
+
+Three decisions have sat unanswered in `#nexus` throughout, in a
+channel with zero human replies anywhere in its history: the Vercel
+plan-vs-cron-cadence call for `nexus` (since 08-21), the
+auto-merge-for-planning-PRs ask (since 08-09, now directly
+responsible for the growing backlog), and the deposit-crediting
+failure (since 08-21, financial stakes — real USDC deposits likely
+going uncredited).
+
+**If the Vercel check clears:** merge the backlog in strict order,
+#175 through #185 then tonight's PR, rather than starting fresh —
+each PR's `planning/daily/<date>.md` content is still valid and
+should land in order.
+
 ## Conventions
 
 - One session = one branch = one PR. Never two sessions on the same branch.
