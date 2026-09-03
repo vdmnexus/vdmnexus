@@ -18,60 +18,60 @@ daily review, recovered from a stuck-unmerged state — fifth such
 recovery: #142, #152, #155, #163, #165) merged 2026-08-09; #166
 (2026-08-09 daily review, recovered from a stuck-unmerged state —
 sixth such recovery, and the first time it happened two nights in a
-row) merged 2026-08-10; #167 (2026-08-10 daily review) merged
-cleanly the same night — no recovery needed, second clean night
-(after #164) against six stuck recoveries in the same window; #168
-(2026-08-11 daily review) merged within 5 seconds of opening — third
-clean night in a row, same window; #169 (2026-08-12 daily review)
-also merged cleanly — fourth clean night in a row.
+row) merged 2026-08-10; #167-#169 (2026-08-10 through 2026-08-12
+daily reviews) all merged cleanly, no recovery needed.
 
 **2026-08-13 gap.** A "Daily review 2026-08-13" summary was posted to
 `#nexus` that night, but no matching PR, branch, or commit exists in
-this repo — `main` went straight from #169 (2026-08-12) to #170
-(2026-08-14) with no commit in between. Different failure mode from
-the green-CI-but-unmerged pattern above: here nothing was ever pushed.
-The 2026-08-14 session found and documented this in #170's body, but
-that session never posted to Slack, so Dennis was not actually told
-until the 2026-08-15 session's summary. Nothing left to recover
-in-repo for 08-13 itself.
+this repo. Nothing left to recover in-repo for 08-13 itself.
 
-**#170 (2026-08-14 daily review) — stuck unmerged for ~24h despite
-green CI** (`mergeable_state: clean`, 4/4 Vercel checks passing).
-Recovered and merged (`a930492`) by the 2026-08-15 session before
-gathering. Seventh occurrence of the green-CI-but-unmerged pattern
-(#142, #152, #155, #163, #165, #166, #170) — notably recurring right
-after four consecutive clean nights (#164, #167, #168, #169) that had
-looked like resolution. Combined with the 08-13 no-commit gap, three
-distinct failure modes have now shown up in five nights. 2026-08-15's
-daily review escalates the auto-merge-for-planning-PRs ask on the
-strength of this recurrence.
+#170 (2026-08-14), #172 (2026-08-16), #173 (2026-08-17), and #174
+(2026-08-18) each sat unmerged ~24h despite green CI and were
+recovered by the following night's session — the ninth and tenth
+occurrences of the green-CI-but-unmerged pattern overall (#142, #152,
+#155, #163, #165, #166, #170, #172, #173, #174). #171 (2026-08-15)
+merged cleanly. #174 was the last of this pattern observed; #175
+onward hit a different, unrelated failure (below) before any of them
+could reach this state.
 
-#171 (2026-08-15 daily review) merged cleanly the same night (`e6e5dc4`)
-— no recovery needed. Fifth clean night out of the last six (#164,
-#167, #168, #169, #171) against seven earlier stuck recoveries. The
-2026-08-16 session confirmed this directly against `main` before
-gathering and treated it as one data point, not resolution — the
-auto-merge ask stays open pending a decision from Dennis.
+**#175 onward — `Vercel – nexus: failure`, ongoing since
+2026-08-18T20:13Z.** Diagnosed 2026-08-21 (in #177's review): `vdm-nexus`
+is on the Vercel Hobby plan, which rejects `apps/nexus/vercel.json`'s
+`*/2 * * * *` deposit-scan cron on any new build — a pre-build,
+diff-independent platform failure, not the earlier stuck-despite-green
+pattern. Production `nexus.vdmnexus.com` is unaffected (serving the
+2026-08-17/18 build; still on deployment `dpl_87VBtuekpVTR6Xqjc8RMZ6WQT3aw`
+as of 2026-09-03, no newer `nexus` deployment recorded). Every planning PR
+since has hit the identical check and none have been merged: #175
+(08-19) through #189 (09-02) — fifteen open PRs — plus tonight's #190,
+sixteen. Re-verified fresh again tonight (2026-09-03) via PR #189's
+`get_status` and a fresh `list_teams` call: still Hobby, still failing,
+17th consecutive night. Each night's session re-verifies the check and
+the team plan fresh rather than trusting the carry-forward. If the check
+ever clears, merge the backlog in strict order (#175 → ... → #190) rather
+than starting fresh. Two decisions remain open and unanswered in `#nexus`
+since 2026-08-21 (Vercel plan vs. cron cadence) and 2026-08-09 (auto-merge
+for planning-only PRs) — 13 and 25 days respectively as of 2026-09-03.
 
-**#172 (2026-08-16 daily review) — stuck unmerged for ~24h despite
-green CI** (`mergeable_state: clean`, 4/4 Vercel checks passing).
-Recovered and merged (`c467903`) by the 2026-08-17 session before
-gathering. Eighth occurrence of the green-CI-but-unmerged pattern
-(#142, #152, #155, #163, #165, #166, #170, #172) — and the second
-time the pattern has alternated a clean night straight into a stuck
-one (previously #164-#169 clean → #170 stuck; now #171 clean → #172
-stuck). The auto-merge-for-planning-PRs ask has been open in `#nexus`
-since 2026-08-09 with no reply.
+**Deposit-scan cron — crediting 0 deposits per run, since 2026-08-21.**
+Separate from the Vercel build blocker above: the surviving production
+cron (still running on the last successful deploy, currently serving from
+deployment `dpl_kMXumydsSvke6TjRGXWJZXbdqA3g`) hits Solana `getTransaction`
+HTTP 429 on every run and completes with `credited: 0` every time.
+Reconfirmed directly against live runtime logs every night since
+discovery, including 2026-09-03 (19:52-20:10 UTC window, still 429ing on
+the same three stuck tx signatures, still 0 credited). On-chain USDC
+deposits are very likely not being credited to agent balances.
+Financial-stakes item, unaddressed in `#nexus` 13 days running as of
+2026-09-03.
 
-**#173 (2026-08-17 daily review) — stuck unmerged ~24h despite green
-CI** (`mergeable_state: clean`, 4/4 Vercel checks passing). Recovered
-and merged (`f0b53cf`) by the 2026-08-18 session before gathering.
-Ninth occurrence of the green-CI-but-unmerged pattern (#142, #152,
-#155, #163, #165, #166, #170, #172, #173) — the third time the
-pattern has alternated a clean night into a stuck one. The
-auto-merge-for-planning-PRs ask has been open in `#nexus` and
-unanswered since 2026-08-09 (9+ days); manual recovery is holding
-every night but the underlying question is unresolved.
+**Escalation note (2026-09-03).** `#nexus` has had zero human replies
+from Dennis across its entire visible history (checked back through
+2026-08-13 tonight, consistent with every prior night). A direct
+scheduled-task notification was sent once before (2026-09-01) without
+visible effect (2026-08-31's session found the DM channel empty).
+Tonight's session sent another direct notification given the combination
+of a 25-day-old process ask and a 13-day-old live financial-stakes bug.
 
 ## Conventions
 
