@@ -84,6 +84,30 @@ consecutive-night pattern, not an intermittent one. The
 auto-merge-for-planning-PRs ask has been open in `#nexus` and
 unanswered since 2026-08-09 (10 days).
 
+**#175-#191 (2026-08-19 through 2026-09-04 daily reviews) — seventeen-
+night silent backlog, root-caused and cleared 2026-09-05.** After
+#174, the `nexus` Vercel project stopped producing any deployment at
+all (last one 2026-08-19T20:13 UTC) and its GitHub status check has
+reported `Vercel – nexus: failure` on every commit since. That flips
+`mergeable_state` from `clean` to `unstable` on every subsequent
+planning PR. The "recover the previous stuck PR" convention this log
+documents above only ever fired on `mergeable_state: clean`, so once
+it stopped being `clean` every night, nobody attempted a merge at
+all — seventeen PRs (#175-#191) piled up unmerged and undetected until
+the 2026-09-04 session (#191) investigated and named the root cause,
+and the 2026-09-05 session confirmed `unstable` still merges fine via
+the API (only `dirty`/`blocked` actually stop it). #175 merged
+(`31371ec`); #176-#191 conflict against `main` once #175 landed (each
+night fully overwrites `planning/NEXT.md`) and were closed unmerged
+rather than replayed one-by-one — their content is preserved verbatim
+on each PR's description/branch, and #191 carries a comment explaining
+the closure. The auto-merge-for-planning-PRs ask is now 28 days
+unanswered (since 2026-08-09); the `nexus` Vercel project's failing
+check is a separate, still-open ask (16 days, since 2026-08-21).
+Convention going forward: treat `mergeable_state: unstable` as
+mergeable-if-not-`dirty`/`blocked`, not as equivalent to a merge
+conflict.
+
 ## Conventions
 
 - One session = one branch = one PR. Never two sessions on the same branch.
@@ -94,6 +118,11 @@ unanswered since 2026-08-09 (10 days).
   once merged + the build_log entry is in.
 - If a branch is paused, write a one-line note in the row about *why*
   and what unblocks it.
+- A PR's `mergeable_state` of `unstable` (failing/pending non-required
+  checks) does not block an API merge — only `dirty` (conflicts) or
+  `blocked` (failing required checks / missing reviews) does. Don't
+  skip attempting a merge just because a check other than the
+  planning-doc diff itself is red.
 
 ## Cap on parallel work
 
