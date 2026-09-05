@@ -1,59 +1,62 @@
-# Tomorrow's plan — 2026-08-20
+# Tomorrow's plan — 2026-09-06
 
-Tracked objects, in priority order (per `prompts/00-daily-review.md`):
-launch readiness, Rienda M1-M5, site/API health, standing-blocked items.
-Plus the process-integrity item, listed first.
+Tracked objects, in priority order (per `prompts/00-daily-review.md`).
+Process-integrity item first.
 
-0. **Process integrity — auto-merge decision still open.** Tonight
-   (2026-08-19) recovered #174 (2026-08-18's review), stuck unmerged
-   ~24h despite green CI — the tenth occurrence of this pattern
-   (#142, #152, #155, #163, #165, #166, #170, #172, #173, #174), and
-   the third consecutive stuck night (#172, #173, #174), which
-   supersedes the earlier "alternates with a clean night" read. The
-   auto-merge / merge-on-green ask for this loop's own docs-only
-   `planning/**` + `STATUS.md` PRs has now gone unanswered in
-   `#nexus` for ten days (first raised 2026-08-09). Keep repeating
-   it plainly; recover and merge immediately if it recurs.
-1. **Launch readiness** (`marketing/token-launch-checklist.md`): the
-   T-14 / T-48h / T-0 operational steps still describe Solana tooling
-   (pump.fun deploy, Squads multisigs, Solscan, Bubblemaps Solana) and
-   need a rewrite pass for the Uniswap v4 / Robinhood Chain venue —
-   twenty-second night running as the top actionable item with no PR
-   picking it up. Not a pure copy-substitution: the three-separate-
-   Squads-multisig step and the Bubblemaps-Solana clustering check
-   need an explicit Safe-multisig / Robinhood-explorer-equivalent
-   decision first, not just a renamed tool. Three real building blocks
-   are merged and ready to reuse: #156 (wallet connect, wagmi/viem,
-   chain IDs 46630 testnet / 4663 mainnet), #160 (`/live` reading real
-   chain state), and #162 (trustless vault enumeration from factory
-   storage, no env pins).
-2. **Rienda M1-M5**: last reported status (2026-07-31, from Dennis) —
-   spec complete; token + Uniswap v4 fee-burn hook contracts built, 26
-   passing tests; M1 (vault + policy engine) in development. M2-M5 not
-   started. Now 19 days stale as of 2026-08-19 — continue asking
-   Dennis directly for a fresh update. Carry forward unchanged until
-   one lands.
-3. **Health checks — still an infra blocker, at least 20 consecutive
-   confirmed nights.** This session's outbound proxy rejects
-   `www.vdmnexus.com`, `verify.vdmnexus.com`, and `nexus.vdmnexus.com`
-   with a CONNECT-tunnel 403 — confirmed again tonight via `curl`,
-   identical to every prior confirmed night since 2026-07-31. Needs
-   Dennis's decision: allowlist these three hosts for the scheduled
-   session's egress policy, or move health checks to a job that has
-   broader access. Until resolved, keep reporting the health-check
-   line as "not run," not pass/fail.
-4. **Standing blocked items**: #106 (cards-v1 spec) — still a merge-
-   or-close decision, open since 2026-05-24 (87+ days). #95
-   (Polymarket agent) — still blocked on Spanish counsel, 88+ days.
-   Legal memo — still status-tracking: email drafted, awaiting Dennis
-   send. May manual-submission backlog — one line, no more.
+0. **Process integrity — backlog cleared, root cause fixed, three asks
+   still open.** `main` was stuck at #174 (2026-08-19) for seventeen
+   nights because the `nexus` Vercel project's failing status check
+   flips every planning PR's `mergeable_state` to `unstable`, and prior
+   sessions treated anything short of `clean` as unmergeable — so
+   nobody tried merging, and the backlog (#175-#191) grew silently.
+   Tonight: merged #175, closed #176-#191 (superseded, content
+   preserved on their branches), and corrected the merge logic —
+   `unstable` is mergeable via the API unless GitHub also reports
+   `dirty`/`blocked`. Verify tomorrow that tonight's own PR merged
+   the same way and that `main` stays current going forward, one PR
+   per night. Three asks remain open and unanswered in `#nexus`:
+   (a) fix or retire the `nexus` Vercel project's failing check
+   (Hobby-plan/cron-cadence question, open since 08-21, 16 days);
+   (b) auto-merge for planning PRs, open since 08-09 (28 days) — now
+   addressed procedurally by (0) above, but Dennis still hasn't
+   weighed in; (c) the deposit-crediting bug below, open since 08-21
+   (16 days) and financially live.
+1. **Deposit-crediting bug — live, unresolved, 16 days.**
+   `/api/v1/deposits/scan` on production still hits `RPC getTransaction
+   HTTP 429` on the same three stuck Solana signatures and completes
+   with `credited:0` every 2-minute run, reconfirmed directly against
+   runtime logs tonight (15/15 invocations, 19:34-20:12 UTC). Any
+   on-chain USDC deposit landing in this window is very likely not
+   being credited. Needs Dennis's decision on the RPC provider/rate
+   limit, not another nightly re-check.
+2. **Launch readiness** (`marketing/token-launch-checklist.md`): the
+   T-14 / T-48h / T-0 steps still describe Solana tooling (pump.fun,
+   Squads, Solscan, Bubblemaps Solana) and need a rewrite pass for the
+   Uniswap v4 / Robinhood Chain venue — now the top unpicked build item
+   for over three weeks running. Reusable building blocks already
+   merged: #156 (wallet connect, chain IDs 46630/4663), #160 (`/live`
+   chain reads), #162 (trustless vault enumeration).
+3. **Rienda M1-M5**: last report 2026-07-31 (spec complete; token +
+   Uniswap v4 fee-burn hook contracts, 26 passing tests; M1 in
+   development). Now 37 days stale — keep asking Dennis directly.
+4. **Health checks — still egress-blocked, 37th consecutive confirmed
+   night** on `nexus.vdmnexus.com`, `verify.vdmnexus.com`, and
+   `www.vdmnexus.com`. Needs Dennis's call: allowlist these hosts for
+   the scheduled session's egress policy, or move health checks
+   elsewhere.
+5. **Standing blocked items**: #106 (cards-v1 spec, 104 days) —
+   merge-or-close decision. #95 (Polymarket agent, 105 days) — blocked
+   on Spanish counsel. Legal memo — status-tracking only (email
+   drafted, awaiting Dennis send). May manual-submission backlog — one
+   line, no more.
 
 ## Process watch
 
-Tonight (2026-08-19) recovered #174 and confirmed a third consecutive
-stuck night (#172, #173, #174) — this supersedes the earlier
-clean/stuck alternation read as the operative pattern. Manual recovery
-is the only thing keeping it from silently stalling. Keep tracking
-clean-vs-stuck per night in `STATUS.md`, keep recovering immediately
-on recurrence, and keep the auto-merge ask open — it has been
-unanswered in `#nexus` since 2026-08-09 (10 days).
+Tonight cleared a seventeen-PR backlog (#175-#191) that had accumulated
+since 2026-08-19 because sessions only attempted to merge a stuck PR
+when GitHub reported `mergeable_state: clean`. The `nexus` Vercel
+project has been failing its check every night since 08-19 (no
+deployment produced at all), which keeps every PR at `unstable` instead
+— still mergeable via the API, just never tried. Fixed the logic
+tonight; watch that it holds for a few nights before treating this as
+resolved rather than one data point.
