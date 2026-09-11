@@ -131,8 +131,13 @@ night under the corrected merge logic, despite `mergeable_state:
 unstable` (the `nexus` Vercel check is still failing — reconfirmed
 fresh again by the 2026-09-10 session via `list_teams`/`list_deployments`:
 still Hobby plan, no `nexus` deployment newer than 2026-08-19T20:13 UTC).
-Tonight's session (2026-09-10) is opening and merging its own PR the
-same way — see next session's entry once it's confirmed landed.
+
+**#197 (2026-09-10 daily review) — merged cleanly the same session**
+(9 seconds, 20:12:20-20:12:29 UTC, `9b8537a6`). Sixth consecutive clean
+night under the corrected merge logic, `nexus` Vercel check still
+failing (unchanged root cause). Tonight's session (2026-09-11) is
+opening and merging its own PR the same way — see next session's entry
+once it's confirmed landed.
 
 ## Conventions
 
