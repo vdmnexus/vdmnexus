@@ -135,9 +135,15 @@ still Hobby plan, no `nexus` deployment newer than 2026-08-19T20:13 UTC).
 **#197 (2026-09-10 daily review) — merged cleanly the same session**
 (9 seconds, 20:12:20-20:12:29 UTC, `9b8537a6`). Sixth consecutive clean
 night under the corrected merge logic, `nexus` Vercel check still
-failing (unchanged root cause). Tonight's session (2026-09-11) is
-opening and merging its own PR the same way — see next session's entry
-once it's confirmed landed.
+failing (unchanged root cause).
+
+**#198 (2026-09-11 daily review) — merged cleanly the same session**
+(7 seconds, 20:11:51-20:11:58 UTC, `a7f1b894`). Seventh consecutive
+clean night under the corrected merge logic, confirmed fresh by this
+2026-09-12 session before gathering. `nexus` Vercel check still
+failing (unchanged root cause, 22 days). With a full week of clean
+merges now on record, this session's `planning/NEXT.md` treats the
+merge-logic fix as proven rather than an ongoing watch item.
 
 ## Conventions
 
