@@ -145,6 +145,20 @@ failing (unchanged root cause, 22 days). With a full week of clean
 merges now on record, this session's `planning/NEXT.md` treats the
 merge-logic fix as proven rather than an ongoing watch item.
 
+**#199 (2026-09-12 daily review) — merged cleanly the same session**
+(7 seconds, 20:11:16-20:11:25 UTC, `2828504`). Eighth consecutive
+clean night under the corrected merge logic. This 2026-09-13 session
+reconfirmed the `nexus` Vercel project fresh via `list_teams` /
+`list_deployments`: still Hobby plan, still no `nexus` deployment
+newer than 2026-08-19T20:13Z, root cause unchanged (23 days). It also
+pulled live Vercel runtime logs for the production `nexus` deployment
+directly and reconfirmed the deposit-crediting bug is still active:
+every `/api/v1/deposits/scan` run in the last two hours hit `RPC
+getTransaction HTTP 429` and completed with `credited: 0` (23 days
+running, since 2026-08-21) — flagging that the stalled `nexus`
+deployments are very likely also why a code fix for the deposit bug
+has never shipped.
+
 ## Conventions
 
 - One session = one branch = one PR. Never two sessions on the same branch.
