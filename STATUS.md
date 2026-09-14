@@ -159,6 +159,18 @@ running, since 2026-08-21) — flagging that the stalled `nexus`
 deployments are very likely also why a code fix for the deposit bug
 has never shipped.
 
+**#200 (2026-09-13 daily review) — merged cleanly the same session**
+(8 seconds, 20:12:35-20:12:43 UTC, `ca584ae5`). Ninth consecutive
+clean night under the corrected merge logic. This 2026-09-14 session
+reconfirmed both still-open findings fresh against live data rather
+than carrying them forward: `list_teams` / `list_deployments` still
+show `vdm-nexus` on the Hobby plan with no `nexus` deployment newer
+than 2026-08-19T20:13Z (26 days), and a pulled two-hour window of
+production runtime logs shows 90 occurrences of `RPC getTransaction
+HTTP 429` across 30 `deposit.scan_completed` events, every one
+`credited: 0` (24 days running, since 2026-08-21). Both remain
+unresolved asks in `#nexus` pending a decision from Dennis.
+
 ## Conventions
 
 - One session = one branch = one PR. Never two sessions on the same branch.
