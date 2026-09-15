@@ -171,6 +171,16 @@ HTTP 429` across 30 `deposit.scan_completed` events, every one
 `credited: 0` (24 days running, since 2026-08-21). Both remain
 unresolved asks in `#nexus` pending a decision from Dennis.
 
+**#201 (2026-09-14 daily review) — merged cleanly the same session**
+despite `mergeable_state: unstable` (the `nexus` Vercel check is
+still failing, root cause unchanged). Tenth consecutive clean night
+under the corrected merge logic (#192-#201). This 2026-09-15 session
+confirmed no new PRs/commits landed on `main` since #201 before
+gathering; the deposit-crediting bug and the `nexus` Vercel check
+were carried forward from their last direct confirmation on 2026-09-14
+rather than re-pulled fresh tonight — flagged in `planning/NEXT.md`
+for a fresh pull on 2026-09-16.
+
 ## Conventions
 
 - One session = one branch = one PR. Never two sessions on the same branch.
