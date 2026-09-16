@@ -181,6 +181,19 @@ were carried forward from their last direct confirmation on 2026-09-14
 rather than re-pulled fresh tonight — flagged in `planning/NEXT.md`
 for a fresh pull on 2026-09-16.
 
+**#202 (2026-09-15 daily review) — merged cleanly the same session**
+despite `mergeable_state: unstable` (the `nexus` Vercel check is
+still failing, root cause unchanged). Eleventh consecutive clean
+night under the corrected merge logic (#192-#202). This 2026-09-16
+session reconfirmed both still-open findings fresh against live data
+rather than carrying them forward: `list_teams` / `list_deployments`
+still show `vdm-nexus` on the Hobby plan with no `nexus` deployment
+newer than 2026-08-19T20:13Z (28 days), and a pulled two-hour window
+of production runtime logs shows 90 occurrences of `RPC
+getTransaction HTTP 429` across 30 `deposit.scan_completed` events,
+every one `credited: 0` (26 days running, since 2026-08-21). Both
+remain unresolved asks in `#nexus` pending a decision from Dennis.
+
 ## Conventions
 
 - One session = one branch = one PR. Never two sessions on the same branch.
