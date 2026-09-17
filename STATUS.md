@@ -108,91 +108,17 @@ Convention going forward: treat `mergeable_state: unstable` as
 mergeable-if-not-`dirty`/`blocked`, not as equivalent to a merge
 conflict.
 
-**#192 (2026-09-05 daily review) — merged cleanly the same session**
-(~90 seconds from open to merge), the first PR opened under the
-corrected merge logic. One data point that the fix works end-to-end,
-not just in theory.
-
-**#193 (2026-09-06 daily review) — merged cleanly the same session**
-(~68 seconds, 20:11:29-20:12:38 UTC). Second consecutive clean night
-under the corrected merge logic.
-
-**#194 (2026-09-07 daily review) — merged cleanly the same session**
-(8 seconds, 20:12:16-20:12:24 UTC, `a4c0244`). Third consecutive clean
-night under the corrected merge logic.
-
-**#195 (2026-09-08 daily review) — merged cleanly the same session**
-(8 seconds, 20:12:48-20:12:56 UTC, `2da23b0`). Fourth consecutive clean
-night under the corrected merge logic.
-
-**#196 (2026-09-09 daily review) — merged cleanly the same session**
-(9 seconds, 20:13:22-20:13:31 UTC, `8b5eba8`). Fifth consecutive clean
-night under the corrected merge logic, despite `mergeable_state:
-unstable` (the `nexus` Vercel check is still failing — reconfirmed
-fresh again by the 2026-09-10 session via `list_teams`/`list_deployments`:
-still Hobby plan, no `nexus` deployment newer than 2026-08-19T20:13 UTC).
-
-**#197 (2026-09-10 daily review) — merged cleanly the same session**
-(9 seconds, 20:12:20-20:12:29 UTC, `9b8537a6`). Sixth consecutive clean
-night under the corrected merge logic, `nexus` Vercel check still
-failing (unchanged root cause).
-
-**#198 (2026-09-11 daily review) — merged cleanly the same session**
-(7 seconds, 20:11:51-20:11:58 UTC, `a7f1b894`). Seventh consecutive
-clean night under the corrected merge logic, confirmed fresh by this
-2026-09-12 session before gathering. `nexus` Vercel check still
-failing (unchanged root cause, 22 days). With a full week of clean
-merges now on record, this session's `planning/NEXT.md` treats the
-merge-logic fix as proven rather than an ongoing watch item.
-
-**#199 (2026-09-12 daily review) — merged cleanly the same session**
-(7 seconds, 20:11:16-20:11:25 UTC, `2828504`). Eighth consecutive
-clean night under the corrected merge logic. This 2026-09-13 session
-reconfirmed the `nexus` Vercel project fresh via `list_teams` /
-`list_deployments`: still Hobby plan, still no `nexus` deployment
-newer than 2026-08-19T20:13Z, root cause unchanged (23 days). It also
-pulled live Vercel runtime logs for the production `nexus` deployment
-directly and reconfirmed the deposit-crediting bug is still active:
-every `/api/v1/deposits/scan` run in the last two hours hit `RPC
-getTransaction HTTP 429` and completed with `credited: 0` (23 days
-running, since 2026-08-21) — flagging that the stalled `nexus`
-deployments are very likely also why a code fix for the deposit bug
-has never shipped.
-
-**#200 (2026-09-13 daily review) — merged cleanly the same session**
-(8 seconds, 20:12:35-20:12:43 UTC, `ca584ae5`). Ninth consecutive
-clean night under the corrected merge logic. This 2026-09-14 session
-reconfirmed both still-open findings fresh against live data rather
-than carrying them forward: `list_teams` / `list_deployments` still
-show `vdm-nexus` on the Hobby plan with no `nexus` deployment newer
-than 2026-08-19T20:13Z (26 days), and a pulled two-hour window of
-production runtime logs shows 90 occurrences of `RPC getTransaction
-HTTP 429` across 30 `deposit.scan_completed` events, every one
-`credited: 0` (24 days running, since 2026-08-21). Both remain
-unresolved asks in `#nexus` pending a decision from Dennis.
-
-**#201 (2026-09-14 daily review) — merged cleanly the same session**
-despite `mergeable_state: unstable` (the `nexus` Vercel check is
-still failing, root cause unchanged). Tenth consecutive clean night
-under the corrected merge logic (#192-#201). This 2026-09-15 session
-confirmed no new PRs/commits landed on `main` since #201 before
-gathering; the deposit-crediting bug and the `nexus` Vercel check
-were carried forward from their last direct confirmation on 2026-09-14
-rather than re-pulled fresh tonight — flagged in `planning/NEXT.md`
-for a fresh pull on 2026-09-16.
-
-**#202 (2026-09-15 daily review) — merged cleanly the same session**
-despite `mergeable_state: unstable` (the `nexus` Vercel check is
-still failing, root cause unchanged). Eleventh consecutive clean
-night under the corrected merge logic (#192-#202). This 2026-09-16
-session reconfirmed both still-open findings fresh against live data
-rather than carrying them forward: `list_teams` / `list_deployments`
-still show `vdm-nexus` on the Hobby plan with no `nexus` deployment
-newer than 2026-08-19T20:13Z (28 days), and a pulled two-hour window
-of production runtime logs shows 90 occurrences of `RPC
-getTransaction HTTP 429` across 30 `deposit.scan_completed` events,
-every one `credited: 0` (26 days running, since 2026-08-21). Both
-remain unresolved asks in `#nexus` pending a decision from Dennis.
+**#192 through #203 (2026-09-05 through 2026-09-16 daily reviews) —
+twelve consecutive clean nights under the corrected merge logic.**
+Each PR opened and merged within the same session (times ranging from
+~7 seconds to ~90 seconds), most recently #203 (2026-09-16, merged
+`aad33f42d`) despite `mergeable_state: unstable` (the `nexus` Vercel
+check is still failing, root cause unchanged since 2026-08-19). The
+`nexus` Vercel check and the deposit-crediting bug (both live,
+unresolved) were reconfirmed fresh against live data on 2026-09-16 —
+carried forward without a fresh pull on 2026-09-17, flagged for
+re-verification next session. Both remain unresolved asks in `#nexus`
+pending a decision from Dennis.
 
 ## Conventions
 
