@@ -108,20 +108,20 @@ Convention going forward: treat `mergeable_state: unstable` as
 mergeable-if-not-`dirty`/`blocked`, not as equivalent to a merge
 conflict.
 
-**#192 through #206 (2026-09-05 through 2026-09-19 daily reviews) —
-fifteen consecutive clean nights under the corrected merge logic.**
+**#192 through #207 (2026-09-05 through 2026-09-20 daily reviews) —
+sixteen consecutive clean nights under the corrected merge logic.**
 Each PR opened and merged within the same session (times ranging from
-~7 seconds to ~90 seconds), most recently #206 (2026-09-19, merged
-`78e4cd64`) despite `mergeable_state: unstable` (the `nexus` Vercel
+~7 seconds to ~90 seconds), most recently #207 (2026-09-20, merged
+`4dc6a4c8`) despite `mergeable_state: unstable` (the `nexus` Vercel
 check is still failing, root cause unchanged since 2026-08-19). The
 `nexus` Vercel check and the deposit-crediting bug (both live,
 unresolved) were reconfirmed fresh against live data again on
-2026-09-20 (direct pull against Vercel's `list_teams`/`list_deployments`
+2026-09-21 (direct pull against Vercel's `list_teams`/`list_deployments`
 and `get_runtime_logs`, not carried forward) — the `nexus` project is
 still on the Hobby plan with no deployment newer than the
 2026-08-19T20:12:40Z production build (`dpl_kMXumydsSvke6TjRGXWJZXbdqA3g`),
 and that exact build is still the one serving the deposit-scan cron,
-which hit `RPC getTransaction HTTP 429` on all 28 invocations in the
+which hit `RPC getTransaction HTTP 429` on all 30 invocations in the
 last 2h window, crediting 0 every time. Both remain unresolved asks in
 `#nexus` pending a decision from Dennis.
 
