@@ -1,10 +1,10 @@
-# Tomorrow's plan — 2026-09-27
+# Tomorrow's plan — 2026-09-28
 
 Tracked objects, in priority order (per `prompts/00-daily-review.md`).
 
-1. **Deposit-crediting bug — live, unresolved, 36 days.**
+1. **Deposit-crediting bug — live, unresolved, 37 days.**
    `/api/v1/deposits/scan` on production reconfirmed fresh tonight
-   (2026-09-26, direct pull against live runtime logs scoped to the
+   (2026-09-27, direct pull against live runtime logs scoped to the
    current production deployment, not carried forward): every scan
    invocation in the last 30 minutes hits `RPC getTransaction HTTP 429`
    on the same three stuck signatures and completes with `credited:0`.
@@ -13,43 +13,43 @@ Tracked objects, in priority order (per `prompts/00-daily-review.md`).
    the RPC provider/rate limit, not another nightly re-check.
 2. **Process integrity — two asks still open, unanswered in `#nexus`.**
    (a) The `nexus` Vercel project's failing check / stalled
-   deployments (open since 08-19, 38 days; reconfirmed fresh tonight —
+   deployments (open since 08-19, 39 days; reconfirmed fresh tonight —
    `vdm-nexus` team still on Hobby plan, no `nexus` deployment newer
    than the 2026-08-19T20:12:40Z production build, which is the exact
    build id still serving the deposit-scan cron tonight; very likely
    the same root cause blocking a code fix for item 1 from ever
    shipping).
-   (b) Auto-merge for planning PRs (open since 08-09, 48 days) — less
+   (b) Auto-merge for planning PRs (open since 08-09, 49 days) — less
    urgent procedurally since the merge-logic fix is proven across
-   twenty-one straight clean nights (#192-#212), but still unanswered.
+   twenty-two straight clean nights (#192-#213), but still unanswered.
 3. **Launch readiness** (`marketing/token-launch-checklist.md`): the
    T-14 / T-48h / T-0 steps still describe Solana tooling (pump.fun,
    Squads, Solscan, Bubblemaps Solana) and need a rewrite pass for the
-   Uniswap v4 / Robinhood Chain venue — 58 days unpicked since the
+   Uniswap v4 / Robinhood Chain venue — 59 days unpicked since the
    2026-07-30 re-venue. Reusable building blocks already merged: #156
    (wallet connect, chain IDs 46630/4663), #160 (`/live` chain reads),
    #162 (trustless vault enumeration).
 4. **Rienda M1-M5**: last report 2026-07-31 (spec complete; token +
    Uniswap v4 fee-burn hook contracts, 26 passing tests; M1 in
-   development). Now 57 days stale — keep asking Dennis directly for a
+   development). Now 58 days stale — keep asking Dennis directly for a
    fresh status.
-5. **Health checks — still egress-blocked, 58th consecutive confirmed
+5. **Health checks — still egress-blocked, 59th consecutive confirmed
    night** on `nexus.vdmnexus.com`, `verify.vdmnexus.com`, and
    `www.vdmnexus.com` (proxy CONNECT-tunnel `connect_rejected`,
    confirmed directly tonight). Needs Dennis's call: allowlist these
    hosts for the scheduled session's egress policy, or move health
    checks elsewhere.
-6. **Standing blocked items**: #106 (cards-v1 spec, 125 days) —
-   merge-or-close decision. #95 (Polymarket agent, 126 days) — blocked
+6. **Standing blocked items**: #106 (cards-v1 spec, 126 days) —
+   merge-or-close decision. #95 (Polymarket agent, 127 days) — blocked
    on Spanish counsel. Legal memo — status-tracking only (email
    drafted, awaiting Dennis send). May manual-submission backlog — one
    line, no more.
 
 ## Process watch
 
-Twenty-one consecutive clean nights now under the corrected merge
-logic: #192 through #212, most recently #212 (2026-09-25, merged
-cleanly). This session (2026-09-26) opened and merged its own PR the
+Twenty-two consecutive clean nights now under the corrected merge
+logic: #192 through #213, most recently #213 (2026-09-26, merged
+cleanly). This session (2026-09-27) opened and merged its own PR the
 same way. The merge-logic fix stays proven; the underlying `nexus`
 Vercel check (item 2a above) is a separate, still-unresolved root
 cause and stays open on its own merits — and remains flagged as the
