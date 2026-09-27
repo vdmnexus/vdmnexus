@@ -108,15 +108,15 @@ Convention going forward: treat `mergeable_state: unstable` as
 mergeable-if-not-`dirty`/`blocked`, not as equivalent to a merge
 conflict.
 
-**#192 through #212 (2026-09-05 through 2026-09-25 daily reviews) —
-twenty-one consecutive clean nights under the corrected merge logic.**
+**#192 through #213 (2026-09-05 through 2026-09-27 daily reviews) —
+twenty-three consecutive clean nights under the corrected merge logic.**
 Each PR opened and merged within the same session (times ranging from
-~7 seconds to ~90 seconds), most recently #212 (2026-09-25, merged
+~7 seconds to ~90 seconds), most recently #213 (2026-09-26, merged
 same session) despite `mergeable_state: unstable` (the `nexus` Vercel
 check is still failing, root cause unchanged since 2026-08-19). The
 `nexus` Vercel check and the deposit-crediting bug (both live,
 unresolved) were reconfirmed fresh against live data again on
-2026-09-26 (direct pull against Vercel's `list_teams`/`list_deployments`
+2026-09-27 (direct pull against Vercel's `list_teams`/`list_deployments`
 and `get_runtime_logs`, not carried forward) — the `nexus` project is
 still on the Hobby plan with no deployment newer than the
 2026-08-19T20:12:40Z production build (`dpl_kMXumydsSvke6TjRGXWJZXbdqA3g`),
